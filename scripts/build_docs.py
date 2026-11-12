@@ -1,6 +1,6 @@
 """Собирает публичные версии демо в docs/ для GitHub Pages."""
 import os, re
-PAIRS = {'okna': 'demos/okna-chelyabinsk/index.html', 'krovlya': 'demos/krovlya/index.html', 'avtomatika': 'demos/avtomatika/index.html', 'detailing': 'templates/detailing/index.html',
+PAIRS = {'okna': 'demos/okna-chelyabinsk/index.html', 'krovlya': 'demos/krovlya/index.html', 'avtomatika': 'demos/avtomatika/index.html', 'vizitka': 'demos/vizitka-chip/index.html', 'detailing': 'templates/detailing/index.html',
          'coffee': 'templates/coffee/index.html', 'dental': 'templates/dental/index.html',
          'kitchen': 'templates/kitchen/index.html', 'fitness': 'templates/fitness/index.html'}
 for k, src in PAIRS.items():
