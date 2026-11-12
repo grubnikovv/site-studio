@@ -53,9 +53,28 @@ p { margin: 0; }
 .demo-bar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 10px; font-size: 13px; }
 .demo-bar b { font-family: var(--font-d); letter-spacing: .02em; }
 .demo-bar b span { color: var(--yellow); }
-.mode { display: inline-flex; padding: 3px; border-radius: 999px; background: #2a2a2d; gap: 2px; }
-.mode button { min-height: 34px; padding: 0 14px; border-radius: 999px; border: 0; background: transparent; color: #bdbdb8; font: 600 13px/1 var(--font); cursor: pointer; }
-.mode button[aria-pressed="true"] { background: var(--yellow); color: #141414; }
+/* Переключатель день/ночь: солнце превращается в луну, небо темнеет */
+.sw { position: relative; width: 76px; height: 38px; border-radius: 999px; border: 0; padding: 0; cursor: pointer; overflow: hidden; flex: none;
+  background: linear-gradient(180deg, #7cc4ff, #bfe3ff); box-shadow: inset 0 2px 6px rgba(0,0,0,.25); transition: background .6s var(--ease); }
+.sw::before, .sw::after { content: ""; position: absolute; border-radius: 999px; background: #fff; transition: transform .6s var(--ease), opacity .4s; }
+.sw::before { width: 22px; height: 8px; left: 36px; top: 21px; box-shadow: 8px -4px 0 1px #fff; }
+.sw::after { width: 14px; height: 6px; left: 46px; top: 9px; opacity: .8; }
+.sw .stars { position: absolute; inset: 0; opacity: 0; transform: translateY(8px); transition: opacity .5s .1s, transform .6s var(--ease);
+  background: radial-gradient(1.2px 1.2px at 14px 10px, #fff 99%, transparent), radial-gradient(1px 1px at 26px 24px, #fff 99%, transparent), radial-gradient(1.4px 1.4px at 40px 12px, #fff 99%, transparent), radial-gradient(1px 1px at 18px 28px, #fff 99%, transparent), radial-gradient(1px 1px at 33px 7px, #fff 99%, transparent); }
+.sw .knob { position: absolute; top: 4px; left: 4px; width: 30px; height: 30px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fff9b0, #ffd21f 60%, #ffb800);
+  box-shadow: 0 0 0 4px rgba(255,236,120,.35), 0 0 14px 4px rgba(255,210,31,.55); transition: transform .6s cubic-bezier(.5,1.6,.5,1), background .5s, box-shadow .5s; overflow: hidden; }
+.sw .knob::after { content: ""; position: absolute; width: 30px; height: 30px; border-radius: 50%; top: -4px; left: 30px; background: #1d2742; transition: left .6s var(--ease); }
+.sw .knob i { position: absolute; border-radius: 50%; background: #c9cbd6; opacity: 0; transition: opacity .4s .2s; }
+.sw[aria-checked="true"] { background: linear-gradient(180deg, #0b1530, #1d2742); }
+.sw[aria-checked="true"]::before, .sw[aria-checked="true"]::after { transform: translateY(30px); opacity: 0; }
+.sw[aria-checked="true"] .stars { opacity: 1; transform: none; }
+.sw[aria-checked="true"] .knob { transform: translateX(38px) rotate(-30deg); background: radial-gradient(circle at 35% 35%, #ffffff, #e4e6ee 60%, #c8cbd8); box-shadow: 0 0 12px 3px rgba(220,228,255,.45); }
+.sw[aria-checked="true"] .knob::after { left: 12px; background: transparent; }
+.sw[aria-checked="true"] .knob i { opacity: 1; }
+.sw:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+.swl { display: inline-flex; align-items: center; gap: 10px; font: 600 13px/1 var(--font); color: #bdbdb8; }
+.swl span { white-space: nowrap; }
+@media (max-width: 480px) { .swl span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } }
 
 section { padding-block: 72px; }
 @media (max-width: 640px) { section { padding-block: 52px; } }
@@ -148,7 +167,7 @@ footer { padding-block: 28px; font-size: 13px; color: var(--muted); border-top: 
 <div class="demo-bar">
   <div class="wrap">
     <b>avtomatika<span>.</span>ru — новые блоки главной</b>
-    <div class="mode" role="group" aria-label="Тема"><button type="button" data-m="day" aria-pressed="true">День</button><button type="button" data-m="night" aria-pressed="false">Ночь</button></div>
+    <label class="swl" for="theme"><span id="theme-l">Ночной режим</span><button class="sw" id="theme" type="button" role="switch" aria-checked="false" aria-labelledby="theme-l"><span class="stars"></span><span class="knob"><i style="width:7px;height:7px;left:8px;top:14px"></i><i style="width:5px;height:5px;left:16px;top:6px"></i><i style="width:4px;height:4px;left:18px;top:19px"></i></span></button></label>
   </div>
 </div>
 
@@ -232,12 +251,11 @@ footer { padding-block: 28px; font-size: 13px; color: var(--muted); border-top: 
   var app = document.getElementById("app");
 
   /* День / ночь */
-  document.querySelectorAll(".mode button").forEach(function (b) {
-    b.addEventListener("click", function () {
-      var night = b.dataset.m === "night";
-      document.documentElement.classList.toggle("night", night);
-      document.querySelectorAll(".mode button").forEach(function (o) { o.setAttribute("aria-pressed", o === b); });
-    });
+  var sw = document.getElementById("theme");
+  sw.addEventListener("click", function () {
+    var night = sw.getAttribute("aria-checked") !== "true";
+    sw.setAttribute("aria-checked", night);
+    document.documentElement.classList.toggle("night", night);
   });
 
   /* Фон первого экрана: схема с бегущими сигналами */
