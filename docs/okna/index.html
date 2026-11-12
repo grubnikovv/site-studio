@@ -1,0 +1,775 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><title>Окна Урал</title>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head><body>
+
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;500;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: тёмная «вечерняя» тема. Главная — окно с инеем, который тает при прокрутке; дальше разрез профиля (липкая сцена), горизонтальная лента услуг, калькулятор. Внутренние страницы переключаются по адресу (#okna, #balkony …). */
+:root {
+  --bg: #0b0f14;
+  --bg2: #10161d;
+  --panel: #151c24;
+  --line: #24303c;
+  --fg: #eef3f7;
+  --muted: #8d9aa7;
+  --ice: #9fd3ff;
+  --warm: #ffb35c;
+  --warm-ink: #1c1206;
+  --font-d: "Geologica", "Segoe UI", system-ui, sans-serif;
+  --font: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --ease: cubic-bezier(.2,.7,.1,1);
+  --wrap: 1180px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 400 16px/1.6 var(--font); -webkit-font-smoothing: antialiased; overflow-x: clip; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bg); }
+.wrap { max-width: var(--wrap); margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--font-d); margin: 0; letter-spacing: -.025em; text-wrap: balance; }
+p { margin: 0; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--ice); outline-offset: 3px; }
+.eyebrow { font: 500 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ice); }
+.btn { position: relative; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 54px; padding: 0 26px; border-radius: 999px; border: 0; background: var(--warm); color: var(--warm-ink); font: 700 15px/1 var(--font); text-decoration: none; cursor: pointer; transition: transform .25s var(--ease); }
+.btn::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.5) 50%, transparent 70%); transform: translateX(-120%); animation: sheen 4s 1.5s var(--ease) infinite; }
+@keyframes sheen { 0% { transform: translateX(-120%); } 30%, 100% { transform: translateX(120%); } }
+.btn:active { transform: scale(.97); }
+.btn.line { background: transparent; color: var(--fg); border: 1px solid var(--line); }
+.btn.line::after { display: none; }
+.btn .arr { transition: transform .3s var(--ease); }
+.btn:hover .arr { transform: translateX(4px); }
+
+/* Шапка и меню */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 15; background: color-mix(in srgb, var(--bg) 78%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid transparent; transition: border-color .3s; }
+.top.scrolled { border-bottom-color: var(--line); }
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 14px; }
+.logo { display: flex; align-items: center; gap: 10px; font: 700 17px/1 var(--font-d); letter-spacing: .02em; text-decoration: none; }
+.logo svg { width: 26px; height: 26px; }
+.menu { display: flex; gap: 4px; }
+.menu a { text-decoration: none; font-size: 14px; color: var(--muted); padding: 8px 12px; border-radius: 999px; transition: color .2s, background .2s; }
+.menu a:hover { color: var(--fg); }
+.menu a[aria-current="page"] { color: var(--fg); background: var(--panel); }
+.top .btn { min-height: 42px; padding: 0 18px; font-size: 14px; }
+.burger { display: none; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--fg); cursor: pointer; }
+.burger span { display: block; width: 18px; height: 2px; background: currentColor; margin: 4px auto; transition: transform .3s var(--ease), opacity .3s; }
+.drawer { position: fixed; inset: 0; z-index: 14; background: var(--bg); padding: calc(90px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px)); display: grid; align-content: start; gap: 6px; transform: translateY(-100%); transition: transform .5s var(--ease); }
+.drawer.open { transform: none; }
+.drawer a { font: 600 30px/1.2 var(--font-d); text-decoration: none; padding: 10px 0; border-bottom: 1px solid var(--line); }
+@media (max-width: 900px) { .menu, .top .btn { display: none; } .burger { display: block; } }
+.burger[aria-expanded="true"] span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.burger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+.burger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+.progress { position: fixed; top: env(safe-area-inset-top, 0px); left: 0; right: 0; height: 2px; z-index: 16; background: linear-gradient(90deg, var(--ice), var(--warm)); transform-origin: 0 50%; transform: scaleX(0); }
+
+/* Страницы */
+.page[hidden] { display: none !important; }
+.page.enter { animation: pageIn .7s var(--ease) both; }
+@keyframes pageIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+
+/* Герой: окно с инеем */
+.hero { position: relative; overflow: hidden; }
+.hero .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; padding-block: 56px 72px; }
+@media (max-width: 900px) { .hero .wrap { grid-template-columns: 1fr; gap: 32px; padding-block: 28px 48px; } }
+.hero h1 { font-weight: 800; font-size: clamp(40px, 6.4vw, 84px); line-height: .98; margin: 18px 0 22px; }
+.hero h1 .ln { display: block; overflow: hidden; padding-bottom: .04em; }
+.hero h1 .ln > span { display: inline-block; animation: up 1.1s var(--ease) both; animation-delay: calc(var(--i) * 110ms + 100ms); }
+.hero h1 .ice { color: var(--ice); }
+.hero h1 .warm { color: var(--warm); }
+@keyframes up { from { transform: translateY(105%); } to { transform: none; } }
+.fade { animation: fadeup .9s var(--ease) both; animation-delay: var(--d, 0ms); }
+@keyframes fadeup { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.hero .lead { color: var(--muted); font-size: 18px; max-width: 42ch; }
+.hero .row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.temps { display: flex; gap: 22px; margin-top: 30px; font-family: var(--mono); font-size: 13px; color: var(--muted); }
+.temps b { display: block; font: 700 28px/1 var(--font-d); letter-spacing: -.02em; margin-bottom: 6px; font-variant-numeric: tabular-nums; }
+.temps .c b { color: var(--ice); } .temps .h b { color: var(--warm); }
+
+.window { position: relative; aspect-ratio: 5 / 6; width: 100%; max-width: 500px; justify-self: center; }
+.window .frame { position: absolute; inset: 0; border-radius: 6px; background: linear-gradient(145deg, #f2f4f6, #c9cfd5); padding: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; box-shadow: 0 60px 120px -40px rgba(255,179,92,.35), 0 40px 80px -30px rgba(0,0,0,.8); }
+.window .glass { position: relative; overflow: hidden; border-radius: 2px; box-shadow: inset 0 0 0 7px #e9edf0, inset 0 0 0 8px #b8c0c8; }
+.window canvas { position: absolute; inset: 8px; width: calc(100% - 16px); height: calc(100% - 16px); display: block; }
+.window .handle { position: absolute; z-index: 2; right: 14px; top: 50%; width: 8px; height: 46px; margin-top: -23px; border-radius: 4px; background: linear-gradient(90deg, #fff, #cfd5db); box-shadow: 0 2px 6px rgba(0,0,0,.35); }
+.window .sill { position: absolute; left: -22px; right: -22px; bottom: -20px; height: 22px; border-radius: 4px; background: linear-gradient(180deg, #f5f6f7, #cdd3d8); box-shadow: 0 18px 30px -10px rgba(0,0,0,.6); }
+.window .hint { position: absolute; z-index: 3; left: 50%; bottom: 26px; transform: translateX(-50%); font: 500 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: #3a4652; background: rgba(255,255,255,.75); padding: 8px 12px; border-radius: 999px; white-space: nowrap; transition: opacity .5s; }
+
+/* Бегущая строка профилей */
+.marquee { border-block: 1px solid var(--line); overflow: hidden; white-space: nowrap; padding-block: 20px; }
+.marquee .row { display: inline-flex; gap: 40px; align-items: center; font: 700 clamp(26px, 5vw, 48px)/1 var(--font-d); letter-spacing: -.02em; will-change: transform; }
+.marquee .row span:nth-child(4n+3) { color: transparent; -webkit-text-stroke: 1px var(--muted); }
+.marquee .row i { width: 10px; height: 10px; border-radius: 50%; background: var(--warm); display: inline-block; }
+
+section { padding-block: 84px; }
+.head { display: grid; gap: 12px; margin-bottom: 34px; max-width: 700px; }
+.head h2 { font-weight: 700; font-size: clamp(30px, 4.6vw, 54px); line-height: 1.04; }
+.head p { color: var(--muted); font-size: 17px; }
+
+/* Разрез профиля — липкая сцена */
+.cut { position: relative; height: 300vh; }
+.cut .stick { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 72px); height: calc(100vh - 72px - env(safe-area-inset-top, 0px)); min-height: 560px; display: grid; align-items: center; }
+.cut .wrap { display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; width: 100%; }
+@media (max-width: 900px) { .cut .wrap { grid-template-columns: 1fr; gap: 18px; } .cut .stick { min-height: 600px; } }
+.cut svg { width: 100%; max-height: 52vh; height: auto; display: block; }
+.cut .chamber { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: fill .5s var(--ease), stroke .5s; }
+.cut .chamber.on { fill: url(#heat); stroke: var(--warm); }
+.cut .wall { fill: #dfe5ea; }
+.cut .glassu { fill: rgba(159,211,255,.14); stroke: var(--ice); stroke-width: 2; }
+.cut .lbl { font: 500 13px var(--mono); fill: var(--muted); }
+.cut .big { font: 800 clamp(64px, 11vw, 140px)/1 var(--font-d); letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.cut .big small { font-size: .3em; color: var(--muted); letter-spacing: 0; margin-left: 8px; }
+.cut .txt { color: var(--muted); font-size: 17px; max-width: 40ch; min-height: 5.2em; }
+.cut .txt b { color: var(--fg); }
+.thermo { height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--ice), #6d7d8c 45%, var(--warm)); position: relative; margin-top: 22px; max-width: 420px; }
+.thermo i { position: absolute; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: var(--fg); box-shadow: 0 0 0 4px var(--bg); left: 0; }
+.thermo-l { display: flex; justify-content: space-between; max-width: 420px; font: 500 12px var(--mono); color: var(--muted); margin-top: 10px; }
+
+/* Горизонтальная лента услуг */
+.hscroll { position: relative; height: 260vh; }
+.hscroll .stick { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 72px); height: calc(100vh - 72px - env(safe-area-inset-top, 0px)); min-height: 520px; overflow: hidden; display: grid; align-content: center; gap: 28px; }
+.hscroll .stick { grid-template-columns: minmax(0, 1fr); }
+.hscroll .stick > .wrap { width: 100%; }
+.track { display: flex; gap: 18px; padding-left: max(16px, calc((100vw - var(--wrap)) / 2 + 16px)); will-change: transform; }
+.card { flex: 0 0 min(78vw, 420px); aspect-ratio: 4 / 5; max-width: 100%; border-radius: 24px; padding: 26px; display: grid; align-content: space-between; position: relative; overflow: hidden; border: 1px solid var(--line); background: var(--panel); text-decoration: none; }
+.card .n { font: 500 12px var(--mono); color: var(--muted); }
+.card h3 { font-size: 30px; font-weight: 700; line-height: 1.05; }
+.card p { color: var(--muted); font-size: 15px; margin-top: 10px; }
+.card .pr { font: 700 20px var(--font-d); margin-top: 16px; }
+.card .pr small { font: 400 13px var(--font); color: var(--muted); }
+.card .art { position: absolute; right: -30px; top: -30px; width: 220px; height: 220px; opacity: .9; }
+.card:nth-child(1) { background: linear-gradient(160deg, #18222d, #10161d); }
+.card:nth-child(2) { background: linear-gradient(160deg, #2a1d10, #16110b); }
+.card:nth-child(3) { background: linear-gradient(160deg, #142a2c, #0d1819); }
+.card:nth-child(4) { background: linear-gradient(160deg, #1f1a2c, #12101a); }
+
+/* Калькулятор */
+.calc { border: 1px solid var(--line); border-radius: 28px; overflow: hidden; display: grid; grid-template-columns: 1.3fr .7fr; background: var(--bg2); }
+@media (max-width: 900px) { .calc { grid-template-columns: 1fr; } }
+.q { padding: 30px; display: grid; gap: 20px; min-width: 0; }
+.steps { display: flex; gap: 6px; }
+.steps i { flex: 1; height: 3px; border-radius: 2px; background: var(--line); overflow: hidden; position: relative; }
+.steps i::after { content: ""; position: absolute; inset: 0; background: var(--warm); transform: scaleX(0); transform-origin: 0 50%; transition: transform .5s var(--ease); }
+.steps i.on::after { transform: none; }
+.q h3 { font-size: 24px; font-weight: 700; }
+.q .sub { color: var(--muted); font-size: 14px; margin-top: -12px; }
+.opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+.opt { text-align: left; border-radius: 16px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); padding: 16px; cursor: pointer; font: 600 15px/1.25 var(--font); display: grid; gap: 8px; transition: border-color .25s, transform .25s var(--ease); }
+.opt:hover { transform: translateY(-2px); }
+.opt small { color: var(--muted); font-weight: 400; font-size: 12.5px; }
+.opt svg { width: 44px; height: 44px; color: var(--ice); }
+.opt[aria-pressed="true"] { border-color: var(--warm); box-shadow: inset 0 0 0 1px var(--warm); }
+.dims { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 520px) { .dims { grid-template-columns: 1fr 1fr; } }
+.dims label { display: grid; gap: 6px; font-size: 13px; color: var(--muted); }
+.dims input { width: 100%; min-height: 54px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); font: 500 18px/1 var(--mono); padding: 0 14px; font-variant-numeric: tabular-nums; }
+.dims input:focus { outline: none; border-color: var(--warm); }
+.toggle { display: flex; gap: 10px; align-items: center; font-size: 15px; cursor: pointer; }
+.toggle input { width: 22px; height: 22px; accent-color: var(--warm); }
+.nav-q { display: flex; gap: 10px; justify-content: space-between; }
+.res { background: linear-gradient(170deg, #1a1409, #0f0c07); border-left: 1px solid var(--line); padding: 30px; display: grid; align-content: start; gap: 14px; min-width: 0; }
+@media (max-width: 900px) { .res { border-left: 0; border-top: 1px solid var(--line); } }
+.res .sum { font: 800 clamp(38px, 5vw, 52px)/1 var(--font-d); letter-spacing: -.03em; color: var(--warm); font-variant-numeric: tabular-nums; }
+.res .old { color: var(--muted); text-decoration: line-through; font-size: 15px; font-variant-numeric: tabular-nums; min-height: 1.4em; }
+.res ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 14px; color: var(--muted); }
+.res li { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px dashed var(--line); padding-bottom: 8px; }
+.res li b { color: var(--fg); font-weight: 600; text-align: right; }
+.res .note { font-size: 12.5px; color: var(--muted); }
+.form { display: grid; gap: 10px; }
+.form input, .form select, .form textarea { width: 100%; min-height: 54px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); padding: 0 16px; font: 500 16px/1 var(--font); }
+.form textarea { min-height: 100px; padding: 14px 16px; line-height: 1.4; resize: vertical; }
+.form input:focus, .form textarea:focus { outline: none; border-color: var(--warm); }
+.done { border: 1px solid var(--warm); border-radius: 16px; padding: 16px; background: rgba(255,179,92,.08); font-size: 14px; animation: fadeup .6s var(--ease) both; }
+.done b { color: var(--warm); }
+
+/* Общие блоки внутренних страниц */
+.ph { padding-block: 64px 28px; }
+.ph h1 { font-weight: 800; font-size: clamp(40px, 7vw, 92px); line-height: .98; margin-top: 16px; }
+.ph h1 .ln { display: block; overflow: hidden; }
+.ph h1 .ln > span { display: inline-block; animation: up 1s var(--ease) both; animation-delay: calc(var(--i) * 110ms); }
+.ph p { color: var(--muted); font-size: 18px; max-width: 52ch; margin-top: 18px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 900px) { .grid3, .grid2 { grid-template-columns: 1fr; } }
+.box { background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 24px; display: grid; gap: 10px; align-content: start; transition: border-color .3s, transform .4s var(--ease); }
+.box:hover { border-color: #3a4a59; transform: translateY(-3px); }
+.box h3 { font-size: 22px; font-weight: 700; }
+.box p { color: var(--muted); font-size: 15px; }
+.box .pr { font: 700 20px var(--font-d); }
+.box .pr small { font: 400 13px var(--font); color: var(--muted); }
+.box .k { font: 500 12px var(--mono); color: var(--ice); letter-spacing: .08em; text-transform: uppercase; }
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 22px; background: var(--panel); }
+table { width: 100%; border-collapse: collapse; min-width: 620px; font-size: 15px; }
+th, td { padding: 16px 18px; text-align: left; border-bottom: 1px solid var(--line); }
+th { font: 500 12px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+td.n { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+tr:last-child td { border-bottom: 0; }
+tbody tr { transition: background .2s; }
+tbody tr:hover { background: rgba(255,255,255,.02); }
+.pill { display: inline-block; margin-left: 8px; font: 600 11px/1 var(--font); color: var(--warm-ink); background: var(--warm); padding: 4px 8px; border-radius: 999px; vertical-align: 2px; }
+.swatches { display: flex; flex-wrap: wrap; gap: 12px; }
+.sw { display: grid; gap: 8px; justify-items: center; font-size: 13px; color: var(--muted); }
+.sw i { width: 64px; height: 64px; border-radius: 16px; display: block; border: 1px solid var(--line); }
+.stepsl { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: s; }
+.stepsl li { counter-increment: s; display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 16px; padding-block: 22px; border-top: 1px solid var(--line); }
+.stepsl li::before { content: counter(s, decimal-leading-zero); font: 700 34px/1 var(--font-d); color: var(--line); transition: color .5s; }
+.stepsl li.lit::before { color: var(--warm); }
+.stepsl b { display: block; font-size: 18px; }
+.stepsl span { color: var(--muted); }
+.deal { border-radius: 26px; padding: 30px; min-height: 240px; display: grid; align-content: space-between; gap: 14px; position: relative; overflow: hidden; }
+.deal b { font: 800 clamp(36px, 5vw, 56px)/1 var(--font-d); letter-spacing: -.03em; }
+.deal span { font-size: 16px; opacity: .85; max-width: 32ch; }
+.deal .t { font: 500 13px var(--mono); }
+.dl1 { background: linear-gradient(140deg, #ffb35c, #e2752c); color: var(--warm-ink); }
+.dl2 { background: linear-gradient(140deg, #1f3b57, #0f1d2b); }
+.dl3 { background: linear-gradient(140deg, #2b2f36, #15181c); }
+.map { border-radius: 24px; border: 1px solid var(--line); background: var(--panel); aspect-ratio: 16 / 10; max-width: 100%; position: relative; overflow: hidden; }
+.map svg { width: 100%; height: 100%; display: block; }
+.cta { border-radius: 30px; padding: clamp(28px, 5vw, 56px); background: radial-gradient(120% 140% at 85% 0%, rgba(255,179,92,.25), transparent 55%), var(--panel); border: 1px solid var(--line); display: grid; grid-template-columns: 1.2fr .8fr; gap: 28px; align-items: center; }
+@media (max-width: 900px) { .cta { grid-template-columns: 1fr; } }
+.cta h2 { font-size: clamp(28px, 4vw, 46px); font-weight: 700; line-height: 1.05; }
+.cta p { color: var(--muted); margin-top: 12px; }
+
+footer { border-top: 1px solid var(--line); padding-block: 34px 110px; color: var(--muted); font-size: 13px; }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+.dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 12; padding: 12px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); background: linear-gradient(to top, var(--bg) 55%, transparent); transform: translateY(110%); transition: transform .5s var(--ease); }
+.dock.show { transform: none; }
+.dock .btn { width: 100%; }
+@media (min-width: 901px) { .dock { display: none; } }
+
+/* Появление при прокрутке */
+.rv { transition: opacity 1s var(--ease), transform 1s var(--ease), clip-path 1.2s var(--ease); transition-delay: var(--d, 0ms); }
+.rv.pre { opacity: 0; transform: translateY(36px); }
+.rv.mask.pre { opacity: 1; transform: none; clip-path: inset(0 0 100% 0); }
+.rv.mask { clip-path: inset(0 0 0 0); }
+.rv.scale.pre { transform: scale(.94); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .rv.pre { opacity: 1; transform: none; clip-path: none; } html { scroll-behavior: auto; } .cut, .hscroll { height: auto; } .cut .stick, .hscroll .stick { position: static; height: auto; } .track { flex-wrap: wrap; } }
+</style>
+
+<div class="progress" id="progress" aria-hidden="true"></div>
+<header class="top" id="topbar">
+  <div class="wrap">
+    <a class="logo" href="#glavnaya"><svg viewBox="0 0 26 26" fill="none" aria-hidden="true"><rect x="1.5" y="1.5" width="23" height="23" rx="3" stroke="#9fd3ff" stroke-width="2"/><path d="M13 2v22M2 13h22" stroke="#9fd3ff" stroke-width="2"/><rect x="15" y="15" width="7" height="7" fill="#ffb35c"/></svg>ОКНА УРАЛ</a>
+    <nav class="menu" aria-label="Разделы">
+      <a href="#glavnaya">Главная</a><a href="#okna">Окна</a><a href="#balkony">Балконы</a><a href="#vhodnye">Входные группы</a><a href="#akcii">Акции</a><a href="#kontakty">Контакты</a>
+    </nav>
+    <a class="btn" href="#raschet">Рассчитать окно</a>
+    <button class="burger" id="burger" type="button" aria-label="Меню" aria-expanded="false"><span></span><span></span><span></span></button>
+  </div>
+</header>
+<nav class="drawer" id="drawer" aria-label="Меню">
+  <a href="#glavnaya">Главная</a><a href="#okna">Окна</a><a href="#balkony">Балконы и лоджии</a><a href="#vhodnye">Входные группы</a><a href="#akcii">Акции</a><a href="#kontakty">Контакты</a>
+</nav>
+
+<main>
+<!-- ============ ГЛАВНАЯ ============ -->
+<div class="page" data-page="glavnaya">
+  <div class="hero">
+    <div class="wrap">
+      <div>
+        <span class="eyebrow fade">Своё производство · Челябинск</span>
+        <h1>
+          <span class="ln"><span style="--i:0">Снаружи <span class="ice">−30°</span></span></span>
+          <span class="ln"><span style="--i:1">Дома <span class="warm">+22°</span></span></span>
+          <span class="ln"><span style="--i:2">и тишина</span></span>
+        </h1>
+        <p class="lead fade" style="--d:450ms">Пластиковые окна и остекление балконов под ключ. Изготовим за 3 дня на профиле Rehau, KBE или Exprof, установим за 1 день.</p>
+        <div class="row fade" style="--d:600ms">
+          <a class="btn" href="#raschet">Рассчитать стоимость <span class="arr">→</span></a>
+          <a class="btn line" href="#kontakty">Бесплатный замер</a>
+        </div>
+        <div class="temps fade" style="--d:750ms">
+          <div class="c"><b>5 камер</b>в профиле</div>
+          <div class="h"><b>5 лет</b>гарантия</div>
+          <div><b>0%</b>рассрочка</div>
+        </div>
+      </div>
+      <div class="window fade" style="--d:300ms" aria-hidden="true">
+        <div class="frame">
+          <div class="glass"><canvas class="frost"></canvas></div>
+          <div class="glass"><canvas class="frost"></canvas><span class="handle"></span></div>
+        </div>
+        <div class="sill"></div>
+        <span class="hint" id="hint">Проведите пальцем по стеклу</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="marquee" aria-hidden="true"><div class="row" id="marquee">
+    <span>Rehau</span><i></i><span>KBE</span><i></i><span>Exprof</span><i></i><span>Балконы</span><i></i><span>Входные группы</span><i></i>
+    <span>Rehau</span><i></i><span>KBE</span><i></i><span>Exprof</span><i></i><span>Балконы</span><i></i><span>Входные группы</span><i></i>
+  </div></div>
+
+  <div class="cut" id="cut">
+    <div class="stick">
+      <div class="wrap">
+        <svg viewBox="0 0 520 360" role="img" aria-label="Разрез пятикамерного профиля со стеклопакетом">
+          <defs><linearGradient id="heat" x1="0" x2="1"><stop offset="0" stop-color="#9fd3ff" stop-opacity=".35"/><stop offset="1" stop-color="#ffb35c" stop-opacity=".55"/></linearGradient></defs>
+          <text class="lbl" x="10" y="24">УЛИЦА  −30 °C</text><text class="lbl" x="380" y="24">КОМНАТА  +22 °C</text>
+          <rect class="glassu" x="60" y="44" width="160" height="150" rx="3"/>
+          <line x1="113" y1="44" x2="113" y2="194" stroke="#9fd3ff" stroke-width="2"/><line x1="166" y1="44" x2="166" y2="194" stroke="#9fd3ff" stroke-width="2"/>
+          <text class="lbl" x="70" y="214">стеклопакет 32 мм</text>
+          <rect class="wall" x="40" y="230" width="440" height="110" rx="6"/>
+          <rect class="chamber" x="54"  y="244" width="64"  height="82" rx="3"/>
+          <rect class="chamber" x="128" y="244" width="70"  height="40" rx="3"/>
+          <rect class="chamber" x="128" y="290" width="70"  height="36" rx="3"/>
+          <rect class="chamber" x="208" y="244" width="150" height="82" rx="3"/>
+          <rect class="chamber" x="368" y="244" width="98"  height="82" rx="3"/>
+          <rect x="226" y="262" width="114" height="46" rx="2" fill="none" stroke="#8d9aa7" stroke-dasharray="4 4"/>
+          <text class="lbl" x="232" y="290">армирование</text>
+          <text class="lbl" x="40" y="356">ширина профиля 70 мм</text>
+        </svg>
+        <div>
+          <span class="eyebrow">Профиль в разрезе</span>
+          <div class="big" id="cut-n">0<small>из 5 камер</small></div>
+          <p class="txt" id="cut-t"></p>
+          <div class="thermo"><i id="cut-dot"></i></div>
+          <div class="thermo-l"><span>−30 °C</span><span id="cut-temp">−30 °C</span><span>+22 °C</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hscroll" id="hs">
+    <div class="stick">
+      <div class="wrap"><div class="head" style="margin:0"><span class="eyebrow">Что делаем</span><h2>Под ключ, от замера до уборки</h2></div></div>
+      <div class="track" id="track">
+        <a class="card" href="#okna"><svg class="art" viewBox="0 0 200 200" fill="none" stroke="#9fd3ff" stroke-opacity=".5"><rect x="40" y="30" width="120" height="150" rx="4"/><path d="M100 30v150M40 105h60"/></svg><span class="n">01</span><div><h3>Окна в квартиру и дом</h3><p>Ламинация под дерево, москитные сетки, детские замки, микропроветривание.</p><div class="pr">от 12 900 ₽ <small>с монтажом</small></div></div></a>
+        <a class="card" href="#balkony"><svg class="art" viewBox="0 0 200 200" fill="none" stroke="#ffb35c" stroke-opacity=".5"><rect x="20" y="40" width="160" height="90" rx="4"/><path d="M60 40v90M100 40v90M140 40v90M20 130h160v40H20z"/></svg><span class="n">02</span><div><h3>Балконы и лоджии</h3><p>Тёплое и холодное остекление, вынос, утепление и отделка.</p><div class="pr">от 34 000 ₽ <small>за 3 метра</small></div></div></a>
+        <a class="card" href="#vhodnye"><svg class="art" viewBox="0 0 200 200" fill="none" stroke="#7fe0d0" stroke-opacity=".5"><rect x="50" y="20" width="100" height="170" rx="4"/><circle cx="130" cy="110" r="5"/><path d="M50 60h100"/></svg><span class="n">03</span><div><h3>Входные группы</h3><p>Алюминиевые и ПВХ-двери для магазинов, офисов и частных домов.</p><div class="pr">от 48 000 ₽ <small>с монтажом</small></div></div></a>
+        <a class="card" href="#kontakty"><svg class="art" viewBox="0 0 200 200" fill="none" stroke="#b9a7ff" stroke-opacity=".5"><path d="M30 170V80l70-50 70 50v90z"/><rect x="70" y="100" width="60" height="50"/><path d="M100 100v50M70 125h60"/></svg><span class="n">04</span><div><h3>Коттеджи и дачи</h3><p>Панорамное остекление, нестандартные формы, выезд по области.</p><div class="pr">по замеру <small>бесплатно</small></div></div></a>
+      </div>
+    </div>
+  </div>
+
+  <section id="calc">
+    <div class="wrap">
+      <div class="head"><span class="eyebrow rv">Калькулятор</span><h2 class="rv mask">Цена окна за 4 шага</h2><p class="rv">Считает сразу. Точную сумму замерщик подтвердит бесплатно.</p></div>
+      <div class="calc rv scale">
+        <div class="q">
+          <div class="steps" id="steps"><i></i><i></i><i></i><i></i></div>
+          <div id="stage"></div>
+          <div class="nav-q"><button class="btn line" type="button" id="back">Назад</button><button class="btn" type="button" id="next">Дальше</button></div>
+        </div>
+        <div class="res">
+          <span class="eyebrow">Предварительная цена</span>
+          <div class="sum" id="sum">0 ₽</div>
+          <div class="old" id="old"></div>
+          <ul id="spec"></ul>
+          <div id="lead-box">
+            <form class="form" id="lead" novalidate>
+              <input id="l-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Ваш телефон" aria-label="Телефон">
+              <button class="btn" type="submit">Получить точный расчёт</button>
+            </form>
+          </div>
+          <p class="note">С монтажом и вывозом мусора. Скидка −30% на второе окно уже учтена.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="head"><span class="eyebrow rv">Как работаем</span><h2 class="rv mask">От звонка до тёплой квартиры — 5 дней</h2></div>
+      <ol class="stepsl" id="stepsl">
+        <li class="rv"><div><b>Замер в удобное время</b><span>Замерщик приезжает с образцами профилей и называет точную цену на месте.</span></div></li>
+        <li class="rv"><div><b>Договор и рассрочка</b><span>Фиксируем цену в договоре. Можно оплатить частями без переплаты.</span></div></li>
+        <li class="rv"><div><b>Производство 3 дня</b><span>Собираем окна на своём производстве в Челябинске.</span></div></li>
+        <li class="rv"><div><b>Монтаж за 1 день</b><span>Монтаж по ГОСТ с пароизоляцией. Убираем за собой и вывозим старые окна.</span></div></li>
+        <li class="rv"><div><b>Гарантия 5 лет</b><span>Бесплатная регулировка фурнитуры через год после установки.</span></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap"><div class="cta rv scale"><div><h2>Замер бесплатно, даже если не закажете</h2><p>Приедем завтра. Привезём образцы профилей, рассчитаем всё на месте.</p></div><a class="btn" href="#kontakty">Вызвать замерщика <span class="arr">→</span></a></div></div>
+  </section>
+</div>
+
+<!-- ============ ОКНА ============ -->
+<div class="page" data-page="okna" hidden>
+  <div class="wrap ph">
+    <span class="eyebrow">Окна</span>
+    <h1><span class="ln"><span style="--i:0">Окна под ваш</span></span><span class="ln"><span style="--i:1">климат и бюджет</span></span></h1>
+    <p>Подберём профиль под задачу: дача, квартира у шумной дороги или частный дом. Сравните три профиля, которые устанавливаем.</p>
+  </div>
+  <section style="padding-top:20px">
+    <div class="wrap">
+      <div class="tbl rv">
+        <table>
+          <thead><tr><th>Профиль</th><th>Камер</th><th>Ширина</th><th>Подходит для</th><th>Цена за м²</th></tr></thead>
+          <tbody>
+            <tr><td><b>Exprof Practica</b></td><td class="n">3</td><td class="n">58 мм</td><td>Дача, балкон, нежилые помещения</td><td class="n">от 6 500 ₽</td></tr>
+            <tr><td><b>KBE Эксперт</b><span class="pill">чаще берут</span></td><td class="n">5</td><td class="n">70 мм</td><td>Квартира, частный дом</td><td class="n">от 7 500 ₽</td></tr>
+            <tr><td><b>Rehau Grazio</b></td><td class="n">5</td><td class="n">70 мм</td><td>Шумная улица, высокие этажи</td><td class="n">от 9 000 ₽</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  <section>
+    <div class="wrap">
+      <div class="head"><span class="eyebrow rv">Опции</span><h2 class="rv mask">Что можно добавить</h2></div>
+      <div class="grid3">
+        <div class="box rv"><span class="k">Комфорт</span><h3>Микропроветривание</h3><p>Окно проветривает комнату без сквозняка и не выстужает её зимой.</p><div class="pr">+1 200 ₽</div></div>
+        <div class="box rv" style="--d:90ms"><span class="k">Безопасность</span><h3>Детский замок</h3><p>Ручка с ключом: ребёнок не откроет створку.</p><div class="pr">+900 ₽</div></div>
+        <div class="box rv" style="--d:180ms"><span class="k">Лето</span><h3>Москитная сетка</h3><p>Рамочная сетка на створку, снимается на зиму за минуту.</p><div class="pr">+900 ₽</div></div>
+      </div>
+    </div>
+  </section>
+  <section>
+    <div class="wrap">
+      <div class="head"><span class="eyebrow rv">Ламинация</span><h2 class="rv mask">Цвет снаружи и внутри</h2><p class="rv">Плёнка под дерево или однотонная, с одной или двух сторон.</p></div>
+      <div class="swatches rv">
+        <div class="sw"><i style="background:#f4f4f2"></i>Белый</div>
+        <div class="sw"><i style="background:linear-gradient(135deg,#8a5a34,#6e4526)"></i>Золотой дуб</div>
+        <div class="sw"><i style="background:linear-gradient(135deg,#4a2f22,#2f1d15)"></i>Махагон</div>
+        <div class="sw"><i style="background:#3a3f45"></i>Антрацит</div>
+        <div class="sw"><i style="background:#6b6e70"></i>Серый</div>
+        <div class="sw"><i style="background:linear-gradient(135deg,#d9c7a3,#bfa77d)"></i>Беленый дуб</div>
+      </div>
+    </div>
+  </section>
+  <section><div class="wrap"><div class="cta rv scale"><div><h2>Посчитайте своё окно</h2><p>Калькулятор на главной покажет цену за минуту.</p></div><a class="btn" href="#raschet">Открыть калькулятор <span class="arr">→</span></a></div></div></section>
+</div>
+
+<!-- ============ БАЛКОНЫ ============ -->
+<div class="page" data-page="balkony" hidden>
+  <div class="wrap ph">
+    <span class="eyebrow">Балконы и лоджии</span>
+    <h1><span class="ln"><span style="--i:0">Ещё одна комната</span></span><span class="ln"><span style="--i:1">на вашем балконе</span></span></h1>
+    <p>Остеклим, утеплим и отделаем под ключ. Балкон станет кабинетом, мастерской или местом для утреннего кофе.</p>
+  </div>
+  <section style="padding-top:20px">
+    <div class="wrap">
+      <div class="grid3">
+        <div class="box rv"><span class="k">Холодное</span><h3>Алюминиевое остекление</h3><p>Защищает от снега, пыли и дождя. Лёгкие раздвижные створки.</p><div class="pr">от 22 000 ₽ <small>за 3 м</small></div></div>
+        <div class="box rv" style="--d:90ms"><span class="k">Тёплое</span><h3>ПВХ-остекление</h3><p>Профиль 70 мм и двухкамерный стеклопакет. Зимой на балконе от +12 °C.</p><div class="pr">от 34 000 ₽ <small>за 3 м</small></div></div>
+        <div class="box rv" style="--d:180ms"><span class="k">Под ключ</span><h3>Остекление и отделка</h3><p>Утепление пола, стен и потолка, отделка панелями, свет и розетки.</p><div class="pr">от 89 000 ₽ <small>за 3 м</small></div></div>
+      </div>
+    </div>
+  </section>
+  <section>
+    <div class="wrap">
+      <div class="head"><span class="eyebrow rv">Этапы</span><h2 class="rv mask">Как проходит работа</h2></div>
+      <ol class="stepsl">
+        <li class="rv"><div><b>Замер и проект</b><span>Проверяем плиту, предлагаем варианты выноса и отделки.</span></div></li>
+        <li class="rv"><div><b>Демонтаж</b><span>Аккуратно снимаем старое остекление и вывозим мусор.</span></div></li>
+        <li class="rv"><div><b>Остекление</b><span>Ставим раму, герметизируем, монтируем отливы и козырёк.</span></div></li>
+        <li class="rv"><div><b>Утепление и отделка</b><span>Пароизоляция, утеплитель, панели и электрика.</span></div></li>
+      </ol>
+    </div>
+  </section>
+  <section><div class="wrap"><div class="cta rv scale"><div><h2>Сетка в подарок при остеклении балкона</h2><p>До конца месяца.</p></div><a class="btn" href="#kontakty">Вызвать замерщика <span class="arr">→</span></a></div></div></section>
+</div>
+
+<!-- ============ ВХОДНЫЕ ГРУППЫ ============ -->
+<div class="page" data-page="vhodnye" hidden>
+  <div class="wrap ph">
+    <span class="eyebrow">Входные группы</span>
+    <h1><span class="ln"><span style="--i:0">Первое, что видит</span></span><span class="ln"><span style="--i:1">ваш клиент</span></span></h1>
+    <p>Двери и витражи для магазинов, кафе, офисов и частных домов. Тёплый и холодный алюминий, ПВХ, доводчики и антипаника.</p>
+  </div>
+  <section style="padding-top:20px">
+    <div class="wrap">
+      <div class="grid2">
+        <div class="box rv"><span class="k">Для бизнеса</span><h3>Алюминиевая входная группа</h3><p>Прочная, выдерживает поток посетителей. Доводчик и замок в комплекте.</p><div class="pr">от 68 000 ₽</div></div>
+        <div class="box rv" style="--d:90ms"><span class="k">Для дома</span><h3>ПВХ-дверь с остеклением</h3><p>Тёплая дверь для частного дома или тамбура, ламинация в цвет окон.</p><div class="pr">от 48 000 ₽</div></div>
+        <div class="box rv"><span class="k">Витражи</span><h3>Витрины и фасады</h3><p>Большие стеклянные поверхности для магазинов и шоурумов.</p><div class="pr">по проекту</div></div>
+        <div class="box rv" style="--d:90ms"><span class="k">Безопасность</span><h3>Антипаника и доводчики</h3><p>Фурнитура по требованиям пожарной безопасности для коммерческих помещений.</p><div class="pr">от 7 500 ₽</div></div>
+      </div>
+    </div>
+  </section>
+  <section><div class="wrap"><div class="cta rv scale"><div><h2>Сделаем проект входной группы бесплатно</h2><p>Пришлите фото фасада, и мы предложим 2–3 варианта.</p></div><a class="btn" href="#kontakty">Оставить заявку <span class="arr">→</span></a></div></div></section>
+</div>
+
+<!-- ============ АКЦИИ ============ -->
+<div class="page" data-page="akcii" hidden>
+  <div class="wrap ph">
+    <span class="eyebrow">Акции</span>
+    <h1><span class="ln"><span style="--i:0">Выгодно</span></span><span class="ln"><span style="--i:1">до конца месяца</span></span></h1>
+    <p id="deal-left">Осталось дней: —</p>
+  </div>
+  <section style="padding-top:20px">
+    <div class="wrap">
+      <div class="grid3">
+        <div class="deal dl1 rv"><span class="t">При заказе от 2 окон</span><b>−30% на второе окно</b><span>Скидка на окно с меньшей стоимостью.</span></div>
+        <div class="deal dl2 rv" style="--d:90ms"><span class="t">Без банка</span><b>Рассрочка 0% на 12 месяцев</b><span>Платёж от 1 100 ₽ в месяц, без справок о доходе.</span></div>
+        <div class="deal dl3 rv" style="--d:180ms"><span class="t">Балконы</span><b>Москитная сетка в подарок</b><span>При тёплом остеклении балкона или лоджии.</span></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ============ КОНТАКТЫ ============ -->
+<div class="page" data-page="kontakty" hidden>
+  <div class="wrap ph">
+    <span class="eyebrow">Контакты</span>
+    <h1><span class="ln"><span style="--i:0">Приедем на замер</span></span><span class="ln"><span style="--i:1">уже завтра</span></span></h1>
+  </div>
+  <section style="padding-top:20px">
+    <div class="wrap grid2">
+      <div class="rv">
+        <div id="m-box">
+          <form class="form" id="mform" novalidate>
+            <input id="m-name" autocomplete="name" placeholder="Имя" aria-label="Имя">
+            <input id="m-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Телефон" aria-label="Телефон">
+            <textarea id="m-msg" placeholder="Адрес и что нужно: окна, балкон, дверь" aria-label="Комментарий"></textarea>
+            <button class="btn" type="submit">Вызвать замерщика</button>
+            <p class="note" style="color:var(--muted);font-size:13px">Нажимая кнопку, вы соглашаетесь на обработку персональных данных.</p>
+          </form>
+        </div>
+        <div class="grid2" style="margin-top:18px">
+          <div class="box"><span class="k">Телефон</span><b>+7 (351) 000-00-00</b></div>
+          <div class="box"><span class="k">Режим</span><b>Ежедневно 9:00–20:00</b></div>
+        </div>
+      </div>
+      <div class="map rv scale" aria-label="Схема проезда">
+        <svg viewBox="0 0 400 250" fill="none">
+          <rect width="400" height="250" fill="#121920"/>
+          <g stroke="#24303c" stroke-width="10"><path d="M0 80h400M0 180h400M110 0v250M290 0v250"/></g>
+          <g stroke="#1b252f" stroke-width="4"><path d="M0 130h400M200 0v250M40 0v250M350 0v250"/></g>
+          <path d="M60 230 C 120 200, 160 150, 200 130" stroke="#ffb35c" stroke-width="3" stroke-dasharray="6 6"/>
+          <circle cx="200" cy="130" r="22" fill="#ffb35c" fill-opacity=".2"/><circle cx="200" cy="130" r="8" fill="#ffb35c"/>
+          <text x="214" y="122" fill="#eef3f7" font-family="Manrope" font-size="13" font-weight="700">Офис и производство</text>
+          <text x="214" y="140" fill="#8d9aa7" font-family="Manrope" font-size="11">Челябинск, ул. Примерная, 1</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+</div>
+</main>
+
+<footer><div class="wrap"><span>© Окна Урал. Демо-версия: название, цены и контакты условные.</span><span>Политика конфиденциальности</span></div></footer>
+<div class="dock" id="dock"><a class="btn" href="#raschet">Рассчитать стоимость окна</a></div>
+
+<script>
+(function () {
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var clamp = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
+  var fmt = function (v) { return (Math.round(v / 100) * 100).toLocaleString("ru-RU") + " ₽"; };
+
+  /* ---------- Маршруты страниц ---------- */
+  var pages = document.querySelectorAll(".page"), links = document.querySelectorAll(".menu a");
+  var drawer = document.getElementById("drawer"), burger = document.getElementById("burger");
+  function setMenu(open) { drawer.classList.toggle("open", open); burger.setAttribute("aria-expanded", open); }
+  burger.addEventListener("click", function () { setMenu(!drawer.classList.contains("open")); });
+  drawer.addEventListener("click", function (e) { if (e.target.tagName === "A") setMenu(false); });
+  var current = null;
+  function route() {
+    var h = (location.hash || "#glavnaya").slice(1), scrollCalc = false;
+    if (h === "raschet") { h = "glavnaya"; scrollCalc = true; }
+    if (!document.querySelector('.page[data-page="' + h + '"]')) h = "glavnaya";
+    if (h !== current) {
+      pages.forEach(function (p) { var on = p.dataset.page === h; p.hidden = !on; p.classList.remove("enter"); if (on && current !== null && !reduce) { void p.offsetWidth; p.classList.add("enter"); } });
+      links.forEach(function (a) { if (a.getAttribute("href") === "#" + h) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+      current = h;
+      if (!scrollCalc) window.scrollTo(0, 0);
+      setTimeout(function () { observe(); layout(); onScroll(); }, 30);
+    }
+    if (scrollCalc) setTimeout(function () { document.getElementById("calc").scrollIntoView({ behavior: reduce ? "auto" : "smooth" }); }, 60);
+  }
+  window.addEventListener("hashchange", route);
+
+  /* ---------- Появление при прокрутке ---------- */
+  var io = "IntersectionObserver" in window ? new IntersectionObserver(function (es) {
+    es.forEach(function (en) { if (en.isIntersecting) { en.target.classList.remove("pre"); io.unobserve(en.target); } });
+  }, { rootMargin: "0px 0px -10% 0px" }) : null;
+  function observe() {
+    if (reduce || !io) return;
+    var vh = window.innerHeight;
+    document.querySelectorAll(".page:not([hidden]) .rv").forEach(function (el) {
+      if (el.dataset.seen) return; el.dataset.seen = 1;
+      if (el.getBoundingClientRect().top > vh * 0.9) { el.classList.add("pre"); io.observe(el); }
+    });
+  }
+
+  /* ---------- Иней на стекле ---------- */
+  var frosts = Array.prototype.slice.call(document.querySelectorAll(".frost"));
+  var hint = document.getElementById("hint"), wiped = 0;
+  function rnd(seed) { var s = seed; return function () { s = (s * 16807) % 2147483647; return s / 2147483647; }; }
+  function drawScene(c) {
+    var w = c._w, h = c._h, g = c._bg;
+    var sky = g.createLinearGradient(0, 0, 0, h); sky.addColorStop(0, "#0c1a2e"); sky.addColorStop(.6, "#1d3350"); sky.addColorStop(1, "#3a3247");
+    g.fillStyle = sky; g.fillRect(0, 0, w, h);
+    var r = rnd(c._seed + 7);
+    for (var i = 0; i < 40; i++) { g.fillStyle = "rgba(255,255,255," + (0.2 + r() * 0.5) + ")"; g.fillRect(r() * w, r() * h * .4, 1.2, 1.2); }
+    var x = -c._off;
+    while (x < w) {
+      var bw = 26 + r() * 40, bh = h * (0.25 + r() * 0.45);
+      g.fillStyle = "#0b1320"; g.fillRect(x, h - bh, bw, bh);
+      for (var yy = h - bh + 6; yy < h - 6; yy += 9) for (var xx = x + 4; xx < x + bw - 5; xx += 8) if (r() > .55) { g.fillStyle = r() > .3 ? "rgba(255,190,110,.85)" : "rgba(170,210,255,.7)"; g.fillRect(xx, yy, 4, 5); }
+      x += bw + 3;
+    }
+  }
+  function frostLayer(c) {
+    var w = c._w, h = c._h, f = c._fr, r = rnd(c._seed);
+    f.globalCompositeOperation = "source-over";
+    f.fillStyle = "rgba(225,238,248,.82)"; f.fillRect(0, 0, w, h);
+    f.strokeStyle = "rgba(255,255,255,.55)"; f.lineWidth = 0.8;
+    function fern(x, y, a, len, d) {
+      if (d > 4 || len < 3) return;
+      var x2 = x + Math.cos(a) * len, y2 = y + Math.sin(a) * len;
+      f.beginPath(); f.moveTo(x, y); f.lineTo(x2, y2); f.stroke();
+      for (var k = 1; k <= 3; k++) { var t = k / 4, px = x + (x2 - x) * t, py = y + (y2 - y) * t; fern(px, py, a + 0.9, len * 0.38, d + 1); fern(px, py, a - 0.9, len * 0.38, d + 1); }
+      fern(x2, y2, a + (r() - .5) * .6, len * 0.7, d + 1);
+    }
+    for (var i = 0; i < 26; i++) { var edge = r() * 4 | 0, sx = edge === 0 ? 0 : edge === 1 ? w : r() * w, sy = edge === 2 ? 0 : edge === 3 ? h : r() * h; fern(sx, sy, Math.atan2(h / 2 - sy, w / 2 - sx) + (r() - .5), 30 + r() * 50, 0); }
+    var vg = f.createRadialGradient(w / 2, h / 2, Math.min(w, h) * .1, w / 2, h / 2, Math.max(w, h) * .7);
+    vg.addColorStop(0, "rgba(255,255,255,0)"); vg.addColorStop(1, "rgba(255,255,255,.25)"); f.fillStyle = vg; f.fillRect(0, 0, w, h);
+  }
+  function compose(c) { var g = c.getContext("2d"); g.clearRect(0, 0, c._w, c._h); g.drawImage(c._bgc, 0, 0, c._w, c._h); g.drawImage(c._frc, 0, 0, c._w, c._h); }
+  function sizeFrost() {
+    frosts.forEach(function (c, k) {
+      var r = c.getBoundingClientRect(), d = Math.min(window.devicePixelRatio || 1, 2);
+      c._w = r.width; c._h = r.height; c._seed = 11 + k * 97; c._off = k * r.width;
+      c.width = r.width * d; c.height = r.height * d; c.getContext("2d").setTransform(d, 0, 0, d, 0, 0);
+      [["_bgc", "_bg"], ["_frc", "_fr"]].forEach(function (p) { var o = document.createElement("canvas"); o.width = c.width; o.height = c.height; var x = o.getContext("2d"); x.setTransform(d, 0, 0, d, 0, 0); c[p[0]] = o; c[p[1]] = x; });
+      drawScene(c); frostLayer(c); compose(c);
+    });
+  }
+  function wipe(c, x, y, rad, a) {
+    var f = c._fr; f.globalCompositeOperation = "destination-out";
+    var gr = f.createRadialGradient(x, y, 0, x, y, rad); gr.addColorStop(0, "rgba(0,0,0," + a + ")"); gr.addColorStop(1, "rgba(0,0,0,0)");
+    f.fillStyle = gr; f.beginPath(); f.arc(x, y, rad, 0, 6.283); f.fill(); compose(c);
+  }
+  frosts.forEach(function (c) {
+    c.parentElement.addEventListener("pointermove", function (e) {
+      var r = c.getBoundingClientRect(); wipe(c, e.clientX - r.left, e.clientY - r.top, 34, .5);
+      if (++wiped > 6) hint.style.opacity = 0;
+    });
+  });
+  var meltP = 0;
+  function melt(p) {
+    if (p <= meltP + 0.01) return; meltP = p;
+    frosts.forEach(function (c) { var rr = rnd(Math.floor(p * 400) + c._seed); for (var i = 0; i < 3; i++) wipe(c, c._w * (.15 + rr() * .7), c._h * (.15 + rr() * .7), 30 + p * 90, .18 + p * .25); });
+  }
+
+  /* ---------- Разрез профиля ---------- */
+  var chambers = document.querySelectorAll(".cut .chamber");
+  var cutN = document.getElementById("cut-n"), cutT = document.getElementById("cut-t"), cutDot = document.getElementById("cut-dot"), cutTemp = document.getElementById("cut-temp");
+  var CUT = [
+    "<b>Снаружи −30 °C.</b> Обычное окно пропускает холод через профиль, и подоконник зимой ледяной.",
+    "<b>Первая камера</b> — воздушный зазор, который встречает холод с улицы.",
+    "<b>Вторая камера</b> отводит конденсат, чтобы профиль не промерзал.",
+    "<b>Третья камера</b> добавляет ещё один слой воздуха между улицей и комнатой.",
+    "<b>Четвёртая — с армированием.</b> Стальной вкладыш держит геометрию окна десятки лет.",
+    "<b>Пятая камера</b> с внутренней стороны: рама тёплая на ощупь.",
+    "<b>Дома +22 °C.</b> Пять камер и двухкамерный стеклопакет 32 мм — стандарт для уральской зимы."
+  ];
+  var lastStep = -1;
+  function cutUpdate(p) {
+    var step = Math.min(6, Math.floor(p * 7));
+    chambers.forEach(function (ch, i) { ch.classList.toggle("on", i < step); });
+    var temp = Math.round(-30 + 52 * p);
+    cutDot.style.left = (p * 100) + "%";
+    cutTemp.textContent = (temp > 0 ? "+" : temp < 0 ? "−" : "") + Math.abs(temp) + " °C";
+    if (step !== lastStep) {
+      lastStep = step;
+      cutN.innerHTML = Math.min(step, 5) + "<small>из 5 камер</small>";
+      cutT.innerHTML = CUT[step];
+      if (!reduce) cutT.animate([{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], { duration: 450, easing: "ease-out" });
+    }
+  }
+
+  /* ---------- Прокрутка ---------- */
+  var progress = document.getElementById("progress"), topbar = document.getElementById("topbar"), dock = document.getElementById("dock");
+  var marquee = document.getElementById("marquee"), cut = document.getElementById("cut"), hs = document.getElementById("hs"), track = document.getElementById("track");
+  var trackMax = 0;
+  function layout() { trackMax = Math.max(0, track.scrollWidth - window.innerWidth + 32); }
+  function onScroll() {
+    var y = window.scrollY, vh = window.innerHeight, doc = document.documentElement.scrollHeight - vh;
+    progress.style.transform = "scaleX(" + (doc > 0 ? y / doc : 0) + ")";
+    topbar.classList.toggle("scrolled", y > 10);
+    var calcEl = document.getElementById("calc"), cr = calcEl.getBoundingClientRect();
+    dock.classList.toggle("show", current !== "kontakty" && y > 600 && (cr.top > vh || cr.bottom < 0));
+    if (current !== "glavnaya") return;
+    if (!reduce) {
+      marquee.style.transform = "translateX(" + (-(y * 0.4) % (marquee.scrollWidth / 2)) + "px)";
+      melt(clamp(y / (vh * 0.9), 0, 1));
+      var r = cut.getBoundingClientRect();
+      cutUpdate(clamp(-r.top / (r.height - vh), 0, 1));
+      var hr = hs.getBoundingClientRect(), hp = clamp(-hr.top / (hr.height - vh), 0, 1);
+      track.style.transform = "translateX(" + (-hp * trackMax) + "px)";
+    }
+    document.querySelectorAll("#stepsl li").forEach(function (li) { li.classList.toggle("lit", li.getBoundingClientRect().top < vh * 0.7); });
+  }
+  var ticking = false;
+  window.addEventListener("scroll", function () { if (!ticking) { ticking = true; requestAnimationFrame(function () { ticking = false; onScroll(); }); } }, { passive: true });
+  window.addEventListener("resize", function () { sizeFrost(); layout(); onScroll(); });
+
+  /* ---------- Калькулятор ---------- */
+  var ICON = {
+    one: '<svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2"><rect x="11" y="4" width="22" height="36" rx="2"/></svg>',
+    two: '<svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="6" width="36" height="32" rx="2"/><path d="M22 6v32"/></svg>',
+    three: '<svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="8" width="40" height="28" rx="2"/><path d="M15 8v28M29 8v28"/></svg>',
+    door: '<svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="16" height="36" rx="2"/><rect x="19" y="4" width="22" height="20" rx="2"/></svg>'
+  };
+  var TYPES = [{ id: "one", n: "Одностворчатое", w: 700, h: 1400, s: 1 }, { id: "two", n: "Двухстворчатое", w: 1300, h: 1400, s: 1 }, { id: "three", n: "Трёхстворчатое", w: 2000, h: 1400, s: 2 }, { id: "door", n: "Балконный блок", w: 2000, h: 2100, s: 2 }];
+  var PROF = [{ id: "exprof", n: "Exprof Practica", d: "3 камеры, 58 мм", m2: 6500 }, { id: "kbe", n: "KBE Эксперт", d: "5 камер, 70 мм", m2: 7500 }, { id: "rehau", n: "Rehau Grazio", d: "5 камер, 70 мм", m2: 9000 }];
+  var GLASS = [{ id: "1", n: "Однокамерный", d: "24 мм, балкон и дача", k: 1 }, { id: "2", n: "Двухкамерный", d: "32 мм, для квартиры", k: 1.12 }, { id: "e", n: "Энергосберегающий", d: "теплее на 30%", k: 1.22 }];
+  var st = { step: 0, type: "two", w: 1300, h: 1400, count: 2, prof: "kbe", glass: "2", mount: true, net: true };
+  var stage = document.getElementById("stage"), bars = document.querySelectorAll("#steps i"), back = document.getElementById("back"), next = document.getElementById("next");
+  function find(a, id) { return a.filter(function (x) { return x.id === id; })[0]; }
+  function opts(list, key, icon) { return '<div class="opts">' + list.map(function (o) { return '<button type="button" class="opt" data-k="' + key + '" data-v="' + o.id + '" aria-pressed="' + (st[key] === o.id) + '">' + (icon ? ICON[o.id] : "") + "<span>" + o.n + "</span>" + (o.d ? "<small>" + o.d + "</small>" : "") + "</button>"; }).join("") + "</div>"; }
+  function render() {
+    var s = st.step, html = "";
+    if (s === 0) html = "<h3>Какое окно нужно?</h3><p class='sub'>Размеры подставим типовые</p>" + opts(TYPES, "type", true);
+    if (s === 1) html = "<h3>Размеры и количество</h3><p class='sub'>Можно примерно, замерщик уточнит</p><div class='dims'><label for='w'>Ширина, мм<input id='w' inputmode='numeric' value='" + st.w + "'></label><label for='h'>Высота, мм<input id='h' inputmode='numeric' value='" + st.h + "'></label><label for='cnt'>Окон, шт.<input id='cnt' inputmode='numeric' value='" + st.count + "'></label></div>";
+    if (s === 2) html = "<h3>Профиль</h3><p class='sub'>От него зависит, насколько тёплым будет окно</p>" + opts(PROF, "prof");
+    if (s === 3) html = "<h3>Стеклопакет и монтаж</h3><p class='sub'>Последний шаг</p>" + opts(GLASS, "glass") + "<label class='toggle' for='mount'><input type='checkbox' id='mount'" + (st.mount ? " checked" : "") + "> Монтаж, откосы и подоконник</label><label class='toggle' for='net'><input type='checkbox' id='net'" + (st.net ? " checked" : "") + "> Москитная сетка</label>";
+    stage.innerHTML = html;
+    if (!reduce) stage.animate([{ opacity: 0, transform: "translateX(20px)" }, { opacity: 1, transform: "none" }], { duration: 400, easing: "cubic-bezier(.2,.7,.1,1)" });
+    bars.forEach(function (b, i) { b.classList.toggle("on", i <= s); });
+    back.style.visibility = s === 0 ? "hidden" : "visible";
+    next.innerHTML = s === 3 ? "Готово" : "Дальше <span class='arr'>→</span>";
+    calc();
+  }
+  var shown = 0;
+  function calc() {
+    var t = find(TYPES, st.type), p = find(PROF, st.prof), g = find(GLASS, st.glass);
+    var one = Math.max(.4, st.w * st.h / 1e6) * p.m2 * g.k + t.s * 3500;
+    if (st.mount) one *= 1.18; if (st.net) one += 900 * t.s;
+    var n = clamp(st.count | 0, 1, 50), total = n > 1 ? one * (n - 0.3) : one;
+    tween(total);
+    document.getElementById("old").textContent = n > 1 ? "без скидки " + fmt(one * n) : "";
+    document.getElementById("spec").innerHTML = "<li>Окно<b>" + t.n + ", " + st.w + "×" + st.h + "</b></li><li>Профиль<b>" + p.n + "</b></li><li>Стеклопакет<b>" + g.n + "</b></li><li>Количество<b>" + n + " шт.</b></li>";
+  }
+  function tween(to) {
+    var el = document.getElementById("sum"), from = shown; shown = to;
+    if (reduce) { el.textContent = fmt(to); return; }
+    var t0 = performance.now();
+    (function f(now) { var k = Math.min(1, (now - t0) / 600), e = 1 - Math.pow(1 - k, 3); el.textContent = fmt(from + (to - from) * e); if (k < 1) requestAnimationFrame(f); })(t0);
+  }
+  stage.addEventListener("click", function (e) {
+    var b = e.target.closest(".opt"); if (!b) return;
+    st[b.dataset.k] = b.dataset.v; if (b.dataset.k === "type") { var t = find(TYPES, b.dataset.v); st.w = t.w; st.h = t.h; }
+    stage.querySelectorAll('.opt[data-k="' + b.dataset.k + '"]').forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); }); calc();
+  });
+  stage.addEventListener("input", function (e) {
+    var v = parseInt(String(e.target.value).replace(/\D/g, ""), 10) || 0;
+    if (e.target.id === "w") st.w = Math.min(4000, v); if (e.target.id === "h") st.h = Math.min(3000, v); if (e.target.id === "cnt") st.count = Math.min(50, v); calc();
+  });
+  stage.addEventListener("change", function (e) { if (e.target.type === "checkbox") { st[e.target.id] = e.target.checked; calc(); } });
+  next.addEventListener("click", function () { if (st.step < 3) { st.step++; render(); } else document.getElementById("l-phone").focus(); });
+  back.addEventListener("click", function () { if (st.step > 0) { st.step--; render(); } });
+  render();
+
+  function phoneOk(el) { var ok = el.value.replace(/\D/g, "").length >= 10; el.style.borderColor = ok ? "" : "#ffb35c"; if (!ok) el.placeholder = "Телефон: 10–11 цифр"; return ok; }
+  document.getElementById("lead").addEventListener("submit", function (e) { e.preventDefault(); if (!phoneOk(document.getElementById("l-phone"))) return; document.getElementById("lead-box").innerHTML = '<div class="done"><b>Заявка отправлена.</b> На настоящем сайте она сразу придёт менеджеру в Telegram вместе с параметрами окна. В демо-версии заявка никуда не уходит.</div>'; });
+  document.getElementById("mform").addEventListener("submit", function (e) { e.preventDefault(); if (!phoneOk(document.getElementById("m-phone"))) return; document.getElementById("m-box").innerHTML = '<div class="done"><b>Спасибо!</b> Менеджер перезвонит в течение 15 минут. В демо-версии заявка никуда не уходит.</div>'; });
+
+  var dl = document.getElementById("deal-left");
+  (function () { var n = new Date(), end = new Date(n.getFullYear(), n.getMonth() + 1, 1); dl.textContent = "До конца акций осталось дней: " + Math.ceil((end - n) / 86400000); })();
+
+  sizeFrost(); layout(); route(); onScroll();
+  if (!reduce) setTimeout(function () { frosts.forEach(function (c) { wipe(c, c._w * .5, c._h * .45, 46, .55); }); }, 1400);
+})();
+</script>
+
+</body></html>

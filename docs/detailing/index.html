@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><title>Графит Детейлинг</title>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head><body>
+
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Manrope:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: одна колонка для телефона. Герой с бликом на «лаке», лента услуг, сцена полировки, привязанная к прокрутке, цены по классу авто, этапы с линией прогресса. */
+:root {
+  --bg: #0b0d0f;
+  --panel: #14171a;
+  --line: #252a2f;
+  --fg: #e9ecee;
+  --muted: #8a9299;
+  --accent: #d0bb90;
+  --accent-ink: #17140e;
+  --font-display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --font-body: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --wrap: 1080px;
+  --ease: cubic-bezier(.2,.7,.1,1);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--fg); font: 400 16px/1.6 var(--font-body); -webkit-font-smoothing: antialiased; overflow-x: clip; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: var(--wrap); margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+p { margin: 0; }
+a { color: inherit; }
+.label { font: 500 12px/1 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* Полоса прогресса чтения */
+.progress { position: fixed; top: env(safe-area-inset-top, 0px); left: 0; right: 0; height: 2px; z-index: 7; background: var(--accent); transform-origin: 0 50%; transform: scaleX(0); }
+
+/* Шапка */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 6; background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid transparent; transition: border-color .3s, background .3s; }
+.top.scrolled { border-bottom-color: var(--line); }
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 14px; }
+.brand { font: 600 15px/1 var(--font-display); letter-spacing: 0.04em; text-decoration: none; }
+.brand span { color: var(--accent); }
+.btn { position: relative; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 0 24px; border-radius: 999px; border: 0; font: 700 15px/1 var(--font-body); text-decoration: none; cursor: pointer; transition: transform .25s var(--ease); }
+.btn:active { transform: scale(.97); }
+.btn-main { background: var(--accent); color: var(--accent-ink); }
+.btn-main::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,.55) 50%, transparent 70%); transform: translateX(-120%); animation: sheen 3.6s 1.2s var(--ease) infinite; }
+@keyframes sheen { 0% { transform: translateX(-120%); } 35%, 100% { transform: translateX(120%); } }
+.btn-ghost { background: transparent; color: var(--fg); border: 1px solid var(--line); }
+.top .btn { min-height: 40px; padding: 0 16px; font-size: 14px; }
+
+/* Герой */
+.hero { position: relative; overflow: hidden; }
+.hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.hero .wrap { position: relative; padding-block: 76px 64px; display: grid; gap: 22px; will-change: transform; }
+.hero h1 { font-size: clamp(36px, 9vw, 76px); line-height: 1.02; max-width: 12ch; font-weight: 800; }
+.hero h1 .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .06em; }
+.hero h1 .w > span { display: inline-block; animation: rise 1s var(--ease) both; animation-delay: calc(var(--i) * 90ms + 150ms); }
+.hero h1 em { font-style: normal; background: linear-gradient(100deg, var(--accent) 0%, #fff6dd 45%, var(--accent) 60%); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: rise 1s var(--ease) both, chrome 5s 1.4s linear infinite; animation-delay: calc(var(--i) * 90ms + 150ms), 1.4s; }
+@keyframes rise { from { transform: translateY(105%); } to { transform: none; } }
+@keyframes chrome { from { background-position: 100% 0; } to { background-position: -150% 0; } }
+.fade-in { animation: fadeup .9s var(--ease) both; animation-delay: var(--d, 0ms); }
+@keyframes fadeup { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.hero p.lead { color: var(--muted); font-size: 18px; max-width: 34ch; }
+.hero .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 18px; max-width: 540px; }
+.facts div { border-top: 1px solid var(--line); padding-top: 10px; }
+.facts b { display: block; font: 600 22px/1.2 var(--font-display); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.facts small { color: var(--muted); font-size: 13px; line-height: 1.35; display: block; }
+.scroll-hint { position: absolute; left: 50%; bottom: 14px; width: 22px; height: 34px; margin-left: -11px; border: 1.5px solid var(--line); border-radius: 12px; }
+.scroll-hint::after { content: ""; position: absolute; left: 50%; top: 7px; width: 3px; height: 7px; margin-left: -1.5px; border-radius: 2px; background: var(--accent); animation: wheel 1.8s var(--ease) infinite; }
+@keyframes wheel { from { transform: translateY(0); opacity: 1; } to { transform: translateY(12px); opacity: 0; } }
+
+/* Лента услуг, движется от прокрутки */
+.marquee { border-block: 1px solid var(--line); padding-block: 18px; overflow: hidden; white-space: nowrap; }
+.marquee .row { display: inline-flex; gap: 28px; font: 800 clamp(28px, 7vw, 56px)/1 var(--font-display); letter-spacing: -0.02em; will-change: transform; }
+.marquee .row span:nth-child(even) { color: transparent; -webkit-text-stroke: 1px var(--muted); }
+.marquee .row i { font-style: normal; color: var(--accent); }
+
+section { padding-block: 72px; }
+.sec-head { display: grid; gap: 10px; margin-bottom: 28px; }
+.sec-head h2 { font-size: clamp(26px, 6vw, 42px); line-height: 1.1; }
+.sec-head p { color: var(--muted); max-width: 52ch; }
+
+/* Появление при прокрутке. Скрывается только то, что ниже экрана, и только когда скрипт запущен. */
+.rv { transition: opacity .9s var(--ease), transform .9s var(--ease); transition-delay: var(--d, 0ms); }
+.rv.pre { opacity: 0; transform: translateY(28px); }
+.rv.pre.from-left { transform: translateX(-28px); }
+.rv.pre.zoom { transform: scale(.94); }
+
+/* Сцена полировки */
+.polish { position: relative; height: 260vh; border-top: 1px solid var(--line); }
+.polish .stick { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 68px); height: calc(100vh - 68px - env(safe-area-inset-top, 0px)); min-height: 520px; display: grid; align-content: center; }
+.polish .wrap { display: grid; gap: 18px; width: 100%; }
+.panel { position: relative; aspect-ratio: 16 / 10; max-width: 100%; max-height: 46vh; width: 100%; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); background: #101316; }
+.panel canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.panel .tag { position: absolute; top: 12px; left: 12px; font: 500 11px/1 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; padding: 7px 10px; border-radius: 999px; background: rgba(11,13,15,.7); color: var(--fg); }
+.meters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.meter { border-top: 1px solid var(--line); padding-top: 10px; }
+.meter b { display: block; font: 500 clamp(20px, 5vw, 30px)/1.1 var(--font-mono); font-variant-numeric: tabular-nums; }
+.meter small { color: var(--muted); font-size: 12px; line-height: 1.35; display: block; }
+.meter .bar { height: 3px; background: var(--line); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+.meter .bar i { display: block; height: 100%; width: 0; background: var(--accent); }
+.polish .phase { min-height: 3.2em; color: var(--muted); max-width: 46ch; }
+.polish .phase b { color: var(--fg); }
+
+/* Калькулятор цен */
+.classes { position: relative; display: inline-flex; flex-wrap: wrap; gap: 6px; padding: 5px; border: 1px solid var(--line); border-radius: 999px; margin-bottom: 20px; max-width: 100%; }
+.chip { position: relative; z-index: 1; min-height: 42px; padding: 0 16px; border-radius: 999px; border: 0; background: transparent; color: var(--muted); font: 600 14px/1 var(--font-body); cursor: pointer; transition: color .3s; }
+.chip[aria-pressed="true"] { color: var(--bg); }
+.pill { position: absolute; z-index: 0; top: 5px; left: 5px; height: 42px; border-radius: 999px; background: var(--fg); transition: transform .45s var(--ease), width .45s var(--ease); }
+.services { display: grid; gap: 12px; }
+.svc { position: relative; overflow: hidden; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 20px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; align-items: baseline; transition: border-color .3s, transform .4s var(--ease); }
+.svc::before { content: ""; position: absolute; inset: 0; background: radial-gradient(260px circle at var(--mx, -300px) var(--my, -300px), rgba(208,187,144,.13), transparent 60%); pointer-events: none; }
+.svc:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+.svc h3 { font-size: 17px; line-height: 1.3; }
+.svc .price { font: 500 17px/1.3 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--accent); white-space: nowrap; }
+.svc p { grid-column: 1 / -1; color: var(--muted); font-size: 14px; }
+.svc .spec { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; }
+.svc .spec span { font: 400 11px/1 var(--font-mono); color: var(--muted); padding: 6px 9px; border: 1px solid var(--line); border-radius: 999px; }
+.note { color: var(--muted); font-size: 13px; margin-top: 14px; }
+
+/* Этапы с линией прогресса */
+.steps { position: relative; list-style: none; margin: 0; padding: 0 0 0 30px; display: grid; gap: 26px; }
+.steps::before, .steps .fill { content: ""; position: absolute; left: 7px; top: 6px; bottom: 6px; width: 2px; background: var(--line); }
+.steps .fill { background: var(--accent); transform-origin: 50% 0; transform: scaleY(0); }
+.steps li { position: relative; }
+.steps li::before { content: ""; position: absolute; left: -29px; top: 5px; width: 14px; height: 14px; border-radius: 50%; background: var(--bg); border: 2px solid var(--line); transition: border-color .4s, background .4s; }
+.steps li.on::before { border-color: var(--accent); background: var(--accent); }
+.steps .n { font: 500 12px/1 var(--font-mono); color: var(--accent); }
+.steps b { display: block; font-weight: 700; font-size: 17px; margin-top: 4px; }
+.steps span { color: var(--muted); font-size: 15px; }
+
+/* Работы */
+.works { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 8px; scrollbar-width: none; }
+.works::-webkit-scrollbar { display: none; }
+.work { flex: 0 0 min(78%, 300px); scroll-snap-align: start; aspect-ratio: 4 / 5; max-width: 100%; border-radius: 16px; border: 1px dashed var(--line); background: linear-gradient(160deg, var(--panel), var(--bg)); display: grid; place-items: end start; padding: 16px; }
+.work small { color: var(--muted); font: 400 12px/1.4 var(--font-mono); }
+
+/* Запись */
+form { display: grid; gap: 14px; max-width: 560px; }
+.field { display: grid; gap: 6px; }
+.field label { font-size: 14px; color: var(--muted); }
+input, select, textarea { width: 100%; min-height: 52px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); font: 400 16px/1.4 var(--font-body); transition: border-color .25s; }
+input:focus, select:focus { border-color: var(--accent); outline: none; }
+.consent { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--muted); }
+.consent input { width: 20px; min-height: 20px; height: 20px; margin-top: 2px; flex: none; accent-color: var(--accent); }
+.done { border: 1px solid var(--accent); border-radius: 14px; padding: 18px; background: var(--panel); animation: fadeup .6s var(--ease) both; }
+.done b { color: var(--accent); }
+
+.contacts { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.contacts div { display: grid; gap: 6px; }
+.contacts b { font-size: 18px; }
+footer { border-top: 1px solid var(--line); padding-block: 28px 96px; color: var(--muted); font-size: 13px; }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; }
+
+/* Кнопка записи, всплывает на телефоне после героя */
+.dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; padding: 12px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); background: linear-gradient(to top, var(--bg) 55%, transparent); transform: translateY(110%); transition: transform .5s var(--ease); }
+.dock.show { transform: none; }
+.dock .btn { width: 100%; }
+
+@media (min-width: 760px) {
+  .services { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 48px; align-items: start; }
+  .polish .wrap { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); align-items: center; gap: 36px; }
+  .meters { grid-template-columns: 1fr; }
+  .dock { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .rv.pre { opacity: 1; transform: none; }
+}
+</style>
+
+<div class="progress" id="progress" aria-hidden="true"></div>
+
+<header class="top" id="top-bar">
+  <div class="wrap">
+    <a class="brand" href="#top">ГРАФИТ<span>·</span>ДЕТЕЙЛИНГ</a>
+    <a class="btn btn-main" href="#book">Записаться</a>
+  </div>
+</header>
+
+<div class="hero" id="top">
+  <canvas id="gloss" aria-hidden="true"></canvas>
+  <div class="wrap" id="hero-inner">
+    <span class="label fade-in" style="--d:0ms">Детейлинг-студия · Москва, м. Пример</span>
+    <h1 aria-label="Кузов, который отражает небо">
+      <span class="w" aria-hidden="true"><span style="--i:0">Кузов,</span></span>
+      <span class="w" aria-hidden="true"><span style="--i:1">который</span></span>
+      <span class="w" aria-hidden="true"><em style="--i:2">отражает</em></span>
+      <span class="w" aria-hidden="true"><span style="--i:3">небо</span></span>
+    </h1>
+    <p class="lead fade-in" style="--d:550ms">Полировка, керамика и защитная плёнка. Работаем с одной машиной за раз и показываем замеры лака до и после.</p>
+    <div class="actions fade-in" style="--d:700ms">
+      <a class="btn btn-main" href="#book">Записаться на осмотр</a>
+      <a class="btn btn-ghost" href="#prices">Посмотреть цены</a>
+    </div>
+    <div class="facts fade-in" style="--d:850ms">
+      <div><b data-count="9" data-suffix="H">9H</b><small>твёрдость керамического покрытия</small></div>
+      <div><b data-count="200" data-suffix=" мкм">200 мкм</b><small>толщина плёнки PPF</small></div>
+      <div><b data-count="5" data-prefix="до " data-suffix=" лет">до 5 лет</b><small>гарантия на защиту</small></div>
+    </div>
+  </div>
+  <div class="scroll-hint" aria-hidden="true"></div>
+</div>
+
+<div class="marquee" aria-hidden="true">
+  <div class="row" id="marquee">
+    <span>Полировка</span><i>✦</i><span>Керамика</span><i>✦</i><span>Плёнка PPF</span><i>✦</i><span>Химчистка</span><i>✦</i>
+    <span>Полировка</span><i>✦</i><span>Керамика</span><i>✦</i><span>Плёнка PPF</span><i>✦</i><span>Химчистка</span><i>✦</i>
+  </div>
+</div>
+
+<main>
+  <div class="polish" id="polish">
+    <div class="stick">
+      <div class="wrap">
+        <div class="panel">
+          <canvas id="panel"></canvas>
+          <span class="tag" id="panel-tag">До полировки</span>
+        </div>
+        <div style="display:grid; gap:16px">
+          <div class="sec-head" style="margin:0">
+            <span class="label">Листайте вниз</span>
+            <h2>Что происходит с лаком</h2>
+          </div>
+          <p class="phase" id="phase"></p>
+          <div class="meters">
+            <div class="meter"><b id="m-gloss">58 GU</b><small>блеск по глоссметру</small><div class="bar"><i id="b-gloss"></i></div></div>
+            <div class="meter"><b id="m-defect">100%</b><small>видимых царапин</small><div class="bar"><i id="b-defect"></i></div></div>
+            <div class="meter"><b id="m-lak">124 мкм</b><small>толщина лака</small><div class="bar"><i id="b-lak"></i></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section id="prices">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="label rv">Цены</span>
+        <h2 class="rv" style="--d:80ms">Стоимость зависит от размера машины</h2>
+        <p class="rv" style="--d:160ms">Выберите класс автомобиля, и цены пересчитаются. Точную сумму называем после осмотра и замера толщины лака.</p>
+      </div>
+      <div class="classes rv" role="group" aria-label="Класс автомобиля">
+        <span class="pill" id="pill" aria-hidden="true"></span>
+        <button class="chip" type="button" data-k="1" aria-pressed="true">Седан</button>
+        <button class="chip" type="button" data-k="1.25" aria-pressed="false">Кроссовер</button>
+        <button class="chip" type="button" data-k="1.5" aria-pressed="false">Внедорожник</button>
+      </div>
+      <div class="services" id="services"></div>
+      <p class="note">Цены в шаблоне примерные. Для каждой студии подставляем её собственный прайс.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap split">
+      <div class="sec-head">
+        <span class="label rv">Как проходит работа</span>
+        <h2 class="rv" style="--d:80ms">Пять этапов, и каждый можно увидеть</h2>
+        <p class="rv" style="--d:160ms">Отправляем фото в Telegram после каждого этапа, так что не нужно ждать в студии.</p>
+      </div>
+      <ol class="steps" id="steps">
+        <span class="fill" id="steps-fill" aria-hidden="true"></span>
+        <li class="rv from-left"><span class="n">Этап 1</span><b>Осмотр и замер ЛКП</b><span>Толщиномером проходим каждую деталь и сразу говорим, сколько лака можно снять.</span></li>
+        <li class="rv from-left"><span class="n">Этап 2</span><b>Двухфазная мойка</b><span>Бесконтактная пена, затем ручная мойка по методу двух вёдер.</span></li>
+        <li class="rv from-left"><span class="n">Этап 3</span><b>Деконтаминация</b><span>Очиститель битума и металлических вкраплений, затем глина.</span></li>
+        <li class="rv from-left"><span class="n">Этап 4</span><b>Полировка</b><span>Абразивная и финишная, под светом 6500 K, чтобы не пропустить голограммы.</span></li>
+        <li class="rv from-left"><span class="n">Этап 5</span><b>Защита и выдача</b><span>Керамика или плёнка, сутки на полимеризацию, затем повторный замер при вас.</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="label rv">Работы</span>
+        <h2 class="rv" style="--d:80ms">Фото до и после</h2>
+        <p class="rv" style="--d:160ms">Листайте вбок. Здесь будут фотографии работ студии из её карточки на Яндекс Картах или из соцсетей.</p>
+      </div>
+      <div class="works">
+        <div class="work rv zoom"><small>Фото 1 · полировка</small></div>
+        <div class="work rv zoom" style="--d:90ms"><small>Фото 2 · керамика</small></div>
+        <div class="work rv zoom" style="--d:180ms"><small>Фото 3 · плёнка PPF</small></div>
+        <div class="work rv zoom" style="--d:270ms"><small>Фото 4 · химчистка</small></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="book">
+    <div class="wrap split">
+      <div class="sec-head">
+        <span class="label rv">Запись</span>
+        <h2 class="rv" style="--d:80ms">Запишитесь на бесплатный осмотр</h2>
+        <p class="rv" style="--d:160ms">Перезвоним в течение 15 минут в рабочее время и подберём день.</p>
+      </div>
+      <div class="rv" style="--d:120ms">
+        <form id="form" novalidate>
+          <div class="field"><label for="f-name">Имя</label><input id="f-name" name="name" autocomplete="name" required></div>
+          <div class="field"><label for="f-phone">Телефон</label><input id="f-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7" required></div>
+          <div class="field"><label for="f-car">Марка и модель</label><input id="f-car" name="car" placeholder="Например, BMW X5"></div>
+          <div class="field"><label for="f-svc">Услуга</label><select id="f-svc" name="svc"></select></div>
+          <label class="consent" for="f-ok"><input id="f-ok" type="checkbox" required> Согласен на обработку персональных данных по 152-ФЗ</label>
+          <button class="btn btn-main" type="submit">Отправить заявку</button>
+          <p id="f-err" class="note" hidden></p>
+        </form>
+        <div id="done" class="done" hidden><b>Заявка принята.</b> Это демо-шаблон, поэтому заявка никуда не ушла. На сайте студии она сразу придёт владельцу в Telegram.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head"><span class="label rv">Контакты</span><h2 class="rv" style="--d:80ms">Как нас найти</h2></div>
+      <div class="contacts">
+        <div class="rv"><span class="label">Адрес</span><b>Москва, ул. Примерная, 1</b><span class="note">Въезд со двора, ворота 2</span></div>
+        <div class="rv" style="--d:90ms"><span class="label">Телефон</span><b>+7 (900) 000-00-00</b><span class="note">Ежедневно с 9:00 до 21:00</span></div>
+        <div class="rv" style="--d:180ms"><span class="label">Telegram</span><b>@studio_example</b><span class="note">Фото машины можно прислать сюда</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap"><span>Демо-шаблон сайта для детейлинг-студии</span><span>Политика обработки персональных данных</span></div>
+</footer>
+
+<div class="dock" id="dock"><a class="btn btn-main" href="#book">Записаться на осмотр</a></div>
+
+<script>
+(function () {
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var clamp = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
+  var lerp = function (a, b, t) { return a + (b - a) * t; };
+
+  /* ---------- Цены ---------- */
+  var SERVICES = [
+    { n: "Восстановительная полировка", p: 18000, d: "Убираем царапины, голограммы и следы моек. Снимаем не больше 3–5 мкм лака.", s: ["2–3 дня", "замер до и после"] },
+    { n: "Керамическое покрытие", p: 25000, d: "Два слоя керамики поверх полировки. Грязь и вода скатываются с кузова.", s: ["9H", "гарантия 2 года"] },
+    { n: "Плёнка PPF на зону риска", p: 45000, d: "Капот, бампер, фары и зеркала, то есть всё, куда летят камни.", s: ["200 мкм", "гарантия 5 лет"] },
+    { n: "Полная оклейка PPF", p: 220000, d: "Весь кузов в прозрачной или матовой плёнке. Лак остаётся заводским.", s: ["5–7 дней", "гарантия 5 лет"] },
+    { n: "Химчистка салона", p: 9000, d: "Сиденья, потолок, ковры и багажник. Кожу очищаем и пропитываем кондиционером.", s: ["1 день", "озонирование"] },
+    { n: "Детейлинг-мойка", p: 2500, d: "Ручная мойка в две фазы, дисков и арок, сушка, воск.", s: ["2 часа"] }
+  ];
+  var k = 1;
+  var box = document.getElementById("services");
+  var round = function (v) { return Math.round(v / 500) * 500; };
+  var fmt = function (v) { return "от " + round(v).toLocaleString("ru-RU") + " ₽"; };
+  box.innerHTML = SERVICES.map(function (x, i) {
+    return '<div class="svc rv" style="--d:' + (i % 2) * 90 + 'ms"><h3>' + x.n + '</h3><span class="price" data-i="' + i + '">' + fmt(x.p) + '</span><p>' + x.d + '</p><div class="spec">' + x.s.map(function (t) { return "<span>" + t + "</span>"; }).join("") + "</div></div>";
+  }).join("");
+  var prices = box.querySelectorAll(".price");
+  function retarget(newK) {
+    var oldK = k; k = newK;
+    if (reduce) { prices.forEach(function (el) { el.textContent = fmt(SERVICES[el.dataset.i].p * k); }); return; }
+    var t0 = performance.now();
+    (function step(now) {
+      var t = clamp((now - t0) / 600, 0, 1), e = 1 - Math.pow(1 - t, 3);
+      prices.forEach(function (el) { var p = SERVICES[el.dataset.i].p; el.textContent = fmt(lerp(p * oldK, p * k, e)); });
+      if (t < 1) requestAnimationFrame(step);
+    })(t0);
+  }
+  var pill = document.getElementById("pill");
+  var chips = document.querySelectorAll(".chip");
+  function movePill(b) { pill.style.width = b.offsetWidth + "px"; pill.style.transform = "translate(" + (b.offsetLeft - 5) + "px," + (b.offsetTop - 5) + "px)"; }
+  chips.forEach(function (b) {
+    b.addEventListener("click", function () {
+      chips.forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
+      movePill(b); retarget(parseFloat(b.dataset.k));
+    });
+  });
+  movePill(chips[0]);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { movePill(document.querySelector('.chip[aria-pressed="true"]')); });
+  window.addEventListener("resize", function () { movePill(document.querySelector('.chip[aria-pressed="true"]')); });
+  box.addEventListener("pointermove", function (e) {
+    var c = e.target.closest(".svc"); if (!c) return;
+    var r = c.getBoundingClientRect(); c.style.setProperty("--mx", (e.clientX - r.left) + "px"); c.style.setProperty("--my", (e.clientY - r.top) + "px");
+  });
+
+  /* ---------- Форма ---------- */
+  var sel = document.getElementById("f-svc");
+  sel.innerHTML = SERVICES.map(function (x) { return "<option>" + x.n + "</option>"; }).join("") + "<option>Пока не знаю, нужен осмотр</option>";
+  var form = document.getElementById("form"), err = document.getElementById("f-err");
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = form.name.value.trim(), phone = form.phone.value.replace(/\D/g, "");
+    var msg = !name ? "Укажите имя." : phone.length < 10 ? "Проверьте телефон: нужно 10–11 цифр." : !document.getElementById("f-ok").checked ? "Отметьте согласие на обработку данных." : "";
+    if (msg) { err.textContent = msg; err.hidden = false; return; }
+    err.hidden = true; form.hidden = true; document.getElementById("done").hidden = false;
+  });
+
+  /* ---------- Появление при прокрутке ---------- */
+  var rvs = document.querySelectorAll(".rv");
+  if (!reduce && "IntersectionObserver" in window) {
+    var vh = window.innerHeight;
+    rvs.forEach(function (el) { if (el.getBoundingClientRect().top > vh * 0.92) el.classList.add("pre"); });
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (en) { if (en.isIntersecting) { en.target.classList.remove("pre"); io.unobserve(en.target); } });
+    }, { rootMargin: "0px 0px -8% 0px" });
+    rvs.forEach(function (el) { if (el.classList.contains("pre")) io.observe(el); });
+    setTimeout(function () { rvs.forEach(function (el) { if (el.getBoundingClientRect().top < window.innerHeight) el.classList.remove("pre"); }); }, 2500);
+  }
+
+  /* ---------- Счётчики в герое ---------- */
+  if (!reduce) document.querySelectorAll("[data-count]").forEach(function (el, i) {
+    var to = +el.dataset.count, pre = el.dataset.prefix || "", suf = el.dataset.suffix || "", t0 = null;
+    setTimeout(function () {
+      (function step(now) {
+        if (t0 === null) t0 = now;
+        var t = clamp((now - t0) / 1300, 0, 1), e = 1 - Math.pow(1 - t, 4);
+        el.textContent = pre + Math.round(to * e) + suf;
+        if (t < 1) requestAnimationFrame(step);
+      })(performance.now());
+    }, 900 + i * 120);
+  });
+
+  /* ---------- Сцена полировки ---------- */
+  var pc = document.getElementById("panel"), pg = pc.getContext("2d");
+  var pw = 0, ph = 0, scratches = [];
+  function seed() {
+    scratches = [];
+    var r = 1; function rnd() { r = (r * 16807) % 2147483647; return r / 2147483647; }
+    for (var i = 0; i < 140; i++) {
+      var cx = rnd() * pw, cy = rnd() * ph, rad = 20 + rnd() * Math.max(pw, ph) * 0.5;
+      scratches.push({ cx: cx, cy: cy, rad: rad, a0: rnd() * 6.28, len: 0.15 + rnd() * 0.5, deep: rnd() });
+    }
+  }
+  function sizePanel() {
+    var r = pc.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2);
+    pw = r.width; ph = r.height; pc.width = pw * dpr; pc.height = ph * dpr; pg.setTransform(dpr, 0, 0, dpr, 0, 0); seed();
+  }
+  var PHASES = [
+    [0, "<b>До работы.</b> Под светом видны «паутинка» от моек, голограммы и тусклый, мутный лак."],
+    [0.3, "<b>Абразивная полировка.</b> Снимаем микронный слой лака вместе с царапинами. Толщиномер контролирует остаток."],
+    [0.62, "<b>Финишная полировка.</b> Убираем следы от первого шага и выводим глубину цвета."],
+    [0.86, "<b>Керамика.</b> Покрытие 9H фиксирует блеск и защищает лак от реагентов и моек."]
+  ];
+  var phaseEl = document.getElementById("phase"), tagEl = document.getElementById("panel-tag"), curPhase = -1;
+  var mG = document.getElementById("m-gloss"), mD = document.getElementById("m-defect"), mL = document.getElementById("m-lak");
+  var bG = document.getElementById("b-gloss"), bD = document.getElementById("b-defect"), bL = document.getElementById("b-lak");
+  function drawPanel(p) {
+    var g = pg;
+    var base = g.createLinearGradient(0, 0, pw, ph);
+    var shine = lerp(0.35, 1, p);
+    base.addColorStop(0, "#0f1215"); base.addColorStop(0.5, "rgb(" + Math.round(lerp(24, 18, p)) + "," + Math.round(lerp(28, 22, p)) + "," + Math.round(lerp(32, 28, p)) + ")"); base.addColorStop(1, "#0b0d10");
+    g.fillStyle = base; g.fillRect(0, 0, pw, ph);
+    // мутность лака
+    g.fillStyle = "rgba(180,185,190," + (0.09 * (1 - p)) + ")"; g.fillRect(0, 0, pw, ph);
+    // отражение лампы: размытое до, чёткое после
+    var lx = pw * 0.62, ly = ph * 0.38, blur = lerp(70, 6, p);
+    var lamp = g.createRadialGradient(lx, ly, 0, lx, ly, pw * 0.42);
+    lamp.addColorStop(0, "rgba(255,248,230," + (0.10 + 0.5 * shine * shine) + ")"); lamp.addColorStop(Math.min(0.9, 0.08 + blur / 400), "rgba(208,187,144," + 0.16 * shine + ")"); lamp.addColorStop(1, "rgba(0,0,0,0)");
+    g.fillStyle = lamp; g.fillRect(0, 0, pw, ph);
+    // полосы ламп
+    g.save(); g.translate(lx, ly); g.rotate(-0.35);
+    for (var i = -2; i <= 2; i++) {
+      var y = i * 26, a = (0.06 + 0.45 * p * p) * (1 - Math.abs(i) * 0.18);
+      var hb = lerp(18, 3, p);
+      var lg = g.createLinearGradient(0, y - hb, 0, y + hb);
+      lg.addColorStop(0, "rgba(255,250,235,0)"); lg.addColorStop(0.5, "rgba(255,250,235," + a + ")"); lg.addColorStop(1, "rgba(255,250,235,0)");
+      g.fillStyle = lg; g.beginPath(); g.ellipse(0, y, pw * 0.3, hb, 0, 0, 6.283); g.fill();
+    }
+    g.restore();
+    // царапины-«паутинка» вокруг отражения
+    var vis = clamp(1 - p / 0.8, 0, 1);
+    if (vis > 0) {
+      g.lineWidth = 0.7;
+      scratches.forEach(function (s) {
+        var keep = clamp(vis * 1.4 - (1 - s.deep) * 0.4, 0, 1); if (keep <= 0) return;
+        g.strokeStyle = "rgba(230,232,235," + (0.28 * keep) + ")";
+        g.beginPath(); g.arc(lx, ly, s.rad, s.a0, s.a0 + s.len); g.stroke();
+      });
+    }
+    // круговой проход машинкой
+    if (p > 0.05 && p < 0.86) {
+      var a = p * 40, px = pw * (0.2 + 0.6 * ((Math.sin(p * 9) + 1) / 2)), py = ph * (0.3 + 0.4 * ((Math.cos(p * 7) + 1) / 2));
+      g.save(); g.translate(px, py); g.rotate(a);
+      var pad = Math.min(pw, ph) * 0.16;
+      var pgd = g.createRadialGradient(0, 0, pad * 0.2, 0, 0, pad);
+      pgd.addColorStop(0, "rgba(208,187,144,.35)"); pgd.addColorStop(1, "rgba(208,187,144,0)");
+      g.fillStyle = pgd; g.beginPath(); g.arc(0, 0, pad, 0, 6.28); g.fill();
+      g.strokeStyle = "rgba(208,187,144,.5)"; g.lineWidth = 1; g.beginPath(); g.arc(0, 0, pad * 0.62, 0, 4.5); g.stroke();
+      g.restore();
+    }
+    // капли после керамики
+    if (p > 0.88) {
+      var dp = (p - 0.88) / 0.12;
+      for (var j = 0; j < 22; j++) {
+        var dx = ((j * 97) % 100) / 100 * pw, dy = ((j * 53) % 100) / 100 * ph, dr = 2 + (j % 4) * 1.6;
+        g.fillStyle = "rgba(255,255,255," + 0.22 * dp + ")"; g.beginPath(); g.arc(dx, dy, dr * dp, 0, 6.28); g.fill();
+        g.fillStyle = "rgba(255,255,255," + 0.6 * dp + ")"; g.beginPath(); g.arc(dx - dr * 0.3, dy - dr * 0.3, dr * 0.3 * dp, 0, 6.28); g.fill();
+      }
+    }
+  }
+  function updatePolish(p) {
+    drawPanel(p);
+    var gloss = Math.round(lerp(58, 94, clamp(p / 0.9, 0, 1)));
+    var defect = Math.round(100 * clamp(1 - p / 0.8, 0, 1));
+    var lak = lerp(124, 120.5, clamp(p / 0.8, 0, 1));
+    mG.textContent = gloss + " GU"; mD.textContent = defect + "%"; mL.textContent = lak.toFixed(1).replace(".", ",") + " мкм";
+    bG.style.width = gloss + "%"; bD.style.width = defect + "%"; bL.style.width = (lak / 124 * 100) + "%";
+    var idx = 0; PHASES.forEach(function (ph, i) { if (p >= ph[0]) idx = i; });
+    if (idx !== curPhase) {
+      curPhase = idx; phaseEl.innerHTML = PHASES[idx][1];
+      tagEl.textContent = ["До полировки", "Абразивный шаг", "Финишный шаг", "Керамика 9H"][idx];
+      if (!reduce) phaseEl.animate([{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], { duration: 450, easing: "ease-out" });
+    }
+  }
+
+  /* ---------- Герой: блик на лаке ---------- */
+  var c = document.getElementById("gloss"), g = c.getContext("2d");
+  var w = 0, h = 0, t = 0.35, target = null;
+  function size() {
+    var r = c.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = r.width; h = r.height; c.width = w * dpr; c.height = h * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0); draw();
+  }
+  function draw() {
+    var base = g.createLinearGradient(0, 0, 0, h);
+    base.addColorStop(0, "#0b0d0f"); base.addColorStop(0.55, "#121518"); base.addColorStop(1, "#0b0d0f");
+    g.fillStyle = base; g.fillRect(0, 0, w, h);
+    g.save();
+    g.beginPath(); g.moveTo(0, h * 0.78);
+    g.bezierCurveTo(w * 0.3, h * 0.6, w * 0.7, h * 0.95, w, h * 0.7);
+    g.lineTo(w, h); g.lineTo(0, h); g.closePath();
+    var body = g.createLinearGradient(0, h * 0.6, 0, h);
+    body.addColorStop(0, "#1b1f23"); body.addColorStop(1, "#0b0d0f");
+    g.fillStyle = body; g.fill(); g.clip();
+    var x = t * (w + 600) - 300;
+    var hl = g.createLinearGradient(x - 160, 0, x + 160, h * 0.4);
+    hl.addColorStop(0, "rgba(208,187,144,0)"); hl.addColorStop(0.5, "rgba(240,228,198,0.26)"); hl.addColorStop(1, "rgba(208,187,144,0)");
+    g.fillStyle = hl; g.fillRect(0, 0, w, h);
+    g.restore();
+    var x2 = (1 - t) * (w + 800) - 400;
+    var sky = g.createRadialGradient(x2, h * 0.1, 0, x2, h * 0.1, Math.max(w, h) * 0.7);
+    sky.addColorStop(0, "rgba(208,187,144,0.11)"); sky.addColorStop(1, "rgba(208,187,144,0)");
+    g.fillStyle = sky; g.fillRect(0, 0, w, h);
+  }
+  c.parentElement.addEventListener("pointermove", function (e) { var r = c.getBoundingClientRect(); target = (e.clientX - r.left) / r.width; });
+  c.parentElement.addEventListener("pointerleave", function () { target = null; });
+
+  /* ---------- Всё, что привязано к прокрутке ---------- */
+  var progress = document.getElementById("progress"), bar = document.getElementById("top-bar"), dock = document.getElementById("dock");
+  var heroInner = document.getElementById("hero-inner"), hero = document.getElementById("top");
+  var marquee = document.getElementById("marquee"), polish = document.getElementById("polish");
+  var steps = document.getElementById("steps"), fill = document.getElementById("steps-fill"), lis = steps.querySelectorAll("li");
+  var book = document.getElementById("book");
+  var lastP = -1;
+  function onScroll() {
+    var y = window.scrollY, vh = window.innerHeight, doc = document.documentElement.scrollHeight - vh;
+    progress.style.transform = "scaleX(" + (doc > 0 ? y / doc : 0) + ")";
+    bar.classList.toggle("scrolled", y > 10);
+    var hh = hero.offsetHeight;
+    var bookTop = book.getBoundingClientRect().top;
+    dock.classList.toggle("show", y > hh * 0.8 && bookTop > vh * 0.6);
+    if (!reduce) {
+      if (y < hh) heroInner.style.transform = "translateY(" + (y * 0.28) + "px)";
+      heroInner.style.opacity = clamp(1 - y / (hh * 0.9), 0, 1);
+      marquee.style.transform = "translateX(" + (-(y * 0.35) % (marquee.scrollWidth / 2)) + "px)";
+    }
+    var pr = polish.getBoundingClientRect();
+    var p = clamp(-pr.top / (pr.height - vh * 0.85), 0, 1);
+    if (Math.abs(p - lastP) > 0.002) { lastP = p; updatePolish(p); }
+    var sr = steps.getBoundingClientRect();
+    var sp = clamp((vh * 0.65 - sr.top) / sr.height, 0, 1);
+    fill.style.transform = "scaleY(" + sp + ")";
+    lis.forEach(function (li) { li.classList.toggle("on", li.getBoundingClientRect().top < vh * 0.65); });
+  }
+  var ticking = false;
+  window.addEventListener("scroll", function () { if (!ticking) { ticking = true; requestAnimationFrame(function () { ticking = false; onScroll(); }); } }, { passive: true });
+  window.addEventListener("resize", function () { size(); sizePanel(); lastP = -1; onScroll(); });
+  size(); sizePanel(); updatePolish(0); onScroll();
+
+  function tick() {
+    if (target !== null) t += (target - t) * 0.08; else t = (t + 0.0012) % 1;
+    if (window.scrollY < hero.offsetHeight) draw();
+    requestAnimationFrame(tick);
+  }
+  if (!reduce) requestAnimationFrame(tick);
+})();
+</script>
+
+</body></html>
