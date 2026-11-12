@@ -35,8 +35,12 @@ jobs:
           for f in $(git diff --name-only HEAD~1 HEAD -- 'jobs/*.json'); do
             [ -f "$f" ] || continue
             n=$(basename "$f" .json)
-            DEBUG=$(python -c "import json;print('1' if json.load(open('$f')).get('debug') else '0')") \
-              python scanner/scan.py "$f" "results/$n.enc.json"
+            if python -c "import json,sys;sys.exit(0 if 'urls' in json.load(open('$f')) else 1)"; then
+              python scanner/boards.py "$f" "results/$n.enc.json"
+            else
+              DEBUG=$(python -c "import json;print('1' if json.load(open('$f')).get('debug') else '0')") \
+                python scanner/scan.py "$f" "results/$n.enc.json"
+            fi
           done
       - name: Сохранение результата
         run: |

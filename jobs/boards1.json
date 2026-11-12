@@ -1,0 +1,15 @@
+{
+ "name": "boards1",
+ "urls": [
+  "https://kwork.ru/projects?c=all",
+  "https://kwork.ru/projects?c=11",
+  "https://kwork.ru/projects?c=41",
+  "https://www.fl.ru/projects/",
+  "https://www.fl.ru/projects/category/programmirovanie/",
+  "https://www.fl.ru/projects/category/razrabotka-sajtov/",
+  "https://freelance.ru/project/search?c[]=4",
+  "https://freelance.ru/project/search",
+  "https://www.weblancer.net/freelance/",
+  "https://youdo.com/tasks-all-opened-all"
+ ]
+}
