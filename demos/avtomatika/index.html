@@ -1,0 +1,307 @@
+<title>Avtomatika редизайн</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tektur:wght@500;700;900&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: фирменный стиль avtomatika.ru (жёлтый, чёрный, Tektur, «сигнальная» полоса под заголовками). Четыре переработанных блока главной; переключатель день/ночь меняет токены. */
+:root {
+  --bg: #ffffff;
+  --bg2: #f5f5f3;
+  --card: #ffffff;
+  --fg: #141414;
+  --muted: #6b6b6b;
+  --line: #e2e2de;
+  --yellow: #fff200;
+  --yellow-ink: #141414;
+  --black: #141414;
+  --font-d: "Tektur", "Arial Black", system-ui, sans-serif;
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ease: cubic-bezier(.2,.7,.1,1);
+  color-scheme: light;
+}
+.night {
+  --bg: #0f0f10;
+  --bg2: #161618;
+  --card: #1c1c1f;
+  --fg: #f2f2ee;
+  --muted: #a3a3a0;
+  --line: #2c2c30;
+  --black: #000000;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 400 16px/1.6 var(--font); -webkit-font-smoothing: antialiased; overflow-x: clip; transition: background .4s, color .4s; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
+.wrap { max-width: 1200px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--font-d); margin: 0; text-wrap: balance; }
+p { margin: 0; }
+:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 50px; padding: 0 24px; border-radius: 4px; border: 0; background: var(--yellow); color: var(--yellow-ink); font: 700 15px/1 var(--font); text-decoration: none; cursor: pointer; transition: transform .2s var(--ease), box-shadow .2s; }
+.btn:hover { box-shadow: 0 0 0 4px rgba(255,242,0,.25); }
+.btn:active { transform: scale(.97); }
+.btn.ghost { background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,.4); }
+
+/* Панель демо */
+.demo-bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--black); color: #fff; }
+.demo-bar .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 10px; font-size: 13px; }
+.demo-bar b { font-family: var(--font-d); letter-spacing: .02em; }
+.demo-bar b span { color: var(--yellow); }
+.mode { display: inline-flex; padding: 3px; border-radius: 999px; background: #2a2a2d; gap: 2px; }
+.mode button { min-height: 34px; padding: 0 14px; border-radius: 999px; border: 0; background: transparent; color: #bdbdb8; font: 600 13px/1 var(--font); cursor: pointer; }
+.mode button[aria-pressed="true"] { background: var(--yellow); color: #141414; }
+
+section { padding-block: 72px; }
+@media (max-width: 640px) { section { padding-block: 52px; } }
+.h2 { font-weight: 900; font-size: clamp(24px, 3.2vw, 34px); text-transform: uppercase; letter-spacing: -.01em; line-height: 1.1; padding-bottom: 16px; margin-bottom: 30px; position: relative; }
+.h2::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 8px; background: repeating-linear-gradient(-45deg, var(--fg) 0 10px, var(--yellow) 10px 20px); background-size: 28.28px 100%; animation: stripes 1.2s linear infinite paused; }
+.h2.on::after { animation-play-state: running; animation-iteration-count: 1; }
+@keyframes stripes { from { background-position: 0 0; } to { background-position: 28.28px 0; } }
+
+/* 1. Первый экран */
+.hero { background: var(--black); color: #fff; position: relative; overflow: hidden; }
+.hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: .55; }
+.hero .wrap { position: relative; display: grid; grid-template-columns: 1.25fr .75fr; gap: 48px; align-items: center; padding-block: 72px 64px; }
+@media (max-width: 900px) { .hero .wrap { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-block: 48px; } }
+.tag { display: inline-flex; align-items: center; gap: 8px; font: 600 12px/1 var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--yellow); }
+.tag i { width: 8px; height: 8px; background: var(--yellow); display: inline-block; animation: blink 1.6s steps(2) infinite; }
+@keyframes blink { 50% { opacity: .2; } }
+.hero h1 { font-weight: 900; font-size: clamp(34px, 5.2vw, 64px); line-height: 1.02; margin: 18px 0 20px; }
+.hero h1 span { color: var(--yellow); }
+.hero .lead { color: #c9c9c4; font-size: 17px; max-width: 58ch; }
+.hero .row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.stats { display: grid; gap: 1px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.12); }
+.stats div { background: rgba(20,20,20,.85); padding: 20px 22px; display: grid; gap: 4px; }
+.stats b { font: 900 38px/1 var(--font-d); color: var(--yellow); font-variant-numeric: tabular-nums; }
+.stats span { font-size: 14px; color: #c9c9c4; }
+@media (max-width: 900px) { .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); } .stats div { padding: 14px 12px; } .stats b { font-size: 26px; } .stats span { font-size: 12px; } }
+
+/* 2. Технологии и стандарты */
+.tech { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 900px) { .tech { grid-template-columns: minmax(0, 1fr); } }
+.tc { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 26px; display: grid; gap: 14px; align-content: start; position: relative; overflow: hidden; transition: border-color .3s, transform .4s var(--ease); }
+.tc:hover { border-color: var(--fg); transform: translateY(-4px); }
+.tc::before { content: ""; position: absolute; left: 0; top: 0; height: 4px; width: 0; background: var(--yellow); transition: width .6s var(--ease); }
+.tc:hover::before, .tc.on::before { width: 100%; }
+.tc .ic { width: 56px; height: 56px; border-radius: 6px; background: var(--yellow); display: grid; place-items: center; }
+.tc .ic svg { width: 30px; height: 30px; }
+.tc h3 { font-weight: 700; font-size: 20px; line-height: 1.2; }
+.tc p { color: var(--muted); font-size: 15px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips span { font: 500 12px/1 var(--font); padding: 7px 10px; border-radius: 4px; background: var(--bg2); border: 1px solid var(--line); color: var(--fg); }
+.std { margin-top: 18px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 18px 22px; border: 1px dashed var(--line); border-radius: 6px; }
+.std b { font: 700 13px/1 var(--font-d); text-transform: uppercase; letter-spacing: .04em; margin-right: 4px; }
+.std span { font: 600 14px/1 var(--font); }
+.std i { width: 4px; height: 4px; background: var(--muted); border-radius: 50%; }
+
+/* 3. Что мы автоматизируем */
+.ind { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 1000px) { .ind { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .ind { gap: 10px; } .it .ph { aspect-ratio: 4 / 3; } .it .ph svg { width: 40px; height: 40px; } .it .ph small { display: none; } .it .bd { padding: 12px; } .it h3 { font-size: 14px; } .it p { font-size: 13px; } }
+.it { background: var(--card); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; transition: transform .4s var(--ease), box-shadow .4s; cursor: pointer; text-align: left; padding: 0; font: inherit; color: inherit; }
+.it:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -28px rgba(0,0,0,.5); }
+.it .ph { aspect-ratio: 16 / 10; max-width: 100%; position: relative; display: grid; place-items: center; overflow: hidden; }
+.it .ph svg { width: 54px; height: 54px; position: relative; z-index: 1; transition: transform .5s var(--ease); }
+.it:hover .ph svg { transform: scale(1.12) rotate(-4deg); }
+.it .ph small { position: absolute; right: 8px; bottom: 8px; font: 500 10px/1 var(--font); color: rgba(0,0,0,.45); background: rgba(255,255,255,.6); padding: 4px 6px; border-radius: 3px; }
+.it .bd { padding: 16px 18px 18px; display: grid; gap: 6px; align-content: start; }
+.it h3 { font-size: 16px; font-weight: 700; line-height: 1.25; }
+.it p { font-size: 14px; color: var(--muted); }
+.it .more { max-height: 0; overflow: hidden; transition: max-height .5s var(--ease); }
+.it[aria-expanded="true"] .more { max-height: 200px; }
+.it .tg { font: 600 12px/1 var(--font); color: var(--fg); display: inline-flex; gap: 6px; align-items: center; margin-top: 4px; }
+.it .tg::after { content: "+"; width: 18px; height: 18px; display: inline-grid; place-items: center; background: var(--yellow); color: #141414; border-radius: 3px; transition: transform .3s; }
+.it[aria-expanded="true"] .tg::after { transform: rotate(45deg); }
+.showall { margin-top: 18px; display: flex; justify-content: center; }
+.showall .btn { background: transparent; color: var(--fg); border: 1.5px solid var(--fg); }
+.ind .it.hide { display: none; }
+
+/* 4. Блог */
+.blog { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 1000px) { .blog { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .blog { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px; padding-bottom: 6px; scrollbar-width: none; } .blog::-webkit-scrollbar { display: none; } .blog .post { flex: 0 0 82%; scroll-snap-align: start; } }
+.post { background: var(--card); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; text-decoration: none; color: inherit; transition: transform .4s var(--ease), border-color .3s; }
+.post:hover { transform: translateY(-4px); border-color: var(--fg); }
+.post .cv { aspect-ratio: 16 / 10; max-width: 100%; position: relative; overflow: hidden; }
+.post .cv::after { content: "→"; position: absolute; right: 10px; top: 10px; width: 32px; height: 32px; display: grid; place-items: center; background: var(--yellow); color: #141414; font-weight: 700; border-radius: 4px; transform: translate(6px, -6px); opacity: 0; transition: .3s var(--ease); }
+.post:hover .cv::after { transform: none; opacity: 1; }
+.post .bd { padding: 16px; display: grid; gap: 8px; align-content: start; }
+.post .meta { font-size: 12px; color: var(--muted); }
+.post h3 { font: 600 16px/1.3 var(--font); }
+.post .tags { font-size: 12px; color: var(--muted); }
+
+.note { margin-top: 40px; padding: 18px 20px; border-left: 4px solid var(--yellow); background: var(--bg2); font-size: 14px; color: var(--muted); }
+footer { padding-block: 28px; font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); }
+
+.rv { transition: opacity .8s var(--ease), transform .8s var(--ease); transition-delay: var(--d, 0ms); }
+.rv.pre { opacity: 0; transform: translateY(24px); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .rv.pre { opacity: 1; transform: none; } }
+</style>
+
+<div id="app">
+<div class="demo-bar">
+  <div class="wrap">
+    <b>avtomatika<span>.</span>ru — новые блоки главной</b>
+    <div class="mode" role="group" aria-label="Тема"><button type="button" data-m="day" aria-pressed="true">День</button><button type="button" data-m="night" aria-pressed="false">Ночь</button></div>
+  </div>
+</div>
+
+<!-- 1. Первый экран -->
+<header class="hero">
+  <canvas id="grid" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div>
+      <span class="tag"><i></i>Полный цикл · от аудита до пусконаладки</span>
+      <h1>Автоматизация производства и зданий <span>под ключ</span></h1>
+      <p class="lead">Комплексная цифровизация производственных процессов и инженерных систем. Снижаем операционные издержки, минимизируем брак и повышаем производительность промышленных и коммерческих объектов.</p>
+      <div class="row">
+        <a class="btn" href="#tech">Рассчитать стоимость</a>
+        <a class="btn ghost" href="#ind">Что мы автоматизируем</a>
+      </div>
+    </div>
+    <div class="stats">
+      <div><b data-n="10" data-s="+">10+</b><span>лет опыта в автоматизации</span></div>
+      <div><b data-n="100" data-s="+">100+</b><span>реализованных проектов</span></div>
+      <div><b data-n="24" data-s=" ч">24 ч</b><span>ответ после заявки</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- 2. Технологии и стандарты -->
+<section id="tech">
+  <div class="wrap">
+    <h2 class="h2 rv">Применяемые технологии и стандарты</h2>
+    <div class="tech">
+      <div class="tc rv">
+        <div class="ic"><svg viewBox="0 0 30 30" fill="none" stroke="#141414" stroke-width="2"><rect x="3" y="5" width="24" height="16" rx="1"/><path d="M8 17l4-5 3 3 5-7M11 25h8"/></svg></div>
+        <h3>SCADA-системы и диспетчеризация</h3>
+        <p>Визуализация техпроцессов в реальном времени, архив данных и удалённый контроль с рабочих станций и телефонов.</p>
+        <div class="chips"><span>Мнемосхемы</span><span>Архивы трендов</span><span>Аварийная сигнализация</span></div>
+      </div>
+      <div class="tc rv" style="--d:100ms">
+        <div class="ic"><svg viewBox="0 0 30 30" fill="none" stroke="#141414" stroke-width="2"><rect x="5" y="4" width="20" height="22" rx="1"/><path d="M9 9h12M9 13h12M9 21h2M14 21h2M19 21h2"/></svg></div>
+        <h3>ПЛК и датчики</h3>
+        <p>Надёжная аппаратная основа для управления распределёнными и критически важными процессами.</p>
+        <div class="chips"><span>ОВЕН</span><span>Siemens LOGO!</span><span>Wiren Board</span><span>Eaton Easy</span></div>
+      </div>
+      <div class="tc rv" style="--d:200ms">
+        <div class="ic"><svg viewBox="0 0 30 30" fill="none" stroke="#141414" stroke-width="2"><circle cx="15" cy="15" r="4"/><circle cx="5" cy="7" r="2"/><circle cx="25" cy="7" r="2"/><circle cx="5" cy="23" r="2"/><circle cx="25" cy="23" r="2"/><path d="M7 8l5 5M23 8l-5 5M7 22l5-5M23 22l-5-5"/></svg></div>
+        <h3>Интеграция с ERP и промышленный IoT</h3>
+        <p>Связываем уровень цеха с корпоративными системами для предиктивной аналитики и мониторинга оборудования.</p>
+        <div class="chips"><span>MES / ERP</span><span>OPC UA</span><span>Предиктивная аналитика</span></div>
+      </div>
+    </div>
+    <div class="std rv"><b>Протоколы и стандарты</b><span>OPC UA</span><i></i><span>Modbus RTU/TCP</span><i></i><span>Profinet</span><i></i><span>BACnet</span><i></i><span>RS-485</span><i></i><span>МЭК 61131-3</span><i></i><span>ГОСТ 34</span></div>
+  </div>
+</section>
+
+<!-- 3. Что мы автоматизируем -->
+<section id="ind" style="background:var(--bg2)">
+  <div class="wrap">
+    <h2 class="h2 rv">Что мы автоматизируем</h2>
+    <div class="ind" id="indg"></div>
+    <div class="showall"><button class="btn" type="button" id="more">Показать все 15 отраслей</button></div>
+  </div>
+</section>
+
+<!-- 4. Блог -->
+<section>
+  <div class="wrap">
+    <h2 class="h2 rv">Полезное в блоге</h2>
+    <div class="blog">
+      <a class="post rv" href="#"><div class="cv" style="background:linear-gradient(135deg,#e9f0ff,#cfdcff)"><svg viewBox="0 0 160 100" style="width:100%;height:100%"><path d="M20 70h120M40 70V40h30v30M90 70V30h30v40" stroke="#2a4bd8" stroke-width="3" fill="none"/><circle cx="55" cy="30" r="6" fill="#fff200" stroke="#141414"/></svg></div><div class="bd"><span class="meta">06.04.2026 · 3 минуты</span><h3>Технология PoE (Power over Ethernet): как работает и где применять</h3><span class="tags">#PoE #Сеть</span></div></a>
+      <a class="post rv" href="#" style="--d:80ms"><div class="cv" style="background:linear-gradient(135deg,#ffe9ea,#ffd0d4)"><svg viewBox="0 0 160 100" style="width:100%;height:100%"><rect x="45" y="25" width="70" height="50" rx="4" fill="#fff" stroke="#c51a4a" stroke-width="3"/><path d="M55 40h20M55 50h30M55 60h15" stroke="#c51a4a" stroke-width="3"/></svg></div><div class="bd"><span class="meta">22.09.2026 · 3 минуты</span><h3>Промышленные контроллеры на базе Raspberry Pi Compute Module</h3><span class="tags">#RaspberryPi</span></div></a>
+      <a class="post rv" href="#" style="--d:160ms"><div class="cv" style="background:linear-gradient(135deg,#fffbcc,#fff200)"><svg viewBox="0 0 160 100" style="width:100%;height:100%"><circle cx="80" cy="50" r="24" fill="none" stroke="#141414" stroke-width="3"/><path d="M80 34v16l10 8" stroke="#141414" stroke-width="3"/></svg></div><div class="bd"><span class="meta">Пример статьи</span><h3>Как выбрать ПЛК для небольшого производства</h3><span class="tags">#ПЛК #Подбор</span></div></a>
+      <a class="post rv" href="#" style="--d:240ms"><div class="cv" style="background:linear-gradient(135deg,#e6f7ef,#c4ecd8)"><svg viewBox="0 0 160 100" style="width:100%;height:100%"><path d="M40 75c10-30 30-45 40-45s30 15 40 45" fill="none" stroke="#138a52" stroke-width="3"/><circle cx="80" cy="30" r="6" fill="#138a52"/></svg></div><div class="bd"><span class="meta">Пример статьи</span><h3>Диспетчеризация ИТП: с чего начать и сколько это стоит</h3><span class="tags">#ИТП #Диспетчеризация</span></div></a>
+    </div>
+    <p class="note">Демо-вариант четырёх блоков. Версии для ПК, планшета и телефона — одна страница: измените ширину окна или откройте с телефона. Вместо значков в «Что мы автоматизируем» встанут ваши фото объектов.</p>
+  </div>
+</section>
+<footer><div class="wrap">Концепт редизайна блоков главной avtomatika.ru</div></footer>
+</div>
+
+<script>
+(function () {
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var app = document.getElementById("app");
+
+  /* День / ночь */
+  document.querySelectorAll(".mode button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var night = b.dataset.m === "night";
+      document.documentElement.classList.toggle("night", night);
+      document.querySelectorAll(".mode button").forEach(function (o) { o.setAttribute("aria-pressed", o === b); });
+    });
+  });
+
+  /* Фон первого экрана: схема с бегущими сигналами */
+  var c = document.getElementById("grid"), g = c.getContext("2d"), w, h, lines = [], pulses = [];
+  function size() {
+    var r = c.getBoundingClientRect(), d = Math.min(window.devicePixelRatio || 1, 2); w = r.width; h = r.height; c.width = w * d; c.height = h * d; g.setTransform(d, 0, 0, d, 0, 0);
+    lines = []; var s = 48;
+    for (var y = s; y < h; y += s) lines.push({ x1: 0, y1: y, x2: w, y2: y });
+    for (var x = s; x < w; x += s * 2) lines.push({ x1: x, y1: 0, x2: x, y2: h });
+  }
+  function draw() {
+    g.clearRect(0, 0, w, h);
+    g.strokeStyle = "rgba(255,255,255,.06)"; g.lineWidth = 1;
+    lines.forEach(function (l) { g.beginPath(); g.moveTo(l.x1, l.y1); g.lineTo(l.x2, l.y2); g.stroke(); });
+    pulses.forEach(function (p) {
+      var l = lines[p.l], x = l.x1 + (l.x2 - l.x1) * p.t, y = l.y1 + (l.y2 - l.y1) * p.t;
+      var gr = g.createRadialGradient(x, y, 0, x, y, 40); gr.addColorStop(0, "rgba(255,242,0,.9)"); gr.addColorStop(1, "rgba(255,242,0,0)");
+      g.fillStyle = gr; g.fillRect(x - 40, y - 40, 80, 80);
+      g.fillStyle = "#fff200"; g.fillRect(x - 2, y - 2, 4, 4);
+    });
+    var fade = g.createLinearGradient(0, 0, w, 0); fade.addColorStop(0, "rgba(20,20,20,.9)"); fade.addColorStop(.6, "rgba(20,20,20,.3)"); fade.addColorStop(1, "rgba(20,20,20,.1)");
+    g.fillStyle = fade; g.fillRect(0, 0, w, h);
+  }
+  function tick() {
+    if (pulses.length < 7 && Math.random() < .04) pulses.push({ l: Math.floor(Math.random() * lines.length), t: 0, v: .002 + Math.random() * .004 });
+    pulses.forEach(function (p) { p.t += p.v; }); pulses = pulses.filter(function (p) { return p.t < 1; });
+    draw(); requestAnimationFrame(tick);
+  }
+  size(); draw(); window.addEventListener("resize", function () { size(); draw(); });
+  if (!reduce) requestAnimationFrame(tick);
+
+  /* Счётчики */
+  if (!reduce) document.querySelectorAll("[data-n]").forEach(function (el, i) {
+    var to = +el.dataset.n, s = el.dataset.s || "", t0;
+    setTimeout(function () { t0 = performance.now(); (function f(n) { var k = Math.min(1, (n - t0) / 1300), e = 1 - Math.pow(1 - k, 4); el.textContent = Math.round(to * e) + s; if (k < 1) requestAnimationFrame(f); })(t0); }, 300 + i * 150);
+  });
+
+  /* Отрасли */
+  var IND = [
+    ["Машиностроение и металлообработка", "Станки с ЧПУ, роботизированные комплексы и сборочные линии.", "#dfe8f5", "M8 30h28M12 30V18h8v12M24 30V12h8v18"],
+    ["Пищевая промышленность", "Контроль температурных режимов, дозирование, смешивание и упаковка.", "#fdecd8", "M14 10h16l-2 22H16zM18 6h8"],
+    ["Химическая отрасль", "Реакторы, контроль давления и уровня, аварийная вентиляция.", "#e6f3e6", "M18 6v10l-8 16h24l-8-16V6M16 6h12"],
+    ["Коммерческие здания (BMS)", "Диспетчеризация вентиляции, отопления, водо- и энергоснабжения.", "#ececf6", "M10 34V8h24v26M16 14h4M24 14h4M16 20h4M24 20h4M16 26h4M24 26h4"],
+    ["Энергетика и ЖКХ", "Котельные, ИТП и ЦТП, насосные станции, учёт энергоресурсов (АСКУЭ).", "#fff7b8", "M24 4L12 22h10l-2 14 12-18H22z"],
+    ["Нефтегазовая отрасль", "Компрессорные станции, перекачка, мониторинг утечек и ПАЗ.", "#f2e4dc", "M22 6c6 8 10 13 10 18a10 10 0 0 1-20 0c0-5 4-10 10-18z"],
+    ["Металлургия и горнодобыча", "Плавильные печи, прокатные станы, конвейеры и дробильные комплексы.", "#ebe3dc", "M6 32l8-14 6 8 6-12 8 18z"],
+    ["Фармацевтика и биотехнологии", "Стерильность, микроклимат чистых помещений и валидация по GMP.", "#e3f1f7", "M14 30l16-16a5 5 0 0 0-7-7L7 23a5 5 0 0 0 7 7zM15 15l7 7"],
+    ["Деревообработка и ЦБП", "Сушильные камеры, лесопильные линии, контроль влажности полотна.", "#efe8d8", "M22 4l-10 14h6l-8 12h24l-8-12h6z"],
+    ["Строительные материалы", "Бетонные заводы, кирпич, цемент, стекло: дозирование и обжиг.", "#ececec", "M6 32h32M8 32V20h12v12M20 32V14h14v18"],
+    ["Сельское хозяйство", "Климат в теплицах и птичниках, полив, кормление, элеваторы.", "#e4f2dc", "M22 34V18M22 18c0-6 6-10 12-10 0 6-6 10-12 10zM22 22c0-5-5-8-10-8 0 5 5 8 10 8z"],
+    ["Склады и ритейл", "Автоматизированные склады, конвейеры, сортировка, холодильные терминалы.", "#f6ecdc", "M6 16l16-8 16 8v18H6zM12 34V22h20v12"],
+    ["Водоподготовка и очистные", "Станции водоочистки, химический контроль, задвижки и реагенты.", "#dceff7", "M22 6c6 8 10 13 10 18a10 10 0 0 1-20 0c0-5 4-10 10-18zM16 26a6 6 0 0 0 6 4"],
+    ["Транспортная инфраструктура", "Вентиляция и свет в тоннелях, паркинги, шлюзы, обогрев стрелок.", "#e8e8f2", "M8 34L18 8h8l10 26M22 14v4M22 22v4M22 30v2"],
+    ["Ваша отрасль", "Не нашли свою? Расскажите о задаче — подберём решение.", "#fff200", "M22 12v12M22 30v2M22 4a18 18 0 1 0 0 36 18 18 0 0 0 0-36z"]
+  ];
+  var grid = document.getElementById("indg");
+  grid.innerHTML = IND.map(function (x, i) {
+    return '<button type="button" class="it rv' + (i >= 8 ? ' hide' : '') + '" aria-expanded="false" style="--d:' + (i % 4) * 70 + 'ms"><div class="ph" style="background:' + x[2] + '"><svg viewBox="0 0 44 44" fill="none" stroke="#141414" stroke-width="2" stroke-linejoin="round"><path d="' + x[3] + '"/></svg><small>фото объекта</small></div><div class="bd"><h3>' + x[0] + '</h3><div class="more"><p>' + x[1] + '</p></div><span class="tg">Подробнее</span></div></button>';
+  }).join("");
+  grid.addEventListener("click", function (e) { var b = e.target.closest(".it"); if (!b) return; b.setAttribute("aria-expanded", b.getAttribute("aria-expanded") !== "true"); });
+  document.getElementById("more").addEventListener("click", function (e) {
+    var hidden = grid.querySelectorAll(".it.hide"); hidden.forEach(function (x) { x.classList.remove("hide"); x.classList.remove("pre"); }); e.currentTarget.parentElement.remove();
+  });
+
+  /* Появление при прокрутке, «бегущая» полоса под заголовками */
+  if (!reduce && "IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) { en.target.classList.remove("pre"); en.target.classList.add("on"); io.unobserve(en.target); } }); }, { rootMargin: "0px 0px -8% 0px" });
+    document.querySelectorAll(".rv").forEach(function (el) { if (el.getBoundingClientRect().top > window.innerHeight * .92) el.classList.add("pre"); io.observe(el); });
+  }
+})();
+</script>
