@@ -73,8 +73,8 @@ p { margin: 0; }
 .sw[aria-checked="true"] .knob i { opacity: 1; }
 .sw:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
 .swl { display: inline-flex; align-items: center; gap: 10px; font: 600 13px/1 var(--font); color: #bdbdb8; }
-.swl span { white-space: nowrap; }
-@media (max-width: 480px) { .swl span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } }
+#theme-l { white-space: nowrap; }
+@media (max-width: 480px) { #theme-l { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } }
 
 section { padding-block: 72px; }
 @media (max-width: 640px) { section { padding-block: 52px; } }
@@ -122,7 +122,7 @@ section { padding-block: 72px; }
 /* 3. Что мы автоматизируем */
 .ind { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
 @media (max-width: 1000px) { .ind { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 520px) { .ind { gap: 10px; } .it .ph { aspect-ratio: 4 / 3; } .it .ph svg { width: 40px; height: 40px; } .it .ph small { display: none; } .it .bd { padding: 12px; } .it h3 { font-size: 14px; } .it p { font-size: 13px; } }
+@media (max-width: 520px) { .ind { gap: 10px; } .it .ph { aspect-ratio: 4 / 3; } .it .ph svg { width: 40px; height: 40px; } .it .ph small { display: none; } .it .bd { padding: 12px; } .it h3 { font-size: 13px; } .it p { font-size: 13px; } }
 .it { background: var(--card); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; transition: transform .4s var(--ease), box-shadow .4s; cursor: pointer; text-align: left; padding: 0; font: inherit; color: inherit; }
 .it:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -28px rgba(0,0,0,.5); }
 .it .ph { aspect-ratio: 16 / 10; max-width: 100%; position: relative; display: grid; place-items: center; overflow: hidden; }
@@ -130,7 +130,7 @@ section { padding-block: 72px; }
 .it:hover .ph svg { transform: scale(1.12) rotate(-4deg); }
 .it .ph small { position: absolute; right: 8px; bottom: 8px; font: 500 10px/1 var(--font); color: rgba(0,0,0,.45); background: rgba(255,255,255,.6); padding: 4px 6px; border-radius: 3px; }
 .it .bd { padding: 16px 18px 18px; display: grid; gap: 6px; align-content: start; }
-.it h3 { font-size: 16px; font-weight: 700; line-height: 1.25; }
+.it h3 { font-size: 16px; font-weight: 700; line-height: 1.25; hyphens: manual; overflow-wrap: break-word; }
 .it p { font-size: 14px; color: var(--muted); }
 .it .more { max-height: 0; overflow: hidden; transition: max-height .5s var(--ease); }
 .it[aria-expanded="true"] .more { max-height: 200px; }
@@ -295,20 +295,20 @@ footer { padding-block: 28px; font-size: 13px; color: var(--muted); border-top: 
 
   /* Отрасли */
   var IND = [
-    ["Машиностроение и металлообработка", "Станки с ЧПУ, роботизированные комплексы и сборочные линии.", "#dfe8f5", "M8 30h28M12 30V18h8v12M24 30V12h8v18"],
-    ["Пищевая промышленность", "Контроль температурных режимов, дозирование, смешивание и упаковка.", "#fdecd8", "M14 10h16l-2 22H16zM18 6h8"],
+    ["Машино\u00adстроение и металло\u00adобработка", "Станки с ЧПУ, роботизированные комплексы и сборочные линии.", "#dfe8f5", "M8 30h28M12 30V18h8v12M24 30V12h8v18"],
+    ["Пищевая промыш\u00adленность", "Контроль температурных режимов, дозирование, смешивание и упаковка.", "#fdecd8", "M14 10h16l-2 22H16zM18 6h8"],
     ["Химическая отрасль", "Реакторы, контроль давления и уровня, аварийная вентиляция.", "#e6f3e6", "M18 6v10l-8 16h24l-8-16V6M16 6h12"],
     ["Коммерческие здания (BMS)", "Диспетчеризация вентиляции, отопления, водо- и энергоснабжения.", "#ececf6", "M10 34V8h24v26M16 14h4M24 14h4M16 20h4M24 20h4M16 26h4M24 26h4"],
     ["Энергетика и ЖКХ", "Котельные, ИТП и ЦТП, насосные станции, учёт энергоресурсов (АСКУЭ).", "#fff7b8", "M24 4L12 22h10l-2 14 12-18H22z"],
     ["Нефтегазовая отрасль", "Компрессорные станции, перекачка, мониторинг утечек и ПАЗ.", "#f2e4dc", "M22 6c6 8 10 13 10 18a10 10 0 0 1-20 0c0-5 4-10 10-18z"],
     ["Металлургия и горнодобыча", "Плавильные печи, прокатные станы, конвейеры и дробильные комплексы.", "#ebe3dc", "M6 32l8-14 6 8 6-12 8 18z"],
-    ["Фармацевтика и биотехнологии", "Стерильность, микроклимат чистых помещений и валидация по GMP.", "#e3f1f7", "M14 30l16-16a5 5 0 0 0-7-7L7 23a5 5 0 0 0 7 7zM15 15l7 7"],
-    ["Деревообработка и ЦБП", "Сушильные камеры, лесопильные линии, контроль влажности полотна.", "#efe8d8", "M22 4l-10 14h6l-8 12h24l-8-12h6z"],
+    ["Фармацевтика и био\u00adтехнологии", "Стерильность, микроклимат чистых помещений и валидация по GMP.", "#e3f1f7", "M14 30l16-16a5 5 0 0 0-7-7L7 23a5 5 0 0 0 7 7zM15 15l7 7"],
+    ["Дерево\u00adобработка и ЦБП", "Сушильные камеры, лесопильные линии, контроль влажности полотна.", "#efe8d8", "M22 4l-10 14h6l-8 12h24l-8-12h6z"],
     ["Строительные материалы", "Бетонные заводы, кирпич, цемент, стекло: дозирование и обжиг.", "#ececec", "M6 32h32M8 32V20h12v12M20 32V14h14v18"],
     ["Сельское хозяйство", "Климат в теплицах и птичниках, полив, кормление, элеваторы.", "#e4f2dc", "M22 34V18M22 18c0-6 6-10 12-10 0 6-6 10-12 10zM22 22c0-5-5-8-10-8 0 5 5 8 10 8z"],
     ["Склады и ритейл", "Автоматизированные склады, конвейеры, сортировка, холодильные терминалы.", "#f6ecdc", "M6 16l16-8 16 8v18H6zM12 34V22h20v12"],
-    ["Водоподготовка и очистные", "Станции водоочистки, химический контроль, задвижки и реагенты.", "#dceff7", "M22 6c6 8 10 13 10 18a10 10 0 0 1-20 0c0-5 4-10 10-18zM16 26a6 6 0 0 0 6 4"],
-    ["Транспортная инфраструктура", "Вентиляция и свет в тоннелях, паркинги, шлюзы, обогрев стрелок.", "#e8e8f2", "M8 34L18 8h8l10 26M22 14v4M22 22v4M22 30v2"],
+    ["Водо\u00adподготовка и очистные", "Станции водоочистки, химический контроль, задвижки и реагенты.", "#dceff7", "M22 6c6 8 10 13 10 18a10 10 0 0 1-20 0c0-5 4-10 10-18zM16 26a6 6 0 0 0 6 4"],
+    ["Транспортная инфра\u00adструктура", "Вентиляция и свет в тоннелях, паркинги, шлюзы, обогрев стрелок.", "#e8e8f2", "M8 34L18 8h8l10 26M22 14v4M22 22v4M22 30v2"],
     ["Ваша отрасль", "Не нашли свою? Расскажите о задаче — подберём решение.", "#fff200", "M22 12v12M22 30v2M22 4a18 18 0 1 0 0 36 18 18 0 0 0 0-36z"]
   ];
   var grid = document.getElementById("indg");
