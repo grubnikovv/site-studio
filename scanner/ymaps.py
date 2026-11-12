@@ -48,7 +48,7 @@ def main(job_path, out_path):
                 page.wait_for_timeout(5000)
                 for _ in range(job.get("scrolls", 4)):
                     page.mouse.move(300, 500); page.mouse.wheel(0, 3000); page.wait_for_timeout(1500)
-                links = page.eval_on_selector_all('a[href*="/maps/org/"]', "els => [...new Set(els.map(e => e.href.split('?')[0]))]")
+                links = page.eval_on_selector_all('a[href*="/maps/org/"]', "els => [...new Set(els.map(e => { const m = e.href.match(/(https:[^?#]*\\/maps\\/org\\/[^/]+\\/\\d+\\/)/); return m ? m[1] : null; }).filter(Boolean))]")
             except Exception as e:
                 print(q, "ERR", str(e)[:120], flush=True); links = []
             print(q, len(links), flush=True)
