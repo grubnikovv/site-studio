@@ -793,21 +793,24 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     one: '<svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2"><rect x="11" y="4" width="22" height="36" rx="2"/></svg>',
     two: '<svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="6" width="36" height="32" rx="2"/><path d="M22 6v32"/></svg>',
     three: '<svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="8" width="40" height="28" rx="2"/><path d="M15 8v28M29 8v28"/></svg>',
-    door: '<svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="16" height="36" rx="2"/><rect x="19" y="4" width="22" height="20" rx="2"/></svg>'
+    door: '<svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="16" height="36" rx="2"/><rect x="19" y="4" width="22" height="20" rx="2"/></svg>',
+    custom: '<svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 40V20a16 16 0 0 1 32 0v20z"/><path d="M22 4v36M6 24h32"/></svg>'
   };
-  var TYPES = [{ id: "one", n: "Одностворчатое", w: 700, h: 1400, s: 1 }, { id: "two", n: "Двухстворчатое", w: 1300, h: 1400, s: 1 }, { id: "three", n: "Трёхстворчатое", w: 2000, h: 1400, s: 2 }, { id: "door", n: "Балконный блок", w: 2000, h: 2100, s: 2 }];
+  var TYPES = [{ id: "one", n: "Одностворчатое", w: 700, h: 1400, s: 1 }, { id: "two", n: "Двухстворчатое", w: 1300, h: 1400, s: 1 }, { id: "three", n: "Трёхстворчатое", w: 2000, h: 1400, s: 2 }, { id: "door", n: "Балконный блок", w: 2000, h: 2100, s: 2 }, { id: "custom", n: "Нестандартное", d: "арка, трапеция, круглое, панорамное, эркер", w: 0, h: 0, s: 0 }];
+  var OPEN = [{ id: "none", n: "Все глухие", d: "дешевле, только для 2+ створок", k: 0 }, { id: "one", n: "Одна открывается", d: "поворотно-откидная", k: 1 }, { id: "all", n: "Все открываются", d: "удобно мыть снаружи", k: 2 }];
   var PROF = [{ id: "exprof", n: "Exprof Practica", d: "3 камеры, 58 мм", m2: 6500 }, { id: "kbe", n: "KBE Эксперт", d: "5 камер, 70 мм", m2: 7500 }, { id: "rehau", n: "Rehau Grazio", d: "5 камер, 70 мм", m2: 9000 }];
   var GLASS = [{ id: "1", n: "Однокамерный", d: "24 мм, балкон и дача", k: 1 }, { id: "2", n: "Двухкамерный", d: "32 мм, для квартиры", k: 1.12 }, { id: "e", n: "Энергосберегающий", d: "теплее на 30%", k: 1.22 }];
-  var st = { step: 0, type: "two", w: 1300, h: 1400, count: 2, prof: "kbe", glass: "2", mount: true, net: true };
+  var st = { step: 0, type: "two", w: 1300, h: 1400, count: 2, prof: "kbe", glass: "2", open: "one", mount: true, net: true };
   var stage = document.getElementById("stage"), bars = document.querySelectorAll("#steps i"), back = document.getElementById("back"), next = document.getElementById("next");
   function find(a, id) { return a.filter(function (x) { return x.id === id; })[0]; }
   function opts(list, key, icon) { return '<div class="opts">' + list.map(function (o) { return '<button type="button" class="opt" data-k="' + key + '" data-v="' + o.id + '" aria-pressed="' + (st[key] === o.id) + '">' + (icon ? ICON[o.id] : "") + "<span>" + o.n + "</span>" + (o.d ? "<small>" + o.d + "</small>" : "") + "</button>"; }).join("") + "</div>"; }
   function render() {
     var s = st.step, html = "";
     if (s === 0) html = "<h3>Какое окно нужно?</h3><p class='sub'>Размеры подставим типовые</p>" + opts(TYPES, "type", true);
+    if (s === 0 && st.type === "custom") html += "<p class='sub' style='margin-top:14px'>Окна нестандартной формы считаем индивидуально. Оставьте телефон справа — замерщик приедет бесплатно и назовёт цену на месте.</p>";
     if (s === 1) html = "<h3>Размеры и количество</h3><p class='sub'>Можно примерно, замерщик уточнит</p><div class='dims'><label for='w'>Ширина, мм<input id='w' inputmode='numeric' value='" + st.w + "'></label><label for='h'>Высота, мм<input id='h' inputmode='numeric' value='" + st.h + "'></label><label for='cnt'>Окон, шт.<input id='cnt' inputmode='numeric' value='" + st.count + "'></label></div>";
     if (s === 2) html = "<h3>Профиль</h3><p class='sub'>От него зависит, насколько тёплым будет окно</p>" + opts(PROF, "prof");
-    if (s === 3) html = "<h3>Стеклопакет и монтаж</h3><p class='sub'>Последний шаг</p>" + opts(GLASS, "glass") + "<label class='toggle' for='mount'><input type='checkbox' id='mount'" + (st.mount ? " checked" : "") + "> Монтаж, откосы и подоконник</label><label class='toggle' for='net'><input type='checkbox' id='net'" + (st.net ? " checked" : "") + "> Москитная сетка</label>";
+    if (s === 3) html = "<h3>Створки, стеклопакет и монтаж</h3><p class='sub'>Последний шаг</p><span class='eyebrow'>Какие створки открываются</span>" + opts(OPEN, "open") + "<span class='eyebrow'>Стеклопакет</span>" + opts(GLASS, "glass") + "<label class='toggle' for='mount'><input type='checkbox' id='mount'" + (st.mount ? " checked" : "") + "> Монтаж, откосы и подоконник</label><label class='toggle' for='net'><input type='checkbox' id='net'" + (st.net ? " checked" : "") + "> Москитная сетка</label>";
     stage.innerHTML = html;
     if (!reduce) stage.animate([{ opacity: 0, transform: "translateX(20px)" }, { opacity: 1, transform: "none" }], { duration: 400, easing: "cubic-bezier(.2,.7,.1,1)" });
     bars.forEach(function (b, i) { b.classList.toggle("on", i <= s); });
@@ -818,12 +821,18 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   var shown = 0;
   function calc() {
     var t = find(TYPES, st.type), p = find(PROF, st.prof), g = find(GLASS, st.glass);
-    var one = Math.max(.4, st.w * st.h / 1e6) * p.m2 * g.k + t.s * 3500;
-    if (st.mount) one *= 1.18; if (st.net) one += 900 * t.s;
+    var custom = st.type === "custom";
+    next.style.visibility = custom ? "hidden" : "visible";
+    if (custom) { shown = 0; document.getElementById("sum").textContent = "по замеру"; document.getElementById("old").textContent = "";
+      document.getElementById("spec").innerHTML = "<li>Окно<b>Нестандартное</b></li><li>Замер<b>бесплатно</b></li><li>Расчёт<b>на месте, за 30 минут</b></li>"; return; }
+    var sashes = st.type === "one" ? 1 : st.type === "three" ? 3 : 2;
+    var opening = st.open === "all" ? sashes : st.open === "one" ? 1 : (sashes > 1 ? 0 : 1);
+    var one = Math.max(.4, st.w * st.h / 1e6) * p.m2 * g.k + opening * 3500;
+    if (st.mount) one *= 1.18; if (st.net) one += 900 * Math.max(1, opening);
     var n = clamp(st.count | 0, 1, 50), total = n > 1 ? one * (n - 0.3) : one;
     tween(total);
     document.getElementById("old").textContent = n > 1 ? "без скидки " + fmt(one * n) : "";
-    document.getElementById("spec").innerHTML = "<li>Окно<b>" + t.n + ", " + st.w + "×" + st.h + "</b></li><li>Профиль<b>" + p.n + "</b></li><li>Стеклопакет<b>" + g.n + "</b></li><li>Количество<b>" + n + " шт.</b></li>";
+    document.getElementById("spec").innerHTML = "<li>Окно<b>" + t.n + ", " + st.w + "×" + st.h + "</b></li><li>Профиль<b>" + p.n + "</b></li><li>Створки<b>" + find(OPEN, st.open).n + "</b></li><li>Стеклопакет<b>" + g.n + "</b></li><li>Количество<b>" + n + " шт.</b></li>";
   }
   function tween(to) {
     var el = document.getElementById("sum"), from = shown; shown = to;
@@ -833,7 +842,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   }
   stage.addEventListener("click", function (e) {
     var b = e.target.closest(".opt"); if (!b) return;
-    st[b.dataset.k] = b.dataset.v; if (b.dataset.k === "type") { var t = find(TYPES, b.dataset.v); st.w = t.w; st.h = t.h; }
+    st[b.dataset.k] = b.dataset.v; if (b.dataset.k === "type") { var t = find(TYPES, b.dataset.v); if (t.w) { st.w = t.w; st.h = t.h; } render(); return; }
     stage.querySelectorAll('.opt[data-k="' + b.dataset.k + '"]').forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); }); calc();
   });
   stage.addEventListener("input", function (e) {
