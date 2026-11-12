@@ -17,7 +17,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORDS = ["лендинг", "сайт", "редизайн", "дизайн сайта", "telegram бот", "бот", "чат-бот", "верстка", "квиз",
          "калькулятор", "mini app", "автоматизация", "презентация", "инфографика", "баннер"]
 OTHER = ["https://www.fl.ru/projects/", "https://www.fl.ru/projects/category/razrabotka-sajtov/",
-         "https://www.fl.ru/projects/category/razrabotka-sajtov/landingi/", "https://www.fl.ru/projects/category/messendzhery/",
+         "https://www.fl.ru/projects/category/avtomatizaciya-biznesa/", "https://www.fl.ru/projects/category/ai-iskusstvenniy-intellekt/",
          "https://www.fl.ru/projects/category/dizajn/", "https://www.fl.ru/projects/category/teksty/",
          "https://youdo.com/tasks-all-opened-all"] + ["https://t.me/s/" + c for c in
          ("job_for_bots", "digitaltender", "freelancetaverna", "mirfri", "FrWork3", "job_webdev")]
@@ -69,7 +69,9 @@ def main():
     pub = priv.public_key().public_bytes(serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo).decode()
 
     names = ["watch-" + stamp]
-    urls = ["https://kwork.ru/projects?keyword=" + quote(w) for w in WORDS] + OTHER
+    # Kwork вперемешку с другими площадками — подряд он блокирует после ~13 запросов.
+    kw = ["https://kwork.ru/projects?keyword=" + quote(w) for w in WORDS]; urls = []
+    for i in range(max(len(kw), len(OTHER))): urls += kw[i:i + 1] + OTHER[i:i + 1]
     json.dump({"name": names[0], "pause": 8, "pubkey": pub, "urls": urls}, open(f"{ROOT}/jobs/{names[0]}.json", "w"), ensure_ascii=False, indent=1)
     push("Плановая проверка заказов", f"jobs/{names[0]}.json")
     if now.weekday() == 0:
