@@ -1,0 +1,312 @@
+<title>Графит Детейлинг</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600&family=Manrope:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: одна колонка для телефона; тёмный «лак» и блик в герое, дальше спокойные секции с ценами по классу авто. */
+:root {
+  --bg: #0d0f11;
+  --panel: #15181b;
+  --line: #262b30;
+  --fg: #e8ebed;
+  --muted: #8b939a;
+  --accent: #cdb88e;
+  --accent-ink: #17140e;
+  --font-display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --font-body: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --wrap: 1080px;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg); color: var(--fg);
+  font: 400 16px/1.6 var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap {
+  max-width: var(--wrap); margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+p { margin: 0; }
+a { color: inherit; }
+.label { font: 500 12px/1 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* Шапка */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 14px; }
+.brand { font: 600 15px/1 var(--font-display); letter-spacing: 0.04em; text-decoration: none; }
+.brand span { color: var(--accent); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 22px; border-radius: 999px; border: 0; font: 700 15px/1 var(--font-body); text-decoration: none; cursor: pointer; }
+.btn-main { background: var(--accent); color: var(--accent-ink); }
+.btn-ghost { background: transparent; color: var(--fg); border: 1px solid var(--line); }
+.top .btn { min-height: 40px; padding: 0 16px; font-size: 14px; }
+
+/* Герой */
+.hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
+.hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.hero .wrap { position: relative; padding-block: 72px 56px; display: grid; gap: 22px; }
+.hero h1 { font-size: clamp(34px, 8.5vw, 68px); line-height: 1.04; max-width: 13ch; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+.hero p.lead { color: var(--muted); font-size: 18px; max-width: 34ch; }
+.hero .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 18px; max-width: 520px; }
+.facts div { border-top: 1px solid var(--line); padding-top: 10px; }
+.facts b { display: block; font: 600 22px/1.2 var(--font-display); font-variant-numeric: tabular-nums; }
+.facts small { color: var(--muted); font-size: 13px; line-height: 1.35; display: block; }
+
+section { padding-block: 64px; border-bottom: 1px solid var(--line); }
+.sec-head { display: grid; gap: 10px; margin-bottom: 28px; }
+.sec-head h2 { font-size: clamp(24px, 5.5vw, 38px); line-height: 1.12; }
+.sec-head p { color: var(--muted); max-width: 52ch; }
+
+/* Калькулятор цен */
+.classes { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.chip { min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--fg); font: 500 14px/1 var(--font-body); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.services { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.svc { background: var(--panel); padding: 20px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; align-items: baseline; }
+.svc h3 { font-size: 17px; line-height: 1.3; }
+.svc .price { font: 500 17px/1.3 var(--font-mono); font-variant-numeric: tabular-nums; color: var(--accent); white-space: nowrap; }
+.svc p { grid-column: 1 / -1; color: var(--muted); font-size: 14px; }
+.svc .spec { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px 14px; font: 400 12px/1.4 var(--font-mono); color: var(--muted); }
+.note { color: var(--muted); font-size: 13px; margin-top: 14px; }
+
+/* Этапы */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: s; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 14px; padding-block: 18px; border-top: 1px solid var(--line); }
+.steps li::before { content: counter(s, decimal-leading-zero); font: 500 13px/1.6 var(--font-mono); color: var(--accent); }
+.steps b { display: block; font-weight: 700; }
+.steps span { color: var(--muted); font-size: 15px; }
+
+/* Работы */
+.works { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.work { aspect-ratio: 4 / 5; max-width: 100%; border-radius: 14px; border: 1px dashed var(--line); background: var(--panel); display: grid; place-items: end start; padding: 14px; }
+.work small { color: var(--muted); font: 400 12px/1.4 var(--font-mono); }
+
+/* Запись */
+form { display: grid; gap: 14px; max-width: 560px; }
+.field { display: grid; gap: 6px; }
+.field label { font-size: 14px; color: var(--muted); }
+input, select, textarea { width: 100%; min-height: 50px; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); font: 400 16px/1.4 var(--font-body); }
+textarea { min-height: 90px; resize: vertical; }
+.consent { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: var(--muted); }
+.consent input { width: 20px; min-height: 20px; height: 20px; margin-top: 2px; flex: none; accent-color: var(--accent); }
+.done { border: 1px solid var(--accent); border-radius: 14px; padding: 18px; background: var(--panel); }
+.done b { color: var(--accent); }
+
+/* Контакты */
+.contacts { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.contacts div { display: grid; gap: 6px; }
+.contacts b { font-size: 18px; }
+footer { padding-block: 28px 40px; color: var(--muted); font-size: 13px; }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; }
+
+@media (min-width: 760px) {
+  .services { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .works { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 48px; align-items: start; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top">ГРАФИТ<span>·</span>ДЕТЕЙЛИНГ</a>
+    <a class="btn btn-main" href="#book">Записаться</a>
+  </div>
+</header>
+
+<div class="hero" id="top">
+  <canvas id="gloss" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <span class="label">Детейлинг-студия · Москва, м. Пример</span>
+    <h1>Кузов, который <em>отражает</em> небо</h1>
+    <p class="lead">Полировка, керамика и защитная плёнка. Работаем с одной машиной за раз и показываем замеры лака до и после.</p>
+    <div class="actions">
+      <a class="btn btn-main" href="#book">Записаться на осмотр</a>
+      <a class="btn btn-ghost" href="#prices">Посмотреть цены</a>
+    </div>
+    <div class="facts">
+      <div><b>9H</b><small>твёрдость керамического покрытия</small></div>
+      <div><b>200 мкм</b><small>толщина плёнки PPF</small></div>
+      <div><b>до 5 лет</b><small>гарантия на защиту</small></div>
+    </div>
+  </div>
+</div>
+
+<main>
+  <section id="prices">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="label">Цены</span>
+        <h2>Стоимость зависит от размера машины</h2>
+        <p>Выберите класс автомобиля, и цены пересчитаются. Точную сумму называем после осмотра и замера толщины лака.</p>
+      </div>
+      <div class="classes" role="group" aria-label="Класс автомобиля">
+        <button class="chip" type="button" data-k="1" aria-pressed="true">Седан, хэтчбек</button>
+        <button class="chip" type="button" data-k="1.25" aria-pressed="false">Кроссовер</button>
+        <button class="chip" type="button" data-k="1.5" aria-pressed="false">Внедорожник, минивэн</button>
+      </div>
+      <div class="services" id="services"></div>
+      <p class="note">Цены в шаблоне примерные. Для каждой студии подставляем её собственный прайс.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap split">
+      <div class="sec-head">
+        <span class="label">Как проходит работа</span>
+        <h2>Пять этапов, и каждый можно увидеть</h2>
+        <p>Отправляем фото в Telegram после каждого этапа, так что не нужно ждать в студии.</p>
+      </div>
+      <ol class="steps">
+        <li><div><b>Осмотр и замер ЛКП</b><span>Толщиномером проходим каждую деталь и сразу говорим, сколько лака можно снять.</span></div></li>
+        <li><div><b>Двухфазная мойка</b><span>Бесконтактная пена, затем ручная мойка по методу двух вёдер.</span></div></li>
+        <li><div><b>Деконтаминация</b><span>Очиститель битума и металлических вкраплений, затем глина.</span></div></li>
+        <li><div><b>Полировка</b><span>Абразивная и финишная, под светом 6500 K, чтобы не пропустить голограммы.</span></div></li>
+        <li><div><b>Защита и выдача</b><span>Керамика или плёнка, сутки на полимеризацию, затем повторный замер при вас.</span></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="label">Работы</span>
+        <h2>Фото до и после</h2>
+        <p>Здесь будут фотографии работ студии из её карточки на Яндекс Картах или из соцсетей.</p>
+      </div>
+      <div class="works">
+        <div class="work"><small>Фото 1 · полировка</small></div>
+        <div class="work"><small>Фото 2 · керамика</small></div>
+        <div class="work"><small>Фото 3 · плёнка PPF</small></div>
+        <div class="work"><small>Фото 4 · химчистка</small></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="book">
+    <div class="wrap split">
+      <div class="sec-head">
+        <span class="label">Запись</span>
+        <h2>Запишитесь на бесплатный осмотр</h2>
+        <p>Перезвоним в течение 15 минут в рабочее время и подберём день.</p>
+      </div>
+      <div>
+        <form id="form" novalidate>
+          <div class="field"><label for="f-name">Имя</label><input id="f-name" name="name" autocomplete="name" required></div>
+          <div class="field"><label for="f-phone">Телефон</label><input id="f-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7" required></div>
+          <div class="field"><label for="f-car">Марка и модель</label><input id="f-car" name="car" placeholder="Например, BMW X5"></div>
+          <div class="field"><label for="f-svc">Услуга</label><select id="f-svc" name="svc"></select></div>
+          <label class="consent" for="f-ok"><input id="f-ok" type="checkbox" required> Согласен на обработку персональных данных по 152-ФЗ</label>
+          <button class="btn btn-main" type="submit">Отправить заявку</button>
+          <p id="f-err" class="note" hidden></p>
+        </form>
+        <div id="done" class="done" hidden><b>Заявка принята.</b> Это демо-шаблон, поэтому заявка никуда не ушла. На сайте студии она сразу придёт владельцу в Telegram.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head"><span class="label">Контакты</span><h2>Как нас найти</h2></div>
+      <div class="contacts">
+        <div><span class="label">Адрес</span><b>Москва, ул. Примерная, 1</b><span class="note">Въезд со двора, ворота 2</span></div>
+        <div><span class="label">Телефон</span><b>+7 (900) 000-00-00</b><span class="note">Ежедневно с 9:00 до 21:00</span></div>
+        <div><span class="label">Telegram</span><b>@studio_example</b><span class="note">Фото машины можно прислать сюда</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap"><span>Демо-шаблон сайта для детейлинг-студии</span><span>Политика обработки персональных данных</span></div>
+</footer>
+
+<script>
+(function () {
+  var SERVICES = [
+    { n: "Восстановительная полировка", p: 18000, d: "Убираем царапины, голограммы и следы моек. Снимаем не больше 3–5 мкм лака.", s: ["2–3 дня", "замер до и после"] },
+    { n: "Керамическое покрытие", p: 25000, d: "Два слоя керамики поверх полировки. Грязь и вода скатываются с кузова.", s: ["9H", "гарантия 2 года"] },
+    { n: "Плёнка PPF на зону риска", p: 45000, d: "Капот, бампер, фары и зеркала, то есть всё, куда летят камни.", s: ["200 мкм", "гарантия 5 лет"] },
+    { n: "Полная оклейка PPF", p: 220000, d: "Весь кузов в прозрачной или матовой плёнке. Лак остаётся заводским.", s: ["5–7 дней", "гарантия 5 лет"] },
+    { n: "Химчистка салона", p: 9000, d: "Сиденья, потолок, ковры и багажник. Кожу очищаем и пропитываем кондиционером.", s: ["1 день", "озонирование"] },
+    { n: "Детейлинг-мойка", p: 2500, d: "Ручная мойка в две фазы, дисков и арок, сушка, воск.", s: ["2 часа"] }
+  ];
+  var k = 1;
+  var box = document.getElementById("services");
+  var sel = document.getElementById("f-svc");
+  function rub(v) { return "от " + (Math.round(v / 500) * 500).toLocaleString("ru-RU") + " ₽"; }
+  function render() {
+    box.innerHTML = SERVICES.map(function (x) {
+      return '<div class="svc"><h3>' + x.n + '</h3><span class="price">' + rub(x.p * k) + '</span><p>' + x.d + '</p><div class="spec">' + x.s.map(function (t) { return "<span>" + t + "</span>"; }).join("") + "</div></div>";
+    }).join("");
+  }
+  sel.innerHTML = SERVICES.map(function (x) { return "<option>" + x.n + "</option>"; }).join("") + "<option>Пока не знаю, нужен осмотр</option>";
+  document.querySelectorAll(".chip").forEach(function (b) {
+    b.addEventListener("click", function () {
+      document.querySelectorAll(".chip").forEach(function (o) { o.setAttribute("aria-pressed", o === b ? "true" : "false"); });
+      k = parseFloat(b.dataset.k); render();
+    });
+  });
+  render();
+
+  var form = document.getElementById("form"), err = document.getElementById("f-err");
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = form.name.value.trim(), phone = form.phone.value.replace(/\D/g, "");
+    var msg = !name ? "Укажите имя." : phone.length < 10 ? "Проверьте телефон: нужно 10–11 цифр." : !document.getElementById("f-ok").checked ? "Отметьте согласие на обработку данных." : "";
+    if (msg) { err.textContent = msg; err.hidden = false; return; }
+    err.hidden = true; form.hidden = true; document.getElementById("done").hidden = false;
+  });
+
+  // Блик на «лаке»: полоса света медленно проходит по тёмному кузову, на телефоне следует за пальцем.
+  var c = document.getElementById("gloss"), g = c.getContext("2d");
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var w = 0, h = 0, t = 0.35, target = null;
+  function size() {
+    var r = c.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = r.width; h = r.height; c.width = w * dpr; c.height = h * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0); draw();
+  }
+  function draw() {
+    var base = g.createLinearGradient(0, 0, 0, h);
+    base.addColorStop(0, "#0d0f11"); base.addColorStop(0.55, "#121518"); base.addColorStop(1, "#0d0f11");
+    g.fillStyle = base; g.fillRect(0, 0, w, h);
+    // изгиб кузова
+    g.save();
+    g.beginPath(); g.moveTo(0, h * 0.78);
+    g.bezierCurveTo(w * 0.3, h * 0.6, w * 0.7, h * 0.95, w, h * 0.7);
+    g.lineTo(w, h); g.lineTo(0, h); g.closePath();
+    var body = g.createLinearGradient(0, h * 0.6, 0, h);
+    body.addColorStop(0, "#1a1e22"); body.addColorStop(1, "#0d0f11");
+    g.fillStyle = body; g.fill(); g.clip();
+    var x = t * (w + 600) - 300;
+    var hl = g.createLinearGradient(x - 160, 0, x + 160, h * 0.4);
+    hl.addColorStop(0, "rgba(205,184,142,0)"); hl.addColorStop(0.5, "rgba(232,220,190,0.22)"); hl.addColorStop(1, "rgba(205,184,142,0)");
+    g.fillStyle = hl; g.fillRect(0, 0, w, h);
+    g.restore();
+    // широкий отражённый свет над линией
+    var x2 = (1 - t) * (w + 800) - 400;
+    var sky = g.createRadialGradient(x2, h * 0.1, 0, x2, h * 0.1, Math.max(w, h) * 0.7);
+    sky.addColorStop(0, "rgba(205,184,142,0.10)"); sky.addColorStop(1, "rgba(205,184,142,0)");
+    g.fillStyle = sky; g.fillRect(0, 0, w, h);
+  }
+  function tick() {
+    if (target !== null) t += (target - t) * 0.08; else t = (t + 0.0012) % 1;
+    draw(); requestAnimationFrame(tick);
+  }
+  window.addEventListener("resize", size);
+  c.parentElement.addEventListener("pointermove", function (e) { var r = c.getBoundingClientRect(); target = (e.clientX - r.left) / r.width; });
+  c.parentElement.addEventListener("pointerleave", function () { target = null; });
+  size();
+  if (!reduce) requestAnimationFrame(tick);
+})();
+</script>
