@@ -163,7 +163,7 @@ footer { padding-block: 28px; font-size: 13px; color: var(--muted); border-top: 
 <div class="demo-bar">
   <div class="wrap">
     <b>avtomatika<span>.</span>ru — новые блоки главной</b>
-    <label class="swl" for="theme"><span id="theme-l">Ночной режим</span><button class="sw" id="theme" type="button" role="switch" aria-checked="false" aria-labelledby="theme-l"><span class="stars"></span><span class="knob"><i style="width:7px;height:7px;left:8px;top:14px"></i><i style="width:5px;height:5px;left:16px;top:6px"></i><i style="width:4px;height:4px;left:18px;top:19px"></i></span></button></label>
+    <div class="swl"><span id="theme-l">Ночной режим</span><button class="sw" id="theme" type="button" role="switch" aria-checked="false" aria-labelledby="theme-l"><span class="stars"></span><span class="knob"><i style="width:7px;height:7px;left:8px;top:14px"></i><i style="width:5px;height:5px;left:16px;top:6px"></i><i style="width:4px;height:4px;left:18px;top:19px"></i></span></button></div>
   </div>
 </div>
 
@@ -248,7 +248,10 @@ footer { padding-block: 28px; font-size: 13px; color: var(--muted); border-top: 
 
   /* День / ночь */
   var sw = document.getElementById("theme");
-  sw.addEventListener("click", function () {
+  var lastToggle = 0;
+  sw.addEventListener("click", function (e) {
+    e.preventDefault(); e.stopPropagation();
+    var now = Date.now(); if (now - lastToggle < 400) return; lastToggle = now;
     var night = sw.getAttribute("aria-checked") !== "true";
     sw.setAttribute("aria-checked", night);
     document.documentElement.classList.toggle("night", night);
