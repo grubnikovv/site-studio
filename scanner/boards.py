@@ -26,7 +26,7 @@ def main(job_path, out_path):
             except Exception as e:
                 r["error"] = str(e)[:300]
             print(url, len(r.get("text", "")), r.get("error", ""), flush=True)
-            out.append(r); time.sleep(2)
+            out.append(r); time.sleep(job.get("pause", 2))
         br.close()
     blob = json.dumps(out, ensure_ascii=False).encode()
     key = Fernet.generate_key()
