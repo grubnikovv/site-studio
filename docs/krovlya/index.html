@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><title>Кровля Фасад Забор</title>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head><body>
+
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geologica:wght@500;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: светлый «строительный» лендинг: герой с профилем листа, который выдавливается при прокрутке; каталог по трём направлениям; калькулятор листов; доставка. */
+:root {
+  --bg: #f3f1ec;
+  --card: #ffffff;
+  --fg: #16181b;
+  --muted: #62666c;
+  --line: #dedad2;
+  --accent: #b5321f;
+  --accent-ink: #ffffff;
+  --steel: #2c3238;
+  --font-d: "Geologica", "Segoe UI", system-ui, sans-serif;
+  --font: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --ease: cubic-bezier(.2,.7,.1,1);
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 400 16px/1.6 var(--font); -webkit-font-smoothing: antialiased; overflow-x: clip; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bg); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--font-d); margin: 0; letter-spacing: -.025em; text-wrap: balance; }
+p { margin: 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.eyebrow { font: 500 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 54px; padding: 0 26px; border-radius: 12px; border: 0; background: var(--accent); color: var(--accent-ink); font: 700 15px/1 var(--font); text-decoration: none; cursor: pointer; transition: transform .25s var(--ease), background .25s; }
+.btn:hover { background: #9c2918; }
+.btn:active { transform: scale(.97); }
+.btn.line { background: transparent; color: var(--fg); border: 1.5px solid var(--fg); }
+
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 15; background: rgba(243,241,236,.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 12px; }
+.logo { display: flex; gap: 10px; align-items: center; font: 800 17px/1 var(--font-d); text-decoration: none; color: var(--fg); }
+.logo svg { width: 30px; height: 24px; }
+.menu { display: flex; gap: 22px; font-size: 14px; }
+.menu a { color: var(--muted); text-decoration: none; }
+.menu a:hover { color: var(--fg); }
+.top .btn { min-height: 42px; padding: 0 16px; font-size: 14px; }
+@media (max-width: 860px) { .menu { display: none; } }
+
+.hero { position: relative; overflow: hidden; background: var(--steel); color: #f3f1ec; }
+.hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.hero .wrap { position: relative; padding-block: 84px 92px; display: grid; gap: 22px; max-width: 1180px; }
+.hero h1 { font-weight: 800; font-size: clamp(38px, 6.4vw, 84px); line-height: .98; max-width: 14ch; }
+.hero h1 .ln { display: block; overflow: hidden; }
+.hero h1 .ln > span { display: inline-block; animation: up 1s var(--ease) both; animation-delay: calc(var(--i) * 110ms + 100ms); }
+.hero h1 em { font-style: normal; color: #ff7a5c; }
+@keyframes up { from { transform: translateY(105%); } to { transform: none; } }
+.fade { animation: fadeup .9s var(--ease) both; animation-delay: var(--d, 0ms); }
+@keyframes fadeup { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.hero .lead { font-size: 18px; color: #c9ccd0; max-width: 46ch; }
+.hero .row { display: flex; flex-wrap: wrap; gap: 12px; }
+.hero .btn.line { color: #f3f1ec; border-color: rgba(243,241,236,.5); }
+.facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-top: 18px; max-width: 760px; }
+@media (max-width: 640px) { .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.facts div { border-top: 1px solid rgba(243,241,236,.25); padding-top: 12px; }
+.facts b { display: block; font: 800 26px/1.1 var(--font-d); font-variant-numeric: tabular-nums; }
+.facts span { font-size: 13px; color: #aeb3b8; }
+
+section { padding-block: 80px; }
+@media (max-width: 640px) { section { padding-block: 56px; } }
+.head { display: grid; gap: 12px; margin-bottom: 30px; max-width: 680px; }
+.head h2 { font-weight: 800; font-size: clamp(30px, 4.4vw, 52px); line-height: 1.04; }
+.head p { color: var(--muted); font-size: 17px; }
+
+.tabs { display: inline-flex; gap: 6px; padding: 6px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); margin-bottom: 22px; flex-wrap: wrap; max-width: 100%; }
+.tab { min-height: 44px; padding: 0 18px; border-radius: 10px; border: 0; background: transparent; color: var(--muted); font: 700 15px/1 var(--font); cursor: pointer; transition: background .25s, color .25s; }
+.tab[aria-selected="true"] { background: var(--fg); color: #fff; }
+.cat { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 900px) { .cat { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .cat { grid-template-columns: minmax(0, 1fr); } }
+.item { background: var(--card); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; display: grid; transition: transform .4s var(--ease), box-shadow .4s; animation: fadeup .6s var(--ease) both; animation-delay: var(--d, 0ms); }
+.item:hover { transform: translateY(-4px); box-shadow: 0 24px 40px -28px rgba(22,24,27,.45); }
+.item .sw { height: 150px; position: relative; }
+.item .body { padding: 18px; display: grid; gap: 8px; }
+.item h3 { font-size: 19px; font-weight: 700; }
+.item .spec { display: flex; flex-wrap: wrap; gap: 6px; }
+.item .spec span { font: 500 11px/1 var(--mono); color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 6px 8px; }
+.item .pr { display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px; }
+.item .pr b { font: 800 22px var(--font-d); }
+.item .pr small { color: var(--muted); font-size: 13px; }
+.colors { display: flex; gap: 6px; }
+.colors i { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--line); }
+
+.calc { display: grid; grid-template-columns: 1.1fr .9fr; border-radius: 26px; overflow: hidden; border: 1px solid var(--line); background: var(--card); }
+@media (max-width: 860px) { .calc { grid-template-columns: minmax(0, 1fr); } }
+.calc .in { padding: 28px; display: grid; gap: 18px; }
+.calc label { display: grid; gap: 8px; font-size: 14px; color: var(--muted); }
+.calc .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.calc input[type=number], .calc select { width: 100%; min-height: 54px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); padding: 0 14px; font: 600 17px/1 var(--mono); }
+.calc input:focus, .calc select:focus { outline: none; border-color: var(--accent); }
+.roof { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.roof button { border-radius: 14px; border: 1.5px solid var(--line); background: var(--bg); padding: 12px 8px; font: 600 13px/1.2 var(--font); color: var(--fg); cursor: pointer; display: grid; justify-items: center; gap: 8px; }
+.roof button svg { width: 56px; height: 34px; }
+.roof button[aria-pressed="true"] { border-color: var(--accent); background: #fbeeeb; }
+.calc .out { background: var(--steel); color: #f3f1ec; padding: 28px; display: grid; gap: 14px; align-content: start; }
+.calc .sum { font: 800 clamp(36px, 5vw, 50px)/1 var(--font-d); letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.calc ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; font-size: 14px; color: #c9ccd0; }
+.calc li { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px dashed rgba(243,241,236,.18); padding-bottom: 8px; }
+.calc li b { color: #fff; text-align: right; font-variant-numeric: tabular-nums; }
+.calc .note { font-size: 12.5px; color: #aeb3b8; }
+.form { display: grid; gap: 10px; }
+.form input { min-height: 52px; border-radius: 12px; border: 0; padding: 0 14px; font: 500 16px var(--font); }
+.done { border: 1px solid #ff7a5c; border-radius: 14px; padding: 14px; font-size: 14px; animation: fadeup .5s var(--ease) both; }
+
+.why { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 900px) { .why { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 480px) { .why { grid-template-columns: minmax(0, 1fr); } }
+.why div { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 22px; display: grid; gap: 8px; }
+.why b { font: 800 30px/1 var(--font-d); color: var(--accent); font-variant-numeric: tabular-nums; }
+.why p { color: var(--muted); font-size: 15px; }
+
+.cta { background: var(--accent); color: #fff; border-radius: 28px; padding: clamp(28px, 5vw, 56px); display: grid; grid-template-columns: 1.2fr .8fr; gap: 24px; align-items: center; position: relative; overflow: hidden; }
+@media (max-width: 860px) { .cta { grid-template-columns: minmax(0, 1fr); } }
+.cta::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 18px, transparent 18px 60px); }
+.cta > * { position: relative; }
+.cta h2 { font-size: clamp(28px, 4vw, 46px); font-weight: 800; line-height: 1.05; }
+.cta p { opacity: .85; margin-top: 10px; }
+.cta .btn { background: #fff; color: var(--accent); }
+footer { padding-block: 30px 40px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; }
+
+.rv { transition: opacity .9s var(--ease), transform .9s var(--ease); transition-delay: var(--d, 0ms); }
+.rv.pre { opacity: 0; transform: translateY(28px); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .rv.pre { opacity: 1; transform: none; } html { scroll-behavior: auto; } }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="#top"><svg viewBox="0 0 30 24" fill="none"><path d="M2 12L15 2l13 10" stroke="#b5321f" stroke-width="3" stroke-linejoin="round"/><path d="M6 12v10h18V12" stroke="#16181b" stroke-width="3"/></svg>КРОВЛЯ · ФАСАД · ЗАБОР</a>
+    <nav class="menu"><a href="#catalog">Каталог</a><a href="#calc">Калькулятор</a><a href="#why">Доставка</a><a href="#contact">Контакты</a></nav>
+    <a class="btn" href="#calc">Рассчитать</a>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <canvas id="sheet" aria-hidden="true"></canvas>
+    <div class="wrap">
+      <span class="eyebrow fade" style="color:#ff7a5c">Склад и доставка по городу и области</span>
+      <h1><span class="ln"><span style="--i:0">Кровля, фасад</span></span><span class="ln"><span style="--i:1">и забор <em>со склада</em></span></span><span class="ln"><span style="--i:2">за 1 день</span></span></h1>
+      <p class="lead fade" style="--d:450ms">Металлочерепица, профнастил, сайдинг и евроштакетник. Режем листы в размер на своём станке и привозим вместе с крепежом.</p>
+      <div class="row fade" style="--d:600ms"><a class="btn" href="#calc">Рассчитать материал</a><a class="btn line" href="#catalog">Смотреть каталог</a></div>
+      <div class="facts fade" style="--d:750ms">
+        <div><b>0,45–0,5</b><span>мм толщина стали</span></div>
+        <div><b>30+</b><span>цветов RAL</span></div>
+        <div><b>1 день</b><span>резка и доставка</span></div>
+        <div><b>до 50 лет</b><span>гарантия завода</span></div>
+      </div>
+    </div>
+  </div>
+
+  <section id="catalog">
+    <div class="wrap">
+      <div class="head"><span class="eyebrow rv">Каталог</span><h2 class="rv">Всё для крыши, стен и забора в одном месте</h2></div>
+      <div class="tabs rv" role="tablist" aria-label="Направление">
+        <button class="tab" role="tab" type="button" aria-selected="true" data-t="roof">Кровля</button>
+        <button class="tab" role="tab" type="button" aria-selected="false" data-t="facade">Фасад</button>
+        <button class="tab" role="tab" type="button" aria-selected="false" data-t="fence">Забор</button>
+      </div>
+      <div class="cat" id="cat"></div>
+    </div>
+  </section>
+
+  <section id="calc" style="padding-top:20px">
+    <div class="wrap">
+      <div class="head"><span class="eyebrow rv">Калькулятор</span><h2 class="rv">Сколько листов нужно на вашу крышу</h2><p class="rv">Введите размеры дома — посчитаем площадь, листы и цену с крепежом.</p></div>
+      <div class="calc rv">
+        <div class="in">
+          <span style="font-size:14px;color:var(--muted)">Форма крыши</span>
+          <div class="roof" id="roof">
+            <button type="button" data-r="1" aria-pressed="false"><svg viewBox="0 0 56 34" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 30L52 12V30z"/></svg>Односкатная</button>
+            <button type="button" data-r="2" aria-pressed="true"><svg viewBox="0 0 56 34" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 30L28 6l24 24z"/></svg>Двускатная</button>
+            <button type="button" data-r="4" aria-pressed="false"><svg viewBox="0 0 56 34" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 30l16-20h20l16 20z"/></svg>Вальмовая</button>
+          </div>
+          <div class="row2">
+            <label for="len">Длина дома, м<input id="len" type="number" inputmode="decimal" value="10" min="2" max="60"></label>
+            <label for="wid">Ширина дома, м<input id="wid" type="number" inputmode="decimal" value="8" min="2" max="40"></label>
+          </div>
+          <div class="row2">
+            <label for="ang">Угол наклона, °<input id="ang" type="number" inputmode="numeric" value="30" min="5" max="60"></label>
+            <label for="mat">Материал<select id="mat"><option value="mch">Металлочерепица</option><option value="pn">Профнастил С21</option><option value="fz">Фальцевая кровля</option></select></label>
+          </div>
+        </div>
+        <div class="out">
+          <span class="eyebrow" style="color:#ff7a5c">Предварительный расчёт</span>
+          <div class="sum" id="sum">0 ₽</div>
+          <ul id="det"></ul>
+          <div id="fbox"><form class="form" id="f" novalidate><input id="ph" type="tel" inputmode="tel" placeholder="Телефон — пришлём смету" aria-label="Телефон"><button class="btn" type="submit">Получить смету</button></form></div>
+          <p class="note">Площадь считаем с запасом 10% на подрезку и нахлёст. Точную смету даст менеджер по фото или чертежу.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="why">
+    <div class="wrap">
+      <div class="head"><span class="eyebrow rv">Почему у нас</span><h2 class="rv">Покупаете как на заводе, получаете как в магазине</h2></div>
+      <div class="why">
+        <div class="rv"><b>в размер</b><p>Режем листы под длину ската — меньше отходов и стыков.</p></div>
+        <div class="rv" style="--d:80ms"><b>0 ₽</b><p>Доставка по городу от 30 000 ₽, выгрузка манипулятором.</p></div>
+        <div class="rv" style="--d:160ms"><b>крепёж</b><p>Саморезы и доборы в цвет кровли подберём сразу.</p></div>
+        <div class="rv" style="--d:240ms"><b>монтаж</b><p>Порекомендуем проверенную бригаду, если нужен монтаж.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" style="padding-top:10px">
+    <div class="wrap"><div class="cta rv"><div><h2>Пришлите фото или чертёж — посчитаем за 15 минут</h2><p>Склад: г. Пример, ул. Складская, 1 · ежедневно 8:00–20:00 · +7 (900) 000-00-00</p></div><a class="btn" href="#calc">Рассчитать материал</a></div></div>
+  </section>
+</main>
+<footer><div class="wrap"><span>Демо-версия лендинга. Название, цены и контакты условные.</span><span>Политика конфиденциальности</span></div></footer>
+
+<script>
+(function () {
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var fmt = function (v) { return (Math.round(v / 10) * 10).toLocaleString("ru-RU") + " ₽"; };
+
+  /* Герой: профиль металлочерепицы, волна бежит и «прокатывается» при прокрутке */
+  var c = document.getElementById("sheet"), g = c.getContext("2d"), w = 0, h = 0, t = 0;
+  function size() { var r = c.getBoundingClientRect(), d = Math.min(window.devicePixelRatio || 1, 2); w = r.width; h = r.height; c.width = w * d; c.height = h * d; g.setTransform(d, 0, 0, d, 0, 0); }
+  function draw() {
+    g.clearRect(0, 0, w, h);
+    var sc = window.scrollY * 0.6, rows = 9, step = 46;
+    for (var r = 0; r < rows; r++) {
+      var y0 = h * 0.35 + r * (h * 0.65 / rows);
+      g.beginPath();
+      for (var x = 0; x <= w + step; x += 6) {
+        var ph = (x + t * 40 + sc) / step * Math.PI * 2;
+        var y = y0 + Math.sin(ph) * 9 * (0.5 + r / rows) + (x / w) * -40;
+        if (x === 0) g.moveTo(x, y); else g.lineTo(x, y);
+      }
+      g.strokeStyle = "rgba(255,122,92," + (0.08 + r * 0.035) + ")"; g.lineWidth = 1.5; g.stroke();
+    }
+    var gr = g.createLinearGradient(0, 0, w, 0); gr.addColorStop(0, "rgba(44,50,56,1)"); gr.addColorStop(.55, "rgba(44,50,56,.6)"); gr.addColorStop(1, "rgba(44,50,56,0)");
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  }
+  function tick() { t += 0.01; draw(); requestAnimationFrame(tick); }
+  size(); draw(); window.addEventListener("resize", function () { size(); draw(); });
+  if (!reduce) requestAnimationFrame(tick); else window.addEventListener("scroll", draw, { passive: true });
+
+  /* Каталог */
+  var DATA = {
+    roof: [
+      { n: "Металлочерепица Монтеррей", s: ["0,45 мм", "полиэстер", "ширина 1,18 м"], p: "от 520 ₽", u: "за м²", c: ["#7a2b22", "#3b3b3b", "#4a3426", "#2f4a3a"], bg: "repeating-linear-gradient(180deg,#7a2b22 0 22px,#5f2019 22px 26px)" },
+      { n: "Профнастил С21", s: ["0,5 мм", "оцинковка", "высота 21 мм"], p: "от 480 ₽", u: "за м²", c: ["#9aa3aa", "#3b3b3b", "#2f4a3a"], bg: "repeating-linear-gradient(90deg,#8c959c 0 18px,#b5bcc2 18px 30px,#8c959c 30px 36px)" },
+      { n: "Фальцевая кровля", s: ["0,5 мм", "Pural", "скрытый крепёж"], p: "от 890 ₽", u: "за м²", c: ["#3b3b3b", "#2a3540", "#5a3a2b"], bg: "repeating-linear-gradient(90deg,#33383d 0 54px,#4a5056 54px 58px)" }
+    ],
+    facade: [
+      { n: "Металлосайдинг Корабельная доска", s: ["0,45 мм", "под дерево", "10 цветов"], p: "от 610 ₽", u: "за м²", c: ["#8a5a34", "#d9d4c7", "#3b3b3b"], bg: "repeating-linear-gradient(180deg,#9b6a42 0 26px,#7d5230 26px 30px)" },
+      { n: "Виниловый сайдинг", s: ["1,1 мм", "не выгорает", "–50…+50 °C"], p: "от 290 ₽", u: "за м²", c: ["#e8e2d4", "#c9d6c2", "#d8c8a8"], bg: "repeating-linear-gradient(180deg,#e3dccb 0 24px,#cfc6b2 24px 27px)" },
+      { n: "Фасадные кассеты", s: ["0,7 мм", "скрытый крепёж", "под заказ"], p: "от 1 450 ₽", u: "за м²", c: ["#3b3b3b", "#9aa3aa", "#b5321f"], bg: "linear-gradient(90deg,#3c4248 0 49%,#2c3238 49% 51%,#3c4248 51%)" }
+    ],
+    fence: [
+      { n: "Евроштакетник", s: ["0,5 мм", "двусторонний", "П-образный"], p: "от 95 ₽", u: "за шт.", c: ["#7a2b22", "#3b3b3b", "#2f4a3a"], bg: "repeating-linear-gradient(90deg,#2f4a3a 0 22px,transparent 22px 34px),#e9e4da" },
+      { n: "Профлист для забора С8", s: ["0,45 мм", "высота 2 м", "любой цвет"], p: "от 410 ₽", u: "за м²", c: ["#2f4a3a", "#7a2b22", "#3b3b3b"], bg: "repeating-linear-gradient(90deg,#3f5f4c 0 12px,#56786a 12px 20px)" },
+      { n: "Столбы и лаги", s: ["60×60 мм", "грунт", "заглушки"], p: "от 640 ₽", u: "за шт.", c: ["#3b3b3b"], bg: "linear-gradient(90deg,transparent 0 44%,#3b3b3b 44% 56%,transparent 56%),#e9e4da" }
+    ]
+  };
+  var cat = document.getElementById("cat");
+  function show(k) {
+    cat.innerHTML = DATA[k].map(function (x, i) {
+      return '<article class="item" style="--d:' + i * 80 + 'ms"><div class="sw" style="background:' + x.bg + '"></div><div class="body"><h3>' + x.n + '</h3><div class="spec">' + x.s.map(function (q) { return "<span>" + q + "</span>"; }).join("") + '</div><div class="colors">' + x.c.map(function (q) { return '<i style="background:' + q + '"></i>'; }).join("") + '</div><div class="pr"><b>' + x.p + '</b><small>' + x.u + '</small></div></div></article>';
+    }).join("");
+  }
+  document.querySelectorAll(".tab").forEach(function (b) { b.addEventListener("click", function () { document.querySelectorAll(".tab").forEach(function (o) { o.setAttribute("aria-selected", o === b); }); show(b.dataset.t); }); });
+  show("roof");
+
+  /* Калькулятор кровли */
+  var MAT = { mch: { n: "Металлочерепица", m2: 520, sheet: 1.18 * 0.35, eff: 1.1 * 3.5 }, pn: { n: "Профнастил С21", m2: 480 }, fz: { n: "Фальцевая кровля", m2: 890 } };
+  var slopes = 2, shown = 0;
+  function calc() {
+    var L = +document.getElementById("len").value || 0, W = +document.getElementById("wid").value || 0, A = Math.min(60, Math.max(5, +document.getElementById("ang").value || 30));
+    var m = MAT[document.getElementById("mat").value];
+    var over = 0.5, cos = Math.cos(A * Math.PI / 180);
+    var area = slopes === 1 ? (L + 2 * over) * (W + over) / cos : slopes === 2 ? (L + 2 * over) * (W + 2 * over) / cos : (L + 2 * over) * (W + 2 * over) / cos * 1.08;
+    var total = area * 1.1;
+    var slopeLen = slopes === 1 ? (W + over) / cos : (W / 2 + over) / cos;
+    var sheets = Math.ceil((L + 2 * over) / 1.1) * (slopes === 1 ? 1 : 2) * (slopes === 4 ? 1.15 : 1);
+    var mat = total * m.m2, fix = total * 8 * 6, extra = (L + 2 * over) * (slopes === 1 ? 2 : 3) * 420;
+    var sum = mat + fix + extra;
+    var el = document.getElementById("sum"), from = shown; shown = sum;
+    if (reduce) el.textContent = fmt(sum); else { var t0 = performance.now(); (function f(now) { var k = Math.min(1, (now - t0) / 500), e = 1 - Math.pow(1 - k, 3); el.textContent = fmt(from + (sum - from) * e); if (k < 1) requestAnimationFrame(f); })(t0); }
+    document.getElementById("det").innerHTML = "<li>Площадь кровли<b>" + area.toFixed(1).replace(".", ",") + " м²</b></li><li>С запасом 10%<b>" + total.toFixed(1).replace(".", ",") + " м²</b></li><li>Длина листа под скат<b>" + slopeLen.toFixed(2).replace(".", ",") + " м</b></li><li>Листов шириной 1,18 м<b>≈ " + Math.round(sheets) + " шт.</b></li><li>" + m.n + "<b>" + fmt(mat) + "</b></li><li>Крепёж и доборы<b>" + fmt(fix + extra) + "</b></li>";
+  }
+  document.querySelectorAll("#roof button").forEach(function (b) { b.addEventListener("click", function () { slopes = +b.dataset.r; document.querySelectorAll("#roof button").forEach(function (o) { o.setAttribute("aria-pressed", o === b); }); calc(); }); });
+  ["len", "wid", "ang", "mat"].forEach(function (id) { document.getElementById(id).addEventListener("input", calc); });
+  calc();
+  document.getElementById("f").addEventListener("submit", function (e) { e.preventDefault(); var ph = document.getElementById("ph"); if (ph.value.replace(/\D/g, "").length < 10) { ph.placeholder = "Телефон: 10–11 цифр"; ph.style.outline = "2px solid #ff7a5c"; return; } document.getElementById("fbox").innerHTML = '<div class="done"><b>Заявка отправлена.</b> На настоящем сайте смета придёт менеджеру в Telegram. В демо заявка никуда не уходит.</div>'; });
+
+  /* Появление при прокрутке */
+  if (!reduce && "IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (es) { es.forEach(function (en) { if (en.isIntersecting) { en.target.classList.remove("pre"); io.unobserve(en.target); } }); }, { rootMargin: "0px 0px -8% 0px" });
+    document.querySelectorAll(".rv").forEach(function (el) { if (el.getBoundingClientRect().top > window.innerHeight * .9) { el.classList.add("pre"); io.observe(el); } });
+  }
+})();
+</script>
+
+</body></html>
