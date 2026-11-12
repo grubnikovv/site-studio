@@ -1,0 +1,46 @@
+name: Проверка сайтов компаний
+
+# Запускается, когда в ветку добавляют файл задания jobs/*.json.
+on:
+  push:
+    paths:
+      - "jobs/*.json"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: scan-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Установка
+        run: |
+          pip install playwright==1.47.0 cryptography requests
+          python -m playwright install --with-deps chromium
+      - name: Проверка
+        run: |
+          mkdir -p results
+          for f in $(git diff --name-only HEAD~1 HEAD -- 'jobs/*.json'); do
+            [ -f "$f" ] || continue
+            n=$(basename "$f" .json)
+            DEBUG=$(python -c "import json;print('1' if json.load(open('$f')).get('debug') else '0')") \
+              python scanner/scan.py "$f" "results/$n.enc.json"
+          done
+      - name: Сохранение результата
+        run: |
+          git config user.name "scan-bot"
+          git config user.email "scan-bot@users.noreply.github.com"
+          git add results
+          git diff --cached --quiet || (git commit -m "Результаты проверки" && git pull --rebase && git push)

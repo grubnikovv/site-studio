@@ -1,0 +1,18 @@
+{
+ "name": "debug1",
+ "debug": true,
+ "leads": [
+  {
+   "id": "l01",
+   "name": "Baza Detailing",
+   "address": "Москва, 1-я ул. Бухвостова, 1",
+   "phone": "+7 925 122 35 22"
+  },
+  {
+   "id": "x_has",
+   "name": "Detailing Room",
+   "address": "",
+   "phone": ""
+  }
+ ]
+}
