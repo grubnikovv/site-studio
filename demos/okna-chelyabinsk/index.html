@@ -72,9 +72,10 @@ a { color: inherit; }
 
 /* Герой: окно с инеем */
 .hero { position: relative; overflow: hidden; }
-.hero .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; padding-block: 56px 72px; }
+.hero .wrap { display: grid; grid-template-columns: 1.05fr .95fr; gap: 56px; align-items: center; padding-block: 48px 64px; }
 @media (max-width: 900px) { .hero .wrap { grid-template-columns: 1fr; gap: 32px; padding-block: 28px 48px; } }
-.hero h1 { font-weight: 800; font-size: clamp(40px, 6.4vw, 84px); line-height: .98; margin: 18px 0 22px; }
+.hero h1 { font-weight: 800; font-size: clamp(38px, 5vw, 76px); line-height: 1; margin: 18px 0 22px; }
+.hero h1 .ln { white-space: nowrap; }
 .hero h1 .ln { display: block; overflow: hidden; padding-bottom: .04em; }
 .hero h1 .ln > span { display: inline-block; animation: up 1.1s var(--ease) both; animation-delay: calc(var(--i) * 110ms + 100ms); }
 .hero h1 .ice { color: var(--ice); }
@@ -96,6 +97,49 @@ a { color: inherit; }
 .window .sill { position: absolute; left: -22px; right: -22px; bottom: -20px; height: 22px; border-radius: 4px; background: linear-gradient(180deg, #f5f6f7, #cdd3d8); box-shadow: 0 18px 30px -10px rgba(0,0,0,.6); }
 .window .hint { position: absolute; z-index: 3; left: 50%; bottom: 26px; transform: translateX(-50%); font: 500 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: #3a4652; background: rgba(255,255,255,.75); padding: 8px 12px; border-radius: 999px; white-space: nowrap; transition: opacity .5s; }
 
+.offer { display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px 8px 10px; border-radius: 999px; background: rgba(255,179,92,.1); border: 1px solid rgba(255,179,92,.35); font-size: 14px; color: var(--fg); }
+.offer .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warm); box-shadow: 0 0 0 0 rgba(255,179,92,.7); animation: ping 1.8s infinite; }
+@keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(255,179,92,.7); } 80%, 100% { box-shadow: 0 0 0 10px rgba(255,179,92,0); } }
+.offer b { color: var(--warm); }
+.anchor { display: flex; align-items: baseline; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+.anchor .from { font: 800 34px/1 var(--font-d); letter-spacing: -.02em; }
+.anchor .was { color: var(--muted); text-decoration: line-through; font-size: 16px; }
+.anchor small { color: var(--muted); font-size: 14px; width: 100%; }
+
+/* Плитки акций */
+.bento { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: minmax(180px, auto); gap: 14px; }
+.tile { position: relative; overflow: hidden; border-radius: 26px; padding: 24px; border: 1px solid var(--line); background: var(--panel); display: grid; align-content: space-between; gap: 14px; isolation: isolate; transition: transform .5s var(--ease), border-color .3s; }
+.tile::before { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(320px circle at var(--mx, 50%) var(--my, -40%), rgba(255,255,255,.08), transparent 60%); }
+.tile:hover { transform: translateY(-4px); border-color: #3a4a59; }
+.tile .k { font: 500 12px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.tile b { font: 800 clamp(28px, 3vw, 40px)/1 var(--font-d); letter-spacing: -.03em; display: block; }
+.tile p { color: var(--muted); font-size: 15px; }
+.t-big { grid-column: span 2; grid-row: span 2; background: radial-gradient(120% 100% at 100% 0%, #ffcf8f 0%, #ffb35c 35%, #e2752c 100%); color: var(--warm-ink); border: 0; }
+.t-big .k, .t-big p { color: rgba(28,18,6,.7); }
+.t-big b { font-size: clamp(52px, 7vw, 104px); line-height: .9; }
+.t-big .btn { background: var(--warm-ink); color: #fff; justify-self: start; }
+.t-wide { grid-column: span 2; }
+.t-cta { background: linear-gradient(120deg, #13202c, #1b2a38); border-color: #2d4153; }
+.t-cta b { font-size: clamp(22px, 2.2vw, 30px); line-height: 1.15; }
+.cd { display: flex; gap: 8px; }
+.cd div { background: rgba(28,18,6,.12); border-radius: 14px; padding: 10px 12px; min-width: 64px; text-align: center; }
+.cd span { display: block; font: 800 30px/1 var(--font-d); font-variant-numeric: tabular-nums; }
+.cd small { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; opacity: .7; }
+.t-blue { background: linear-gradient(150deg, #1f3b57, #121d29); }
+.t-blue b { color: var(--ice); }
+.noise { display: grid; gap: 12px; }
+.nb { display: grid; grid-template-columns: 116px minmax(0, 1fr) 60px; gap: 12px; align-items: center; font-size: 13px; color: var(--muted); }
+.nb .bar { height: 10px; border-radius: 5px; background: var(--line); overflow: hidden; }
+.nb .bar i { display: block; height: 100%; width: 0; border-radius: 5px; transition: width 1.4s var(--ease); }
+.nb .v { font: 600 14px var(--mono); color: var(--fg); text-align: right; font-variant-numeric: tabular-nums; }
+@media (max-width: 1000px) { .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .bento { grid-template-columns: minmax(0, 1fr); } .t-big, .t-wide { grid-column: auto; grid-row: auto; } .t-big { min-height: 380px; } .nb { grid-template-columns: 96px minmax(0, 1fr) 54px; } .cd div { min-width: 0; flex: 1; padding: 10px 6px; } }
+
+.how { display: grid; grid-template-columns: .8fr 1.2fr; gap: 56px; align-items: start; }
+.how .head { position: sticky; top: 110px; }
+.how .head h2 { font-size: clamp(30px, 3.4vw, 44px); }
+@media (max-width: 900px) { .how { grid-template-columns: minmax(0, 1fr); gap: 0; } .how .head { position: static; } }
+
 /* Бегущая строка профилей */
 .marquee { border-block: 1px solid var(--line); overflow: hidden; white-space: nowrap; padding-block: 20px; }
 .marquee .row { display: inline-flex; gap: 40px; align-items: center; font: 700 clamp(26px, 5vw, 48px)/1 var(--font-d); letter-spacing: -.02em; will-change: transform; }
@@ -103,16 +147,17 @@ a { color: inherit; }
 .marquee .row i { width: 10px; height: 10px; border-radius: 50%; background: var(--warm); display: inline-block; }
 
 section { padding-block: 84px; }
+@media (max-width: 600px) { section { padding-block: 60px; } .head h2 { font-size: 30px; } }
 .head { display: grid; gap: 12px; margin-bottom: 34px; max-width: 700px; }
 .head h2 { font-weight: 700; font-size: clamp(30px, 4.6vw, 54px); line-height: 1.04; }
 .head p { color: var(--muted); font-size: 17px; }
 
 /* Разрез профиля — липкая сцена */
-.cut { position: relative; height: 300vh; }
+.cut { position: relative; height: 200vh; background: radial-gradient(60% 50% at 30% 55%, rgba(255,179,92,.08), transparent 70%), radial-gradient(50% 40% at 70% 40%, rgba(159,211,255,.06), transparent 70%); }
 .cut .stick { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 72px); height: calc(100vh - 72px - env(safe-area-inset-top, 0px)); min-height: 560px; display: grid; align-items: center; }
-.cut .wrap { display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; width: 100%; }
-@media (max-width: 900px) { .cut .wrap { grid-template-columns: 1fr; gap: 18px; } .cut .stick { min-height: 600px; } }
-.cut svg { width: 100%; max-height: 52vh; height: auto; display: block; }
+.cut .wrap { display: grid; grid-template-columns: 1.35fr .65fr; gap: 56px; align-items: center; width: 100%; }
+@media (max-width: 900px) { .cut .wrap { grid-template-columns: minmax(0, 1fr); gap: 14px; } .cut .stick { min-height: 600px; } .cut .big { font-size: 72px; } }
+.cut svg { width: 100%; max-height: 70vh; height: auto; display: block; filter: drop-shadow(0 30px 60px rgba(0,0,0,.45)); }
 .cut .chamber { fill: var(--panel); stroke: var(--line); stroke-width: 2; transition: fill .5s var(--ease), stroke .5s; }
 .cut .chamber.on { fill: url(#heat); stroke: var(--warm); }
 .cut .wall { fill: #dfe5ea; }
@@ -124,7 +169,7 @@ section { padding-block: 84px; }
 .cut .txt b { color: var(--fg); }
 .thermo { height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--ice), #6d7d8c 45%, var(--warm)); position: relative; margin-top: 22px; max-width: 420px; }
 .thermo i { position: absolute; top: 50%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; background: var(--fg); box-shadow: 0 0 0 4px var(--bg); left: 0; }
-.thermo-l { display: flex; justify-content: space-between; max-width: 420px; font: 500 12px var(--mono); color: var(--muted); margin-top: 10px; }
+.thermo-l { display: flex; justify-content: space-between; max-width: 420px; white-space: nowrap; font: 500 12px var(--mono); color: var(--muted); margin-top: 10px; }
 
 /* Горизонтальная лента услуг */
 .hscroll { position: relative; height: 260vh; }
@@ -147,13 +192,13 @@ section { padding-block: 84px; }
 /* Калькулятор */
 .calc { border: 1px solid var(--line); border-radius: 28px; overflow: hidden; display: grid; grid-template-columns: 1.3fr .7fr; background: var(--bg2); }
 @media (max-width: 900px) { .calc { grid-template-columns: 1fr; } }
-.q { padding: 30px; display: grid; gap: 20px; min-width: 0; }
+.q { padding: 30px; display: grid; gap: 20px; min-width: 0; grid-template-rows: auto 1fr auto; }
 .steps { display: flex; gap: 6px; }
 .steps i { flex: 1; height: 3px; border-radius: 2px; background: var(--line); overflow: hidden; position: relative; }
 .steps i::after { content: ""; position: absolute; inset: 0; background: var(--warm); transform: scaleX(0); transform-origin: 0 50%; transition: transform .5s var(--ease); }
 .steps i.on::after { transform: none; }
 .q h3 { font-size: 24px; font-weight: 700; }
-.q .sub { color: var(--muted); font-size: 14px; margin-top: -12px; }
+.q .sub { color: var(--muted); font-size: 14px; margin-top: 6px; }
 .opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
 .opt { text-align: left; border-radius: 16px; border: 1px solid var(--line); background: var(--panel); color: var(--fg); padding: 16px; cursor: pointer; font: 600 15px/1.25 var(--font); display: grid; gap: 8px; transition: border-color .25s, transform .25s var(--ease); }
 .opt:hover { transform: translateY(-2px); }
@@ -167,7 +212,8 @@ section { padding-block: 84px; }
 .dims input:focus { outline: none; border-color: var(--warm); }
 .toggle { display: flex; gap: 10px; align-items: center; font-size: 15px; cursor: pointer; }
 .toggle input { width: 22px; height: 22px; accent-color: var(--warm); }
-.nav-q { display: flex; gap: 10px; justify-content: space-between; }
+.nav-q { display: flex; gap: 10px; justify-content: space-between; align-items: center; }
+.nav-q .btn { height: 54px; flex: 0 0 auto; }
 .res { background: linear-gradient(170deg, #1a1409, #0f0c07); border-left: 1px solid var(--line); padding: 30px; display: grid; align-content: start; gap: 14px; min-width: 0; }
 @media (max-width: 900px) { .res { border-left: 0; border-top: 1px solid var(--line); } }
 .res .sum { font: 800 clamp(38px, 5vw, 52px)/1 var(--font-d); letter-spacing: -.03em; color: var(--warm); font-variant-numeric: tabular-nums; }
@@ -268,13 +314,14 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   <div class="hero">
     <div class="wrap">
       <div>
-        <span class="eyebrow fade">Своё производство · Челябинск</span>
+        <span class="offer fade"><span class="dot"></span>Акция ноября: <b>−30% на второе окно</b></span>
         <h1>
           <span class="ln"><span style="--i:0">Снаружи <span class="ice">−30°</span></span></span>
           <span class="ln"><span style="--i:1">Дома <span class="warm">+22°</span></span></span>
           <span class="ln"><span style="--i:2">и тишина</span></span>
         </h1>
         <p class="lead fade" style="--d:450ms">Пластиковые окна и остекление балконов под ключ. Изготовим за 3 дня на профиле Rehau, KBE или Exprof, установим за 1 день.</p>
+        <div class="anchor fade" style="--d:520ms"><span class="from">от 12 900 ₽</span><span class="was">18 400 ₽</span><small>окно 1300×1400 под ключ: профиль KBE, монтаж, откосы, подоконник</small></div>
         <div class="row fade" style="--d:600ms">
           <a class="btn" href="#raschet">Рассчитать стоимость <span class="arr">→</span></a>
           <a class="btn line" href="#kontakty">Бесплатный замер</a>
@@ -301,6 +348,32 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
     <span>Rehau</span><i></i><span>KBE</span><i></i><span>Exprof</span><i></i><span>Балконы</span><i></i><span>Входные группы</span><i></i>
   </div></div>
 
+
+  <section style="padding-bottom:40px">
+    <div class="wrap">
+      <div class="head"><span class="eyebrow rv">Только в этом месяце</span><h2 class="rv mask">Скидки, которые реально работают</h2></div>
+      <div class="bento">
+        <div class="tile t-big rv scale">
+          <span class="k">При заказе от 2 окон</span>
+          <div><b>−30%</b><p style="margin-top:12px;font-size:18px">на второе окно. Например, два окна KBE 1300×1400 — 22 600 ₽ вместо 32 200 ₽.</p></div>
+          <div class="cd" aria-label="До конца акции"><div><span id="cd-d">00</span><small>дней</small></div><div><span id="cd-h">00</span><small>часов</small></div><div><span id="cd-m">00</span><small>минут</small></div><div><span id="cd-s">00</span><small>секунд</small></div></div>
+          <a class="btn" href="#raschet">Забрать скидку <span class="arr">→</span></a>
+        </div>
+        <div class="tile t-blue rv" style="--d:80ms"><span class="k">Рассрочка без банка</span><div><b>0% на 12 мес.</b><p>Платёж от 1 100 ₽ в месяц, без переплаты и справок.</p></div></div>
+        <div class="tile rv" style="--d:160ms"><span class="k">Замер</span><div><b>Завтра, 0 ₽</b><p>Приедем с образцами, цену зафиксируем в договоре.</p></div></div>
+        <div class="tile t-wide rv" style="--d:120ms"><span class="k">Шумоизоляция, дБ</span>
+          <div class="noise" id="noise">
+            <div class="nb"><span>Улица</span><div class="bar"><i data-w="100" style="background:#5b6b7a"></i></div><span class="v">70</span></div>
+            <div class="nb"><span>Старое окно</span><div class="bar"><i data-w="71" style="background:#8d9aa7"></i></div><span class="v">50</span></div>
+            <div class="nb"><span>Окно KBE 70 мм</span><div class="bar"><i data-w="46" style="background:var(--warm)"></i></div><span class="v">32</span></div>
+          </div>
+          <p>Дома тише, чем в библиотеке: до 32 дБ при закрытом окне.</p></div>
+        <div class="tile rv" style="--d:80ms"><span class="k">Подарок</span><div><b>Сетка 0 ₽</b><p>Москитная сетка при остеклении балкона.</p></div></div>
+        <div class="tile rv" style="--d:160ms"><span class="k">Сроки</span><div><b>3 + 1 день</b><p>3 дня производство, 1 день монтаж с уборкой.</p></div></div>
+        <a class="tile t-wide t-cta rv" style="--d:200ms;text-decoration:none" href="#raschet"><span class="k">Калькулятор</span><div><b>Узнайте цену своего окна за 1 минуту →</b><p>4 вопроса, и цена со скидкой на экране.</p></div></a>
+      </div>
+    </div>
+  </section>
   <div class="cut" id="cut">
     <div class="stick">
       <div class="wrap">
@@ -371,14 +444,14 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
 
   <section>
     <div class="wrap">
-      <div class="head"><span class="eyebrow rv">Как работаем</span><h2 class="rv mask">От звонка до тёплой квартиры — 5 дней</h2></div>
+      <div class="how"><div class="head"><span class="eyebrow rv">Как работаем</span><h2 class="rv mask">От звонка до тёплой квартиры — 5 дней</h2><p class="rv">Один менеджер ведёт заказ от замера до гарантии. Все этапы и цена — в договоре.</p><a class="btn rv" href="#kontakty" style="justify-self:start;margin-top:10px">Вызвать замерщика <span class="arr">→</span></a></div>
       <ol class="stepsl" id="stepsl">
         <li class="rv"><div><b>Замер в удобное время</b><span>Замерщик приезжает с образцами профилей и называет точную цену на месте.</span></div></li>
         <li class="rv"><div><b>Договор и рассрочка</b><span>Фиксируем цену в договоре. Можно оплатить частями без переплаты.</span></div></li>
         <li class="rv"><div><b>Производство 3 дня</b><span>Собираем окна на своём производстве в Челябинске.</span></div></li>
         <li class="rv"><div><b>Монтаж за 1 день</b><span>Монтаж по ГОСТ с пароизоляцией. Убираем за собой и вывозим старые окна.</span></div></li>
         <li class="rv"><div><b>Гарантия 5 лет</b><span>Бесплатная регулировка фурнитуры через год после установки.</span></div></li>
-      </ol>
+      </ol></div>
     </div>
   </section>
 
@@ -640,6 +713,22 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
       if (++wiped > 6) hint.style.opacity = 0;
     });
   });
+  function writeOnGlass(c, text) {
+    var m = document.createElement("canvas"); m.width = c._frc.width; m.height = c._frc.height;
+    var mx = m.getContext("2d"), d = m.width / c._w; mx.scale(d, d);
+    var size = Math.min(c._w * 0.3, 78);
+    mx.font = "800 " + size + "px Geologica, sans-serif"; mx.textAlign = "center"; mx.textBaseline = "middle";
+    mx.shadowColor = "#000"; mx.shadowBlur = 3; mx.fillStyle = "#000";
+    mx.save(); mx.translate(c._w / 2, c._h * 0.42); mx.rotate(-0.12); mx.fillText(text, 0, 0); mx.restore();
+    var t0 = performance.now(), dur = 1300;
+    (function f(now) {
+      var k = Math.min(1, (now - t0) / dur), fr = c._fr;
+      fr.save(); fr.globalCompositeOperation = "destination-out"; fr.beginPath(); fr.rect(0, 0, c._w * k, c._h); fr.clip();
+      fr.setTransform(1, 0, 0, 1, 0, 0); fr.globalAlpha = 0.35; fr.drawImage(m, 0, 0); fr.restore();
+      var dpr = c._frc.width / c._w; fr.setTransform(dpr, 0, 0, dpr, 0, 0);
+      compose(c); if (k < 1) requestAnimationFrame(f);
+    })(t0);
+  }
   var meltP = 0;
   function melt(p) {
     if (p <= meltP + 0.01) return; meltP = p;
@@ -677,7 +766,7 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   var progress = document.getElementById("progress"), topbar = document.getElementById("topbar"), dock = document.getElementById("dock");
   var marquee = document.getElementById("marquee"), cut = document.getElementById("cut"), hs = document.getElementById("hs"), track = document.getElementById("track");
   var trackMax = 0;
-  function layout() { trackMax = Math.max(0, track.scrollWidth - window.innerWidth + 32); }
+  function layout() { trackMax = Math.max(0, track.scrollWidth - window.innerWidth + 32); if (!reduce) hs.style.height = (trackMax + window.innerHeight * 1.15) + "px"; }
   function onScroll() {
     var y = window.scrollY, vh = window.innerHeight, doc = document.documentElement.scrollHeight - vh;
     progress.style.transform = "scaleX(" + (doc > 0 ? y / doc : 0) + ")";
@@ -764,6 +853,28 @@ footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; g
   (function () { var n = new Date(), end = new Date(n.getFullYear(), n.getMonth() + 1, 1); dl.textContent = "До конца акций осталось дней: " + Math.ceil((end - n) / 86400000); })();
 
   sizeFrost(); layout(); route(); onScroll();
-  if (!reduce) setTimeout(function () { frosts.forEach(function (c) { wipe(c, c._w * .5, c._h * .45, 46, .55); }); }, 1400);
+  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(function () {
+    setTimeout(function () { if (frosts[0]) writeOnGlass(frosts[0], "−30%");  }, reduce ? 0 : 1300);
+  });
+
+  /* Таймер акции */
+  function pad(n) { return String(n).padStart(2, "0"); }
+  function cd() {
+    var n = new Date(), end = new Date(n.getFullYear(), n.getMonth() + 1, 1), s = Math.max(0, Math.floor((end - n) / 1000));
+    document.getElementById("cd-d").textContent = pad(Math.floor(s / 86400)); document.getElementById("cd-h").textContent = pad(Math.floor(s % 86400 / 3600));
+    document.getElementById("cd-m").textContent = pad(Math.floor(s % 3600 / 60)); document.getElementById("cd-s").textContent = pad(s % 60);
+  }
+  cd(); setInterval(cd, 1000);
+
+  /* Подсветка плиток за пальцем/курсором */
+  document.querySelectorAll(".tile").forEach(function (t) {
+    t.addEventListener("pointermove", function (e) { var r = t.getBoundingClientRect(); t.style.setProperty("--mx", (e.clientX - r.left) + "px"); t.style.setProperty("--my", (e.clientY - r.top) + "px"); });
+  });
+
+  /* Полосы шумоизоляции */
+  var noise = document.getElementById("noise");
+  function noiseGo() { noise.querySelectorAll("i").forEach(function (i) { i.style.width = i.dataset.w + "%"; }); }
+  if (reduce || !("IntersectionObserver" in window)) noiseGo();
+  else new IntersectionObserver(function (es, o) { if (es[0].isIntersecting) { noiseGo(); o.disconnect(); } }, { threshold: .4 }).observe(noise);
 })();
 </script>
