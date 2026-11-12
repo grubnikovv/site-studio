@@ -10,7 +10,7 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.fernet import Fernet
 
-SOCIAL = re.compile(r"(vk\.com|t\.me|instagram|wa\.me|whatsapp|ok\.ru|youtube|taplink|clients\.site|avito|2gis|yandex|zoon|drive2)", re.I)
+SOCIAL = re.compile(r"(^|\.)(vk\.com|vk\.ru|t\.me|instagram\.com|wa\.me|whatsapp\.com|ok\.ru|youtube\.com|taplink\.(cc|ws|ru)|clients\.site|avito\.ru|2gis\.ru|zoon\.ru|drive2\.ru|max\.ru|viber\.click)$", re.I)
 
 def card(page, url):
     r = {"url": url}
