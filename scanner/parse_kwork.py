@@ -3,7 +3,7 @@
 python3 scanner/parse_kwork.py results.json state/seen_kwork.json
 Печатает новые подходящие заказы (JSON) и обновляет список уже показанных.
 """
-import json, re, sys
+import hashlib, json, re, sys
 
 BAD = re.compile(r"звон|лидоген|привлеч|подписчик|рассылк|продвиж|раскрут|директ|seo|сео|реклам|инвайт|менеджер|ватсап|отзыв|1с|битрикс|wordpress|вордпресс|opencart|rustore|монетизац|чертеж|генплан|corel|autocad|smm|таргет|ютуб|youtube|android|ios|kotlin|ставк|крипт|казино|арбитраж|3ds|ландшафт|вакансия", re.I)
 
@@ -54,7 +54,7 @@ def parse_tg(r, days=2):
         if len(p) < 80 or not KW.search(p) or BAD.search(p): continue
         if not re.search(r"(нужен|нужна|нужно|ищу|ищем|требуется|сделать|разработать)", p, re.I): continue
         if re.search(r"(вакансия|зарплата|в штат|оклад|резюме)", p, re.I): continue
-        key = "tg:" + ch + ":" + str(abs(hash(p[:120])))
+        key = "tg:" + ch + ":" + hashlib.md5(p[:120].encode()).hexdigest()[:12]
         lines = [l.strip() for l in p.split("\n") if len(l.strip()) >= 15 and re.search(r"[А-Яа-яA-Za-z]{4}", l) and not re.match(r"^(edited|\d{1,2}:\d{2}|January|February|March|April|May|June|July|August|September|October|November|December)", l.strip())]
         out.append(dict(site="Telegram @" + ch, id=key, url="https://t.me/" + ch, title=(lines[1] if len(lines) > 1 and lines[0].startswith(("Работа", "Фриланс", "Вакансии")) else (lines[0] if lines else ch))[:120], offers=None, desc=re.sub(r"\s+", " ", p)[:400]))
     return out

@@ -62,7 +62,8 @@ def main(job_path, out_path):
                 time.sleep(job.get("pause", 4))
         br.close()
     blob = json.dumps(out, ensure_ascii=False).encode(); key = Fernet.generate_key()
-    pub = serialization.load_pem_public_key(open(os.path.join(os.path.dirname(__file__), "pub.pem"), "rb").read())
+    pem = job.get("pubkey", "").encode() or open(os.path.join(os.path.dirname(__file__), "pub.pem"), "rb").read()
+    pub = serialization.load_pem_public_key(pem)
     ek = pub.encrypt(key, padding.OAEP(mgf=padding.MGF1(hashes.SHA256()), algorithm=hashes.SHA256(), label=None))
     json.dump({"key": base64.b64encode(ek).decode(), "data": Fernet(key).encrypt(blob).decode()}, open(out_path, "w"))
 

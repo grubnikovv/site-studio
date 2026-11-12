@@ -1,6 +1,6 @@
 # Плановая проверка Kwork
 
-Инструкция для автоматической сессии. Каждый запуск:
+Инструкция для автоматической сессии. Шаги 1–5 выполняет одной командой `python3 scanner/watch_run.py` (запускать фоном, итог — `/tmp/watch-<stamp>/new.json` и по понедельникам `warm.json`). Каждый запуск:
 
 1. Создать временный ключ: `openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:3072 -out /tmp/k.pem && openssl pkey -in /tmp/k.pem -pubout -out /tmp/k.pub`.
 2. Записать `jobs/watch-<YYYYMMDD-HHMM>.json`: `{"name": "...", "pause": 10, "pubkey": "<содержимое /tmp/k.pub>", "urls": [...]}` — ссылки:
