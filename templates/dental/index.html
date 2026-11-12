@@ -1,0 +1,26 @@
+<title>Дента Линия</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;800&display=swap">
+<style>
+:root{--bg:#f6f9f9;--card:#fff;--fg:#0f2a2c;--muted:#5b7375;--accent:#0f8f8a;--soft:#dff1ef;--line:#dde8e8}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:400 16px/1.6 Onest,system-ui,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:max(16px,4vw)}
+header{background:var(--card);border-bottom:1px solid var(--line)}header .wrap{display:flex;justify-content:space-between;align-items:center;padding-block:16px;gap:16px}
+.logo{font-weight:800;font-size:20px;display:flex;gap:10px;align-items:center}.logo i{width:30px;height:30px;border-radius:9px;background:var(--accent);display:inline-block;position:relative}.logo i:after{content:"";position:absolute;inset:8px 9px;border:3px solid #fff;border-top:0;border-radius:0 0 8px 8px}
+nav{display:flex;gap:24px;font-size:14px;color:var(--muted)}.ph{font-weight:600;font-size:15px}@media(max-width:760px){nav,.ph{display:none}}
+.btn{display:inline-flex;align-items:center;min-height:48px;padding:0 22px;border-radius:12px;background:var(--accent);color:#fff;font-weight:600;text-decoration:none;font-size:15px}.ghost{background:var(--soft);color:var(--accent)}
+.hero .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:36px;align-items:center;padding-block:56px}@media(max-width:760px){.hero .wrap{grid-template-columns:1fr;padding-block:28px}}
+.chip{display:inline-flex;gap:8px;align-items:center;background:var(--soft);color:var(--accent);font-weight:600;font-size:13px;padding:8px 12px;border-radius:999px}
+h1{font-weight:800;font-size:clamp(36px,5.4vw,64px);line-height:1.04;letter-spacing:-.02em;margin:16px 0}
+h1 span{color:var(--accent)}.lead{color:var(--muted);font-size:18px;max-width:46ch;margin:0 0 26px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:0 30px 60px -30px rgba(15,42,44,.25);display:grid;gap:14px}
+.card h3{margin:0;font-size:18px}.price{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px dashed var(--line);padding-bottom:10px;font-size:15px}.price b{font-size:18px;white-space:nowrap}
+.note{font-size:13px;color:var(--muted)}
+.trust{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:34px}@media(max-width:760px){.trust{grid-template-columns:repeat(2,1fr)}}
+.trust div{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}.trust b{font-size:24px;display:block}.trust span{font-size:13px;color:var(--muted)}
+</style>
+<header><div class="wrap"><div class="logo"><i></i>Дента Линия</div><nav><span>Услуги</span><span>Врачи</span><span>Цены</span><span>Отзывы</span></nav><a class="btn" href="#">Записаться</a></div></header>
+<section class="hero"><div class="wrap"><div><span class="chip">Консультация и снимок КТ — бесплатно</span><h1>Имплант под ключ <span>за 1 визит</span> к хирургу</h1><p class="lead">Ставим импланты Straumann и Osstem с пожизненной гарантией. Перед лечением показываем план и итоговую цену, без доплат в процессе.</p><div class="row"><a class="btn" href="#">Записаться на консультацию</a><a class="btn ghost" href="#">Рассчитать стоимость</a></div>
+<div class="trust"><div><b>14 лет</b><span>работаем в Москве</span></div><div><b>6 200+</b><span>имплантов</span></div><div><b>4,9</b><span>на Яндекс Картах</span></div><div><b>0%</b><span>рассрочка на 12 мес.</span></div></div></div>
+<div class="card"><h3>Цены на имплантацию</h3><div class="price"><span>Osstem (Корея)</span><b>от 39 900 ₽</b></div><div class="price"><span>Straumann (Швейцария)</span><b>от 69 900 ₽</b></div><div class="price"><span>Коронка из циркония</span><b>от 24 500 ₽</b></div><div class="price"><span>All-on-4 на челюсть</span><b>от 290 000 ₽</b></div><span class="note">Цена включает имплант, абатмент и работу хирурга.</span><a class="btn" href="#">Получить план лечения</a></div></div></section>

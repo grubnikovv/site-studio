@@ -1,0 +1,36 @@
+<title>Кофейня Зерно</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,500&family=Onest:wght@400;500;700&display=swap">
+<style>
+:root{--bg:#10241b;--panel:#163024;--fg:#f1ead8;--muted:#b9b39f;--accent:#e8b23a;--line:#2a4436;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:400 16px/1.6 Onest,system-ui,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:max(16px,4vw)}
+header .wrap{display:flex;justify-content:space-between;align-items:center;padding-block:22px}
+.logo{font:600 28px/1 "Cormorant Garamond",serif;letter-spacing:.02em}.logo i{color:var(--accent)}
+nav{display:flex;gap:28px;font-size:14px;color:var(--muted)}@media(max-width:760px){nav{display:none}}
+.btn{display:inline-flex;align-items:center;min-height:48px;padding:0 24px;border-radius:999px;background:var(--accent);color:#1b1407;font-weight:700;text-decoration:none;font-size:15px}
+.hero .wrap{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center;padding-block:40px 70px}
+@media(max-width:760px){.hero .wrap{grid-template-columns:1fr;padding-block:20px 50px}}
+.eyebrow{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+h1{font:600 clamp(48px,7.5vw,96px)/.95 "Cormorant Garamond",serif;margin:14px 0 20px;letter-spacing:-.01em}
+h1 em{font-style:italic;font-weight:500;color:var(--accent)}
+.lead{color:var(--muted);font-size:18px;max-width:40ch;margin:0 0 28px}
+.row{display:flex;gap:14px;flex-wrap:wrap;align-items:center}.row a.link{color:var(--fg);font-size:15px}
+.cup{position:relative;aspect-ratio:1;max-width:460px;width:100%;justify-self:center}
+.cup .plate{position:absolute;inset:8%;border-radius:50%;background:radial-gradient(circle at 50% 50%,#f1ead8 0 58%,#d9d0b8 59% 61%,#f1ead8 62% 100%);box-shadow:0 40px 80px rgba(0,0,0,.45)}
+.cup .coffee{position:absolute;inset:24%;border-radius:50%;background:radial-gradient(circle at 45% 40%,#9b6236 0,#6b3d1e 45%,#3e2210 100%);box-shadow:inset 0 0 0 10px #e9e1cb}
+.cup .art{position:absolute;inset:36%;border-radius:50% 50% 46% 46%;background:radial-gradient(ellipse at 50% 70%,#f3e4c8 0 30%,transparent 31%),radial-gradient(ellipse at 50% 45%,#f3e4c8 0 22%,transparent 23%),radial-gradient(ellipse at 50% 25%,#f3e4c8 0 14%,transparent 15%);opacity:.9}
+.tag{position:absolute;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 16px;font-size:13px;color:var(--muted)}.tag b{display:block;color:var(--fg);font-size:18px}
+.t1{left:-4%;top:12%}.t2{right:-2%;bottom:14%}
+.strip{border-top:1px solid var(--line)}.strip .wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;padding-block:28px}
+@media(max-width:760px){.strip .wrap{grid-template-columns:repeat(2,1fr)}}
+.strip b{font:600 30px/1 "Cormorant Garamond",serif;color:var(--accent)}.strip span{display:block;color:var(--muted);font-size:14px}
+.menu .wrap{padding-block:60px}.menu h2{font:600 44px/1 "Cormorant Garamond",serif;margin:0 0 24px}
+.items{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}@media(max-width:760px){.items{grid-template-columns:1fr}}
+.it{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px}.it b{font-size:18px}.it p{color:var(--muted);margin:6px 0 0;font-size:14px}.it .p{float:right;color:var(--accent);font-weight:700}
+</style>
+<header><div class="wrap"><div class="logo">Зерно<i>.</i></div><nav><span>Меню</span><span>Обжарка</span><span>Завтраки</span><span>Контакты</span></nav><a class="btn" href="#">Заказать</a></div></header>
+<section class="hero"><div class="wrap"><div><div class="eyebrow">Кофейня и обжарочная · с 7:30</div><h1>Обжариваем <em>по пятницам,</em> варим каждый день</h1><p class="lead">Зерно из Эфиопии, Колумбии и Бразилии. Обжариваем небольшими партиями по 5 кг и продаём на вынос свежим.</p><div class="row"><a class="btn" href="#">Заказать с собой</a><a class="link" href="#">Купить зерно →</a></div></div>
+<div class="cup"><div class="plate"></div><div class="coffee"></div><div class="art"></div><div class="tag t1"><b>4,9 ★</b>580 отзывов</div><div class="tag t2"><b>за 7 минут</b>готовим заказ</div></div></div></section>
+<section class="strip"><div class="wrap"><div><b>5 кг</b><span>партия обжарки</span></div><div><b>12</b><span>сортов зерна</span></div><div><b>92 °C</b><span>температура пролива</span></div><div><b>−10%</b><span>со своей кружкой</span></div></div></section>
+<section class="menu"><div class="wrap"><h2>Меню</h2><div class="items"><div class="it"><span class="p">220 ₽</span><b>Капучино</b><p>Двойной эспрессо и молоко 65 °C</p></div><div class="it"><span class="p">290 ₽</span><b>Фильтр-кофе</b><p>Эфиопия Иргачеффе, ноты бергамота</p></div><div class="it"><span class="p">340 ₽</span><b>Раф с халвой</b><p>Сливки, ваниль, тахинная халва</p></div></div></div></section>
