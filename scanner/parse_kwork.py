@@ -5,7 +5,7 @@ python3 scanner/parse_kwork.py results.json state/seen_kwork.json
 """
 import hashlib, json, re, sys
 
-BAD = re.compile(r"звон|лидоген|привлеч|подписчик|рассылк|продвиж|раскрут|директ|seo|сео|реклам|инвайт|менеджер|ватсап|отзыв|1с|битрикс|wordpress|вордпресс|opencart|rustore|монетизац|чертеж|генплан|corel|autocad|smm|таргет|ютуб|youtube|android|ios|kotlin|ставк|крипт|казино|арбитраж|3ds|ландшафт|вакансия", re.I)
+BAD = re.compile(r"звон|лидоген|привлеч|подписчик|рассылк|продвиж|раскрут|директ|seo|сео|реклам|инвайт|менеджер|ватсап|отзыв|1с\b|rustore|монетизац|чертеж|генплан|corel|autocad|smm|таргет|ютуб|youtube|android|ios|kotlin|ставк|крипт|казино|арбитраж|3ds|ландшафт|вакансия", re.I)
 
 def parse(data):
     out = {}
