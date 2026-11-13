@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><title>СТО Пульс</title>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head><body>
+
+
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+/* Layout: приложение под телефон и планшет. Сверху переключатель роли (демо), внизу вкладки. Админ: табло, задания, QR, табель. Слесарь: вход по QR, мои задания. */
+:root {
+  --bg: #eef0f3; --card: #ffffff; --fg: #111418; --muted: #6a727d; --line: #dfe3e8;
+  --accent: #f5b301; --accent-ink: #1a1400; --ok: #16a34a; --ok-soft: #e3f6ea; --warn: #d97706; --warn-soft: #fdf1df; --blue: #2563eb; --blue-soft: #e6eeff; --red: #dc2626;
+  --font: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif; --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #0d0f12; --card: #171a1f; --fg: #eef1f5; --muted: #98a1ac; --line: #272c33; --ok-soft: #12291b; --warn-soft: #2b1f0c; --blue-soft: #15203a; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #0d0f12; --card: #171a1f; --fg: #eef1f5; --muted: #98a1ac; --line: #272c33; --ok-soft: #12291b; --warn-soft: #2b1f0c; --blue-soft: #15203a; color-scheme: dark; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 500 15px/1.45 var(--font); }
+.app { max-width: 760px; margin: 0 auto; padding: 14px max(16px, env(safe-area-inset-right, 0px)) 110px max(16px, env(safe-area-inset-left, 0px)); display: grid; gap: 14px; }
+.demo { display: flex; align-items: center; gap: 8px; background: var(--fg); color: var(--bg); border-radius: 14px; padding: 8px 10px; font-size: 13px; flex-wrap: wrap; }
+.demo b { font-weight: 800; margin-right: auto; }
+.demo select { min-height: 36px; border-radius: 10px; border: 0; padding: 0 10px; font: 700 14px var(--font); background: var(--bg); color: var(--fg); }
+.head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.brand { display: flex; align-items: center; gap: 10px; font: 800 20px var(--font); }
+.brand i { width: 34px; height: 34px; border-radius: 10px; background: var(--accent); display: grid; place-items: center; font-style: normal; color: var(--accent-ink); font-size: 18px; }
+.who { font-size: 13px; color: var(--muted); text-align: right; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 16px; display: grid; gap: 12px; min-width: 0; }
+.sec { font: 800 12px/1 var(--font); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 520px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.kpis div { background: var(--bg); border-radius: 14px; padding: 12px; display: grid; gap: 2px; }
+.kpis b { font: 800 24px/1 var(--font); font-variant-numeric: tabular-nums; }
+.kpis span { font-size: 12px; color: var(--muted); }
+.people { display: grid; gap: 8px; }
+.person { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px; border-radius: 14px; background: var(--bg); }
+.av { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-weight: 800; color: #fff; }
+.person small { display: block; color: var(--muted); font-size: 12.5px; }
+.pill { font: 800 12px/1 var(--font); padding: 6px 9px; border-radius: 999px; white-space: nowrap; }
+.pill.on { background: var(--ok-soft); color: var(--ok); }
+.pill.off { background: var(--bg); color: var(--muted); border: 1px solid var(--line); }
+.pill.new { background: var(--blue-soft); color: var(--blue); }
+.pill.work { background: var(--warn-soft); color: var(--warn); }
+.pill.done { background: var(--ok-soft); color: var(--ok); }
+.tasks { display: grid; gap: 8px; }
+.task { border: 1px solid var(--line); border-radius: 16px; padding: 12px; display: grid; gap: 6px; background: var(--card); }
+.task .t1 { display: flex; justify-content: space-between; gap: 8px; align-items: start; }
+.task b { font-size: 15px; }
+.plate { font: 700 13px var(--mono); border: 1.5px solid var(--fg); border-radius: 6px; padding: 2px 6px; white-space: nowrap; }
+.task .meta { font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.task .acts { display: flex; gap: 8px; margin-top: 4px; }
+.btn { min-height: 48px; border-radius: 14px; border: 0; padding: 0 18px; background: var(--accent); color: var(--accent-ink); font: 800 15px var(--font); cursor: pointer; }
+.btn.ghost { background: var(--bg); color: var(--fg); border: 1px solid var(--line); }
+.btn.ok { background: var(--ok); color: #fff; }
+.btn.wide { width: 100%; }
+.btn:active { transform: scale(.98); }
+.form { display: grid; gap: 10px; }
+.form .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); }
+.form input, .form select { width: 100%; min-height: 48px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--fg); padding: 0 12px; font: 600 15px var(--font); }
+.qrbox { display: grid; justify-items: center; gap: 10px; text-align: center; }
+#qr { background: #fff; padding: 14px; border-radius: 18px; }
+#qr img, #qr canvas { display: block; width: 220px; height: 220px; }
+.ring { font: 700 14px var(--mono); color: var(--muted); }
+.ring b { color: var(--fg); }
+.bar { height: 6px; width: 220px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--accent); transition: width 1s linear; }
+.tbl { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 460px; }
+th, td { padding: 10px 8px; border-bottom: 1px solid var(--line); text-align: left; }
+th { font-size: 12px; color: var(--muted); font-weight: 700; }
+td.n { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.big { font: 800 34px/1.05 var(--font); }
+.scan { display: grid; gap: 14px; justify-items: center; text-align: center; padding: 10px 0; }
+.scan .ico { width: 120px; height: 120px; border-radius: 28px; background: var(--bg); display: grid; place-items: center; }
+.scan .ico svg { width: 64px; height: 64px; }
+video { width: 100%; max-width: 360px; border-radius: 18px; background: #000; }
+.empty { color: var(--muted); font-size: 14px; text-align: center; padding: 6px; }
+.tabs { position: fixed; left: 0; right: 0; bottom: 0; background: var(--card); border-top: 1px solid var(--line); padding: 8px max(16px, env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); z-index: 5; }
+.tabs .in { max-width: 760px; margin: 0 auto; display: grid; grid-auto-flow: column; gap: 6px; }
+.tabs button { min-height: 52px; border-radius: 14px; border: 0; background: transparent; color: var(--muted); font: 800 12.5px var(--font); display: grid; place-items: center; gap: 2px; cursor: pointer; }
+.tabs button svg { width: 22px; height: 22px; }
+.tabs button[aria-pressed="true"] { color: var(--fg); background: var(--bg); }
+.toast { position: fixed; left: 50%; bottom: calc(90px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px); opacity: 0; background: var(--fg); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-weight: 800; transition: .3s; pointer-events: none; z-index: 9; max-width: calc(100% - 32px); text-align: center; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<div class="app">
+  <div class="demo"><b>Демо-режим</b><label for="role" style="position:absolute;left:-9999px">Роль</label><select id="role"></select><button class="btn ghost" type="button" id="reset" style="min-height:36px;padding:0 10px;font-size:13px">Сбросить</button></div>
+  <div class="head"><div class="brand"><i>⚙</i>СТО Пульс</div><div class="who" id="who"></div></div>
+  <main id="view"></main>
+</div>
+<nav class="tabs" aria-label="Разделы"><div class="in" id="tabs"></div></nav>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var pad = function (n) { return String(n).padStart(2, "0"); };
+  var hm = function (t) { var d = new Date(t); return pad(d.getHours()) + ":" + pad(d.getMinutes()); };
+  var dur = function (ms) { var m = Math.max(0, Math.round(ms / 60000)); return Math.floor(m / 60) + " ч " + pad(m % 60) + " мин"; };
+  var dayKey = function (t) { var d = new Date(t); return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); };
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function toast(t) { var e = $("toast"); e.textContent = t; e.classList.add("show"); clearTimeout(toast.h); toast.h = setTimeout(function () { e.classList.remove("show"); }, 2000); }
+
+  /* ---------- Данные (демо: хранится в этом браузере) ---------- */
+  var SECRET = "sto-demo-7f3a";
+  var LS = "sto-pulse-demo-v1";
+  var MECH = [{ id: "ivan", n: "Иван Петров", c: "#2563eb" }, { id: "oleg", n: "Олег Смирнов", c: "#16a34a" }, { id: "rustam", n: "Рустам Алиев", c: "#d97706" }, { id: "sergey", n: "Сергей Ким", c: "#9333ea" }];
+  function seed() {
+    var now = Date.now(), d0 = new Date(); d0.setHours(8, 0, 0, 0); var t8 = Math.min(d0.getTime(), now - 4 * 3600000);
+    var shifts = [];
+    for (var back = 1; back <= 9; back++) {
+      var day = new Date(t8 - back * 86400000); if (day.getDay() === 0) continue;
+      MECH.forEach(function (m, i) { if ((back + i) % 6 === 0) return; var s = day.getTime() + (i * 7 - 6) * 60000; shifts.push({ m: m.id, in: s, out: s + (9 * 60 + (i * 13) % 50) * 60000 }); });
+    }
+    shifts.push({ m: "ivan", in: t8 - 4 * 60000, out: null }, { m: "oleg", in: t8 + 11 * 60000, out: null }, { m: "rustam", in: t8 + 27 * 60000, out: null });
+    var tasks = [
+      { id: 1, car: "Toyota Camry", plate: "А123ВС 777", job: "Замена масла и фильтров", m: "ivan", h: 1, st: "done", started: t8 + 20 * 60000, finished: t8 + 75 * 60000 },
+      { id: 2, car: "Kia Rio", plate: "М456ОР 750", job: "Передние колодки и диски", m: "ivan", h: 1.5, st: "work", started: now - 35 * 60000 },
+      { id: 3, car: "Газель Next", plate: "Е789КХ 190", job: "Диагностика подвески", m: "oleg", h: 0.5, st: "new" },
+      { id: 4, car: "Hyundai Solaris", plate: "О321АУ 799", job: "Замена ремня ГРМ", m: "rustam", h: 3, st: "work", started: now - 80 * 60000 },
+      { id: 5, car: "VW Polo", plate: "Т654ММ 177", job: "Развал-схождение", m: "oleg", h: 0.8, st: "new" }
+    ];
+    return { shifts: shifts, tasks: tasks, nextId: 6 };
+  }
+  var S;
+  try { S = JSON.parse(localStorage.getItem(LS)); } catch (e) { S = null; }
+  if (!S || !S.tasks) S = seed();
+  function save() { try { localStorage.setItem(LS, JSON.stringify(S)); } catch (e) {} }
+  function mech(id) { return MECH.filter(function (m) { return m.id === id; })[0]; }
+  function openShift(id) { return S.shifts.filter(function (s) { return s.m === id && !s.out; })[0]; }
+
+  /* ---------- QR: код меняется каждые 30 секунд ---------- */
+  function slot(t) { return Math.floor((t || Date.now()) / 30000); }
+  function token(sl) { var h = 0, s = SECRET + ":" + sl; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return "STOPULSE-" + sl.toString(36) + "-" + h.toString(36); }
+  function valid(code) { var s = slot(); return code === token(s) || code === token(s - 1); }
+
+  /* ---------- Роли и вкладки ---------- */
+  var role = "admin", tab = "board";
+  $("role").innerHTML = '<option value="admin">Администратор</option>' + MECH.map(function (m) { return '<option value="' + m.id + '">Слесарь: ' + m.n + "</option>"; }).join("");
+  $("role").addEventListener("change", function () { role = this.value; tab = role === "admin" ? "board" : "me"; render(); });
+  $("reset").addEventListener("click", function () { S = seed(); save(); render(); toast("Демо-данные восстановлены"); });
+  var ICON = {
+    board: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>',
+    tasks: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></svg>',
+    qr: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3M21 14v7h-7"/></svg>',
+    table: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>',
+    me: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>'
+  };
+  function tabs() {
+    var list = role === "admin" ? [["board", "Табло"], ["tasks", "Задания"], ["qr", "QR входа"], ["table", "Табель"]] : [["me", "Смена"], ["tasks", "Мои задания"]];
+    $("tabs").innerHTML = list.map(function (t) { return '<button type="button" data-t="' + t[0] + '" aria-pressed="' + (tab === t[0]) + '">' + ICON[t[0] === "tasks" ? "tasks" : t[0]] + t[1] + "</button>"; }).join("");
+  }
+  $("tabs").addEventListener("click", function (e) { var b = e.target.closest("[data-t]"); if (!b) return; tab = b.dataset.t; render(); window.scrollTo(0, 0); });
+
+  /* ---------- Экраны администратора ---------- */
+  function vBoard() {
+    var on = MECH.filter(function (m) { return openShift(m.id); });
+    var today = dayKey(Date.now()), tt = S.tasks;
+    var html = '<div class="kpis"><div><b>' + on.length + "/" + MECH.length + '</b><span>на смене</span></div><div><b>' + tt.filter(function (t) { return t.st === "work"; }).length + '</b><span>в работе</span></div><div><b>' + tt.filter(function (t) { return t.st === "new"; }).length + '</b><span>ждут</span></div><div><b>' + tt.filter(function (t) { return t.st === "done" && dayKey(t.finished) === today; }).length + '</b><span>готово сегодня</span></div></div>';
+    html += '<div class="card"><span class="sec">Сотрудники сейчас</span><div class="people">' + MECH.map(function (m) {
+      var sh = openShift(m.id), cur = S.tasks.filter(function (t) { return t.m === m.id && t.st === "work"; })[0];
+      return '<div class="person"><span class="av" style="background:' + m.c + '">' + m.n[0] + "</span><span><b>" + m.n + "</b><small>" + (sh ? "Пришёл в " + hm(sh.in) + " · " + dur(Date.now() - sh.in) + (cur ? " · " + esc(cur.car) : " · без задания") : "Не на смене") + '</small></span><span class="pill ' + (sh ? "on" : "off") + '">' + (sh ? "на смене" : "нет") + "</span></div>";
+    }).join("") + "</div></div>";
+    return html;
+  }
+  function taskCard(t, forMech) {
+    var m = mech(t.m), st = { new: ["new", "Ждёт"], work: ["work", "В работе"], done: ["done", "Готово"] }[t.st];
+    var info = t.st === "work" ? "Начато в " + hm(t.started) + " · идёт " + dur(Date.now() - t.started) : t.st === "done" ? "Сделано за " + dur(t.finished - t.started) + " (норма " + t.h + " ч)" : "Норма " + t.h + " ч";
+    var acts = "";
+    if (forMech && t.st === "new") acts = '<div class="acts"><button class="btn" type="button" data-start="' + t.id + '">Начать</button></div>';
+    if (forMech && t.st === "work") acts = '<div class="acts"><button class="btn ok" type="button" data-done="' + t.id + '">Готово</button></div>';
+    return '<div class="task"><div class="t1"><span><b>' + esc(t.car) + '</b> <span class="plate">' + esc(t.plate) + '</span></span><span class="pill ' + st[0] + '">' + st[1] + "</span></div><div>" + esc(t.job) + '</div><div class="meta">' + (forMech ? "" : "<span>👤 " + m.n + "</span>") + "<span>⏱ " + info + "</span></div>" + acts + "</div>";
+  }
+  function vTasksAdmin() {
+    var html = '<div class="card"><span class="sec">Новое задание</span><form class="form" id="tf"><div class="g2"><label for="f-car">Автомобиль<input id="f-car" placeholder="Lada Vesta" required></label><label for="f-plate">Госномер<input id="f-plate" placeholder="А000АА 777" required></label></div><label for="f-job">Работа<input id="f-job" placeholder="Замена передних амортизаторов" required></label><div class="g2"><label for="f-m">Исполнитель<select id="f-m">' + MECH.map(function (m) { return '<option value="' + m.id + '">' + m.n + (openShift(m.id) ? " · на смене" : "") + "</option>"; }).join("") + '</select></label><label for="f-h">Нормочасы<input id="f-h" inputmode="decimal" value="1"></label></div><button class="btn wide" type="submit">Выдать задание</button></form></div>';
+    var order = { work: 0, new: 1, done: 2 };
+    html += '<div class="card"><span class="sec">Все задания</span><div class="tasks">' + S.tasks.slice().sort(function (a, b) { return order[a.st] - order[b.st] || b.id - a.id; }).map(function (t) { return taskCard(t, false); }).join("") + "</div></div>";
+    return html;
+  }
+  var qrObj = null, qrTimer = null;
+  function vQR() {
+    return '<div class="card qrbox"><span class="sec">QR для входа на смену</span><p style="margin:0;color:var(--muted);max-width:42ch">Этот экран висит на планшете в сервисе. Слесарь сканирует код телефоном, когда приходит и когда уходит. Код меняется каждые 30 секунд — фото не сработает.</p><div id="qr"></div><div class="bar"><i id="qbar"></i></div><div class="ring">Новый код через <b id="qleft">30</b> с</div><p style="margin:0;font-size:12px;color:var(--muted)">В демо можно отсканировать этот код телефоном слесаря из второй вкладки браузера или нажать «Симулировать» в режиме слесаря.</p></div>';
+  }
+  function startQR() {
+    clearInterval(qrTimer);
+    var box = $("qr"); if (!box) return;
+    var last = -1;
+    function tick() {
+      var s = slot(), left = 30 - Math.floor((Date.now() / 1000) % 30);
+      if (s !== last) { last = s; box.innerHTML = ""; if (window.QRCode) new QRCode(box, { text: token(s), width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M }); else box.textContent = token(s); }
+      $("qleft").textContent = left; $("qbar").style.width = (left / 30 * 100) + "%";
+    }
+    tick(); qrTimer = setInterval(function () { if (!$("qr")) return clearInterval(qrTimer); tick(); }, 1000);
+  }
+  function vTable() {
+    var now = new Date(), mon = now.getFullYear() + "-" + pad(now.getMonth() + 1), today = dayKey(Date.now());
+    var rows = MECH.map(function (m) {
+      var sh = S.shifts.filter(function (s) { return s.m === m.id; });
+      var dToday = sh.filter(function (s) { return dayKey(s.in) === today; }).reduce(function (a, s) { return a + ((s.out || Date.now()) - s.in); }, 0);
+      var mm = sh.filter(function (s) { return dayKey(s.in).slice(0, 7) === mon; });
+      var mHours = mm.reduce(function (a, s) { return a + ((s.out || Date.now()) - s.in); }, 0);
+      var late = mm.filter(function (s) { var d = new Date(s.in); return d.getHours() * 60 + d.getMinutes() > 8 * 60 + 10; }).length;
+      var norm = S.tasks.filter(function (t) { return t.m === m.id && t.st === "done"; }).reduce(function (a, t) { return a + t.h; }, 0);
+      return "<tr><td><b>" + m.n + '</b></td><td class="n">' + dur(dToday) + '</td><td class="n">' + mm.length + '</td><td class="n">' + Math.round(mHours / 3600000) + ' ч</td><td class="n">' + late + '</td><td class="n">' + norm + "</td></tr>";
+    }).join("");
+    return '<div class="card"><span class="sec">Табель · ' + now.toLocaleDateString("ru-RU", { month: "long", year: "numeric" }) + '</span><div class="tbl"><table><thead><tr><th>Сотрудник</th><th>Сегодня</th><th>Смен</th><th>Часов</th><th>Опозданий</th><th>Нормочасов</th></tr></thead><tbody>' + rows + '</tbody></table></div><p style="margin:0;font-size:13px;color:var(--muted)">Опоздание — вход после 08:10. Нормочасы — по закрытым заданиям. Табель можно выгружать в Excel для расчёта зарплаты.</p></div>';
+  }
+
+  /* ---------- Экраны слесаря ---------- */
+  var stream = null;
+  function vMe() {
+    var m = mech(role), sh = openShift(role);
+    var html = '<div class="card"><span class="sec">Моя смена</span>';
+    if (sh) html += '<div class="big">На смене с ' + hm(sh.in) + '</div><div style="color:var(--muted)">Отработано ' + dur(Date.now() - sh.in) + '</div><button class="btn ghost wide" type="button" id="scan">Закончить смену — сканировать QR</button>';
+    else html += '<div class="scan"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M7 12h10"/></svg></span><div class="big">Вы не на смене</div><div style="color:var(--muted)">Отсканируйте QR-код на планшете в сервисе</div><button class="btn wide" type="button" id="scan">Сканировать QR и начать смену</button></div>';
+    html += '<div id="cam" hidden><video id="vid" playsinline muted></video><button class="btn ghost wide" type="button" id="stopcam" style="margin-top:8px">Отмена</button></div><button class="btn ghost wide" type="button" id="sim">Симулировать скан (для демо)</button></div>';
+    var mine = S.tasks.filter(function (t) { return t.m === role && t.st !== "done"; });
+    html += '<div class="card"><span class="sec">Задания на сегодня</span><div class="tasks">' + (mine.length ? mine.map(function (t) { return taskCard(t, true); }).join("") : '<p class="empty">Заданий нет. Администратор выдаст новое.</p>') + "</div></div>";
+    return html;
+  }
+  function vTasksMech() {
+    var all = S.tasks.filter(function (t) { return t.m === role; });
+    return '<div class="card"><span class="sec">Мои задания</span><div class="tasks">' + (all.length ? all.map(function (t) { return taskCard(t, true); }).join("") : '<p class="empty">Пока пусто</p>') + "</div></div>";
+  }
+  function checkin(code) {
+    if (!valid(code)) { toast("Код устарел или неверный. Отсканируйте QR на планшете ещё раз"); return; }
+    var sh = openShift(role);
+    if (sh) { sh.out = Date.now(); toast("Смена закрыта: " + dur(sh.out - sh.in)); }
+    else { if (!S.shifts) S.shifts = []; S.shifts.push({ m: role, in: Date.now(), out: null }); toast("Смена начата в " + hm(Date.now())); }
+    save(); render();
+  }
+  async function scanCam() {
+    if (!("BarcodeDetector" in window) || !navigator.mediaDevices) { toast("Камера в этом браузере недоступна — нажмите «Симулировать скан»"); return; }
+    try {
+      var det = new BarcodeDetector({ formats: ["qr_code"] });
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+      $("cam").hidden = false; var v = $("vid"); v.srcObject = stream; await v.play();
+      (async function loop() {
+        if (!stream) return;
+        try { var r = await det.detect(v); if (r[0] && r[0].rawValue.indexOf("STOPULSE-") === 0) { stopCam(); checkin(r[0].rawValue); return; } } catch (e) {}
+        requestAnimationFrame(loop);
+      })();
+    } catch (e) { toast("Нет доступа к камере — нажмите «Симулировать скан»"); }
+  }
+  function stopCam() { if (stream) stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; var c = $("cam"); if (c) c.hidden = true; }
+
+  /* ---------- Отрисовка ---------- */
+  function render() {
+    stopCam(); tabs();
+    var who = role === "admin" ? "Администратор" : mech(role).n;
+    $("who").textContent = who;
+    var v = $("view");
+    if (role === "admin") v.innerHTML = '<div style="display:grid;gap:14px">' + ({ board: vBoard, tasks: vTasksAdmin, qr: vQR, table: vTable }[tab] || vBoard)() + "</div>";
+    else v.innerHTML = '<div style="display:grid;gap:14px">' + (tab === "tasks" ? vTasksMech() : vMe()) + "</div>";
+    if (tab === "qr") startQR();
+    var f = $("tf");
+    if (f) f.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var car = $("f-car").value.trim(), plate = $("f-plate").value.trim().toUpperCase(), job = $("f-job").value.trim();
+      if (!car || !plate || !job) { toast("Заполните автомобиль, госномер и работу"); return; }
+      S.tasks.push({ id: S.nextId++, car: car, plate: plate, job: job, m: $("f-m").value, h: parseFloat(String($("f-h").value).replace(",", ".")) || 1, st: "new" });
+      save(); toast("Задание выдано: " + mech($("f-m").value).n); render();
+    });
+    if ($("scan")) $("scan").addEventListener("click", scanCam);
+    if ($("stopcam")) $("stopcam").addEventListener("click", stopCam);
+    if ($("sim")) $("sim").addEventListener("click", function () { checkin(token(slot())); });
+  }
+  $("view").addEventListener("click", function (e) {
+    var s = e.target.closest("[data-start]"), d = e.target.closest("[data-done]");
+    if (s) { if (!openShift(role)) { toast("Сначала начните смену по QR-коду"); return; } var t = S.tasks.filter(function (x) { return x.id === +s.dataset.start; })[0]; t.st = "work"; t.started = Date.now(); save(); render(); toast("Работа начата"); }
+    if (d) { var t2 = S.tasks.filter(function (x) { return x.id === +d.dataset.done; })[0]; t2.st = "done"; t2.finished = Date.now(); save(); render(); toast("Готово! Администратор увидит"); }
+  });
+  render();
+  setInterval(function () { if (tab === "board" || tab === "me") { var y = window.scrollY; render(); window.scrollTo(0, y); } }, 60000);
+})();
+</script>
+
+</body></html>
