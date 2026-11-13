@@ -1,12 +1,12 @@
 <title>Monro Beauty</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="robots" content="noindex">
-<meta name="description" content="Маникюр, педикюр и обучение маникюру в Михайловке. Мастер Марина Шевченко, 10 лет опыта. Онлайн-запись с предоплатой.">
+<meta name="description" content="Маникюр, педикюр и обучение маникюру в Михайловке. Мастер Марина Шевченко, 10 лет опыта. Онлайн-запись, очное обучение.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tenor+Sans&family=Manrope:wght@400;500;600;700;800&display=swap">
 <style>
-/* Layout: одностраничник с разделами (#zapis, #kursy, #admin — отдельные экраны), на телефоне снизу липкая кнопка записи */
+/* Layout: многостраничный сайт на хэш-маршрутах, слева выезжающее меню, на телефоне снизу липкая кнопка записи */
 :root {
   --bg: #FBF8F7;
   --paper: #FFFFFF;
@@ -363,6 +363,46 @@ footer .fnav { display: flex; gap: 8px 20px; flex-wrap: wrap; align-items: cente
 footer .fnav a { text-decoration: none; }
 footer .fnav a:hover { color: var(--ink); }
 
+/* обучение */
+.train-teaser { display: grid; grid-template-columns: 1.1fr 1fr; border-radius: 30px; overflow: hidden; background: var(--paper); border: 1px solid var(--line); }
+.train-teaser .cv { background: linear-gradient(135deg, color-mix(in srgb, var(--lac) 80%, black), var(--lac) 55%, color-mix(in srgb, var(--lac) 55%, white)); color: #fff; padding: clamp(24px, 4vw, 44px); display: grid; align-content: space-between; gap: 30px; min-height: 280px; }
+.train-teaser .cv h2 { color: #fff; }
+.train-teaser .cv span { font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; opacity: .85; }
+.train-teaser .bd { padding: clamp(24px, 4vw, 44px); display: grid; gap: 16px; align-content: center; }
+.train-teaser .bd p { margin: 0; color: var(--mute); }
+@media (max-width: 760px) { .train-teaser { grid-template-columns: 1fr; } .train-teaser .cv { min-height: 200px; } }
+.train { display: grid; grid-template-columns: 1fr 420px; gap: 32px; align-items: start; }
+.train-info { min-width: 0; }
+.train-form { position: sticky; top: calc(84px + env(safe-area-inset-top, 0px)); }
+@media (max-width: 900px) { .train { grid-template-columns: 1fr; } .train-form { position: static; } }
+.tfacts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 28px; }
+.tfacts div { background: var(--paper); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; }
+.tfacts small { display: block; color: var(--mute); font-size: 12px; }
+.tfacts b { font-size: 17px; }
+@media (max-width: 600px) { .tfacts { grid-template-columns: 1fr 1fr; } }
+.prog { margin: 0 0 8px; padding: 0; list-style: none; display: grid; gap: 0; border-top: 1px solid var(--line); }
+.prog li { padding: 14px 2px; border-bottom: 1px solid var(--line); color: var(--mute); }
+.prog b { color: var(--ink); font-weight: 700; }
+.lbl { font-size: 13px; font-weight: 700; color: var(--mute); }
+div.f { display: grid; gap: 8px; }
+.seg2 { display: grid; grid-template-columns: 1fr 1fr; background: var(--bg); border: 1.5px solid var(--line); border-radius: 14px; padding: 4px; gap: 4px; }
+.seg2 button { border: 0; background: none; border-radius: 10px; padding: 10px; font-weight: 700; color: var(--mute); transition: background .25s, color .25s; }
+.seg2 button[aria-pressed="true"] { background: var(--lac); color: var(--lac-ink); }
+.tdone { background: color-mix(in srgb, var(--ok) 10%, var(--paper)); border-radius: 16px; padding: 14px 16px; font-size: 14px; animation: fadein .4s ease both; }
+.tdone b { color: var(--ok); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 480px) { .row2 { grid-template-columns: 1fr; } }
+/* шторка кабинета */
+.sheet-scrim { position: fixed; inset: 0; z-index: 90; background: rgba(20,12,16,.45); opacity: 0; transition: opacity .35s; }
+.sheet-scrim.on { opacity: 1; }
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 91; max-height: 92%; overflow: auto; overscroll-behavior: contain; background: var(--bg); border-radius: 26px 26px 0 0; transform: translateY(102%); transition: transform .45s cubic-bezier(.2,.8,.2,1); padding-left: max(18px, env(safe-area-inset-left, 0px)); padding-right: max(18px, env(safe-area-inset-right, 0px)); padding-block: 10px calc(22px + env(safe-area-inset-bottom, 0px)); }
+.sheet.on { transform: none; }
+.sheet-in { max-width: 640px; margin: 0 auto; display: grid; gap: 14px; }
+.grip { width: 42px; height: 5px; border-radius: 9px; background: var(--line); margin: 0 auto; }
+.sheet .x { width: 40px; height: 40px; border: 0; background: none; border-radius: 50%; display: grid; place-content: center; }
+.bk.moved { animation: flash 1.2s ease; }
+@keyframes flash { 0% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--lac) 45%, transparent); } 100% { box-shadow: 0 0 0 0 transparent; } }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
   .reveal.pre { opacity: 1; transform: none; }
@@ -390,7 +430,7 @@ footer .fnav a:hover { color: var(--ink); }
     <a href="#uslugi" data-r="uslugi">Услуги и цены<small>маникюр, педикюр, наращивание</small></a>
     <a href="#zapis" data-r="zapis">Онлайн-запись<small>свободное время на 2 недели</small></a>
     <a href="#raboty" data-r="raboty">Портфолио</a>
-    <a href="#obuchenie" data-r="obuchenie">Обучение<small>курсы маникюра и педикюра</small></a>
+    <a href="#obuchenie" data-r="obuchenie">Обучение<small>очно в студии: маникюр и педикюр</small></a>
     <a href="#o-mastere" data-r="o-mastere">О мастере и награды</a>
     <a href="#voprosy" data-r="voprosy">Вопросы и ответы</a>
     <a href="#kontakty" data-r="kontakty">Контакты</a>
@@ -413,7 +453,7 @@ footer .fnav a:hover { color: var(--ink); }
         <div class="price-from"><b class="num">от 1 400 ₽</b><span>маникюр с покрытием гель-лаком</span></div>
         <div class="cta">
           <a class="btn" href="#zapis">Выбрать время онлайн</a>
-          <a class="btn ghost" href="#obuchenie">Курсы маникюра</a>
+          <a class="btn ghost" href="#obuchenie">Обучение маникюру</a>
         </div>
         <div class="facts">
           <div><b class="num">10 лет</b><small>в ногтевом сервисе</small></div>
@@ -447,8 +487,7 @@ footer .fnav a:hover { color: var(--ink); }
 
   <section class="block" style="background:var(--paper)">
     <div class="wrap">
-      <div class="sec-row"><div class="sec-head"><span class="eyebrow">Обучение</span><h2>Научу делать маникюр, за который платят</h2></div><a class="more" href="#obuchenie">Все курсы →</a></div>
-      <div class="courses" id="homeCourses"></div>
+      <div class="train-teaser" id="homeTrain"></div>
     </div>
   </section>
 
@@ -470,7 +509,7 @@ footer .fnav a:hover { color: var(--ink); }
       <div class="steps">
         <div class="step"><b>Выберите услугу</b><p>Цена и время видны сразу.</p></div>
         <div class="step"><b>Свободное время</b><p>Занятые окна уже закрыты, без переписки.</p></div>
-        <div class="step"><b>Предоплата</b><p>От 300 ₽ картой или по СБП. Время держится за вами.</p></div>
+        <div class="step"><b>Имя и телефон</b><p>Без оплаты на сайте. Марина сразу получает вашу запись.</p></div>
         <div class="step"><b>Напоминание</b><p>За день до визита пришлём напоминание.</p></div>
       </div>
       <div class="cta" style="margin-top:24px"><a class="btn" href="#zapis">Записаться онлайн</a><a class="btn ghost" href="#voprosy">Вопросы и ответы</a></div>
@@ -491,11 +530,7 @@ footer .fnav a:hover { color: var(--ink); }
       <div class="prow"><div><b>Снятие чужой работы</b></div><span class="num">200 ₽</span></div>
       <div class="prow"><div><b>Ремонт ногтя</b></div><span class="num">100 ₽</span></div>
     </div>
-    <div class="rules" id="pravila">
-      <b>Правила предоплаты</b>
-      <span>Отмена или перенос больше чем за 24 часа — предоплата возвращается или переходит на новую дату.</span>
-      <span>Отмена позже чем за 24 часа или неявка — предоплата остаётся у мастера: это время могла занять другая клиентка.</span>
-    </div>
+    <div class="rules"><b>Оплата на месте</b><span>Наличными, картой или переводом после процедуры. Если планы изменились, предупредите Марину заранее, лучше за сутки — она перенесёт запись на удобный день.</span></div>
   </div></section>
 </main>
 
@@ -510,27 +545,42 @@ footer .fnav a:hover { color: var(--ink); }
 
 <!-- ===== ОБУЧЕНИЕ ===== -->
 <main id="v-obuchenie" class="page" hidden>
-  <section class="phero"><div class="wrap"><span class="eyebrow">Обучение</span><h1>Курсы маникюра и педикюра</h1><p class="lead">Видеоуроки открываются сразу после оплаты и остаются у вас навсегда. Смотрите с телефона, вопросы задавайте Марине в чате курса.</p></div></section>
-  <section class="block tight"><div class="wrap">
-    <div class="courses" id="courseList"></div>
-    <div class="why">
-      <div><b>Доступ навсегда</b><p>Уроки не исчезают, можно пересматривать.</p></div>
-      <div><b>Обратная связь</b><p>Присылаете фото работы — Марина разбирает ошибки.</p></div>
-      <div><b>С телефона</b><p>Без программ и компьютера, всё в браузере.</p></div>
+  <section class="phero"><div class="wrap"><span class="eyebrow">Очное обучение</span><h1>Научу делать маникюр, за который платят</h1><p class="lead">Обучение в студии Monro Beauty: маникюр или педикюр с нуля. Индивидуально или в мини-группе до 3 человек, практика на моделях, материалы включены.</p></div></section>
+  <section class="block tight"><div class="wrap train">
+    <div class="train-info">
+      <div class="tfacts">
+        <div><small>Длительность</small><b>5 дней</b></div>
+        <div><small>Группа</small><b>до 3 человек</b></div>
+        <div><small>Стоимость</small><b class="num">от 25 000 ₽</b></div>
+        <div><small>После курса</small><b>сертификат</b></div>
+      </div>
+      <h3 class="grp">Программа</h3>
+      <ol class="prog">
+        <li><b>День 1.</b> Рабочее место, санитария и стерилизация, строение ногтя.</li>
+        <li><b>День 2.</b> Аппарат и фрезы, отработка на типсах.</li>
+        <li><b>День 3.</b> Комбинированный маникюр на модели.</li>
+        <li><b>День 4.</b> Выравнивание и покрытие под кутикулу.</li>
+        <li><b>День 5.</b> Самостоятельная работа на модели, разбор ошибок, как найти первых клиенток.</li>
+      </ol>
+      <h3 class="grp">Вопросы</h3>
+      <div class="faq" id="trainFaq"></div>
     </div>
+    <form class="card train-form" id="tForm" novalidate>
+      <h3>Записаться на обучение</h3>
+      <div class="f"><span class="lbl">Направление</span><div class="seg2" id="tDir"><button type="button" data-v="man" aria-pressed="true">Маникюр</button><button type="button" data-v="ped" aria-pressed="false">Педикюр</button></div></div>
+      <div class="f"><span class="lbl">Формат</span><div class="opts" id="tFmt"></div></div>
+      <div class="f"><span class="lbl">Дата начала</span><div class="days" id="tDates"></div></div>
+      <label class="f">Имя<input type="text" id="tName" autocomplete="given-name"></label>
+      <label class="f">Телефон<input type="tel" id="tPhone" autocomplete="tel" inputmode="tel" placeholder="+7"></label>
+      <div class="sum" id="tSum"></div>
+      <label class="check"><input type="checkbox" id="tRules"><span>Согласна с правилами: предоплата закрепляет место. При отмене раньше чем за 7 дней до начала она возвращается, позже — нет.</span></label>
+      <label class="check"><input type="checkbox" id="tPd"><span>Согласна на обработку персональных данных (152-ФЗ).</span></label>
+      <p class="err" id="tErr" hidden></p>
+      <button class="btn" type="submit" id="tPay">Оплатить предоплату</button>
+      <div class="tdone" id="tDone" hidden></div>
+      <p class="note">Демо: оплата не списывается.</p>
+    </form>
   </div></section>
-</main>
-
-<!-- ===== КУРС ===== -->
-<main id="v-kurs" class="page screen" hidden>
-  <div class="wrap">
-    <a class="back" href="#obuchenie">‹ Все курсы</a>
-    <div class="card" id="kHead"></div>
-    <div class="player" id="kPlayer"></div>
-    <div class="card" id="kLessonsCard"><h3>Уроки</h3><div class="lessons" id="kLessons"></div></div>
-    <div class="card"><h3>Вопросы о курсе</h3><div class="faq" id="kFaq"></div></div>
-    <p class="demo">Демо-версия: оплата не списывается. Видео Марина загрузит сама через кабинет мастера.</p>
-  </div>
 </main>
 
 <!-- ===== О МАСТЕРЕ ===== -->
@@ -605,11 +655,10 @@ footer .fnav a:hover { color: var(--ink); }
       <label class="f">Телефон<input type="tel" id="bPhone" autocomplete="tel" inputmode="tel" placeholder="+7" required></label>
       <label class="f">Комментарий, по желанию<input type="text" id="bNote" placeholder="Например: хочу дизайн как на фото"></label>
       <div class="sum" id="bSum"></div>
-      <label class="check"><input type="checkbox" id="bRules"><span>Согласна с <a href="#uslugi" data-to="pravila">правилами предоплаты</a>: при отмене позже чем за 24 часа или неявке предоплата не возвращается.</span></label>
       <label class="check"><input type="checkbox" id="bPd"><span>Согласна на обработку персональных данных для записи (152-ФЗ).</span></label>
       <p class="err" id="bErr" hidden></p>
-      <button class="btn" type="submit" id="bPay">Оплатить предоплату</button>
-      <p class="note">Оплата картой или по СБП.</p>
+      <button class="btn" type="submit" id="bPay">Записаться</button>
+      <p class="note">Оплата на месте после процедуры.</p>
     </form>
 
     <div class="card" id="b4" hidden>
@@ -625,7 +674,7 @@ footer .fnav a:hover { color: var(--ink); }
       <p class="note">Так выглядит уведомление, которое Марина сразу получает в Telegram.</p>
       <a class="btn ghost" href="#top">На главную</a>
     </div>
-    <p class="demo">Демо-версия: оплата не списывается, записи хранятся только на этом телефоне. Их видно в разделе «<a href="#admin">Вход для мастера</a>».</p>
+    <p class="demo">Демо-версия: записи хранятся только на этом телефоне. Их видно в разделе «<a href="#admin">Вход для мастера</a>».</p>
   </div>
 </main>
 
@@ -636,14 +685,30 @@ footer .fnav a:hover { color: var(--ink); }
     <p class="demo">Демо: вход по паролю появится в рабочей версии. Записи с этого телефона и примеры клиенток для наглядности.</p>
     <div class="days" id="aDays"></div>
     <div class="kpis" id="aKpi"></div>
-    <div class="card"><h3>Записи</h3><div class="opts" id="aList"></div></div>
+    <div class="card"><div class="adm-top"><h3>Записи</h3><button class="btn sm" id="aAdd">+ Добавить запись</button></div><div class="opts" id="aList"></div></div>
     <div class="card">
       <div class="adm-top"><h3>Закрыть время</h3><button class="btn sm ghost" id="aDayOff">Выходной весь день</button></div>
       <p class="note">Нажмите на окно, чтобы закрыть его для записи. Ещё раз — открыть.</p>
       <div class="grid-slots" id="aGrid"></div>
     </div>
+    <div class="card"><h3>Заявки на обучение</h3><div class="opts" id="aTrain"></div></div>
   </div>
 </main>
+
+<div class="sheet-scrim" id="eScrim" hidden></div>
+<div class="sheet" id="eSheet" role="dialog" aria-modal="true" aria-labelledby="eTitle" hidden>
+  <div class="sheet-in">
+    <div class="grip"></div>
+    <div class="adm-top"><h3 id="eTitle">Новая запись</h3><button class="x" id="eClose" aria-label="Закрыть"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
+    <p class="note" id="eWho"></p>
+    <label class="f" id="eSvcL">Услуга<select id="eSvc"></select></label>
+    <div class="f"><span class="lbl">День</span><div class="days" id="eDays"></div></div>
+    <div class="f"><span class="lbl">Время</span><div class="slots" id="eSlots"></div></div>
+    <div class="row2" id="eContact"><label class="f">Имя клиентки<input type="text" id="eName"></label><label class="f">Телефон<input type="tel" id="ePhone" inputmode="tel" placeholder="+7"></label></div>
+    <p class="err" id="eErr" hidden></p>
+    <button class="btn" id="eSave">Сохранить</button>
+  </div>
+</div>
 
 <nav class="nextpage" id="nextPage" aria-label="Следующий раздел"></nav>
 
@@ -673,34 +738,22 @@ footer .fnav a:hover { color: var(--ink); }
     { id: "ped", name: "Педикюр с покрытием", price: 1700, min: 120, pre: 300, text: "Обработка стоп и пальцев, гель-лак на ногти." },
     { id: "set", name: "Маникюр + педикюр", price: 2900, min: 210, pre: 500, text: "Обе процедуры за один визит, покрытие в один тон." }
   ];
-  var COURSES = [
-    { id: "base", name: "Маникюр с нуля", price: 12900, kind: "Онлайн-курс", tags: ["24 урока", "доступ навсегда", "чат с Мариной"], text: "Для тех, кто хочет начать зарабатывать на маникюре. От стерилизации и аппарата до покрытия под кутикулу и первых клиенток.",
-      lessons: ["Знакомство и рабочее место", "Стерилизация: как делать правильно", "Аппарат и фрезы", "Комбинированный маникюр", "Подготовка ногтя к покрытию", "База и выравнивание", "Покрытие под кутикулу", "Типичные ошибки и сколы", "Фото работ для соцсетей", "Первые клиентки и цены"],
-      faq: [["Нужен ли опыт?", "Нет. Курс рассчитан на тех, кто никогда не делал маникюр: начинаем с рабочего места и стерилизации."], ["Что купить для занятий?", "Список материалов и инструментов — в первом уроке, с вариантами на разный бюджет."], ["Сколько длится курс?", "Смотрите в своём темпе. Обычно на курс с практикой уходит 3–4 недели."]] },
-    { id: "ped", name: "Педикюр: аппаратный и комбинированный", price: 9900, kind: "Онлайн-курс", tags: ["14 уроков", "доступ навсегда", "чат с Мариной"], text: "Обработка стоп и пальцев аппаратом, работа со сложными случаями, покрытие на ноги. Для начинающих и мастеров маникюра.",
-      lessons: ["Рабочее место и безопасность", "Фрезы и диски для педикюра", "Обработка пальцев", "Обработка стоп", "Сложные случаи: трещины, мозоли", "Покрытие на ноги", "Время и цена процедуры"],
-      faq: [["Можно без опыта маникюра?", "Да. Основы стерилизации и работы аппаратом разбираем с нуля."], ["Нужен ли педикюрный аппарат?", "Подойдёт тот же аппарат, что для маникюра. Какие насадки докупить — в уроке 2."], ["Есть проверка домашних заданий?", "Да. Присылаете фото в чат курса, Марина разбирает ошибки."]] },
-    { id: "cut", name: "Идеальное покрытие", price: 6900, kind: "Онлайн-курс", tags: ["9 уроков", "для мастеров"], text: "Повышение квалификации: архитектура, ровные блики, носка без отслоек 4 недели.",
-      lessons: ["Почему отслаивается покрытие", "Архитектура ногтя", "Выравнивание базой", "Тонкое покрытие у кутикулы", "Блик: проверка и исправление"],
-      faq: [["Для кого курс?", "Для мастеров, которые уже делают маникюр и хотят меньше переделок и больше постоянных клиенток."], ["Подойдут мои материалы?", "Да, техника не привязана к бренду."]] },
-    { id: "live", name: "Очное обучение в студии", price: 25000, from: true, kind: "В студии", tags: ["5 дней", "практика на моделях", "сертификат"], text: "Маникюр или педикюр индивидуально или в мини-группе до 3 человек. Материалы для практики включены.", lessons: [],
-      faq: [["Когда ближайшая группа?", "Даты Марина сообщает при записи на консультацию."], ["Что выдаётся после обучения?", "Сертификат Monro Beauty о прохождении курса."], ["Можно оплатить частями?", "Да, обсуждается на консультации."]] }
-  ];
+  var TRAIN = { formats: [{ id: "solo", name: "Индивидуально", price: 30000 }, { id: "group", name: "Мини-группа до 3 человек", price: 25000 }], pre: 5000, seats: 3 };
   var FAQ = [
     ["Процедуры", [
       ["Сколько держится покрытие?", "Обычно 3–4 недели. Срок зависит от того, как быстро растут ногти, и от домашних дел: бытовая химия без перчаток сокращает носку."],
       ["Можно прийти со своим дизайном?", "Конечно. Пришлите фото при записи в комментарии, Марина заранее скажет, сколько займёт и сколько будет стоить."],
       ["Как обрабатываются инструменты?", "Мытьё, дезинфекция и стерилизация в сухожаре. Инструменты хранятся в крафт-пакетах, пакет вскрывается при вас."],
       ["Снимаете чужую работу?", "Да, снятие стоит 200 ₽. Укажите это при записи, чтобы хватило времени."]]],
-    ["Запись и предоплата", [
-      ["Зачем нужна предоплата?", "Она закрепляет время за вами. Мастер работает одна, и пустое окно из-за неявки — это потерянный рабочий день."],
-      ["Как отменить или перенести запись?", "Напишите Марине. Больше чем за 24 часа — предоплата вернётся или перейдёт на новую дату."],
-      ["Что если отменить позже или не прийти?", "При отмене позже чем за 24 часа или неявке предоплата не возвращается. Это правило вы подтверждаете при записи."],
+    ["Запись", [
+      ["Нужно ли платить заранее?", "Нет. Запись на процедуры без предоплаты, оплата на месте после работы."],
+      ["Как отменить или перенести запись?", "Напишите или позвоните Марине, лучше за сутки. Она перенесёт запись на удобный день и время."],
       ["Что если опоздаю?", "Предупредите, если опаздываете. При опоздании больше чем на 15 минут процедуру, возможно, придётся сократить или перенести."]]],
     ["Обучение", [
-      ["Как получить доступ к урокам?", "Сразу после оплаты уроки открываются в личном кабинете на сайте. Доступ остаётся навсегда."],
-      ["Можно смотреть с телефона?", "Да, всё работает в браузере телефона, без программ."],
-      ["Можно задать вопрос Марине?", "Да, в чате курса. Присылайте фото работ — Марина подскажет, что исправить."]]]
+      ["Как проходит обучение?", "Очно в студии Monro Beauty, 5 дней. Теория, отработка на типсах и практика на моделях."],
+      ["Нужен ли опыт?", "Нет, обучаем с нуля. Если опыт есть, программу подстроим под вас."],
+      ["Зачем предоплата за обучение?", "Мест в группе всего три. Предоплата 5 000 ₽ закрепляет место, остаток оплачивается в первый день."],
+      ["Можно ли вернуть предоплату?", "Да, если отменить раньше чем за 7 дней до начала. Позже предоплата не возвращается: место уже не успеть отдать другому ученику."]]]
   ];
   var SHADES = [["вишня", "#9E1F42"], ["нюд", "#D7A79A"], ["молочный", "#EFE3DC"], ["бордо", "#5B1426"], ["шампань", "#C9A46A"], ["графит", "#3A3438"]];
   var WD = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
@@ -726,25 +779,26 @@ footer .fnav a:hover { color: var(--ink); }
     while (t < CLOSE - 60 && out.length < 3) {
       var s = SERVICES[Math.floor(r() * SERVICES.length)];
       if (t + s.min > CLOSE) break;
-      if (r() < .7) out.push({ id: "ex-" + k + "-" + t, date: k, start: t, svc: s.id, name: NAMES[Math.floor(r() * NAMES.length)], phone: "+7 9•• •••-••-" + String(10 + Math.floor(r() * 89)), status: "booked", example: true });
+      if (r() < .7) out.push({ id: "ex-" + k + "-" + t, date: k, start: t, svc: s.id, name: NAMES[Math.floor(r() * NAMES.length)], phone: "+7 9•• •••-••-" + String(10 + Math.floor(r() * 89)), status: "booked", example: true, seedDate: k });
       t += s.min + STEP * (1 + Math.floor(r() * 4));
     }
     return out;
   }
   function dayBookings(k) {
-    var ex = seeded(k).map(function (b) { var o = st.bookings.filter(function (x) { return x.id === b.id; })[0]; return o || b; });
-    var own = st.bookings.filter(function (b) { return b.date === k && !b.example; });
+    // примеры могут быть перенесены мастером на другой день — тогда показываем их там, куда перенесли
+    var ex = seeded(k).map(function (b) { var o = st.bookings.filter(function (x) { return x.id === b.id; })[0]; return o || b; }).filter(function (b) { return b.date === k; });
+    var own = st.bookings.filter(function (b) { return b.date === k && b.seedDate !== k; });
     return ex.concat(own).sort(function (a, b) { return a.start - b.start; });
   }
-  function busyIntervals(k) {
-    var iv = dayBookings(k).filter(function (b) { return b.status === "booked" || b.status === "came" || b.status === "noshow"; })
+  function busyIntervals(k, ignore) {
+    var iv = dayBookings(k).filter(function (b) { return b.id !== ignore && (b.status === "booked" || b.status === "came" || b.status === "noshow"); })
       .map(function (b) { return [b.start, b.start + svc(b.svc).min]; });
     Object.keys(st.blocks[k] || {}).forEach(function (m) { m = Number(m); iv.push([m, m + STEP]); });
     return iv;
   }
-  function freeSlots(k, minutes) {
+  function freeSlots(k, minutes, ignore) {
     if (st.dayoff[k] || new Date(k + "T12:00").getDay() === 0) return [];
-    var iv = busyIntervals(k), out = [], now = new Date(), isToday = k === dkey(now), nowM = now.getHours() * 60 + now.getMinutes() + 60;
+    var iv = busyIntervals(k, ignore), out = [], now = new Date(), isToday = k === dkey(now), nowM = now.getHours() * 60 + now.getMinutes() + 60;
     for (var t = OPEN; t + minutes <= CLOSE; t += STEP) {
       if (isToday && t < nowM) continue;
       var clash = iv.some(function (x) { return t < x[1] && t + minutes > x[0]; });
@@ -757,7 +811,7 @@ footer .fnav a:hover { color: var(--ink); }
   function dur(m) { return (m / 60).toString().replace(".", ",") + " ч"; }
   function svcCard(s) {
     return '<article class="svc-i"><div class="top"><h3>' + s.name + '</h3><span class="pr num">' + rub(s.price) + '</span></div><p>' + s.text + '</p>' +
-      '<div class="meta"><span>' + dur(s.min) + '</span><span>предоплата ' + rub(s.pre) + '</span></div>' +
+      '<div class="meta"><span>' + dur(s.min) + '</span><span>оплата на месте</span></div>' +
       '<a class="btn sm ghost" href="#zapis" data-pick="' + s.id + '">Записаться</a></article>';
   }
   function priceRow(s) {
@@ -779,16 +833,9 @@ footer .fnav a:hover { color: var(--ink); }
   });
   var cupIcon = '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 4h10v5a5 5 0 0 1-10 0z"></path><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4M12 14v4M8 21h8"></path></svg>';
   $("awards").innerHTML = Array.apply(null, Array(4)).map(function () { return '<div class="award"><div class="ph" role="img" aria-label="Место для фото награды">' + cupIcon + 'Фото награды</div><b>Название конкурса, год</b></div>'; }).join("");
-  function courseCard(c) {
-    return '<article class="course"><div class="cv"><div class="play"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"></path></svg></div><span>' + c.kind + '</span></div>' +
-      '<div class="bd"><h3>' + c.name + '</h3><p>' + c.text + '</p><div class="tags">' + c.tags.map(function (t) { return '<span class="tag">' + t + '</span>'; }).join("") + '</div>' +
-      '<div class="row"><span class="pr num">' + (c.from ? "от " : "") + rub(c.price) + '</span><a class="btn sm" href="#kurs-' + c.id + '">' + (c.lessons.length ? (st.bought[c.id] ? "Смотреть уроки" : "Подробнее") : "Узнать даты") + '</a></div></div></article>';
-  }
-  function renderCourseLists() {
-    $("homeCourses").innerHTML = COURSES.slice(0, 3).map(courseCard).join("");
-    $("courseList").innerHTML = COURSES.map(courseCard).join("");
-  }
-  renderCourseLists();
+  $("homeTrain").innerHTML = '<div class="cv"><span>Обучение в студии</span><h2>Научу делать маникюр, за который платят</h2></div>' +
+    '<div class="bd"><p>Очный курс маникюра или педикюра с нуля: 5 дней, практика на моделях, мини-группа до 3 человек, сертификат.</p>' +
+    '<div class="price-from"><b class="num">от 25 000 ₽</b><span>место закрепляется предоплатой</span></div><a class="btn" href="#obuchenie" style="justify-self:start">Подробнее и запись</a></div>';
   function faqHtml(list) { return list.map(function (q) { return '<details><summary>' + q[0] + '</summary><p>' + q[1] + '</p></details>'; }).join(""); }
   $("faqAll").innerHTML = FAQ.map(function (g) { return '<h3 class="grp">' + g[0] + '</h3><div class="faq">' + faqHtml(g[1]) + '</div>'; }).join("");
 
@@ -852,7 +899,7 @@ footer .fnav a:hover { color: var(--ink); }
   }
   function renderSvcOpts() {
     $("bSvc").innerHTML = SERVICES.map(function (s) {
-      return '<button class="opt" data-s="' + s.id + '" aria-pressed="' + (bk.svc === s.id) + '"><span><b style="font-weight:700">' + s.name + '</b><small>' + (s.min / 60).toString().replace(".", ",") + ' ч · предоплата ' + rub(s.pre) + '</small></span><b class="num">' + rub(s.price) + '</b></button>';
+      return '<button class="opt" data-s="' + s.id + '" aria-pressed="' + (bk.svc === s.id) + '"><span><b style="font-weight:700">' + s.name + '</b><small>' + (s.min / 60).toString().replace(".", ",") + ' ч</small></span><b class="num">' + rub(s.price) + '</b></button>';
     }).join("");
   }
   $("bSvc").addEventListener("click", function (e) {
@@ -889,76 +936,105 @@ footer .fnav a:hover { color: var(--ink); }
   function renderSum() {
     var s = svc(bk.svc), first = !st.bookings.some(function (b) { return !b.example; });
     var price = first ? Math.round(s.price * 0.9 / 10) * 10 : s.price;
-    $("bSum").innerHTML = '<div><span>' + s.name + '</span><b>' + rub(price) + (first ? " (−10%)" : "") + '</b></div><div><span>Когда</span><b>' + whenText(bk.date, bk.start) + '</b></div>' +
-      '<div class="big"><span style="color:inherit">Предоплата сейчас</span><span class="num">' + rub(s.pre) + '</span></div><div><span>Остаток на месте</span><b class="num">' + rub(price - s.pre) + '</b></div>';
-    $("bPay").textContent = "Оплатить " + rub(s.pre);
+    $("bSum").innerHTML = '<div><span>' + s.name + '</span><b>' + rub(price) + (first ? " (−10%)" : "") + '</b></div><div><span>Когда</span><b>' + whenText(bk.date, bk.start) + '</b></div><div><span>Длительность</span><b>' + dur(s.min) + '</b></div>';
     bk.price = price;
   }
   $("b3").addEventListener("submit", function (e) {
     e.preventDefault();
     var name = $("bName").value.trim(), phone = $("bPhone").value.replace(/[^\d+]/g, "");
-    var err = !name ? "Укажите имя." : phone.replace(/\D/g, "").length < 10 ? "Укажите телефон полностью, например +7 900 123-45-67." : !$("bRules").checked ? "Отметьте согласие с правилами предоплаты." : !$("bPd").checked ? "Отметьте согласие на обработку данных." : "";
+    var err = !name ? "Укажите имя." : phone.replace(/\D/g, "").length < 10 ? "Укажите телефон полностью, например +7 900 123-45-67." : !$("bPd").checked ? "Отметьте согласие на обработку данных." : "";
     $("bErr").textContent = err; $("bErr").hidden = !err; if (err) return;
     var still = freeSlots(bk.date, svc(bk.svc).min).some(function (s) { return s.t === bk.start && s.free; });
     if (!still) { $("bErr").textContent = "Это время только что заняли. Выберите другое."; $("bErr").hidden = false; renderDays(); stepTo(2); return; }
-    var btn = $("bPay"); btn.disabled = true; btn.textContent = "Оплата…";
+    var btn = $("bPay"); btn.disabled = true; btn.textContent = "Записываю…";
     setTimeout(function () {
-      var s = svc(bk.svc), b = { id: "b" + Date.now().toString(36), date: bk.date, start: bk.start, svc: s.id, name: name, phone: $("bPhone").value.trim(), note: $("bNote").value.trim(), price: bk.price, pre: s.pre, status: "booked", created: Date.now() };
+      var s = svc(bk.svc), b = { id: "b" + Date.now().toString(36), date: bk.date, start: bk.start, svc: s.id, name: name, phone: $("bPhone").value.trim(), note: $("bNote").value.trim(), price: bk.price, status: "booked", created: Date.now() };
       st.bookings.push(b); save();
       $("bDone").textContent = whenText(b.date, b.start) + ". " + s.name + ". Адрес: ул. Обороны, 44А. Напоминание придёт за день.";
-      $("bTg").textContent = "🆕 Новая запись\n" + s.name + "\n" + whenText(b.date, b.start) + "\n" + name + ", " + b.phone + (b.note ? "\nКомментарий: " + b.note : "") + "\nПредоплата " + rub(s.pre) + " ✅ оплачена";
-      btn.disabled = false; stepTo(4); window.scrollTo({ top: 0, behavior: "smooth" });
+      $("bTg").textContent = "🆕 Новая запись\n" + s.name + "\n" + whenText(b.date, b.start) + "\n" + name + ", " + b.phone + (b.note ? "\nКомментарий: " + b.note : "");
+      btn.disabled = false; btn.textContent = "Записаться"; stepTo(4); window.scrollTo({ top: 0, behavior: "smooth" });
     }, 900);
   });
   function resetBooking(pick) {
     bk = { svc: pick || null, date: null, start: null };
-    ["bName", "bPhone", "bNote"].forEach(function (id) { $(id).value = ""; }); $("bRules").checked = false; $("bPd").checked = false; $("bErr").hidden = true;
+    ["bName", "bPhone", "bNote"].forEach(function (id) { $(id).value = ""; }); $("bPd").checked = false; $("bErr").hidden = true;
     renderSvcOpts(); if (bk.svc) { renderDays(); stepTo(2); } else stepTo(1);
   }
 
-  // ---------- курсы ----------
-  function renderCourse(id) {
-    var c = COURSES.filter(function (x) { return x.id === id; })[0]; if (!c) return false;
-    var own = !!st.bought[c.id];
-    $("kHead").innerHTML = '<span class="eyebrow">' + c.kind + '</span><h2>' + c.name + '</h2><p class="lead" style="margin:0">' + c.text + '</p><div class="tags">' + c.tags.map(function (t) { return '<span class="tag">' + t + '</span>'; }).join("") + '</div>' +
-      (c.lessons.length ? (own ? '<span class="pill ok" style="width:fit-content">Курс открыт</span>' : '<div class="row" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><button class="btn" id="kBuy">Купить за ' + rub(c.price) + '</button><span class="note">Первый урок можно посмотреть бесплатно</span></div>')
-        : '<a class="btn" href="#zapis" style="width:fit-content">Записаться на консультацию</a><p class="note">Даты ближайших групп Марина сообщит при записи.</p>');
-    $("kLessons").innerHTML = c.lessons.length ? c.lessons.map(function (l, i) {
-      var open = own || i === 0;
-      return '<button class="lesson' + (open ? "" : " locked") + '" data-l="' + i + '"><span class="n num">' + (i + 1) + '</span><span class="t">' + l + '</span><span class="d">' + (open ? (i === 0 && !own ? "бесплатно" : "смотреть") : "🔒") + '</span></button>';
-    }).join("") : '<p class="note">Программа очного курса: теория, отработка на типсах, практика на моделях, разбор ошибок, сертификат.</p>';
-    $("kPlayer").innerHTML = '<svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" style="margin:0 auto"><path d="M8 5v14l11-7z"></path></svg><span>' + (c.lessons.length ? "Урок 1. " + c.lessons[0] : c.name) + '</span><span style="opacity:.6">Здесь будет видео Марины</span>';
-    $("kPlayer").hidden = false;
-    $("kFaq").innerHTML = faqHtml(c.faq || []);
-    var buy = $("kBuy");
-    if (buy) buy.onclick = function () { buy.disabled = true; buy.textContent = "Оплата…"; setTimeout(function () { st.bought[c.id] = true; save(); renderCourse(c.id); renderCourseLists(); toast("Курс открыт. Приятного обучения!"); }, 900); };
-    $("kLessons").onclick = function (e) {
-      var b = e.target.closest("[data-l]"); if (!b) return;
-      var i = Number(b.dataset.l);
-      if (!own && i > 0) { toast("Урок откроется после покупки курса"); return; }
-      $("kPlayer").innerHTML = '<svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" style="margin:0 auto"><path d="M8 5v14l11-7z"></path></svg><span>Урок ' + (i + 1) + ". " + c.lessons[i] + '</span><span style="opacity:.6">Здесь будет видео Марины</span>';
-      $("kPlayer").scrollIntoView({ behavior: "smooth", block: "center" });
-    };
-    return true;
+  // ---------- очное обучение ----------
+  var tr = { dir: "man", fmt: "group", date: null };
+  $("trainFaq").innerHTML = faqHtml(FAQ[2][1]);
+  function trainDates() {
+    var out = [];
+    for (var i = 3; out.length < 6 && i < 70; i++) { var d = addDays(i); if (d.getDay() === 1) out.push(dkey(d)); }
+    return out;
   }
+  function seatsTaken(k) { return (st.training || []).filter(function (t) { return t.date === k && t.status === "paid"; }).length + (k.charCodeAt(9) % 2); }
+  function renderTrain() {
+    var f = TRAIN.formats.filter(function (x) { return x.id === tr.fmt; })[0];
+    document.querySelectorAll("#tDir button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.v === tr.dir)); });
+    $("tFmt").innerHTML = TRAIN.formats.map(function (x) { return '<button type="button" class="opt" data-v="' + x.id + '" aria-pressed="' + (x.id === tr.fmt) + '"><span><b style="font-weight:700">' + x.name + '</b></span><b class="num">' + rub(x.price) + '</b></button>'; }).join("");
+    var dates = trainDates();
+    if (!tr.date || dates.indexOf(tr.date) < 0) tr.date = dates.filter(function (k) { return seatsTaken(k) < TRAIN.seats; })[0];
+    var sl = $("tDates").scrollLeft;
+    $("tDates").innerHTML = dates.map(function (k) {
+      var d = new Date(k + "T12:00"), left = TRAIN.seats - seatsTaken(k), full = tr.fmt === "group" ? left <= 0 : left < TRAIN.seats;
+      return '<button type="button" class="day" data-d="' + k + '" aria-pressed="' + (k === tr.date) + '"' + (full ? " disabled" : "") + '><small>' + d.toLocaleDateString("ru-RU", { month: "short" }) + '</small><b class="num">' + d.getDate() + '</b><em>' + (full ? "занято" : tr.fmt === "group" ? "мест: " + left : "свободно") + '</em></button>';
+    }).join("");
+    $("tDates").scrollLeft = sl;
+    $("tSum").innerHTML = '<div><span>Обучение</span><b>' + (tr.dir === "man" ? "маникюр" : "педикюр") + ', ' + f.name.toLowerCase() + '</b></div><div><span>Начало</span><b>' + (tr.date ? new Date(tr.date + "T12:00").toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) : "—") + '</b></div><div><span>Стоимость</span><b class="num">' + rub(f.price) + '</b></div>' +
+      '<div class="big"><span style="color:inherit">Предоплата сейчас</span><span class="num">' + rub(TRAIN.pre) + '</span></div><div><span>Остаток в первый день</span><b class="num">' + rub(f.price - TRAIN.pre) + '</b></div>';
+    $("tPay").textContent = "Оплатить " + rub(TRAIN.pre);
+  }
+  $("tDir").addEventListener("click", function (e) { var b = e.target.closest("[data-v]"); if (b) { tr.dir = b.dataset.v; renderTrain(); } });
+  $("tFmt").addEventListener("click", function (e) { var b = e.target.closest("[data-v]"); if (b) { tr.fmt = b.dataset.v; renderTrain(); } });
+  $("tDates").addEventListener("click", function (e) { var b = e.target.closest("[data-d]"); if (b && !b.disabled) { tr.date = b.dataset.d; renderTrain(); } });
+  $("tForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = $("tName").value.trim(), phone = $("tPhone").value.trim();
+    var err = !tr.date ? "Выберите дату начала." : !name ? "Укажите имя." : phone.replace(/\D/g, "").length < 10 ? "Укажите телефон полностью." : !$("tRules").checked ? "Отметьте согласие с правилами предоплаты." : !$("tPd").checked ? "Отметьте согласие на обработку данных." : "";
+    $("tErr").textContent = err; $("tErr").hidden = !err; if (err) return;
+    var btn = $("tPay"); btn.disabled = true; btn.textContent = "Оплата…";
+    setTimeout(function () {
+      var f = TRAIN.formats.filter(function (x) { return x.id === tr.fmt; })[0];
+      st.training = st.training || [];
+      st.training.push({ id: "t" + Date.now().toString(36), dir: tr.dir, fmt: tr.fmt, date: tr.date, name: name, phone: phone, price: f.price, pre: TRAIN.pre, status: "paid" });
+      save(); btn.disabled = false;
+      $("tDone").innerHTML = '<b>Место закреплено.</b> Обучение начинается ' + new Date(tr.date + "T12:00").toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }) + ' в 10:00. Марина свяжется с вами накануне.';
+      $("tDone").hidden = false; ["tName", "tPhone"].forEach(function (id) { $(id).value = ""; }); $("tRules").checked = false; $("tPd").checked = false;
+      renderTrain(); toast("Предоплата получена, место закреплено");
+    }, 900);
+  });
+  renderTrain();
 
-  // ---------- админка ----------
-  var aDate = dkey(addDays(0));
+  // ---------- кабинет мастера ----------
+  var aDate = dkey(addDays(0)), flashId = null;
+  var STATUS = { booked: ["Записана", ""], came: ["Пришла", "ok"], noshow: ["Не пришла", "bad"], cancelled: ["Отменена", ""] };
+  function ownCopy(rec) {
+    var own = st.bookings.filter(function (x) { return x.id === rec.id; })[0];
+    if (!own) { own = Object.assign({}, rec); st.bookings.push(own); }
+    return own;
+  }
+  function findBooking(id) {
+    for (var i = 0; i < 14; i++) { var r = dayBookings(dkey(addDays(i))).filter(function (x) { return x.id === id; })[0]; if (r) return r; }
+    return st.bookings.filter(function (x) { return x.id === id; })[0];
+  }
   function renderAdmin() {
     var sl = $("aDays").scrollLeft; $("aDays").innerHTML = dayBtns(aDate, false); $("aDays").scrollLeft = sl;
     var list = dayBookings(aDate), active = list.filter(function (b) { return b.status !== "cancelled"; });
     var sumDay = active.filter(function (b) { return b.status !== "noshow"; }).reduce(function (s, b) { return s + (b.price || svc(b.svc).price); }, 0);
-    var preKept = list.filter(function (b) { return b.status === "noshow" || b.status === "late"; }).reduce(function (s, b) { return s + (b.pre || svc(b.svc).pre); }, 0);
-    $("aKpi").innerHTML = '<div class="kpi"><small>Записей</small><b class="num">' + active.length + '</b></div><div class="kpi"><small>Выручка дня</small><b class="num">' + rub(sumDay) + '</b></div><div class="kpi"><small>Удержано предоплат</small><b class="num">' + rub(preKept) + '</b></div>';
-    var stTxt = { booked: ["Записана", ""], came: ["Пришла", "ok"], noshow: ["Не пришла · предоплата ваша", "bad"], cancelled: ["Отменена · предоплата возвращена", ""], late: ["Поздняя отмена · предоплата ваша", "bad"] };
+    var free = freeSlots(aDate, 60).filter(function (x) { return x.free; }).length;
+    $("aKpi").innerHTML = '<div class="kpi"><small>Записей</small><b class="num">' + active.length + '</b></div><div class="kpi"><small>Выручка дня</small><b class="num">' + rub(sumDay) + '</b></div><div class="kpi"><small>Свободных часов</small><b class="num">' + free + '</b></div>';
     $("aList").innerHTML = list.length ? list.map(function (b) {
-      var s = svc(b.svc), t = stTxt[b.status];
-      return '<div class="bk"><div class="r1"><b class="num">' + hm(b.start) + '–' + hm(b.start + s.min) + '</b><span class="pill ' + t[1] + '">' + t[0] + '</span></div>' +
+      var s = svc(b.svc), t = STATUS[b.status] || STATUS.booked;
+      return '<div class="bk' + (b.id === flashId ? " moved" : "") + '"><div class="r1"><b class="num">' + hm(b.start) + '–' + hm(b.start + s.min) + '</b><span class="pill ' + t[1] + '">' + t[0] + '</span></div>' +
         '<div><b style="font-weight:700">' + esc(b.name) + '</b> · ' + esc(b.phone) + (b.example ? ' <span class="pill">пример</span>' : '') + '</div>' +
-        '<div class="info">' + s.name + ' · ' + rub(b.price || s.price) + ' · предоплата ' + rub(b.pre || s.pre) + (b.note ? ' · «' + esc(b.note) + '»' : '') + '</div>' +
-        (b.status === "booked" ? '<div class="acts"><button data-a="came" data-id="' + b.id + '">Пришла</button><button data-a="noshow" data-id="' + b.id + '">Не пришла</button><button data-a="cancel" data-id="' + b.id + '">Отменить</button></div>' : '') + '</div>';
-    }).join("") : '<p class="note">На этот день записей нет.</p>';
-    var iv = dayBookings(aDate).filter(function (b) { return b.status !== "cancelled" && b.status !== "late"; }).map(function (b) { return [b.start, b.start + svc(b.svc).min]; });
+        '<div class="info">' + s.name + ' · ' + rub(b.price || s.price) + (b.note ? ' · «' + esc(b.note) + '»' : '') + '</div>' +
+        (b.status === "booked" ? '<div class="acts"><button data-a="move" data-id="' + b.id + '">Перенести</button><button data-a="came" data-id="' + b.id + '">Пришла</button><button data-a="noshow" data-id="' + b.id + '">Не пришла</button><button data-a="cancel" data-id="' + b.id + '">Отменить</button></div>'
+          : '<div class="acts"><button data-a="restore" data-id="' + b.id + '">Вернуть в «Записана»</button></div>') + '</div>';
+    }).join("") : '<p class="note">На этот день записей нет. Нажмите «+ Добавить запись», если записали клиентку по телефону.</p>';
+    flashId = null;
+    var iv = dayBookings(aDate).filter(function (b) { return b.status !== "cancelled"; }).map(function (b) { return [b.start, b.start + svc(b.svc).min]; });
     var g = "";
     for (var t = OPEN; t < CLOSE; t += STEP) {
       var busy = iv.some(function (x) { return t < x[1] && t + STEP > x[0]; }), blk = st.blocks[aDate] && st.blocks[aDate][t];
@@ -966,19 +1042,31 @@ footer .fnav a:hover { color: var(--ink); }
     }
     $("aGrid").innerHTML = g;
     $("aDayOff").textContent = st.dayoff[aDate] ? "Открыть день" : "Выходной весь день";
+    var trl = (st.training || []).slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+    $("aTrain").innerHTML = trl.length ? trl.map(function (t) {
+      var f = TRAIN.formats.filter(function (x) { return x.id === t.fmt; })[0];
+      var stt = t.status === "paid" ? ["Предоплата получена", "ok"] : t.status === "refund" ? ["Отменена · предоплата возвращена", ""] : ["Отменена поздно · предоплата ваша", "bad"];
+      return '<div class="bk"><div class="r1"><b>' + new Date(t.date + "T12:00").toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + '</b><span class="pill ' + stt[1] + '">' + stt[0] + '</span></div><div><b style="font-weight:700">' + esc(t.name) + '</b> · ' + esc(t.phone) + '</div><div class="info">' + (t.dir === "man" ? "Маникюр" : "Педикюр") + ' · ' + f.name.toLowerCase() + ' · ' + rub(t.price) + ' · предоплата ' + rub(t.pre) + '</div>' +
+        (t.status === "paid" ? '<div class="acts"><button data-t="' + t.id + '">Отменить</button></div>' : '') + '</div>';
+    }).join("") : '<p class="note">Заявок пока нет. Они появятся, когда ученица оплатит предоплату на странице «Обучение».</p>';
   }
   $("aDays").addEventListener("click", function (e) { var b = e.target.closest("[data-d]"); if (b) { aDate = b.dataset.d; renderAdmin(); } });
   $("aList").addEventListener("click", function (e) {
     var b = e.target.closest("[data-a]"); if (!b) return;
     var rec = dayBookings(aDate).filter(function (x) { return x.id === b.dataset.id; })[0]; if (!rec) return;
-    var own = st.bookings.filter(function (x) { return x.id === rec.id; })[0];
-    if (!own) { own = Object.assign({}, rec); st.bookings.push(own); }
-    if (b.dataset.a === "cancel") {
-      var hours = (new Date(own.date + "T00:00").getTime() + own.start * 6e4 - Date.now()) / 36e5;
-      own.status = hours >= 24 ? "cancelled" : "late";
-      toast(hours >= 24 ? "Отменено. Предоплата вернётся клиентке" : "Поздняя отмена. Предоплата остаётся у вас");
-    } else { own.status = b.dataset.a; toast(b.dataset.a === "came" ? "Отмечено: пришла" : "Неявка. Предоплата остаётся у вас"); }
+    if (b.dataset.a === "move") { openEditor(rec); return; }
+    var own = ownCopy(rec);
+    own.status = { came: "came", noshow: "noshow", cancel: "cancelled", restore: "booked" }[b.dataset.a];
+    if (own.status === "booked" && !freeSlots(own.date, svc(own.svc).min, own.id).some(function (x) { return x.t === own.start && x.free; })) { own.status = "cancelled"; toast("Это время уже занято. Перенесите запись на другое окно"); }
+    else toast({ came: "Отмечено: пришла", noshow: "Отмечено: не пришла", cancel: "Запись отменена", restore: "Запись восстановлена" }[b.dataset.a]);
     save(); renderAdmin();
+  });
+  $("aTrain").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-t]"); if (!b) return;
+    var t = st.training.filter(function (x) { return x.id === b.dataset.t; })[0];
+    var days = (new Date(t.date + "T10:00").getTime() - Date.now()) / 864e5;
+    t.status = days >= 7 ? "refund" : "late"; save(); renderAdmin(); renderTrain();
+    toast(days >= 7 ? "Отменено. Предоплата вернётся ученице" : "Поздняя отмена. Предоплата остаётся у вас");
   });
   $("aGrid").addEventListener("click", function (e) {
     var b = e.target.closest("[data-g]"); if (!b || b.disabled) return;
@@ -987,6 +1075,56 @@ footer .fnav a:hover { color: var(--ink); }
     save(); renderAdmin();
   });
   $("aDayOff").onclick = function () { if (st.dayoff[aDate]) delete st.dayoff[aDate]; else st.dayoff[aDate] = 1; save(); renderAdmin(); toast(st.dayoff[aDate] ? "День закрыт для записи" : "День открыт"); };
+
+  // Шторка: добавить запись вручную или перенести существующую
+  var ed = null;
+  $("eSvc").innerHTML = SERVICES.map(function (s) { return '<option value="' + s.id + '">' + s.name + ' · ' + rub(s.price) + ' · ' + dur(s.min) + '</option>'; }).join("");
+  function edSlots() { return freeSlots(ed.date, svc(ed.svc).min, ed.id); }
+  function renderEditor() {
+    var sl = $("eDays").scrollLeft, h = "";
+    for (var i = 0; i < 14; i++) {
+      var d = addDays(i), k = dkey(d), off = d.getDay() === 0 || st.dayoff[k];
+      var cnt = off ? 0 : freeSlots(k, svc(ed.svc).min, ed.id).filter(function (x) { return x.free; }).length;
+      h += '<button class="day" data-d="' + k + '" aria-pressed="' + (k === ed.date) + '"' + (!cnt ? " disabled" : "") + '><small>' + (i === 0 ? "сег" : WD[d.getDay()]) + '</small><b class="num">' + d.getDate() + '</b><em>' + (off ? "выходной" : cnt ? cnt + " окон" : "занято") + '</em></button>';
+    }
+    $("eDays").innerHTML = h; $("eDays").scrollLeft = sl;
+    var list = edSlots();
+    $("eSlots").innerHTML = list.length ? list.map(function (x) { return '<button class="slot num" data-t="' + x.t + '"' + (x.free ? "" : " disabled") + ' aria-pressed="' + (ed.start === x.t) + '">' + hm(x.t) + '</button>'; }).join("") : '<p class="note">В этот день свободных окон нет.</p>';
+  }
+  function openEditor(rec) {
+    ed = rec ? { id: rec.id, svc: rec.svc, date: rec.date, start: rec.start, move: true } : { id: null, svc: "gel", date: aDate, start: null, move: false };
+    $("eTitle").textContent = ed.move ? "Перенести запись" : "Новая запись";
+    $("eWho").textContent = ed.move ? rec.name + " · " + svc(rec.svc).name + " · сейчас: " + whenText(rec.date, rec.start) : "Для клиентки, которая записалась по телефону или в мессенджере.";
+    $("eSvcL").hidden = ed.move; $("eContact").hidden = ed.move; $("eSvc").value = ed.svc; $("eName").value = ""; $("ePhone").value = ""; $("eErr").hidden = true;
+    $("eSave").textContent = ed.move ? "Перенести" : "Добавить запись";
+    renderEditor();
+    $("eScrim").hidden = false; $("eSheet").hidden = false; document.body.classList.add("lock");
+    requestAnimationFrame(function () { requestAnimationFrame(function () { $("eScrim").classList.add("on"); $("eSheet").classList.add("on"); }); });
+  }
+  function closeEditor() {
+    $("eScrim").classList.remove("on"); $("eSheet").classList.remove("on"); document.body.classList.remove("lock");
+    setTimeout(function () { $("eScrim").hidden = true; $("eSheet").hidden = true; }, 450);
+  }
+  $("aAdd").onclick = function () { openEditor(null); };
+  $("eClose").onclick = closeEditor; $("eScrim").onclick = closeEditor;
+  $("eSvc").onchange = function () { ed.svc = this.value; ed.start = null; renderEditor(); };
+  $("eDays").addEventListener("click", function (e) { var b = e.target.closest("[data-d]"); if (b && !b.disabled) { ed.date = b.dataset.d; ed.start = null; renderEditor(); } });
+  $("eSlots").addEventListener("click", function (e) { var b = e.target.closest("[data-t]"); if (b && !b.disabled) { ed.start = Number(b.dataset.t); renderEditor(); } });
+  $("eSave").onclick = function () {
+    var err = ed.start == null ? "Выберите время." : "";
+    if (!err && !ed.move && !$("eName").value.trim()) err = "Укажите имя клиентки.";
+    $("eErr").textContent = err; $("eErr").hidden = !err; if (err) return;
+    if (ed.move) {
+      var own = ownCopy(findBooking(ed.id));
+      own.date = ed.date; own.start = ed.start; flashId = own.id;
+      toast("Перенесено на " + whenText(ed.date, ed.start));
+    } else {
+      var nb = { id: "b" + Date.now().toString(36), date: ed.date, start: ed.start, svc: ed.svc, name: $("eName").value.trim(), phone: $("ePhone").value.trim() || "—", price: svc(ed.svc).price, status: "booked", manual: true };
+      st.bookings.push(nb); flashId = nb.id; toast("Запись добавлена");
+    }
+    save(); aDate = ed.date; closeEditor(); renderAdmin();
+  };
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("eSheet").hidden) closeEditor(); });
 
   // ---------- маршруты ----------
   // ---------- боковое меню ----------
@@ -1010,7 +1148,7 @@ footer .fnav a:hover { color: var(--ink); }
 
   // ---------- маршруты ----------
   var ORDER = [["home", "Главная"], ["uslugi", "Услуги и цены"], ["zapis", "Онлайн-запись"], ["raboty", "Портфолио"], ["obuchenie", "Обучение"], ["o-mastere", "О мастере и награды"], ["voprosy", "Вопросы и ответы"], ["kontakty", "Контакты"]];
-  var VIEWS = ["home", "uslugi", "raboty", "obuchenie", "kurs", "o-mastere", "voprosy", "kontakty", "zapis", "admin"];
+  var VIEWS = ["home", "uslugi", "raboty", "obuchenie", "o-mastere", "voprosy", "kontakty", "zapis", "admin"];
   var pendingPick = null, pendingTo = null, curView = null;
   document.addEventListener("click", function (e) {
     var a = e.target.closest("[data-pick]"); if (a) pendingPick = a.dataset.pick;
@@ -1019,13 +1157,12 @@ footer .fnav a:hover { color: var(--ink); }
   function jumpTop() { window.scrollTo({ top: 0, behavior: "instant" }); }
   function route() {
     var h = location.hash.slice(1), v = "home";
-    if (h.indexOf("kurs-") === 0) { if (renderCourse(h.slice(5))) v = "kurs"; }
-    else if (VIEWS.indexOf(h) > 0) v = h;
+    if (VIEWS.indexOf(h) > 0) v = h;
     var changed = v !== curView; curView = v;
     VIEWS.forEach(function (k) { var el = $("v-" + k); el.hidden = k !== v; if (k === v && changed) { el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter"); } });
     document.body.classList.toggle("home", v === "home");
     $("mbar").hidden = v === "zapis" || v === "admin";
-    drawer.querySelectorAll("[data-r]").forEach(function (a) { if (a.dataset.r === v || (v === "kurs" && a.dataset.r === "obuchenie")) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+    drawer.querySelectorAll("[data-r]").forEach(function (a) { if (a.dataset.r === v || false) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
     var i = -1; ORDER.forEach(function (o, j) { if (o[0] === v) i = j; });
     var nx = i >= 0 && v !== "zapis" ? ORDER[(i + 1) % ORDER.length] : null;
     if (nx && nx[0] === "zapis" && v === "uslugi") nx = ORDER[2];
