@@ -42,6 +42,7 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { scroll-behavior: smooth; }
+main section[id] { scroll-margin-top: 72px; }
 body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; -webkit-tap-highlight-color: transparent; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 60; background: var(--bg); }
 button, input, select, textarea { font: inherit; color: inherit; }
@@ -92,23 +93,39 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 @media (max-width: 860px) { .hero .wrap { grid-template-columns: 1fr; gap: 28px; } .stage { order: -1; } }
 
 /* сцена: ногти с бликом */
-.stage { position: relative; aspect-ratio: 1 / .92; max-width: 100%; border-radius: 32px; background: radial-gradient(120% 90% at 50% 100%, var(--blush), var(--paper) 70%); box-shadow: var(--shadow); overflow: hidden; display: grid; place-items: center; --gx: 0; }
-.fan { position: relative; width: 78%; height: 70%; transform: translateY(6%); }
-.nail { position: absolute; bottom: 0; left: 50%; width: 15%; height: 62%; border-radius: 50% 50% 18% 18% / 62% 62% 14% 14%; background: linear-gradient(160deg, color-mix(in srgb, var(--nail) 70%, white) 0%, var(--nail) 38%, color-mix(in srgb, var(--nail) 70%, black) 100%); transform-origin: 50% 160%; box-shadow: inset 0 -6px 14px rgba(0,0,0,.18), 0 18px 30px color-mix(in srgb, var(--nail) 30%, transparent); overflow: hidden; transition: background .6s ease; }
-.nail::before { content: ""; position: absolute; inset: 0; background: radial-gradient(60% 30% at 50% 4%, rgba(255,255,255,.35), transparent 70%); }
-.nail::after { content: ""; position: absolute; top: -10%; bottom: -10%; left: 18%; width: 22%; border-radius: 50%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.85) 45%, rgba(255,255,255,.95) 50%, transparent); filter: blur(1.5px); transform: translateX(calc(var(--gx) * 160%)) skewX(-8deg); transition: transform .25s ease-out; }
-.stage.idle .nail::after { animation: gloss 4.8s ease-in-out infinite; }
-@keyframes gloss { 0%, 100% { transform: translateX(-120%) skewX(-8deg); } 50% { transform: translateX(200%) skewX(-8deg); } }
-.nail:nth-child(1) { transform: translateX(-50%) rotate(-34deg); height: 46%; }
-.nail:nth-child(2) { transform: translateX(-50%) rotate(-16deg); height: 58%; }
-.nail:nth-child(3) { transform: translateX(-50%) rotate(0deg); height: 64%; }
-.nail:nth-child(4) { transform: translateX(-50%) rotate(16deg); height: 58%; }
-.nail:nth-child(5) { transform: translateX(-50%) rotate(34deg); height: 46%; }
-.nail:nth-child(2)::after { animation-delay: .12s !important; } .nail:nth-child(3)::after { animation-delay: .24s !important; } .nail:nth-child(4)::after { animation-delay: .36s !important; } .nail:nth-child(5)::after { animation-delay: .48s !important; }
-.shades { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); display: flex; gap: 8px; background: color-mix(in srgb, var(--paper) 85%, transparent); backdrop-filter: blur(8px); border-radius: 999px; padding: 6px; box-shadow: var(--shadow); }
-.shade { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--line); padding: 0; }
-.shade[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--ink); }
-.shade-name { position: absolute; top: 18px; left: 20px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--mute); font-weight: 700; }
+@property --glow { syntax: "<color>"; inherits: true; initial-value: #9E1F42; }
+.stage { position: relative; aspect-ratio: 1 / .92; max-width: 100%; border-radius: 32px; background: radial-gradient(120% 90% at 50% 100%, var(--blush), var(--paper) 70%); box-shadow: var(--shadow); overflow: hidden; display: grid; place-items: center; --gx: 0; --glow: #9E1F42; --coat: #9E1F42; transition: --glow 1.2s ease; isolation: isolate; }
+.blob { position: absolute; border-radius: 50%; filter: blur(38px); opacity: .32; background: var(--glow); z-index: -1; will-change: transform; }
+.blob.b1 { width: 46%; height: 46%; left: 6%; top: 10%; animation: drift1 14s ease-in-out infinite alternate; }
+.blob.b2 { width: 38%; height: 38%; right: 4%; top: 22%; opacity: .22; animation: drift2 17s ease-in-out infinite alternate; }
+.blob.b3 { width: 54%; height: 30%; left: 24%; bottom: 4%; opacity: .2; animation: drift1 19s ease-in-out infinite alternate-reverse; }
+@keyframes drift1 { to { transform: translate(18%, 12%) scale(1.15); } }
+@keyframes drift2 { to { transform: translate(-20%, 16%) scale(.9); } }
+.fan { position: relative; width: 78%; height: 66%; transform: translateY(-4%); animation: breathe 7s ease-in-out infinite; transform-origin: 50% 120%; }
+@keyframes breathe { 0%, 100% { transform: translateY(-4%) rotate(-1.2deg); } 50% { transform: translateY(-5.5%) rotate(1.2deg); } }
+.nail { position: absolute; bottom: 0; left: 50%; width: 15%; height: 62%; border-radius: 50% 50% 18% 18% / 62% 62% 14% 14%; transform-origin: 50% 160%; box-shadow: 0 18px 30px color-mix(in srgb, var(--glow) 28%, transparent); overflow: hidden; --o: 0; }
+.nail .base, .nail .coat { position: absolute; inset: 0; background: linear-gradient(160deg, color-mix(in srgb, var(--c) 70%, white) 0%, var(--c) 38%, color-mix(in srgb, var(--c) 70%, black) 100%); box-shadow: inset 0 -6px 14px rgba(0,0,0,.18); }
+.nail .base { --c: var(--nail); }
+.nail .coat { --c: var(--coat); top: -24%; border-radius: 50% 50% 0 0 / 18% 18% 0 0; transform: translateY(105%); visibility: hidden; }
+.nail .coat.go { visibility: visible; animation: brush .75s cubic-bezier(.45,.05,.2,1) forwards; animation-delay: calc(var(--i) * 80ms); }
+@keyframes brush { from { transform: translateY(105%); } to { transform: translateY(0); } }
+.nail::before { content: ""; position: absolute; inset: 0; z-index: 2; background: radial-gradient(60% 30% at 50% 4%, rgba(255,255,255,.35), transparent 70%); }
+.nail::after { content: ""; position: absolute; z-index: 3; top: -10%; bottom: -10%; left: 18%; width: 22%; border-radius: 50%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.8) 45%, rgba(255,255,255,.95) 50%, transparent); filter: blur(1.5px); transform: translateX(calc((var(--gx) + var(--o)) * 160%)) skewX(-8deg); will-change: transform; }
+.nail:nth-child(1) { transform: translateX(-50%) rotate(-34deg); height: 46%; --o: -.16; --i: 0; }
+.nail:nth-child(2) { transform: translateX(-50%) rotate(-16deg); height: 58%; --o: -.08; --i: 1; }
+.nail:nth-child(3) { transform: translateX(-50%) rotate(0deg); height: 64%; --o: 0; --i: 2; }
+.nail:nth-child(4) { transform: translateX(-50%) rotate(16deg); height: 58%; --o: .08; --i: 3; }
+.nail:nth-child(5) { transform: translateX(-50%) rotate(34deg); height: 46%; --o: .16; --i: 4; }
+.spark { position: absolute; width: 14px; height: 14px; z-index: 4; pointer-events: none; opacity: 0; transform: scale(.2); animation: twinkle 3.6s ease-in-out infinite; }
+.spark::before { content: ""; position: absolute; inset: 0; background: #fff; clip-path: polygon(50% 0, 60% 40%, 100% 50%, 60% 60%, 50% 100%, 40% 60%, 0 50%, 40% 40%); filter: drop-shadow(0 0 4px rgba(255,255,255,.9)); }
+.stage.burst .spark { animation: pop-star .9s ease-out both; }
+@keyframes twinkle { 0%, 70%, 100% { opacity: 0; transform: scale(.2) rotate(0deg); } 82% { opacity: .95; transform: scale(1) rotate(45deg); } }
+@keyframes pop-star { 0% { opacity: 0; transform: scale(.2) rotate(0deg); } 40% { opacity: 1; transform: scale(1.25) rotate(60deg); } 100% { opacity: 0; transform: scale(.3) rotate(120deg); } }
+.shades { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); display: flex; gap: 8px; background: color-mix(in srgb, var(--paper) 85%, transparent); backdrop-filter: blur(8px); border-radius: 999px; padding: 6px; box-shadow: var(--shadow); z-index: 5; }
+.shade { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--paper); box-shadow: 0 0 0 1px var(--line); padding: 0; transition: transform .25s cubic-bezier(.3,1.6,.5,1), box-shadow .25s; }
+.shade:active { transform: scale(.88); }
+.shade[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--ink); transform: scale(1.12); }
+.shade-name { position: absolute; z-index: 5; top: 18px; left: 20px; font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--mute); font-weight: 700; }
 
 /* услуги */
 .svc { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 14px; }
@@ -297,9 +314,11 @@ input[type="text"], input[type="tel"], textarea, select { width: 100%; border: 1
           <div><b>Обучение</b><small>онлайн и в студии</small></div>
         </div>
       </div>
-      <div class="stage idle" id="stage" aria-label="Попробуйте оттенки лака">
+      <div class="stage" id="stage" aria-label="Попробуйте оттенки лака">
         <span class="shade-name" id="shadeName">Оттенок: вишня</span>
-        <div class="fan" aria-hidden="true"><div class="nail"></div><div class="nail"></div><div class="nail"></div><div class="nail"></div><div class="nail"></div></div>
+        <i class="blob b1" aria-hidden="true"></i><i class="blob b2" aria-hidden="true"></i><i class="blob b3" aria-hidden="true"></i>
+        <div class="fan" aria-hidden="true"><div class="nail"><i class="base"></i><i class="coat"></i></div><div class="nail"><i class="base"></i><i class="coat"></i></div><div class="nail"><i class="base"></i><i class="coat"></i></div><div class="nail"><i class="base"></i><i class="coat"></i></div><div class="nail"><i class="base"></i><i class="coat"></i></div></div>
+        <i class="spark" style="left:30%;top:30%;animation-delay:.4s"></i><i class="spark" style="left:47%;top:20%;animation-delay:1.6s"></i><i class="spark" style="left:62%;top:28%;animation-delay:2.7s"></i><i class="spark" style="left:38%;top:44%;animation-delay:3.1s"></i><i class="spark" style="left:57%;top:46%;animation-delay:.9s"></i>
         <div class="shades" id="shades"></div>
       </div>
     </div>
@@ -570,18 +589,55 @@ input[type="text"], input[type="tel"], textarea, select { width: 100%; border: 1
   // оттенки и блик
   var stage = $("stage");
   $("shades").innerHTML = SHADES.map(function (s, i) { return '<button class="shade" style="background:' + s[1] + '" data-i="' + i + '" aria-pressed="' + (i === 0) + '" aria-label="Оттенок ' + s[0] + '"></button>'; }).join("");
+  // Смена оттенка: новый лак «наносится кистью» от кутикулы к краю, потом блик и искры
+  var curColor = SHADES[0][1], coatT = 0, nameEl = $("shadeName");
+  var coats = stage.querySelectorAll(".coat");
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   $("shades").addEventListener("click", function (e) {
     var b = e.target.closest(".shade"); if (!b) return;
     var s = SHADES[Number(b.dataset.i)];
-    stage.style.setProperty("--nail", s[1]); $("shadeName").textContent = "Оттенок: " + s[0];
     document.querySelectorAll(".shade").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+    nameEl.textContent = "Оттенок: " + s[0];
+    if (nameEl.animate) nameEl.animate([{ opacity: 0, transform: "translateY(6px)" }, { opacity: 1, transform: "none" }], { duration: 380, easing: "ease-out" });
+    if (s[1] === curColor) return;
+    clearTimeout(coatT);
+    // если прошлый слой ещё наносится — сразу фиксируем его как основу, без мигания
+    stage.style.setProperty("--nail", curColor);
+    coats.forEach(function (c) { c.classList.remove("go"); });
+    void stage.offsetWidth;
+    curColor = s[1];
+    stage.style.setProperty("--coat", curColor);
+    stage.style.setProperty("--glow", curColor);
+    if (reduce) { stage.style.setProperty("--nail", curColor); return; }
+    coats.forEach(function (c) { c.classList.add("go"); });
+    sweep = 1;
+    coatT = setTimeout(function () {
+      stage.style.setProperty("--nail", curColor);
+      requestAnimationFrame(function () { coats.forEach(function (c) { c.classList.remove("go"); }); });
+      stage.classList.remove("burst"); void stage.offsetWidth; stage.classList.add("burst");
+      setTimeout(function () { stage.classList.remove("burst"); }, 1000);
+    }, 750 + 4 * 80 + 40);
   });
-  var raf = 0, idleT;
-  function moveGloss(x) {
-    if (raf) return;
-    raf = requestAnimationFrame(function () { raf = 0; stage.classList.remove("idle"); stage.style.setProperty("--gx", x.toFixed(3)); clearTimeout(idleT); idleT = setTimeout(function () { stage.classList.add("idle"); }, 2200); });
+
+  // Блик плавно следует за пальцем или курсором, без пальца — медленно гуляет сам
+  var gx = -0.6, target = null, lastMove = 0, sweep = 0, visible = true, t0 = performance.now();
+  stage.addEventListener("pointermove", function (e) { var r = stage.getBoundingClientRect(); target = ((e.clientX - r.left) / r.width) * 1.8 - .6; lastMove = performance.now(); });
+  if ("IntersectionObserver" in window) new IntersectionObserver(function (es) { visible = es[0].isIntersecting; if (visible) loop(); }).observe(stage);
+  var running = false;
+  function loop() {
+    if (running || reduce) return; running = true;
+    requestAnimationFrame(function tick(now) {
+      if (!visible) { running = false; return; }
+      var goal;
+      if (sweep > 0) { sweep = Math.max(0, sweep - 0.012); goal = 1.4 - sweep * 2.2; }
+      else if (target != null && now - lastMove < 2500) goal = target;
+      else goal = 0.4 + Math.sin((now - t0) / 1900) * 0.95;
+      gx += (goal - gx) * (sweep > 0 ? 0.12 : 0.06);
+      stage.style.setProperty("--gx", gx.toFixed(4));
+      requestAnimationFrame(tick);
+    });
   }
-  stage.addEventListener("pointermove", function (e) { var r = stage.getBoundingClientRect(); moveGloss(((e.clientX - r.left) / r.width) * 1.6 - .5); });
+  loop();
 
   // ---------- запись ----------
   var bk = { svc: null, date: null, start: null };
@@ -611,7 +667,7 @@ input[type="text"], input[type="tel"], textarea, select { width: 100%; border: 1
   }
   function renderDays() {
     if (!bk.date) { for (var i = 0; i < 14; i++) { var k = dkey(addDays(i)); if (freeSlots(k, svc(bk.svc).min).some(function (s) { return s.free; })) { bk.date = k; break; } } }
-    $("bDays").innerHTML = dayBtns(bk.date, true); renderSlots();
+    var sl = $("bDays").scrollLeft; $("bDays").innerHTML = dayBtns(bk.date, true); $("bDays").scrollLeft = sl; renderSlots();
   }
   function renderSlots() {
     var list = bk.date ? freeSlots(bk.date, svc(bk.svc).min) : [];
@@ -683,7 +739,7 @@ input[type="text"], input[type="tel"], textarea, select { width: 100%; border: 1
   // ---------- админка ----------
   var aDate = dkey(addDays(0));
   function renderAdmin() {
-    $("aDays").innerHTML = dayBtns(aDate, false);
+    var sl = $("aDays").scrollLeft; $("aDays").innerHTML = dayBtns(aDate, false); $("aDays").scrollLeft = sl;
     var list = dayBookings(aDate), active = list.filter(function (b) { return b.status !== "cancelled"; });
     var sumDay = active.filter(function (b) { return b.status !== "noshow"; }).reduce(function (s, b) { return s + (b.price || svc(b.svc).price); }, 0);
     var preKept = list.filter(function (b) { return b.status === "noshow" || b.status === "late"; }).reduce(function (s, b) { return s + (b.pre || svc(b.svc).pre); }, 0);
@@ -729,16 +785,20 @@ input[type="text"], input[type="tel"], textarea, select { width: 100%; border: 1
   // ---------- маршруты ----------
   var pendingPick = null;
   document.addEventListener("click", function (e) { var a = e.target.closest("[data-pick]"); if (a) pendingPick = a.dataset.pick; });
+  var curView = null;
+  function jumpTop() { window.scrollTo({ top: 0, behavior: "instant" }); }
   function route() {
     var h = location.hash.slice(1), v = "home";
     if (h === "zapis") v = "zapis"; else if (h === "admin") v = "admin"; else if (h.indexOf("kurs-") === 0 && renderCourse(h.slice(5))) v = "kurs";
+    var changed = v !== curView; curView = v;
     ["home", "zapis", "kurs", "admin"].forEach(function (k) { $("v-" + k).hidden = k !== v; });
     document.body.classList.toggle("home", v === "home");
     $("mbar").hidden = v !== "home";
-    if (v === "zapis") { resetBooking(pendingPick); pendingPick = null; window.scrollTo(0, 0); }
-    else if (v === "admin") { renderAdmin(); window.scrollTo(0, 0); }
-    else if (v === "kurs") window.scrollTo(0, 0);
-    else if (h) { var el = document.getElementById(h); if (el) setTimeout(function () { el.scrollIntoView(); }, 0); }
+    if (v === "zapis") { resetBooking(pendingPick); pendingPick = null; jumpTop(); }
+    else if (v === "admin") { renderAdmin(); jumpTop(); }
+    else if (v === "kurs") jumpTop();
+    else if (h && h !== "top") { var el = document.getElementById(h); if (el) el.scrollIntoView({ behavior: changed ? "instant" : "smooth" }); }
+    else if (changed) jumpTop(); else window.scrollTo({ top: 0, behavior: "smooth" });
   }
   addEventListener("hashchange", route); route();
 
