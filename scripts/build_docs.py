@@ -11,6 +11,14 @@ for k, src in PAIRS.items():
     head = ('<!doctype html>\n<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
             '<meta name="robots" content="noindex,nofollow"><title>' + t + '</title>\n<style>:root{padding-top:env(safe-area-inset-top,0px);'
             'padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>\n')
+    # Всё до первого </style> (мета-теги, шрифты, стили) уходит в <head>: так браузер раньше начинает грузить шрифты,
+    # а поисковики видят описание страницы.
+    i = s.find('</style>')
+    if i >= 0 and s[:i].lstrip().startswith(('<', '\n')) and '<body' not in s[:i]:
+        top, s = s[:i + 8], s[i + 8:]
+        head += top + '\n'
+    if 'rel="icon"' not in head:
+        head += '<link rel="icon" href="data:,">\n'
     os.makedirs('docs/' + k, exist_ok=True)
-    open('docs/' + k + '/index.html', 'w').write(head + '</head><body>\n' + s + '\n</body></html>\n')
+    open('docs/' + k + '/index.html', 'w').write(head + '</head><body>\n' + s.lstrip() + '\n</body></html>\n')
 print('docs built')
