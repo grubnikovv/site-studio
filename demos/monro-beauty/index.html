@@ -805,7 +805,7 @@ div.f { display: grid; gap: 8px; }
   </div>
 </footer>
 
-<div class="mbar" id="mbar"><a class="btn" href="#zapis">Записаться онлайн</a></div>
+<div class="mbar" id="mbar"><a class="btn" href="#obuchenie">Записаться на обучение</a></div>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
@@ -1279,7 +1279,7 @@ div.f { display: grid; gap: 8px; }
     var changed = v !== curView; curView = v;
     VIEWS.forEach(function (k) { var el = $("v-" + k); el.hidden = k !== v; if (k === v && changed) { el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter"); } });
     document.body.classList.toggle("home", v === "home");
-    $("mbar").hidden = v === "zapis" || v === "admin";
+    $("mbar").hidden = v === "zapis" || v === "admin" || v === "obuchenie";
     drawer.querySelectorAll("[data-r]").forEach(function (a) { if (a.dataset.r === v || false) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
     var i = -1; ORDER.forEach(function (o, j) { if (o[0] === v) i = j; });
     var nx = i >= 0 && v !== "zapis" ? ORDER[(i + 1) % ORDER.length] : null;
