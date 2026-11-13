@@ -62,12 +62,13 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 /* шапка */
 .hdr { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
 .hdr .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; }
-.logo { display: inline-flex; align-items: baseline; font-family: var(--display); font-size: 22px; line-height: 1; letter-spacing: .22em; text-decoration: none; white-space: nowrap; }
-.logo small { font-family: var(--body); font-size: 9.5px; font-weight: 600; letter-spacing: .3em; color: var(--mute); margin-left: 8px; }
+.logo { --lf: 22px; display: inline-flex; align-items: baseline; font-family: var(--display); font-size: var(--lf); line-height: 1; letter-spacing: .22em; text-decoration: none; white-space: nowrap; }
+/* подпись стоит по центру высоты заглавных букв «МОНРО»: заглавные Tenor Sans ≈ 0,7 кегля, подписи ≈ 6,8 px */
+.logo small { font-family: var(--body); font-size: 9.5px; font-weight: 600; letter-spacing: .3em; color: var(--mute); margin-left: 10px; transform: translateY(calc((var(--lf) * .7 - 6.8px) / -2)); }
 /* на узком экране подпись уходит под название, растянутая на его ширину */
 /* разрядка добавляет пробел после последней буквы — убираем его, чтобы слово и подпись центрировались точно */
 .logo .lw { margin-right: -.22em; }
-@media (max-width: 480px) { .hdr .logo { flex-direction: column; align-items: center; } .hdr .logo small { margin: 5px -.34em 0 0; font-size: 7.5px; letter-spacing: .34em; } }
+@media (max-width: 480px) { .hdr .logo { flex-direction: column; align-items: center; } .hdr .logo small { margin: 5px -.34em 0 0; font-size: 7.5px; letter-spacing: .34em; transform: none; } }
 .nav { display: flex; gap: 26px; font-size: 14px; font-weight: 600; }
 .nav a { text-decoration: none; color: var(--mute); }
 .nav a:hover { color: var(--ink); }
@@ -373,7 +374,7 @@ section.block.tight { padding-block: 32px clamp(56px, 8vw, 96px); }
 .nextpage .arr { flex: none; width: 56px; height: 56px; border-radius: 50%; background: var(--lac); color: var(--lac-ink); display: grid; place-content: center; transition: transform .3s; }
 .nextpage a:hover .arr { transform: translateX(6px); }
 footer .fcol { display: grid; gap: 6px; }
-footer .fcol .logo { color: var(--ink); font-size: 18px; }
+footer .fcol .logo { --lf: 18px; color: var(--ink); }
 footer .fnav { display: flex; gap: 8px 20px; flex-wrap: wrap; align-items: center; }
 footer .fnav a { text-decoration: none; }
 footer .fnav a:hover { color: var(--ink); }
