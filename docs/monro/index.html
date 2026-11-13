@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tenor+Sans&family=Manrope:wght@400;500;600;700;800&display=swap">
+<script>try { var t = localStorage.getItem("monro-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}</script>
 <style>
 /* Layout: многостраничный сайт на хэш-маршрутах, слева выезжающее меню, на телефоне снизу липкая кнопка записи */
 :root {
@@ -290,9 +291,9 @@ body.lock { overflow: hidden; }
 .burger[aria-expanded="true"] span:last-child { width: 24px; transform: translateY(-4.3px) rotate(-45deg); }
 .scrim { position: fixed; inset: 0; z-index: 80; background: rgba(20,12,16,.45); opacity: 0; transition: opacity .4s ease; backdrop-filter: blur(2px); }
 .scrim.on { opacity: 1; }
-.drawer { position: fixed; top: 0; bottom: 0; left: 0; z-index: 81; width: min(430px, 90vw); background: var(--bg); display: grid; grid-template-rows: auto 1fr auto; gap: 18px; padding: calc(16px + env(safe-area-inset-top, 0px)) 28px calc(22px + env(safe-area-inset-bottom, 0px)) max(28px, env(safe-area-inset-left, 0px)); transform: translateX(-102%); transition: transform .5s cubic-bezier(.7,0,.2,1); box-shadow: 20px 0 60px rgba(20,12,16,.18); overflow-y: auto; overscroll-behavior: contain; }
+.drawer { position: fixed; top: 0; bottom: 0; left: 0; z-index: 81; width: min(430px, 90vw); background: var(--bg); display: grid; grid-template-rows: auto 1fr auto; gap: 18px; padding: calc(16px + env(safe-area-inset-top, 0px)) 28px calc(22px + env(safe-area-inset-bottom, 0px)) max(28px, env(safe-area-inset-left, 0px)); transform: translateX(-102%); transition: transform .5s cubic-bezier(.7,0,.2,1); box-shadow: 20px 0 60px rgba(20,12,16,.18); overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; }
 .drawer.on { transform: none; }
-.drawer::before { content: ""; position: absolute; width: 320px; height: 320px; right: -140px; top: 30%; border-radius: 50%; background: var(--glow, var(--lac)); opacity: .12; filter: blur(60px); pointer-events: none; }
+.drawer::before { content: ""; position: absolute; width: 60%; height: 320px; right: 0; top: 30%; border-radius: 50%; background: var(--glow, var(--lac)); opacity: .12; filter: blur(60px); pointer-events: none; }
 .drawer-top { display: flex; justify-content: space-between; align-items: center; height: 48px; }
 .drawer .x { width: 44px; height: 44px; margin-right: -10px; border: 0; background: none; border-radius: 50%; display: grid; place-content: center; transition: transform .3s; }
 .drawer .x:hover { transform: rotate(90deg); }
@@ -310,6 +311,13 @@ body.lock { overflow: hidden; }
 .drawer-foot p { margin: 0; }
 .drawer-foot .btn { width: 100%; }
 .adm-link { font-size: 13px; color: var(--mute); }
+.theme { display: grid; gap: 8px; }
+.theme > span { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.theme-seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; background: var(--blush); border-radius: 999px; padding: 3px; }
+.theme-seg button { display: inline-flex; align-items: center; justify-content: center; gap: 5px; min-width: 0; border: 0; background: none; border-radius: 999px; padding: 7px 10px; font-size: 13px; font-weight: 700; color: var(--mute); transition: background .3s, color .3s, box-shadow .3s; }
+.theme-seg button[aria-pressed="true"] { background: var(--paper); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+/* плавная смена темы: только на время переключения */
+html.theme-anim, html.theme-anim *, html.theme-anim *::before, html.theme-anim *::after { transition: background-color .5s ease, color .5s ease, border-color .5s ease, box-shadow .5s ease, fill .5s ease !important; }
 
 .page.enter { animation: pagein .55s cubic-bezier(.2,.8,.2,1) both; }
 @keyframes pagein { from { opacity: 0; transform: translateY(14px); } }
@@ -447,6 +455,14 @@ div.f { display: grid; gap: 8px; }
   <div class="drawer-foot">
     <a class="btn" href="#zapis">Записаться онлайн</a>
     <p>Михайловка, ул. Обороны, 44А<br>Пн–Сб, 9:00–20:00, по записи</p>
+    <div class="theme" role="group" aria-label="Тема сайта">
+      <span>Тема</span>
+      <div class="theme-seg" id="themeSeg">
+        <button type="button" data-th="auto" aria-pressed="true" title="Как в телефоне"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"></circle><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"></path></svg>Авто</button>
+        <button type="button" data-th="light" aria-pressed="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>Светлая</button>
+        <button type="button" data-th="dark" aria-pressed="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"></path></svg>Тёмная</button>
+      </div>
+    </div>
     <a class="adm-link" href="#admin">Вход для мастера</a>
   </div>
 </aside>
@@ -1155,6 +1171,21 @@ div.f { display: grid; gap: 8px; }
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("eSheet").hidden) closeEditor(); });
 
   // ---------- маршруты ----------
+  // ---------- тема: авто (как в телефоне), светлая, тёмная ----------
+  function themeGet() { try { var t = localStorage.getItem("monro-theme"); return t === "light" || t === "dark" ? t : "auto"; } catch (e) { return "auto"; } }
+  function themeShow(t) { document.querySelectorAll("#themeSeg button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.th === t)); }); }
+  $("themeSeg").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-th]"); if (!b) return;
+    var t = b.dataset.th, root = document.documentElement;
+    root.classList.add("theme-anim");
+    if (t === "auto") root.removeAttribute("data-theme"); else root.setAttribute("data-theme", t);
+    try { if (t === "auto") localStorage.removeItem("monro-theme"); else localStorage.setItem("monro-theme", t); } catch (err) {}
+    themeShow(t);
+    setTimeout(function () { root.classList.remove("theme-anim"); }, 600);
+    toast(t === "auto" ? "Тема как в телефоне" : t === "light" ? "Светлая тема" : "Тёмная тема");
+  });
+  themeShow(themeGet());
+
   // ---------- боковое меню ----------
   var drawer = $("drawer"), scrim = $("scrim"), burger = $("burger"), drawerT;
   function openMenu() {
