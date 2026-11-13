@@ -62,7 +62,7 @@ def wait(names, limit=30 * 60):
 
 def main():
     now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=3)))
-    stamp = now.strftime("%Y%m%d-%H%M"); work = "/tmp/watch-" + stamp; os.makedirs(work, exist_ok=True)
+    stamp = now.strftime("%Y%m%d-%H%M") + "-" + os.urandom(2).hex(); work = "/tmp/watch-" + stamp; os.makedirs(work, exist_ok=True)
     sh("git", "checkout", BRANCH); sh("git", "pull", "--rebase", "origin", BRANCH)
     priv = __import__("cryptography.hazmat.primitives.asymmetric.rsa", fromlist=["x"]).generate_private_key(public_exponent=65537, key_size=3072)
     open(work + "/k.pem", "wb").write(priv.private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption()))
