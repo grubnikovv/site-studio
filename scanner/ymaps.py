@@ -5,6 +5,7 @@
 Результат шифруется открытым ключом scanner/pub.pem, потому что репозиторий публичный.
 """
 import base64, json, os, re, sys, time
+from urllib.parse import quote
 from playwright.sync_api import sync_playwright
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -44,7 +45,9 @@ def main(job_path, out_path):
         page = ctx.new_page()
         for q in job["queries"]:
             try:
-                page.goto("https://yandex.ru/maps/213/moscow/search/" + q + "/", timeout=45000, wait_until="domcontentloaded")
+                # anywhere: город берётся из текста запроса («салон красоты Камышин»), иначе ищем в Москве
+                url = ("https://yandex.ru/maps/?text=" + quote(q)) if job.get("anywhere") else ("https://yandex.ru/maps/213/moscow/search/" + q + "/")
+                page.goto(url, timeout=45000, wait_until="domcontentloaded")
                 page.wait_for_timeout(5000)
                 for _ in range(job.get("scrolls", 4)):
                     page.mouse.move(300, 500); page.mouse.wheel(0, 3000); page.wait_for_timeout(1500)
