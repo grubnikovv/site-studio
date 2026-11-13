@@ -3,7 +3,7 @@
 Инструкция для автоматической сессии. Шаги 1–5 выполняет одной командой `python3 scanner/watch_run.py` (запускать фоном, итог — `/tmp/watch-<stamp>/new.json` и по понедельникам `warm.json`). Каждый запуск:
 
 1. Создать временный ключ: `openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:3072 -out /tmp/k.pem && openssl pkey -in /tmp/k.pem -pubout -out /tmp/k.pub`.
-2. Записать `jobs/watch-<YYYYMMDD-HHMM>.json`: `{"name": "...", "pause": 10, "pubkey": "<содержимое /tmp/k.pub>", "urls": [...]}` — ссылки:
+2. Записать `jobs/watch-<YYYYMMDD-HHMM>.json`: `{"name": "...", "pause": 14, "pubkey": "<содержимое /tmp/k.pub>", "urls": [...]}` — ссылки:
    - Kwork по словам: лендинг, сайт, редизайн, дизайн сайта, telegram бот, бот, чат-бот, верстка, квиз, калькулятор, mini app, автоматизация, презентация, инфографика, баннер (`https://kwork.ru/projects?keyword=<слово>`);
    - FL.ru: `https://www.fl.ru/projects/`, `https://www.fl.ru/projects/category/razrabotka-sajtov/`, `https://www.fl.ru/projects/category/avtomatizaciya-biznesa/`, `https://www.fl.ru/projects/category/ai-iskusstvenniy-intellekt/`, `https://www.fl.ru/projects/category/dizajn/`, `https://www.fl.ru/projects/category/teksty/`;
    - YouDo: `https://youdo.com/tasks-all-opened-all`;
