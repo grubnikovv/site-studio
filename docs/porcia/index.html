@@ -721,7 +721,7 @@ label.f { display: grid; gap: 6px; font-size: 13px; font-weight: 600; color: var
       var note = data && data.comment ? String(data.comment).slice(0, 200) : "";
       if (pending.length) note = (note ? note + " " : "") + "Проверьте граммы: их проще поправить, чем угадать по фото.";
       $("photoNote").textContent = note; $("photoNote").hidden = !note;
-    }).catch(function (e) { aiError(e); $("scanTag").textContent = "Не получилось"; })
+    }).catch(function (e) { aiError(e); $("scanTag").textContent = "Не получилось · " + ((e && (e.code || e.message)) || "ошибка"); })
       .then(function () { $("scan").classList.remove("busy"); });
   });
   $("scan").onclick = function () { if (!$("scan").classList.contains("busy")) $("photoIn").click(); };
@@ -776,7 +776,7 @@ label.f { display: grid; gap: 6px; font-size: 13px; font-weight: 600; color: var
     renderAll();
     var claude = window.claude;
     if (claude && claude.use) {
-      try { sample = await claude.use("sample"); var lim = await sample.limits().catch(function () { return null; }); aiText = !!lim; aiImages = !!(lim && lim.images); if (lim && lim.images) $("photoIn").accept = lim.images.mediaTypes.join(","); } catch (e) { sample = null; }
+      try { sample = await claude.use("sample"); var lim = await sample.limits().catch(function () { return null; }); aiText = true; aiImages = true; if (lim && lim.images) $("photoIn").accept = lim.images.mediaTypes.join(","); } catch (e) { sample = null; }
       var db = null, uid = null;
       try { db = await claude.use("db"); var u = await claude.use("user"); uid = await u.id(); } catch (e) { db = null; }
       if (db && uid) {
