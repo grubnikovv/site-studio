@@ -376,6 +376,34 @@ footer .fnav { display: flex; gap: 8px 20px; flex-wrap: wrap; align-items: cente
 footer .fnav a { text-decoration: none; }
 footer .fnav a:hover { color: var(--ink); }
 
+/* обучение на главной: тёмная «лаковая» полоса в любой теме */
+.tband { background: radial-gradient(90% 120% at 100% 0%, #7A1834 0%, transparent 60%), linear-gradient(160deg, #3A0F1D, #1E0910 70%); color: #F6ECEF; padding-block: clamp(56px, 8vw, 104px); position: relative; overflow: hidden; }
+.tband::after { content: ""; position: absolute; width: 520px; height: 520px; left: -200px; bottom: -260px; border-radius: 50%; background: #E04A72; opacity: .16; filter: blur(80px); pointer-events: none; }
+.tb-grid { display: grid; grid-template-columns: 1.25fr .9fr; gap: clamp(28px, 5vw, 64px); align-items: center; position: relative; z-index: 1; }
+@media (max-width: 860px) { .tb-grid { grid-template-columns: 1fr; } }
+.tb-main { display: grid; gap: 20px; min-width: 0; }
+.tb-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #F2A7BC; }
+.tband h2 { color: #fff; font-size: clamp(34px, 5vw, 58px); }
+.tb-lead { margin: 0; color: #DCC8CE; max-width: 52ch; }
+.tb-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.tb-list li { position: relative; padding-left: 30px; color: #DCC8CE; }
+.tb-list li::before { content: ""; position: absolute; left: 0; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: #E04A72 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.4'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / 11px no-repeat; }
+.tb-list b { color: #fff; font-weight: 700; }
+.tb-cta { display: flex; align-items: center; gap: 18px 24px; flex-wrap: wrap; margin-top: 6px; }
+.btn.light { background: #fff; color: #5B1426; }
+.btn.light:hover { box-shadow: 0 12px 30px rgba(224,74,114,.35); }
+.tb-price { display: grid; }
+.tb-price b { font-family: var(--display); font-weight: 400; font-size: 30px; color: #fff; line-height: 1.1; }
+.tb-price span { font-size: 13px; color: #C9AEB6; }
+.tb-card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14); border-radius: 26px; padding: 24px; display: grid; gap: 10px; backdrop-filter: blur(6px); }
+.tb-k { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #C9AEB6; }
+.tb-date { font-family: var(--display); font-weight: 400; font-size: clamp(24px, 3vw, 30px); color: #fff; line-height: 1.15; }
+.tb-note { font-size: 13.5px; color: #C9AEB6; }
+.tb-days { list-style: none; margin: 8px 0 0; padding: 0; display: grid; border-top: 1px solid rgba(255,255,255,.12); }
+.tb-days li { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.12); font-size: 14px; color: #EADCE0; }
+.tb-days i { font-style: normal; flex: none; width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(255,255,255,.3); display: grid; place-content: center; font-size: 12px; font-weight: 700; }
+.tb-more { color: #F2A7BC; font-weight: 700; text-decoration: none; margin-top: 4px; }
+.tb-more:hover { text-decoration: underline; text-underline-offset: 4px; }
 /* обучение */
 .train-teaser { display: grid; grid-template-columns: 1.1fr 1fr; border-radius: 30px; overflow: hidden; background: var(--paper); border: 1px solid var(--line); }
 .train-teaser .cv { background: linear-gradient(135deg, color-mix(in srgb, var(--lac) 80%, black), var(--lac) 55%, color-mix(in srgb, var(--lac) 55%, white)); color: #fff; padding: clamp(24px, 4vw, 44px); display: grid; align-content: space-between; gap: 30px; min-height: 280px; }
@@ -484,7 +512,7 @@ div.f { display: grid; gap: 8px; }
         <div class="facts">
           <div><b class="num">10 лет</b><small>в ногтевом сервисе</small></div>
           <div><b class="num">2 мин</b><small>записаться онлайн</small></div>
-          <div><b>Обучение</b><small>онлайн и в студии</small></div>
+          <div><b>Обучение</b><small>1 на 1 в студии</small></div>
         </div>
       </div>
       <div class="stage" id="stage" aria-label="Попробуйте оттенки лака">
@@ -494,6 +522,40 @@ div.f { display: grid; gap: 8px; }
         <i class="spark" style="left:30%;top:30%;animation-delay:.4s"></i><i class="spark" style="left:47%;top:20%;animation-delay:1.6s"></i><i class="spark" style="left:62%;top:28%;animation-delay:2.7s"></i><i class="spark" style="left:38%;top:44%;animation-delay:3.1s"></i><i class="spark" style="left:57%;top:46%;animation-delay:.9s"></i>
         <div class="shades" id="shades"></div>
       </div>
+    </div>
+  </section>
+
+  <section class="tband" aria-labelledby="tbTitle">
+    <div class="wrap tb-grid">
+      <div class="tb-main">
+        <span class="tb-eyebrow">Обучение в студии «Монро»</span>
+        <h2 id="tbTitle">Станьте мастером маникюра за 5 дней</h2>
+        <p class="tb-lead">Марина учит один на один, без групп: всё внимание только вам. За 10 лет она узнала, на чём спотыкаются новички, и ставит руку с первого дня.</p>
+        <ul class="tb-list">
+          <li><b>Практика на моделях</b> уже со второго дня, а не только на типсах</li>
+          <li><b>Все материалы включены</b> — свой инструмент для учёбы покупать не нужно</li>
+          <li><b>Список закупки для старта</b> — без лишних трат</li>
+          <li><b>Как найти первых клиенток</b> и поставить цены</li>
+          <li><b>Сертификат</b> и связь с Мариной после курса</li>
+        </ul>
+        <div class="tb-cta">
+          <a class="btn light" href="#obuchenie">Записаться на обучение</a>
+          <div class="tb-price"><b class="num">30 000 ₽</b><span>предоплата 5 000 ₽ закрепляет даты</span></div>
+        </div>
+      </div>
+      <aside class="tb-card">
+        <span class="tb-k">Ближайший свободный старт</span>
+        <b class="tb-date" id="tbDate">—</b>
+        <span class="tb-note" id="tbNote"></span>
+        <ol class="tb-days">
+          <li><i>1</i>Рабочее место и стерилизация</li>
+          <li><i>2</i>Аппарат, фрезы, первая модель</li>
+          <li><i>3</i>Комбинированный маникюр</li>
+          <li><i>4</i>Покрытие под кутикулу</li>
+          <li><i>5</i>Самостоятельная работа, разбор, клиенты</li>
+        </ol>
+        <a class="tb-more" href="#obuchenie">Вся программа и вопросы →</a>
+      </aside>
     </div>
   </section>
 
@@ -508,12 +570,6 @@ div.f { display: grid; gap: 8px; }
     <div class="wrap">
       <div class="sec-row"><div class="sec-head"><span class="eyebrow">Портфолио</span><h2>Свежие работы</h2></div><a class="more" href="#raboty">Смотреть все →</a></div>
       <div class="gal small" id="homeGal"></div>
-    </div>
-  </section>
-
-  <section class="block" style="background:var(--paper)">
-    <div class="wrap">
-      <div class="train-teaser" id="homeTrain"></div>
     </div>
   </section>
 
@@ -571,13 +627,13 @@ div.f { display: grid; gap: 8px; }
 
 <!-- ===== ОБУЧЕНИЕ ===== -->
 <main id="v-obuchenie" class="page" hidden>
-  <section class="phero"><div class="wrap"><span class="eyebrow">Очное обучение</span><h1>Научу делать маникюр, за который платят</h1><p class="lead">Обучение в студии «Монро»: маникюр или педикюр с нуля. Индивидуально или в мини-группе до 3 человек, практика на моделях, материалы включены.</p></div></section>
+  <section class="phero"><div class="wrap"><span class="eyebrow">Очное обучение</span><h1>Научу делать маникюр, за который платят</h1><p class="lead">Обучение в студии «Монро» маникюру или педикюру с нуля. Только индивидуально: вы и Марина, один на один. Практика на моделях, все материалы включены.</p></div></section>
   <section class="block tight"><div class="wrap train">
     <div class="train-info">
       <div class="tfacts">
         <div><small>Длительность</small><b>5 дней</b></div>
-        <div><small>Группа</small><b>до 3 человек</b></div>
-        <div><small>Стоимость</small><b class="num">от 25 000 ₽</b></div>
+        <div><small>Формат</small><b>1 на 1</b></div>
+        <div><small>Стоимость</small><b class="num">30 000 ₽</b></div>
         <div><small>После курса</small><b>сертификат</b></div>
       </div>
       <h3 class="grp">Программа</h3>
@@ -594,7 +650,6 @@ div.f { display: grid; gap: 8px; }
     <form class="card train-form" id="tForm" novalidate>
       <h3>Записаться на обучение</h3>
       <div class="f"><span class="lbl">Направление</span><div class="seg2" id="tDir"><button type="button" data-v="man" aria-pressed="true">Маникюр</button><button type="button" data-v="ped" aria-pressed="false">Педикюр</button></div></div>
-      <div class="f"><span class="lbl">Формат</span><div class="opts" id="tFmt"></div></div>
       <div class="f"><span class="lbl">Дата начала</span><div class="days" id="tDates"></div></div>
       <label class="f">Имя<input type="text" id="tName" autocomplete="given-name"></label>
       <label class="f">Телефон<input type="tel" id="tPhone" autocomplete="tel" inputmode="tel" placeholder="+7"></label>
@@ -771,7 +826,7 @@ div.f { display: grid; gap: 8px; }
   ];
   var REMOVE = { price: 200, min: 30 };
   function bmin(b) { return svc(b.svc).min + (b.remove ? REMOVE.min : 0); }
-  var TRAIN = { formats: [{ id: "solo", name: "Индивидуально", price: 30000 }, { id: "group", name: "Мини-группа до 3 человек", price: 25000 }], pre: 5000, seats: 3 };
+  var TRAIN = { formats: [{ id: "solo", name: "Индивидуально, 1 на 1", price: 30000 }], pre: 5000, seats: 3 };
   var FAQ = [
     ["Процедуры", [
       ["Сколько держится покрытие?", "Обычно 3–4 недели. Срок зависит от того, как быстро растут ногти, и от домашних дел: бытовая химия без перчаток сокращает носку."],
@@ -785,7 +840,7 @@ div.f { display: grid; gap: 8px; }
     ["Обучение", [
       ["Как проходит обучение?", "Очно в студии «Монро», 5 дней. Теория, отработка на типсах и практика на моделях."],
       ["Нужен ли опыт?", "Нет, обучаем с нуля. Если опыт есть, программу подстроим под вас."],
-      ["Зачем предоплата за обучение?", "Мест в группе всего три. Предоплата 5 000 ₽ закрепляет место, остаток оплачивается в первый день."],
+      ["Зачем предоплата за обучение?", "Обучение идёт один на один, и даты закрепляются только за вами. Предоплата 5 000 ₽ закрепляет место, остаток оплачивается в первый день."],
       ["Можно ли вернуть предоплату?", "Да, если отменить раньше чем за 7 дней до начала. Позже предоплата не возвращается: место уже не успеть отдать другому ученику."]]]
   ];
   var SHADES = [["вишня", "#9E1F42"], ["нюд", "#D7A79A"], ["молочный", "#EFE3DC"], ["бордо", "#5B1426"], ["шампань", "#C9A46A"], ["графит", "#3A3438"]];
@@ -866,9 +921,6 @@ div.f { display: grid; gap: 8px; }
   });
   var cupIcon = '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 4h10v5a5 5 0 0 1-10 0z"></path><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4M12 14v4M8 21h8"></path></svg>';
   $("awards").innerHTML = Array.apply(null, Array(4)).map(function () { return '<div class="award"><div class="ph" role="img" aria-label="Место для фото награды">' + cupIcon + 'Фото награды</div><b>Название конкурса, год</b></div>'; }).join("");
-  $("homeTrain").innerHTML = '<div class="cv"><span>Обучение в студии</span><h2>Научу делать маникюр, за который платят</h2></div>' +
-    '<div class="bd"><p>Очный курс маникюра или педикюра с нуля: 5 дней, практика на моделях, мини-группа до 3 человек, сертификат.</p>' +
-    '<div class="price-from"><b class="num">от 25 000 ₽</b><span>место закрепляется предоплатой</span></div><a class="btn" href="#obuchenie" style="justify-self:start">Подробнее и запись</a></div>';
   function faqHtml(list) { return list.map(function (q) { return '<details><summary>' + q[0] + '</summary><p>' + q[1] + '</p></details>'; }).join(""); }
   $("faqAll").innerHTML = FAQ.map(function (g) { return '<h3 class="grp">' + g[0] + '</h3><div class="faq">' + faqHtml(g[1]) + '</div>'; }).join("");
 
@@ -1006,32 +1058,32 @@ div.f { display: grid; gap: 8px; }
   }
 
   // ---------- очное обучение ----------
-  var tr = { dir: "man", fmt: "group", date: null };
+  var tr = { dir: "man", fmt: "solo", date: null };
   $("trainFaq").innerHTML = faqHtml(FAQ[2][1]);
   function trainDates() {
     var out = [];
     for (var i = 3; out.length < 6 && i < 70; i++) { var d = addDays(i); if (d.getDay() === 1) out.push(dkey(d)); }
     return out;
   }
-  function seatsTaken(k) { return (st.training || []).filter(function (t) { return t.date === k && t.status === "paid"; }).length + (k.charCodeAt(9) % 2); }
+  // пример занятости для демо: часть дат уже выкуплена другими ученицами
+  function dateTaken(k) { return (st.training || []).some(function (t) { return t.date === k && t.status === "paid"; }) || k.charCodeAt(9) % 4 === 0; }
+  function nextFreeDate() { return trainDates().filter(function (k) { return !dateTaken(k); })[0]; }
   function renderTrain() {
-    var f = TRAIN.formats.filter(function (x) { return x.id === tr.fmt; })[0];
+    var f = TRAIN.formats[0];
     document.querySelectorAll("#tDir button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.v === tr.dir)); });
-    $("tFmt").innerHTML = TRAIN.formats.map(function (x) { return '<button type="button" class="opt" data-v="' + x.id + '" aria-pressed="' + (x.id === tr.fmt) + '"><span><b style="font-weight:700">' + x.name + '</b></span><b class="num">' + rub(x.price) + '</b></button>'; }).join("");
     var dates = trainDates();
-    if (!tr.date || dates.indexOf(tr.date) < 0) tr.date = dates.filter(function (k) { return seatsTaken(k) < TRAIN.seats; })[0];
+    if (!tr.date || dates.indexOf(tr.date) < 0 || dateTaken(tr.date)) tr.date = nextFreeDate();
     var sl = $("tDates").scrollLeft;
     $("tDates").innerHTML = dates.map(function (k) {
-      var d = new Date(k + "T12:00"), left = TRAIN.seats - seatsTaken(k), full = tr.fmt === "group" ? left <= 0 : left < TRAIN.seats;
-      return '<button type="button" class="day" data-d="' + k + '" aria-pressed="' + (k === tr.date) + '"' + (full ? " disabled" : "") + '><small>' + d.toLocaleDateString("ru-RU", { month: "short" }) + '</small><b class="num">' + d.getDate() + '</b><em>' + (full ? "занято" : tr.fmt === "group" ? "мест: " + left : "свободно") + '</em></button>';
+      var d = new Date(k + "T12:00"), full = dateTaken(k);
+      return '<button type="button" class="day" data-d="' + k + '" aria-pressed="' + (k === tr.date) + '"' + (full ? " disabled" : "") + '><small>' + d.toLocaleDateString("ru-RU", { month: "short" }) + '</small><b class="num">' + d.getDate() + '</b><em>' + (full ? "занято" : "свободно") + '</em></button>';
     }).join("");
     $("tDates").scrollLeft = sl;
-    $("tSum").innerHTML = '<div><span>Обучение</span><b>' + (tr.dir === "man" ? "маникюр" : "педикюр") + ', ' + f.name.toLowerCase() + '</b></div><div><span>Начало</span><b>' + (tr.date ? new Date(tr.date + "T12:00").toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) : "—") + '</b></div><div><span>Стоимость</span><b class="num">' + rub(f.price) + '</b></div>' +
+    $("tSum").innerHTML = '<div><span>Обучение</span><b>' + (tr.dir === "man" ? "маникюр" : "педикюр") + ', 1 на 1</b></div><div><span>Начало</span><b>' + (tr.date ? new Date(tr.date + "T12:00").toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) : "—") + '</b></div><div><span>Стоимость</span><b class="num">' + rub(f.price) + '</b></div>' +
       '<div class="big"><span style="color:inherit">Предоплата сейчас</span><span class="num">' + rub(TRAIN.pre) + '</span></div><div><span>Остаток в первый день</span><b class="num">' + rub(f.price - TRAIN.pre) + '</b></div>';
     $("tPay").textContent = "Оплатить " + rub(TRAIN.pre);
   }
   $("tDir").addEventListener("click", function (e) { var b = e.target.closest("[data-v]"); if (b) { tr.dir = b.dataset.v; renderTrain(); } });
-  $("tFmt").addEventListener("click", function (e) { var b = e.target.closest("[data-v]"); if (b) { tr.fmt = b.dataset.v; renderTrain(); } });
   $("tDates").addEventListener("click", function (e) { var b = e.target.closest("[data-d]"); if (b && !b.disabled) { tr.date = b.dataset.d; renderTrain(); } });
   $("tForm").addEventListener("submit", function (e) {
     e.preventDefault();
@@ -1040,16 +1092,22 @@ div.f { display: grid; gap: 8px; }
     $("tErr").textContent = err; $("tErr").hidden = !err; if (err) return;
     var btn = $("tPay"); btn.disabled = true; btn.textContent = "Оплата…";
     setTimeout(function () {
-      var f = TRAIN.formats.filter(function (x) { return x.id === tr.fmt; })[0];
+      var f = TRAIN.formats[0];
       st.training = st.training || [];
       st.training.push({ id: "t" + Date.now().toString(36), dir: tr.dir, fmt: tr.fmt, date: tr.date, name: name, phone: phone, price: f.price, pre: TRAIN.pre, status: "paid" });
       save(); btn.disabled = false;
-      $("tDone").innerHTML = '<b>Место закреплено.</b> Обучение начинается ' + new Date(tr.date + "T12:00").toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }) + ' в 10:00. Марина свяжется с вами накануне.';
+      $("tDone").innerHTML = '<b>Даты закреплены за вами.</b> Обучение начинается ' + new Date(tr.date + "T12:00").toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }) + ' в 10:00. Марина свяжется с вами накануне.';
       $("tDone").hidden = false; ["tName", "tPhone"].forEach(function (id) { $(id).value = ""; }); $("tRules").checked = false; $("tPd").checked = false;
-      renderTrain(); toast("Предоплата получена, место закреплено");
+      renderTrain(); renderTrainBand(); toast("Предоплата получена, даты закреплены за вами");
     }, 900);
   });
   renderTrain();
+  function renderTrainBand() {
+    var k = nextFreeDate(), free = trainDates().filter(function (x) { return !dateTaken(x); }).length;
+    $("tbDate").textContent = k ? new Date(k + "T12:00").toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }) : "даты уточняйте";
+    $("tbNote").textContent = free ? "Свободно стартов на ближайшие 6 недель: " + free + ". Обучение один на один, поэтому даты разбирают быстро." : "";
+  }
+  renderTrainBand();
 
   // ---------- кабинет мастера ----------
   var aDate = dkey(addDays(0)), flashId = null;
@@ -1088,7 +1146,7 @@ div.f { display: grid; gap: 8px; }
     $("aDayOff").textContent = st.dayoff[aDate] ? "Открыть день" : "Выходной весь день";
     var trl = (st.training || []).slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; });
     $("aTrain").innerHTML = trl.length ? trl.map(function (t) {
-      var f = TRAIN.formats.filter(function (x) { return x.id === t.fmt; })[0];
+      var f = TRAIN.formats.filter(function (x) { return x.id === t.fmt; })[0] || TRAIN.formats[0];
       var stt = t.status === "paid" ? ["Предоплата получена", "ok"] : t.status === "refund" ? ["Отменена · предоплата возвращена", ""] : ["Отменена поздно · предоплата ваша", "bad"];
       return '<div class="bk"><div class="r1"><b>' + new Date(t.date + "T12:00").toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + '</b><span class="pill ' + stt[1] + '">' + stt[0] + '</span></div><div><b style="font-weight:700">' + esc(t.name) + '</b> · ' + esc(t.phone) + '</div><div class="info">' + (t.dir === "man" ? "Маникюр" : "Педикюр") + ' · ' + f.name.toLowerCase() + ' · ' + rub(t.price) + ' · предоплата ' + rub(t.pre) + '</div>' +
         (t.status === "paid" ? '<div class="acts"><button data-t="' + t.id + '">Отменить</button></div>' : '') + '</div>';
@@ -1109,7 +1167,7 @@ div.f { display: grid; gap: 8px; }
     var b = e.target.closest("[data-t]"); if (!b) return;
     var t = st.training.filter(function (x) { return x.id === b.dataset.t; })[0];
     var days = (new Date(t.date + "T10:00").getTime() - Date.now()) / 864e5;
-    t.status = days >= 7 ? "refund" : "late"; save(); renderAdmin(); renderTrain();
+    t.status = days >= 7 ? "refund" : "late"; save(); renderAdmin(); renderTrain(); renderTrainBand();
     toast(days >= 7 ? "Отменено. Предоплата вернётся ученице" : "Поздняя отмена. Предоплата остаётся у вас");
   });
   $("aGrid").addEventListener("click", function (e) {
