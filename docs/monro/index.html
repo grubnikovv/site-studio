@@ -396,6 +396,11 @@ div.f { display: grid; gap: 8px; }
 .tdone b { color: var(--ok); }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 @media (max-width: 480px) { .row2 { grid-template-columns: 1fr; } }
+.rmq { display: grid; gap: 12px; background: color-mix(in srgb, var(--gold) 10%, var(--paper)); border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--line)); border-radius: 18px; padding: 14px 16px; }
+.rmq-h { display: flex; gap: 12px; align-items: flex-start; }
+.rmq-h p { margin: 4px 0 0; font-size: 14px; color: var(--mute); }
+.rmq-i { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--gold); color: #fff; display: grid; place-content: center; font-weight: 800; font-size: 14px; }
+.rmq .seg2 { background: var(--paper); }
 /* шторка кабинета */
 .sheet-scrim { position: fixed; inset: 0; z-index: 90; background: rgba(20,12,16,.45); opacity: 0; transition: opacity .35s; }
 .sheet-scrim.on { opacity: 1; }
@@ -531,7 +536,7 @@ div.f { display: grid; gap: 8px; }
     <div class="plist">
       <div class="prow"><div><b>Дизайн</b><small>стразы, втирка, слайдеры, рисунок</small></div><span class="num">от 100 ₽ / ноготь</span></div>
       <div class="prow"><div><b>Френч</b><small>классический или цветной</small></div><span class="num">+300 ₽</span></div>
-      <div class="prow"><div><b>Снятие чужой работы</b></div><span class="num">200 ₽</span></div>
+      <div class="prow"><div><b>Снятие чужой работы</b><small>перед процедурой, если вы от другого мастера · около 30 минут</small></div><span class="num">200 ₽</span></div>
       <div class="prow"><div><b>Ремонт ногтя</b></div><span class="num">100 ₽</span></div>
     </div>
     <div class="rules"><b>Оплата на месте</b><span>Наличными, картой или переводом после процедуры. Если планы изменились, предупредите Марину заранее, лучше за сутки — она перенесёт запись на удобный день.</span></div>
@@ -648,6 +653,10 @@ div.f { display: grid; gap: 8px; }
 
     <div class="card" id="b2" hidden>
       <h3>2. День и время</h3>
+      <div class="rmq" id="bRmBox">
+        <div class="rmq-h"><span class="rmq-i" aria-hidden="true">!</span><div><b>У вас покрытие от другого мастера?</b><p>Перед процедурой Марина аккуратно снимет чужую работу: <b class="num">+200 ₽</b> и около 30 минут. Так новое покрытие ляжет ровно и продержится дольше.</p></div></div>
+        <div class="seg2" id="bRm"><button type="button" data-v="0" aria-pressed="true">Нет</button><button type="button" data-v="1" aria-pressed="false">Да, нужно снятие</button></div>
+      </div>
       <div class="days" id="bDays"></div>
       <div class="slots" id="bSlots"></div>
       <p class="note" id="bSlotNote"></p>
@@ -708,6 +717,7 @@ div.f { display: grid; gap: 8px; }
     <label class="f" id="eSvcL">Услуга<select id="eSvc"></select></label>
     <div class="f"><span class="lbl">День</span><div class="days" id="eDays"></div></div>
     <div class="f"><span class="lbl">Время</span><div class="slots" id="eSlots"></div></div>
+    <label class="check" id="eRmL"><input type="checkbox" id="eRm"><span>Снятие чужой работы: +200 ₽, +30 минут</span></label>
     <div class="row2" id="eContact"><label class="f">Имя клиентки<input type="text" id="eName"></label><label class="f">Телефон<input type="tel" id="ePhone" inputmode="tel" placeholder="+7"></label></div>
     <p class="err" id="eErr" hidden></p>
     <button class="btn" id="eSave">Сохранить</button>
@@ -742,13 +752,15 @@ div.f { display: grid; gap: 8px; }
     { id: "ped", name: "Педикюр с покрытием", price: 1700, min: 120, pre: 300, text: "Обработка стоп и пальцев, гель-лак на ногти." },
     { id: "set", name: "Маникюр + педикюр", price: 2900, min: 210, pre: 500, text: "Обе процедуры за один визит, покрытие в один тон." }
   ];
+  var REMOVE = { price: 200, min: 30 };
+  function bmin(b) { return svc(b.svc).min + (b.remove ? REMOVE.min : 0); }
   var TRAIN = { formats: [{ id: "solo", name: "Индивидуально", price: 30000 }, { id: "group", name: "Мини-группа до 3 человек", price: 25000 }], pre: 5000, seats: 3 };
   var FAQ = [
     ["Процедуры", [
       ["Сколько держится покрытие?", "Обычно 3–4 недели. Срок зависит от того, как быстро растут ногти, и от домашних дел: бытовая химия без перчаток сокращает носку."],
       ["Можно прийти со своим дизайном?", "Конечно. Пришлите фото при записи в комментарии, Марина заранее скажет, сколько займёт и сколько будет стоить."],
       ["Как обрабатываются инструменты?", "Мытьё, дезинфекция и стерилизация в сухожаре. Инструменты хранятся в крафт-пакетах, пакет вскрывается при вас."],
-      ["Снимаете чужую работу?", "Да, снятие стоит 200 ₽. Укажите это при записи, чтобы хватило времени."]]],
+      ["Снимаете чужую работу?", "Да. Если вы приходите от другого мастера, сначала Марина снимает чужое покрытие: 200 ₽ и около 30 минут. При онлайн-записи просто отметьте «Да, нужно снятие» — время рассчитается само."]]],
     ["Запись", [
       ["Нужно ли платить заранее?", "Нет. Запись на процедуры без предоплаты, оплата на месте после работы."],
       ["Как отменить или перенести запись?", "Напишите или позвоните Марине, лучше за сутки. Она перенесёт запись на удобный день и время."],
@@ -796,7 +808,7 @@ div.f { display: grid; gap: 8px; }
   }
   function busyIntervals(k, ignore) {
     var iv = dayBookings(k).filter(function (b) { return b.id !== ignore && (b.status === "booked" || b.status === "came" || b.status === "noshow"); })
-      .map(function (b) { return [b.start, b.start + svc(b.svc).min]; });
+      .map(function (b) { return [b.start, b.start + bmin(b)]; });
     Object.keys(st.blocks[k] || {}).forEach(function (m) { m = Number(m); iv.push([m, m + STEP]); });
     return iv;
   }
@@ -915,18 +927,18 @@ div.f { display: grid; gap: 8px; }
     var h = "";
     for (var i = 0; i < 14; i++) {
       var d = addDays(i), k = dkey(d), off = d.getDay() === 0 || st.dayoff[k];
-      var cnt = withFree && !off ? freeSlots(k, svc(bk.svc).min).filter(function (s) { return s.free; }).length : null;
+      var cnt = withFree && !off ? freeSlots(k, bmin(bk)).filter(function (s) { return s.free; }).length : null;
       var dis = withFree && (off || cnt === 0);
       h += '<button class="day" data-d="' + k + '" aria-pressed="' + (sel === k) + '"' + (dis ? " disabled" : "") + '><small>' + (i === 0 ? "сег" : WD[d.getDay()]) + '</small><b class="num">' + d.getDate() + '</b><em>' + (off ? "выходной" : withFree ? (cnt ? cnt + " окон" : "занято") : d.toLocaleDateString("ru-RU", { month: "short" })) + '</em></button>';
     }
     return h;
   }
   function renderDays() {
-    if (!bk.date) { for (var i = 0; i < 14; i++) { var k = dkey(addDays(i)); if (freeSlots(k, svc(bk.svc).min).some(function (s) { return s.free; })) { bk.date = k; break; } } }
+    if (!bk.date) { for (var i = 0; i < 14; i++) { var k = dkey(addDays(i)); if (freeSlots(k, bmin(bk)).some(function (s) { return s.free; })) { bk.date = k; break; } } }
     var sl = $("bDays").scrollLeft; $("bDays").innerHTML = dayBtns(bk.date, true); $("bDays").scrollLeft = sl; renderSlots();
   }
   function renderSlots() {
-    var list = bk.date ? freeSlots(bk.date, svc(bk.svc).min) : [];
+    var list = bk.date ? freeSlots(bk.date, bmin(bk)) : [];
     $("bSlots").innerHTML = list.map(function (s) { return '<button class="slot num" data-t="' + s.t + '"' + (s.free ? "" : " disabled") + ' aria-pressed="' + (bk.start === s.t) + '">' + hm(s.t) + '</button>'; }).join("");
     $("bSlotNote").textContent = list.length ? "Зачёркнуто — время занято." : "На этот день записи нет.";
   }
@@ -937,30 +949,41 @@ div.f { display: grid; gap: 8px; }
     setTimeout(function () { $("b3").scrollIntoView({ behavior: "smooth", block: "start" }); }, 60);
   });
   function whenText(k, t) { return new Date(k + "T12:00").toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }) + ", " + hm(t); }
+  function renderRm() { document.querySelectorAll("#bRm button").forEach(function (x) { x.setAttribute("aria-pressed", String((x.dataset.v === "1") === !!bk.remove)); }); }
+  $("bRm").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-v]"); if (!b) return;
+    var v = b.dataset.v === "1"; if (v === bk.remove) return;
+    bk.remove = v; bk.start = null; renderRm(); renderDays(); stepTo(2);
+    toast(v ? "Добавили снятие: +200 ₽, +30 минут" : "Без снятия");
+  });
   function renderSum() {
     var s = svc(bk.svc), first = !st.bookings.some(function (b) { return !b.example; });
     var price = first ? Math.round(s.price * 0.9 / 10) * 10 : s.price;
-    $("bSum").innerHTML = '<div><span>' + s.name + '</span><b>' + rub(price) + (first ? " (−10%)" : "") + '</b></div><div><span>Когда</span><b>' + whenText(bk.date, bk.start) + '</b></div><div><span>Длительность</span><b>' + dur(s.min) + '</b></div>';
-    bk.price = price;
+    $("bSum").innerHTML = '<div><span>' + s.name + '</span><b>' + rub(price) + (first ? " (−10%)" : "") + '</b></div>' +
+      (bk.remove ? '<div><span>Снятие чужой работы</span><b class="num">' + rub(REMOVE.price) + '</b></div>' : '') +
+      '<div><span>Когда</span><b>' + whenText(bk.date, bk.start) + '</b></div><div><span>Длительность</span><b>' + dur(bmin(bk)) + '</b></div>' +
+      (bk.remove ? '<div class="big"><span style="color:inherit">Итого</span><span class="num">' + rub(price + REMOVE.price) + '</span></div>' : '');
+    bk.price = price + (bk.remove ? REMOVE.price : 0);
   }
   $("b3").addEventListener("submit", function (e) {
     e.preventDefault();
     var name = $("bName").value.trim(), phone = $("bPhone").value.replace(/[^\d+]/g, "");
     var err = !name ? "Укажите имя." : phone.replace(/\D/g, "").length < 10 ? "Укажите телефон полностью, например +7 900 123-45-67." : !$("bPd").checked ? "Отметьте согласие на обработку данных." : "";
     $("bErr").textContent = err; $("bErr").hidden = !err; if (err) return;
-    var still = freeSlots(bk.date, svc(bk.svc).min).some(function (s) { return s.t === bk.start && s.free; });
+    var still = freeSlots(bk.date, bmin(bk)).some(function (s) { return s.t === bk.start && s.free; });
     if (!still) { $("bErr").textContent = "Это время только что заняли. Выберите другое."; $("bErr").hidden = false; renderDays(); stepTo(2); return; }
     var btn = $("bPay"); btn.disabled = true; btn.textContent = "Записываю…";
     setTimeout(function () {
-      var s = svc(bk.svc), b = { id: "b" + Date.now().toString(36), date: bk.date, start: bk.start, svc: s.id, name: name, phone: $("bPhone").value.trim(), note: $("bNote").value.trim(), price: bk.price, status: "booked", created: Date.now() };
+      var s = svc(bk.svc), b = { id: "b" + Date.now().toString(36), date: bk.date, start: bk.start, svc: s.id, name: name, phone: $("bPhone").value.trim(), note: $("bNote").value.trim(), price: bk.price, remove: bk.remove, status: "booked", created: Date.now() };
       st.bookings.push(b); save();
-      $("bDone").textContent = whenText(b.date, b.start) + ". " + s.name + ". Адрес: ул. Обороны, 44А. Напоминание придёт за день.";
-      $("bTg").textContent = "🆕 Новая запись\n" + s.name + "\n" + whenText(b.date, b.start) + "\n" + name + ", " + b.phone + (b.note ? "\nКомментарий: " + b.note : "");
+      $("bDone").textContent = whenText(b.date, b.start) + ". " + s.name + (b.remove ? " и снятие чужой работы" : "") + ". Адрес: ул. Обороны, 44А. Напоминание придёт за день.";
+      $("bTg").textContent = "🆕 Новая запись\n" + s.name + (b.remove ? "\n+ снятие чужой работы" : "") + "\n" + whenText(b.date, b.start) + "\n" + name + ", " + b.phone + (b.note ? "\nКомментарий: " + b.note : "");
       btn.disabled = false; btn.textContent = "Записаться"; stepTo(4); window.scrollTo({ top: 0, behavior: "smooth" });
     }, 900);
   });
   function resetBooking(pick) {
-    bk = { svc: pick || null, date: null, start: null };
+    bk = { svc: pick || null, date: null, start: null, remove: false };
+    renderRm();
     ["bName", "bPhone", "bNote"].forEach(function (id) { $(id).value = ""; }); $("bPd").checked = false; $("bErr").hidden = true;
     renderSvcOpts(); if (bk.svc) { renderDays(); stepTo(2); } else stepTo(1);
   }
@@ -1031,14 +1054,14 @@ div.f { display: grid; gap: 8px; }
     $("aKpi").innerHTML = '<div class="kpi"><small>Записей</small><b class="num">' + active.length + '</b></div><div class="kpi"><small>Выручка дня</small><b class="num">' + rub(sumDay) + '</b></div><div class="kpi"><small>Свободных часов</small><b class="num">' + free + '</b></div>';
     $("aList").innerHTML = list.length ? list.map(function (b) {
       var s = svc(b.svc), t = STATUS[b.status] || STATUS.booked;
-      return '<div class="bk' + (b.id === flashId ? " moved" : "") + '"><div class="r1"><b class="num">' + hm(b.start) + '–' + hm(b.start + s.min) + '</b><span class="pill ' + t[1] + '">' + t[0] + '</span></div>' +
+      return '<div class="bk' + (b.id === flashId ? " moved" : "") + '"><div class="r1"><b class="num">' + hm(b.start) + '–' + hm(b.start + bmin(b)) + '</b><span class="pill ' + t[1] + '">' + t[0] + '</span></div>' +
         '<div><b style="font-weight:700">' + esc(b.name) + '</b> · ' + esc(b.phone) + (b.example ? ' <span class="pill">пример</span>' : '') + '</div>' +
-        '<div class="info">' + s.name + ' · ' + rub(b.price || s.price) + (b.note ? ' · «' + esc(b.note) + '»' : '') + '</div>' +
+        '<div class="info">' + s.name + (b.remove ? ' + снятие чужой работы' : '') + ' · ' + rub(b.price || s.price) + (b.note ? ' · «' + esc(b.note) + '»' : '') + '</div>' +
         (b.status === "booked" ? '<div class="acts"><button data-a="move" data-id="' + b.id + '">Перенести</button><button data-a="came" data-id="' + b.id + '">Пришла</button><button data-a="noshow" data-id="' + b.id + '">Не пришла</button><button data-a="cancel" data-id="' + b.id + '">Отменить</button></div>'
           : '<div class="acts"><button data-a="restore" data-id="' + b.id + '">Вернуть в «Записана»</button></div>') + '</div>';
     }).join("") : '<p class="note">На этот день записей нет. Нажмите «+ Добавить запись», если записали клиентку по телефону.</p>';
     flashId = null;
-    var iv = dayBookings(aDate).filter(function (b) { return b.status !== "cancelled"; }).map(function (b) { return [b.start, b.start + svc(b.svc).min]; });
+    var iv = dayBookings(aDate).filter(function (b) { return b.status !== "cancelled"; }).map(function (b) { return [b.start, b.start + bmin(b)]; });
     var g = "";
     for (var t = OPEN; t < CLOSE; t += STEP) {
       var busy = iv.some(function (x) { return t < x[1] && t + STEP > x[0]; }), blk = st.blocks[aDate] && st.blocks[aDate][t];
@@ -1061,7 +1084,7 @@ div.f { display: grid; gap: 8px; }
     if (b.dataset.a === "move") { openEditor(rec); return; }
     var own = ownCopy(rec);
     own.status = { came: "came", noshow: "noshow", cancel: "cancelled", restore: "booked" }[b.dataset.a];
-    if (own.status === "booked" && !freeSlots(own.date, svc(own.svc).min, own.id).some(function (x) { return x.t === own.start && x.free; })) { own.status = "cancelled"; toast("Это время уже занято. Перенесите запись на другое окно"); }
+    if (own.status === "booked" && !freeSlots(own.date, bmin(own), own.id).some(function (x) { return x.t === own.start && x.free; })) { own.status = "cancelled"; toast("Это время уже занято. Перенесите запись на другое окно"); }
     else toast({ came: "Отмечено: пришла", noshow: "Отмечено: не пришла", cancel: "Запись отменена", restore: "Запись восстановлена" }[b.dataset.a]);
     save(); renderAdmin();
   });
@@ -1083,12 +1106,12 @@ div.f { display: grid; gap: 8px; }
   // Шторка: добавить запись вручную или перенести существующую
   var ed = null;
   $("eSvc").innerHTML = SERVICES.map(function (s) { return '<option value="' + s.id + '">' + s.name + ' · ' + rub(s.price) + ' · ' + dur(s.min) + '</option>'; }).join("");
-  function edSlots() { return freeSlots(ed.date, svc(ed.svc).min, ed.id); }
+  function edSlots() { return freeSlots(ed.date, bmin(ed), ed.id); }
   function renderEditor() {
     var sl = $("eDays").scrollLeft, h = "";
     for (var i = 0; i < 14; i++) {
       var d = addDays(i), k = dkey(d), off = d.getDay() === 0 || st.dayoff[k];
-      var cnt = off ? 0 : freeSlots(k, svc(ed.svc).min, ed.id).filter(function (x) { return x.free; }).length;
+      var cnt = off ? 0 : freeSlots(k, bmin(ed), ed.id).filter(function (x) { return x.free; }).length;
       h += '<button class="day" data-d="' + k + '" aria-pressed="' + (k === ed.date) + '"' + (!cnt ? " disabled" : "") + '><small>' + (i === 0 ? "сег" : WD[d.getDay()]) + '</small><b class="num">' + d.getDate() + '</b><em>' + (off ? "выходной" : cnt ? cnt + " окон" : "занято") + '</em></button>';
     }
     $("eDays").innerHTML = h; $("eDays").scrollLeft = sl;
@@ -1096,10 +1119,10 @@ div.f { display: grid; gap: 8px; }
     $("eSlots").innerHTML = list.length ? list.map(function (x) { return '<button class="slot num" data-t="' + x.t + '"' + (x.free ? "" : " disabled") + ' aria-pressed="' + (ed.start === x.t) + '">' + hm(x.t) + '</button>'; }).join("") : '<p class="note">В этот день свободных окон нет.</p>';
   }
   function openEditor(rec) {
-    ed = rec ? { id: rec.id, svc: rec.svc, date: rec.date, start: rec.start, move: true } : { id: null, svc: "gel", date: aDate, start: null, move: false };
+    ed = rec ? { id: rec.id, svc: rec.svc, remove: !!rec.remove, date: rec.date, start: rec.start, move: true } : { id: null, svc: "gel", remove: false, date: aDate, start: null, move: false };
     $("eTitle").textContent = ed.move ? "Перенести запись" : "Новая запись";
     $("eWho").textContent = ed.move ? rec.name + " · " + svc(rec.svc).name + " · сейчас: " + whenText(rec.date, rec.start) : "Для клиентки, которая записалась по телефону или в мессенджере.";
-    $("eSvcL").hidden = ed.move; $("eContact").hidden = ed.move; $("eSvc").value = ed.svc; $("eName").value = ""; $("ePhone").value = ""; $("eErr").hidden = true;
+    $("eSvcL").hidden = ed.move; $("eContact").hidden = ed.move; $("eRmL").hidden = ed.move; $("eRm").checked = false; $("eSvc").value = ed.svc; $("eName").value = ""; $("ePhone").value = ""; $("eErr").hidden = true;
     $("eSave").textContent = ed.move ? "Перенести" : "Добавить запись";
     renderEditor();
     $("eScrim").hidden = false; $("eSheet").hidden = false; document.body.classList.add("lock");
@@ -1111,6 +1134,7 @@ div.f { display: grid; gap: 8px; }
   }
   $("aAdd").onclick = function () { openEditor(null); };
   $("eClose").onclick = closeEditor; $("eScrim").onclick = closeEditor;
+  $("eRm").onchange = function () { ed.remove = this.checked; ed.start = null; renderEditor(); };
   $("eSvc").onchange = function () { ed.svc = this.value; ed.start = null; renderEditor(); };
   $("eDays").addEventListener("click", function (e) { var b = e.target.closest("[data-d]"); if (b && !b.disabled) { ed.date = b.dataset.d; ed.start = null; renderEditor(); } });
   $("eSlots").addEventListener("click", function (e) { var b = e.target.closest("[data-t]"); if (b && !b.disabled) { ed.start = Number(b.dataset.t); renderEditor(); } });
@@ -1123,7 +1147,7 @@ div.f { display: grid; gap: 8px; }
       own.date = ed.date; own.start = ed.start; flashId = own.id;
       toast("Перенесено на " + whenText(ed.date, ed.start));
     } else {
-      var nb = { id: "b" + Date.now().toString(36), date: ed.date, start: ed.start, svc: ed.svc, name: $("eName").value.trim(), phone: $("ePhone").value.trim() || "—", price: svc(ed.svc).price, status: "booked", manual: true };
+      var nb = { id: "b" + Date.now().toString(36), date: ed.date, start: ed.start, svc: ed.svc, remove: ed.remove, name: $("eName").value.trim(), phone: $("ePhone").value.trim() || "—", price: svc(ed.svc).price + (ed.remove ? REMOVE.price : 0), status: "booked", manual: true };
       st.bookings.push(nb); flashId = nb.id; toast("Запись добавлена");
     }
     save(); aDate = ed.date; closeEditor(); renderAdmin();
