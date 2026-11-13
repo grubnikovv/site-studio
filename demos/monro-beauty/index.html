@@ -62,7 +62,9 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 .logo { display: inline-flex; align-items: baseline; font-family: var(--display); font-size: 22px; line-height: 1; letter-spacing: .22em; text-decoration: none; white-space: nowrap; }
 .logo small { font-family: var(--body); font-size: 9.5px; font-weight: 600; letter-spacing: .3em; color: var(--mute); margin-left: 8px; }
 /* на узком экране подпись уходит под название, растянутая на его ширину */
-@media (max-width: 480px) { .hdr .logo { flex-direction: column; align-items: stretch; } .hdr .logo small { margin: 5px 0 0; font-size: 7.5px; letter-spacing: .34em; text-align: center; padding-left: .34em; } }
+/* разрядка добавляет пробел после последней буквы — убираем его, чтобы слово и подпись центрировались точно */
+.logo .lw { margin-right: -.22em; }
+@media (max-width: 480px) { .hdr .logo { flex-direction: column; align-items: center; } .hdr .logo small { margin: 5px -.34em 0 0; font-size: 7.5px; letter-spacing: .34em; } }
 .nav { display: flex; gap: 26px; font-size: 14px; font-weight: 600; }
 .nav a { text-decoration: none; color: var(--mute); }
 .nav a:hover { color: var(--ink); }
@@ -428,7 +430,7 @@ div.f { display: grid; gap: 8px; }
   <div class="wrap">
     <div class="hdr-l">
       <button class="burger" id="burger" aria-label="Открыть меню" aria-expanded="false" aria-controls="drawer"><span></span><span></span></button>
-      <a class="logo" href="#top">МОНРО<small>СТУДИЯ КРАСОТЫ</small></a>
+      <a class="logo" href="#top"><span class="lw">МОНРО</span><small>СТУДИЯ КРАСОТЫ</small></a>
     </div>
     <a class="btn sm" href="#zapis">Записаться</a>
   </div>
@@ -437,7 +439,7 @@ div.f { display: grid; gap: 8px; }
 <div class="scrim" id="scrim" hidden></div>
 <aside class="drawer" id="drawer" aria-label="Меню сайта" hidden>
   <div class="drawer-top">
-    <span class="logo">МОНРО<small>СТУДИЯ КРАСОТЫ</small></span>
+    <span class="logo"><span class="lw">МОНРО</span><small>СТУДИЯ КРАСОТЫ</small></span>
     <button class="x" id="drawerClose" aria-label="Закрыть меню"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
   </div>
   <nav class="dnav" id="dnav">
@@ -742,7 +744,7 @@ div.f { display: grid; gap: 8px; }
 
 <footer>
   <div class="wrap">
-    <div class="fcol"><span class="logo">МОНРО<small>СТУДИЯ КРАСОТЫ</small></span><span>Марина Шевченко · Михайловка, ул. Обороны, 44А</span></div>
+    <div class="fcol"><span class="logo"><span class="lw">МОНРО</span><small>СТУДИЯ КРАСОТЫ</small></span><span>Марина Шевченко · Михайловка, ул. Обороны, 44А</span></div>
     <div class="fnav"><a href="#uslugi">Услуги</a><a href="#obuchenie">Обучение</a><a href="#voprosy">Вопросы</a><a href="#kontakty">Контакты</a><a href="#admin">Вход для мастера</a></div>
   </div>
 </footer>
