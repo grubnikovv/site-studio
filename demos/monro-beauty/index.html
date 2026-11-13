@@ -4,7 +4,7 @@
 <meta name="description" content="Маникюр, педикюр и обучение маникюру в Михайловке. Мастер Марина Шевченко, 10 лет опыта. Онлайн-запись, очное обучение.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tenor+Sans&family=Great+Vibes&family=Manrope:wght@400;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tenor+Sans&family=Manrope:wght@400;600;700;800&display=swap">
 <script>try { var t = localStorage.getItem("monro-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}</script>
 <style>
 /* Layout: многостраничный сайт на хэш-маршрутах, слева выезжающее меню, на телефоне снизу липкая кнопка записи */
@@ -21,7 +21,6 @@
   --ok: #2E7D5B;
   --shadow: 0 1px 2px rgba(34,26,29,.05), 0 14px 40px rgba(34,26,29,.08);
   --display: "Tenor Sans", "Manrope", system-ui, sans-serif;
-  --script: "Great Vibes", "Marck Script", cursive;
   --body: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
   --nail: #9E1F42;
 }
@@ -60,8 +59,10 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 /* шапка */
 .hdr { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
 .hdr .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; }
-.logo { display: inline-grid; justify-items: start; font-family: var(--display); font-size: 22px; line-height: 1; letter-spacing: .22em; text-decoration: none; white-space: nowrap; }
-.logo small { font-family: var(--script); font-size: 19px; line-height: 1; letter-spacing: 0; color: var(--lac); font-weight: 400; margin: -3px 0 0 34%; transform: rotate(-4deg); transform-origin: left center; }
+.logo { display: inline-flex; align-items: baseline; font-family: var(--display); font-size: 22px; line-height: 1; letter-spacing: .22em; text-decoration: none; white-space: nowrap; }
+.logo small { font-family: var(--body); font-size: 9.5px; font-weight: 600; letter-spacing: .3em; color: var(--mute); margin-left: 8px; }
+/* на узком экране подпись уходит под название, растянутая на его ширину */
+@media (max-width: 480px) { .hdr .logo { flex-direction: column; align-items: stretch; } .hdr .logo small { margin: 5px 0 0; font-size: 7.5px; letter-spacing: .34em; text-align: center; padding-left: .34em; } }
 .nav { display: flex; gap: 26px; font-size: 14px; font-weight: 600; }
 .nav a { text-decoration: none; color: var(--mute); }
 .nav a:hover { color: var(--ink); }
@@ -427,7 +428,7 @@ div.f { display: grid; gap: 8px; }
   <div class="wrap">
     <div class="hdr-l">
       <button class="burger" id="burger" aria-label="Открыть меню" aria-expanded="false" aria-controls="drawer"><span></span><span></span></button>
-      <a class="logo" href="#top">МОНРО<small>студия красоты</small></a>
+      <a class="logo" href="#top">МОНРО<small>СТУДИЯ КРАСОТЫ</small></a>
     </div>
     <a class="btn sm" href="#zapis">Записаться</a>
   </div>
@@ -436,7 +437,7 @@ div.f { display: grid; gap: 8px; }
 <div class="scrim" id="scrim" hidden></div>
 <aside class="drawer" id="drawer" aria-label="Меню сайта" hidden>
   <div class="drawer-top">
-    <span class="logo">МОНРО<small>студия красоты</small></span>
+    <span class="logo">МОНРО<small>СТУДИЯ КРАСОТЫ</small></span>
     <button class="x" id="drawerClose" aria-label="Закрыть меню"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
   </div>
   <nav class="dnav" id="dnav">
@@ -741,7 +742,7 @@ div.f { display: grid; gap: 8px; }
 
 <footer>
   <div class="wrap">
-    <div class="fcol"><span class="logo">МОНРО<small>студия красоты</small></span><span>Марина Шевченко · Михайловка, ул. Обороны, 44А</span></div>
+    <div class="fcol"><span class="logo">МОНРО<small>СТУДИЯ КРАСОТЫ</small></span><span>Марина Шевченко · Михайловка, ул. Обороны, 44А</span></div>
     <div class="fnav"><a href="#uslugi">Услуги</a><a href="#obuchenie">Обучение</a><a href="#voprosy">Вопросы</a><a href="#kontakty">Контакты</a><a href="#admin">Вход для мастера</a></div>
   </div>
 </footer>
