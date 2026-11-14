@@ -649,6 +649,10 @@ div.f { display: grid; gap: 8px; }
 .cl .hist { display: grid; gap: 4px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 13px; }
 .cl .hist div { display: flex; justify-content: space-between; gap: 10px; }
 .cl .hist span { color: var(--mute); }
+.cl .hist div { align-items: center; }
+.cl .hist b { margin-left: auto; text-align: right; }
+.xdel { flex: none; border: 1.5px solid var(--line); background: var(--paper); border-radius: 999px; padding: 3px 9px; font-size: 12px; font-weight: 700; color: var(--mute); }
+.danger, .bk .acts button.danger { border-color: #C0392B !important; color: #C0392B !important; }
 .mnav { display: flex; gap: 6px; }
 .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
 @media (min-width: 640px) { .stat-grid { grid-template-columns: repeat(3, 1fr); } }
@@ -1100,7 +1104,7 @@ div.f { display: grid; gap: 8px; }
         <div class="step"><b>Выберите услугу</b><p>Цена и время видны сразу.</p></div>
         <div class="step"><b>Свободное время</b><p>Занятые окна уже закрыты, без переписки.</p></div>
         <div class="step"><b>Имя и телефон</b><p>Без оплаты на сайте. Марина сразу получает вашу запись.</p></div>
-        <div class="step"><b>Напоминание</b><p>За день до визита пришлём напоминание.</p></div>
+        <div class="step"><b>Напоминание</b><p>Напомним за 2 дня и за 2 часа — в Telegram или MAX.</p></div>
       </div>
       <div class="cta" style="margin-top:24px"><a class="btn glow" href="#zapis">Записаться онлайн</a><a class="btn ghost" href="#voprosy">Вопросы и ответы</a></div>
     </div>
@@ -1617,7 +1621,8 @@ div.f { display: grid; gap: 8px; }
     // примеры могут быть перенесены мастером на другой день — тогда показываем их там, куда перенесли
     var ex = seeded(k).map(function (b) { var o = st.bookings.filter(function (x) { return x.id === b.id; })[0]; return o || b; }).filter(function (b) { return b.date === k; });
     var own = st.bookings.filter(function (b) { return b.date === k && b.seedDate !== k; });
-    return ex.concat(own).sort(function (a, b) { return a.start - b.start; });
+    var del = st.deleted || {};
+    return ex.concat(own).filter(function (b) { return !del[b.id]; }).sort(function (a, b) { return a.start - b.start; });
   }
   // master = запись из кабинета: любые часы с 7 до 22, выходные, обед и закрытые окна не мешают
   function busyIntervals(k, ignore, master) {
@@ -2121,7 +2126,7 @@ div.f { display: grid; gap: 8px; }
         certBlock(b) +
         (b.status === "booked" ? '<div class="acts"><button data-a="move" data-id="' + b.id + '">Перенести</button><button data-a="came" data-id="' + b.id + '">Пришла</button><button data-a="noshow" data-id="' + b.id + '">Не пришла</button><button data-a="cancel" data-id="' + b.id + '">Отменить</button></div>'
           : b.status === "cancelled"
-            ? '<div class="acts"><button data-a="move" data-id="' + b.id + '">Перенести</button>' + (canRestore(b) ? '<button data-a="restore" data-id="' + b.id + '">Вернуть на это время</button>' : '<button disabled>Время уже занято</button>') + '</div>' +
+            ? '<div class="acts"><button data-a="move" data-id="' + b.id + '">Перенести</button>' + (canRestore(b) ? '<button data-a="restore" data-id="' + b.id + '">Вернуть на это время</button>' : '<button disabled>Время уже занято</button>') + '<button data-a="del" data-id="' + b.id + '" data-key="d' + b.id + '">Удалить</button></div>' +
               (canRestore(b) ? '' : '<div class="info">На это время уже записана другая клиентка. Перенесите запись на свободное окно.</div>')
             : '<div class="acts"><button data-a="restore" data-id="' + b.id + '">Вернуть в «Записана»</button></div>') + '</div>';
     }).join("") : '<p class="note">На этот день записей нет. Нажмите «+ Добавить запись», если записали клиентку по телефону.</p>' + rows.map(function (r) {
@@ -2191,6 +2196,7 @@ div.f { display: grid; gap: 8px; }
     var b = e.target.closest("[data-a]"); if (!b) return;
     var rec = dayBookings(aDate).filter(function (x) { return x.id === b.dataset.id; })[0]; if (!rec) return;
     if (b.dataset.a === "move") { openEditor(rec); return; }
+    if (b.dataset.a === "del") { if (rec.status === "cancelled") askDelete(b, "Точно удалить?", function () { deleteBooking(rec.id); renderAdmin(); toast("Отменённая запись удалена"); }); return; }
     var own = ownCopy(rec);
     if (b.dataset.a === "restore" && own.status === "cancelled" && !canRestore(own)) { toast("Это время уже занято. Перенесите запись на другое окно"); return; }
     own.status = { came: "came", noshow: "noshow", cancel: "cancelled", restore: "booked" }[b.dataset.a];
@@ -2408,7 +2414,8 @@ div.f { display: grid; gap: 8px; }
     var map = {}, today = dkey(new Date());
     allBookings().forEach(function (b) {
       var key = b.example ? "ex" + b.phone : (b.phone.replace(/\D/g, "").replace(/^8/, "7") || b.name);
-      var c = map[key] || (map[key] = { name: b.name, phone: b.phone, example: !!b.example, visits: [], came: 0, noshow: 0, cancel: 0, future: null });
+      if (b.anon) return;  // удалённая клиентка: запись осталась только для статистики
+      var c = map[key] || (map[key] = { key: key, name: b.name, phone: b.phone, example: !!b.example, visits: [], came: 0, noshow: 0, cancel: 0, future: null });
       c.visits.push(b);
       if (b.status === "came") c.came++;
       if (b.status === "noshow") c.noshow++;
@@ -2421,6 +2428,7 @@ div.f { display: grid; gap: 8px; }
       return c;
     });
   }
+  function times(n) { return n + (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? " раза" : " раз"); }
   function shortDate(k) { return new Date(k + "T12:00").toLocaleDateString("ru-RU", { day: "numeric", month: "short" }); }
   function waLink(c, text) { var d = c.phone.replace(/\D/g, "").replace(/^8/, "7"); return d.length === 11 ? "https://wa.me/" + d + "?text=" + encodeURIComponent(text) : ""; }
   function renderClients() {
@@ -2443,11 +2451,41 @@ div.f { display: grid; gap: 8px; }
     $("aClients").innerHTML = list.length ? list.map(function (c) {
       var badges = (c.noshow >= 2 ? '<span class="badge bad">часто не приходит</span>' : '') + (c.came <= 1 && !c.example ? '<span class="badge new">новая</span>' : '') + (c.example ? '<span class="badge">пример</span>' : '');
       return '<details class="bk cl"><summary><div class="r1"><b>' + esc(c.name) + ' · <span class="num" style="font-weight:500">' + esc(c.phone) + '</span></b><span>' + badges + '</span></div>' +
-        '<div class="info">Визитов: ' + c.came + (c.noshow ? ' · неявок: ' + c.noshow : '') + (c.cancel ? ' · отмен: ' + c.cancel : '') + ' · последний: ' + (c.last ? shortDate(c.last.date) : '—') + (c.future ? ' · записана на ' + shortDate(c.future.date) : '') + '</div></summary>' +
-        '<div class="hist">' + c.visits.slice(0, 12).map(function (v) { return '<div><span>' + shortDate(v.date) + ', ' + hm(v.start) + '</span><b style="font-weight:600">' + svc(v.svc).name + ' · ' + statusOf(v)[0].toLowerCase() + '</b></div>'; }).join("") + '</div>' +
-        '<div class="acts" style="margin-top:10px"><button type="button" data-again="' + esc(c.phone) + '" data-svc="' + (c.visits[0] ? c.visits[0].svc : "gel") + '" data-name="' + esc(c.name) + '">Записать снова</button></div></details>';
+        '<div class="info">' + (c.came ? 'Пришла: ' + times(c.came) + ' · последний раз ' + shortDate(c.last.date) : 'Ещё не приходила') + (c.noshow ? ' · не пришла: ' + times(c.noshow) : '') + (c.cancel ? ' · отменено: ' + c.cancel : '') + (c.future ? ' · записана на ' + shortDate(c.future.date) : '') + '</div></summary>' +
+        '<div class="hist">' + c.visits.slice(0, 12).map(function (v) { return '<div><span>' + shortDate(v.date) + ', ' + hm(v.start) + '</span><b style="font-weight:600">' + svc(v.svc).name + ' · ' + statusOf(v)[0].toLowerCase() + '</b>' + (v.status === "cancelled" ? '<button type="button" class="xdel" data-delb="' + v.id + '" data-key="b' + v.id + '" aria-label="Удалить отменённую запись">Удалить</button>' : '') + '</div>'; }).join("") + '</div>' +
+        '<div class="acts" style="margin-top:10px"><button type="button" data-again="' + esc(c.phone) + '" data-svc="' + (c.visits[0] ? c.visits[0].svc : "gel") + '" data-name="' + esc(c.name) + '">Записать снова</button>' +
+        (c.future ? '<button type="button" disabled title="Сначала отмените будущую запись">Удалить клиентку</button>' : '<button type="button" data-delc="' + esc(c.key) + '" data-key="c' + esc(c.key) + '">Удалить клиентку</button>') + '</div>' +
+        (c.future ? '<div class="info">Чтобы удалить клиентку, сначала отмените её будущую запись.</div>' : '') + '</details>';
     }).join("") : '<p class="note">Никого не нашли.</p>';
   }
+  // удалить отменённую запись насовсем (из дня, истории и статистики)
+  function deleteBooking(id) {
+    st.deleted = st.deleted || {}; st.deleted[id] = 1;
+    st.bookings = st.bookings.filter(function (b) { return b.id !== id; });
+    save();
+  }
+  // удалить клиентку по её просьбе: отменённые записи — насовсем, прошедшие — без имени и телефона (чтобы выручка в статистике не поменялась)
+  function deleteClient(c) {
+    c.visits.forEach(function (v) {
+      if (v.status === "cancelled" || v.example) { deleteBooking(v.id); return; }
+      var own = ownCopy(v); own.name = "Клиентка удалена"; own.phone = ""; own.note = ""; own.anon = true; delete own.remind;
+    });
+    save();
+  }
+  var delAsk = null;  // вторая кнопка «Точно удалить?» — защита от случайного нажатия
+  function askDelete(btn, text, fn) {
+    if (delAsk === btn.dataset.key) { delAsk = null; fn(); return; }
+    delAsk = btn.dataset.key; btn.textContent = text; btn.classList.add("danger");
+    setTimeout(function () { if (delAsk === btn.dataset.key) { delAsk = null; renderTab(); } }, 4000);
+  }
+  $("aClients").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-delb]"), c = e.target.closest("[data-delc]");
+    if (b) { askDelete(b, "Точно удалить?", function () { deleteBooking(b.dataset.delb); renderClients(); toast("Запись удалена из истории"); }); return; }
+    if (c) {
+      var cl = clientsDb().filter(function (x) { return x.key === c.dataset.delc; })[0]; if (!cl) return;
+      askDelete(c, "Точно удалить? Нажмите ещё раз", function () { deleteClient(cl); renderClients(); toast("Клиентка удалена: имени и телефона больше нет в истории"); });
+    }
+  });
   $("aSearch").addEventListener("input", renderClients);
   document.addEventListener("click", function (e) {
     var b = e.target.closest("[data-again]"); if (!b) return;
@@ -2470,7 +2508,7 @@ div.f { display: grid; gap: 8px; }
     var by = {}; came.forEach(function (b) { by[b.svc] = (by[b.svc] || 0) + 1; });
     var top = Object.keys(by).sort(function (a, b) { return by[b] - by[a]; }).slice(0, 4), mx = top.length ? by[top[0]] : 1;
     var stat = function (a, b) { return '<div class="stat"><small>' + a + '</small><b class="num">' + b + '</b></div>'; };
-    $("aStats").innerHTML = '<div class="stat-grid">' + stat("Выручка", rub(rev)) + stat("Визитов", came.length) + stat("Средний чек", came.length ? rub(Math.round(rev / came.length / 10) * 10) : "—") +
+    $("aStats").innerHTML = '<div class="stat-grid">' + stat("Выручка", rub(rev)) + stat("Пришли", came.length + '<em class="stat-sub">раз за месяц</em>') + stat("Средний чек", came.length ? rub(Math.round(rev / came.length / 10) * 10) : "—") +
       stat("Новых клиенток", fresh) + stat("Отмены", (cancC + cancM) + '<em class="stat-sub">клиентки ' + cancC + ' · вы ' + cancM + '</em>') + stat("Не пришли", nos) + '</div>' +
       (planned.length ? '<p class="note">Ещё записано до конца месяца: ' + planned.length + ' на ' + rub(plannedRev) + '.</p>' : '') +
       (open ? '<p class="note" style="color:var(--lac)">Не отмечено ' + open + ' прошедших записей — откройте эти дни во вкладке «День» и нажмите «Пришла» или «Не пришла».</p>' : '') +
