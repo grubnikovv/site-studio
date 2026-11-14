@@ -1456,7 +1456,7 @@ div.f { display: grid; gap: 8px; }
     { id: "ext", name: "Наращивание, длина до\u00a03-й", price: 2600, min: 120, text: "Наращивание гелем с покрытием, короткая и средняя длина." },
     { id: "ext4", name: "Наращивание, длина от\u00a04-й", price: 3000, min: 150, text: "Наращивание гелем с покрытием, длинные ногти." },
     { id: "off", name: "Снятие покрытия", price: 300, min: 30, noRemove: true, text: "Только снятие гель-лака или наращивания, без новой работы." },
-    { id: "nit", name: "Титановая нить", price: 2500, min: 30, text: "Укрепление трещины ногтя титановой нитью, цена за один палец." },
+    { id: "nit", name: "Титановая нить (вросший ноготь)", price: 2500, min: 30, noRemove: true, text: "Коррекция вросшего ногтя на ноге: нить приподнимает край ногтя и снимает давление. Цена за один палец." },
     { id: "ped", name: "Педикюр: только пальчики", price: 1200, min: 60, foot: true, text: "Обработка пальчиков без покрытия." },
     { id: "pedg", name: "Педикюр: пальчики с гель-лаком", price: 2000, min: 90, foot: true, text: "Обработка пальчиков и покрытие гель-лаком." },
     { id: "pedf", name: "Педикюр: пальчики и стопы", price: 2200, min: 90, foot: true, text: "Обработка пальчиков и стоп, без покрытия." },
@@ -1627,9 +1627,9 @@ div.f { display: grid; gap: 8px; }
     return '<div class="prow"><div><b>' + s.name + '</b><small>' + s.text + ' ' + dur(s.min) + '.</small></div><div class="pr-r"><span class="num">' + priceText(s) + '</span><a class="btn sm ghost" href="#zapis" data-pick="' + s.id + '">Записаться</a></div></div>';
   }
   $("homeSvc").innerHTML = ["gel", "ext", "pedp"].map(function (id) { return svcCard(svc(id)); }).join("");
-  $("pHands").innerHTML = ["man", "gel", "str", "cor", "ext", "ext4", "nit", "off"].map(function (id) { return priceRow(svc(id)); }).join("");
-  $("nHands").textContent = "8 услуг"; $("nFeet").textContent = "5 услуг";
-  $("pFeet").innerHTML = ["ped", "pedg", "pedf", "pedp", "pedh"].map(function (id) { return priceRow(svc(id)); }).join("");
+  $("pHands").innerHTML = ["man", "gel", "str", "cor", "ext", "ext4", "off"].map(function (id) { return priceRow(svc(id)); }).join("");
+  $("nHands").textContent = "7 услуг"; $("nFeet").textContent = "6 услуг";
+  $("pFeet").innerHTML = ["ped", "pedg", "pedf", "pedp", "pedh", "nit"].map(function (id) { return priceRow(svc(id)); }).join("");
 
   var phIcon = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 21V9a4 4 0 0 1 8 0v12"></path><path d="M10 9.5a2 2 0 0 1 4 0"></path></svg>';
   var GAL = [["m", "Маникюр"], ["d", "Дизайн"], ["e", "Наращивание"], ["p", "Педикюр"], ["m", "Маникюр"], ["d", "Дизайн"], ["e", "Наращивание"], ["m", "Маникюр"], ["p", "Педикюр"], ["d", "Дизайн"], ["m", "Маникюр"], ["e", "Наращивание"]];
@@ -1707,8 +1707,8 @@ div.f { display: grid; gap: 8px; }
   function renderSvcOpts() {
     // тот же порядок и группы, что в прайсе: руки, ноги
     var opt = function (id) { var s = svc(id); return '<button class="opt" data-s="' + s.id + '" aria-pressed="' + (bk.svc === s.id) + '"><span><b style="font-weight:700">' + s.name + '</b><small>' + dur(s.min) + '</small></span><b class="num">' + priceText(s) + '</b></button>'; };
-    $("bSvc").innerHTML = '<span class="bgrp">Руки</span>' + ["man", "gel", "str", "cor", "ext", "ext4", "nit", "off"].map(opt).join("") +
-      '<span class="bgrp">Ноги</span>' + ["ped", "pedg", "pedf", "pedp", "pedh"].map(opt).join("");
+    $("bSvc").innerHTML = '<span class="bgrp">Руки</span>' + ["man", "gel", "str", "cor", "ext", "ext4", "off"].map(opt).join("") +
+      '<span class="bgrp">Ноги</span>' + ["ped", "pedg", "pedf", "pedp", "pedh", "nit"].map(opt).join("");
   }
   $("bSvc").addEventListener("click", function (e) {
     var b = e.target.closest("[data-s]"); if (!b) return;
