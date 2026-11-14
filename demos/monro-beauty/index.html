@@ -512,6 +512,15 @@ div.f { display: grid; gap: 8px; }
 .mc .g-logo { font-size: 16px; }
 .mc-sum { font-family: var(--display); font-weight: 400; font-size: 34px; color: #fff; }
 .mc-sum small { font-family: var(--body); font-size: 14px; color: #C9AEB6; }
+.cpay { display: grid; gap: 10px; padding: 14px; border-radius: 16px; border: 1.5px solid color-mix(in srgb, var(--gold) 50%, var(--line)); background: color-mix(in srgb, var(--gold) 8%, var(--paper)); animation: fadein .3s ease both; }
+.cpay .x { width: 32px; height: 32px; border: 0; background: none; font-size: 22px; line-height: 1; color: var(--mute); }
+.cpay .sum { background: var(--paper); }
+.cpay .amt { display: inline-flex; align-items: center; gap: 6px; }
+.cpay .amt input { width: 110px; border: 1.5px solid var(--line); background: var(--bg); border-radius: 10px; padding: 6px 10px; font-size: 16px; text-align: right; }
+.cpaid { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 12px; border-radius: 14px; background: color-mix(in srgb, var(--gold) 12%, var(--paper)); font-size: 13.5px; }
+.cpaid > div { display: grid; gap: 2px; }
+.cpaid span { color: var(--mute); }
+.cpaid button { border: 1.5px solid var(--line); background: var(--paper); border-radius: 999px; padding: 6px 12px; font-size: 12.5px; font-weight: 700; }
 .spend { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
 .spend input { width: 100%; border: 1.5px solid var(--line); background: var(--paper); border-radius: 12px; padding: 9px 12px; font-size: 16px; }
 .spend button { border: 1.5px solid var(--line); background: var(--paper); border-radius: 999px; padding: 7px 12px; font-size: 13px; font-weight: 700; }
@@ -574,7 +583,7 @@ div.f { display: grid; gap: 8px; }
     <a href="#obuchenie" data-r="obuchenie">Обучение<small>очно в студии: маникюр и педикюр</small></a>
     <a href="#o-mastere" data-r="o-mastere">О мастере и награды</a>
     <a href="#voprosy" data-r="voprosy">Вопросы и ответы</a>
-    <a href="#sertifikat" data-r="sertifikat">Подарочный сертификат<small>на любую процедуру</small></a>
+    <a href="#sertifikat" data-r="sertifikat">Сертификаты<small>подарок на любую процедуру</small></a>
     <a href="#kontakty" data-r="kontakty">Контакты</a>
   </nav>
   <div class="drawer-foot">
@@ -1319,7 +1328,7 @@ div.f { display: grid; gap: 8px; }
     var b = e.target.closest("[data-my]"); if (!b) return;
     if (b.dataset.sure !== "1") { b.dataset.sure = "1"; b.textContent = "Точно отменить? Нажмите ещё раз"; return; }
     var rec = st.bookings.filter(function (x) { return x.id === b.dataset.my; })[0]; if (!rec) return;
-    rec.status = "cancelled"; rec.by = "client"; rec.cancelledAt = Date.now(); save(); renderMy();
+    rec.status = "cancelled"; rec.by = "client"; rec.cancelledAt = Date.now(); certUndo(rec, true); save(); renderMy();
     toast("Запись отменена. Марина получит уведомление");
   });
   function resetBooking(pick) {
@@ -1467,6 +1476,7 @@ div.f { display: grid; gap: 8px; }
         '<div><b style="font-weight:700">' + esc(b.name) + '</b> · ' + esc(b.phone) + (b.example ? ' <span class="pill">пример</span>' : '') + '</div>' +
         '<div class="info">' + s.name + (b.remove ? ' + снятие чужой работы' : '') + ' · ' + rub(b.price || s.price) + (b.note ? ' · «' + esc(b.note) + '»' : '') + '</div>' +
         (b.remind && b.remind !== "none" ? '<div class="info">🔔 ' + (b.remind === "tg" ? "Telegram" : "SMS") + ' · ' + remindPlan(b.date).join(", ") + '</div>' : '') +
+        certBlock(b) +
         (b.status === "booked" ? '<div class="acts"><button data-a="move" data-id="' + b.id + '">Перенести</button><button data-a="came" data-id="' + b.id + '">Пришла</button><button data-a="noshow" data-id="' + b.id + '">Не пришла</button><button data-a="cancel" data-id="' + b.id + '">Отменить</button></div>'
           : b.status === "cancelled"
             ? '<div class="acts"><button data-a="move" data-id="' + b.id + '">Перенести</button>' + (canRestore(b) ? '<button data-a="restore" data-id="' + b.id + '">Вернуть на это время</button>' : '<button disabled>Время уже занято</button>') + '</div>' +
@@ -1513,6 +1523,7 @@ div.f { display: grid; gap: 8px; }
     var own = ownCopy(rec);
     if (b.dataset.a === "restore" && own.status === "cancelled" && !canRestore(own)) { toast("Это время уже занято. Перенесите запись на другое окно"); return; }
     own.status = { came: "came", noshow: "noshow", cancel: "cancelled", restore: "booked" }[b.dataset.a];
+    if (own.status === "cancelled" && own.certPay) { certUndo(own, true); toast("Запись отменена, оплата сертификатом возвращена на сертификат"); save(); renderAdmin(); return; }
     if (own.status === "cancelled") own.by = "master"; else delete own.by;
     toast({ came: "Отмечено: пришла", noshow: "Отмечено: не пришла", cancel: "Запись отменена", restore: "Запись восстановлена" }[b.dataset.a]);
     save(); renderAdmin();
@@ -1807,6 +1818,77 @@ div.f { display: grid; gap: 8px; }
     }, 900);
   });
   renderGift();
+  function certKey(code) { return String(code || "").toUpperCase().replace(/[^A-ZА-Я0-9]/g, "").replace(/^(МН|MH|MN)/, ""); }
+  function findCert(code) { var k = certKey(code); return k ? (st.certs || []).filter(function (c) { return certKey(c.code) === k; })[0] : null; }
+  function certProblem(c) {
+    if (!c) return "Сертификат с таким номером не найден. Проверьте номер.";
+    if (c.till && c.till < dkey(new Date())) return "Срок сертификата закончился " + shortDate(c.till) + ".";
+    if (certBalance(c) <= 0 || c.status === "used") return "Сертификат уже использован полностью.";
+    return "";
+  }
+  // Оплата записи сертификатом: открытая панель, введённый номер и сумма
+  var cp = { id: null, code: "", amt: null };
+  function bookingPrice(b) { return b.price || svc(b.svc).price; }
+  function certBlock(b) {
+    if (b.status === "cancelled") return "";
+    var price = bookingPrice(b);
+    if (b.certPay) return '<div class="cpaid"><div><b>🎁 Оплачено сертификатом № ' + esc(b.certPay.code) + ': ' + rub(b.certPay.sum) + '</b><span>' + (price - b.certPay.sum > 0 ? 'Доплата деньгами: <b class="num">' + rub(price - b.certPay.sum) + '</b>' : 'Без доплаты') + '</span></div><button type="button" data-cp="undo" data-id="' + b.id + '">Отменить списание</button></div>';
+    if (cp.id !== b.id) return '<div class="acts"><button type="button" data-cp="open" data-id="' + b.id + '">🎁 Оплата сертификатом</button></div>';
+    var c = cp.code ? findCert(cp.code) : null, err = cp.code ? certProblem(c) : "", h = '<div class="cpay"><div class="adm-top"><b>Оплата сертификатом</b><button type="button" class="x" data-cp="close" data-id="' + b.id + '" aria-label="Закрыть">×</button></div>' +
+      '<div class="certrow"><input type="text" data-cpcode="' + b.id + '" value="' + esc(cp.code) + '" placeholder="Номер, например МН-7KQ2" autocomplete="off" aria-label="Номер сертификата"><button type="button" data-cp="find" data-id="' + b.id + '">Найти</button></div>';
+    if (cp.code && err) return h + '<p class="err" style="margin:0">' + err + '</p></div>';
+    if (c) {
+      var bal = certBalance(c), amt = cp.amt == null ? Math.min(bal, price) : cp.amt;
+      h += '<div class="sum"><div><span>Сертификат № ' + esc(c.code) + (c.to ? ' · для: ' + esc(c.to) : '') + '</span><b class="num">остаток ' + rub(bal) + '</b></div>' +
+        '<div><span>Стоимость записи</span><b class="num">' + rub(price) + '</b></div>' +
+        '<div><span>Списать с сертификата</span><span class="amt"><input type="number" inputmode="numeric" min="1" max="' + Math.min(bal, price) + '" value="' + amt + '" data-cpamt="' + b.id + '" aria-label="Сумма списания"> ₽</span></div>' +
+        '<div class="big"><span style="color:inherit">Доплата деньгами</span><span class="num" data-cprest="' + b.id + '">' + rub(Math.max(0, price - amt)) + '</span></div>' +
+        '<div><span>На сертификате останется</span><b class="num" data-cpleft="' + b.id + '">' + rub(Math.max(0, bal - amt)) + '</b></div></div>' +
+        '<button type="button" class="btn sm" data-cp="pay" data-id="' + b.id + '">Списать ' + rub(amt) + ' с сертификата</button>';
+    }
+    return h + '</div>';
+  }
+  function certUndo(own, silent) {
+    if (!own.certPay) return;
+    var c = (st.certs || []).filter(function (x) { return x.id === own.certPay.certId; })[0];
+    if (c) { c.balance = certBalance(c) + own.certPay.sum; c.spent = (c.spent || []).filter(function (x) { return x.booking !== own.id; }); if (c.balance > 0) c.status = "paid"; }
+    if (!silent) toast("Списание отменено, " + rub(own.certPay.sum) + " вернулись на сертификат");
+    delete own.certPay;
+  }
+  $("aList").addEventListener("input", function (e) {
+    var i = e.target.closest("[data-cpamt]"); if (i) {
+      var rec = dayBookings(aDate).filter(function (x) { return x.id === i.dataset.cpamt; })[0], c = findCert(cp.code); if (!rec || !c) return;
+      var v = Math.max(0, Math.round(Number(i.value) || 0)); cp.amt = v;
+      document.querySelector('[data-cprest="' + rec.id + '"]').textContent = rub(Math.max(0, bookingPrice(rec) - v));
+      document.querySelector('[data-cpleft="' + rec.id + '"]').textContent = rub(Math.max(0, certBalance(c) - v));
+      document.querySelector('[data-cp="pay"][data-id="' + rec.id + '"]').textContent = "Списать " + rub(v) + " с сертификата";
+    }
+    var k = e.target.closest("[data-cpcode]"); if (k) cp.code = k.value;
+  });
+  $("aList").addEventListener("keydown", function (e) { var k = e.target.closest("[data-cpcode]"); if (k && e.key === "Enter") { e.preventDefault(); cp.code = k.value; cp.amt = null; renderAdmin(); } });
+  $("aList").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-cp]"); if (!b) return;
+    var rec = dayBookings(aDate).filter(function (x) { return x.id === b.dataset.id; })[0]; if (!rec) return;
+    var a = b.dataset.cp;
+    if (a === "open") { cp = { id: rec.id, code: "", amt: null }; renderAdmin(); var inp = document.querySelector('[data-cpcode="' + rec.id + '"]'); if (inp) inp.focus(); return; }
+    if (a === "close") { cp = { id: null, code: "", amt: null }; renderAdmin(); return; }
+    if (a === "find") { cp.code = document.querySelector('[data-cpcode="' + rec.id + '"]').value; cp.amt = null; renderAdmin(); return; }
+    var own = ownCopy(rec);
+    if (a === "undo") { certUndo(own); save(); renderAdmin(); return; }
+    if (a === "pay") {
+      var c = findCert(cp.code), err = certProblem(c); if (err) { toast(err); return; }
+      var bal = certBalance(c), price = bookingPrice(own), amt = cp.amt == null ? Math.min(bal, price) : cp.amt;
+      if (!(amt > 0)) { toast("Введите сумму списания"); return; }
+      if (amt > bal) { toast("На сертификате только " + rub(bal)); return; }
+      if (amt > price) { toast("Запись стоит " + rub(price) + " — больше списать нельзя"); return; }
+      c.balance = bal - amt; c.spent = c.spent || [];
+      c.spent.push({ d: dkey(new Date()), sum: amt, booking: own.id, who: own.name, date: own.date });
+      if (c.balance <= 0) c.status = "used";
+      own.certPay = { code: c.code, certId: c.id, sum: amt };
+      cp = { id: null, code: "", amt: null }; flashId = own.id; save(); renderAdmin();
+      toast("Списано " + rub(amt) + (price - amt > 0 ? ". Доплата деньгами " + rub(price - amt) : ". Доплаты нет"));
+    }
+  });
   function renderCerts() {
     var list = (st.certs || []).slice().reverse();
     $("aCerts").innerHTML = list.length ? list.map(function (c) {
@@ -1814,7 +1896,7 @@ div.f { display: grid; gap: 8px; }
       return '<div class="bk"><div class="r1"><b class="num">№ ' + esc(c.code || "—") + '</b><span class="pill ' + stt[1] + '">' + stt[0] + '</span></div>' +
         '<div class="info">Номинал ' + rub(c.sum) + ' · <b style="color:var(--ink)">остаток ' + rub(bal) + '</b> · до ' + shortDate(c.till || c.created) + '</div>' +
         '<div><b style="font-weight:700">' + esc(c.name) + '</b> · ' + esc(c.phone) + (c.to ? ' · для: ' + esc(c.to) : '') + '</div>' +
-        ((c.spent || []).length ? '<div class="info">Списано: ' + c.spent.map(function (x) { return shortDate(x.d) + ' — ' + rub(x.sum); }).join(", ") + '</div>' : '') +
+        ((c.spent || []).length ? '<div class="info">Списано: ' + c.spent.map(function (x) { return shortDate(x.d) + ' — ' + rub(x.sum) + (x.who ? ' (' + esc(x.who) + ', запись ' + shortDate(x.date) + ')' : ''); }).join(", ") + '</div>' : '') +
         (open ? '<div class="spend"><input type="number" inputmode="numeric" min="1" max="' + bal + '" placeholder="Сумма, ₽" data-amt="' + c.id + '" aria-label="Сколько списать с сертификата"><button type="button" data-cert="' + c.id + '" data-st="part">Списать</button><button type="button" data-cert="' + c.id + '" data-st="used">Закрыть полностью</button></div>' : '') + '</div>';
     }).join("") : '<p class="note">Покупок пока нет. Они появятся, когда кто-то оплатит сертификат на странице «Подарочный сертификат».</p>';
   }
