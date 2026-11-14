@@ -150,7 +150,7 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 .ph { aspect-ratio: 4 / 5; border-radius: 20px; background: repeating-linear-gradient(135deg, var(--blush) 0 14px, var(--paper) 14px 28px); border: 1.5px dashed color-mix(in srgb, var(--lac) 30%, var(--line)); display: grid; place-content: center; text-align: center; color: var(--mute); font-size: 13px; font-weight: 600; padding: 10px; max-width: 100%; }
 .ph svg { margin: 0 auto 6px; color: var(--lac); opacity: .6; }
 .gal .ph:nth-child(1) { grid-column: span 2; grid-row: span 2; aspect-ratio: auto; }
-@media (max-width: 700px) { .gal { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 700px) { .gal { grid-template-columns: repeat(2, 1fr); } .gal .ph:nth-child(1) { grid-row: auto; aspect-ratio: 4 / 3; } }
 .awards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
 .award { background: var(--paper); border: 1px solid var(--line); border-radius: 20px; padding: 16px; display: grid; gap: 10px; text-align: center; }
 .award .ph { aspect-ratio: 1; border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
@@ -222,6 +222,8 @@ footer a { color: var(--mute); }
 .opt small { display: block; color: var(--mute); font-size: 13px; }
 .opt > span { min-width: 0; }
 .opt > b { flex: none; white-space: nowrap; }
+.bgrp { font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--lac); margin: 10px 2px 0; }
+.bgrp:first-child { margin-top: 0; }
 .opt[aria-pressed="true"] { border-color: var(--lac); background: color-mix(in srgb, var(--lac) 7%, var(--paper)); }
 .days { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
 .msep { flex: none; writing-mode: vertical-rl; transform: rotate(180deg); align-self: stretch; text-align: center; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--lac); padding: 0 2px; border-right: 1.5px solid var(--line); }
@@ -258,6 +260,8 @@ footer a { color: var(--mute); }
 .slot:disabled { text-decoration: line-through; opacity: .35; cursor: default; }
 label.f { display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--mute); }
 input[type="text"], input[type="tel"], input[type="search"], textarea, select { width: 100%; border: 1.5px solid var(--line); background: var(--bg); border-radius: 14px; padding: 13px 14px; font-size: 16px; }
+input, textarea, select { font-weight: 500; color: var(--ink); }
+::placeholder { color: var(--mute); opacity: .7; font-weight: 400; }
 .check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; }
 .check input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--lac); flex: none; }
 .sum { display: grid; gap: 6px; background: var(--bg); border-radius: 16px; padding: 14px 16px; font-size: 14px; }
@@ -380,7 +384,8 @@ section.block.tight { padding-block: 32px clamp(56px, 8vw, 96px); }
 .prow b { font-family: var(--display); font-weight: 400; font-size: 20px; }
 .prow small { color: var(--mute); font-size: 13.5px; }
 .prow .num { font-weight: 800; white-space: nowrap; }
-.prow .pr-r { display: flex; align-items: center; gap: 14px; }
+.prow .pr-r { display: flex; align-items: center; gap: 14px; flex: none; }
+.prow > div:first-child { flex: 1 1 auto; }
 @media (max-width: 560px) { .prow { flex-wrap: wrap; } .prow .pr-r { width: 100%; justify-content: space-between; } }
 .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
 .chip { border: 1.5px solid var(--line); background: var(--paper); border-radius: 999px; padding: 8px 16px; font-size: 14px; font-weight: 700; transition: background .25s, color .25s, border-color .25s; }
@@ -947,13 +952,13 @@ div.f { display: grid; gap: 8px; }
   <section class="hero" id="top">
     <div class="wrap">
       <div class="hero-txt">
-        <span class="eyebrow">Студия маникюра и педикюра · Михайловка</span>
+        <span class="eyebrow">Маникюр и педикюр · Михайловка</span>
         <h1>Маникюр, на который <em>оборачиваются</em></h1>
         <p class="lead">Марина Шевченко, мастер маникюра и преподаватель. В профессии с 2017 года, победитель международных чемпионатов. Михайловка, ул. Обороны, 41.</p>
         <div class="price-from"><b class="num">от 1 700 ₽</b><span>маникюр с покрытием гель-лаком</span></div>
         <div class="cta">
           <a class="btn" href="#zapis">Выбрать время онлайн</a>
-          <a class="btn ghost" href="#obuchenie">Обучение маникюру</a>
+          <a class="btn ghost" href="#obuchenie">Курсы обучения</a>
         </div>
         <div class="facts">
           <div><b class="num">10 лет</b><small>в ногтевом сервисе</small></div>
@@ -1047,7 +1052,7 @@ div.f { display: grid; gap: 8px; }
     <h3 class="pgrp"><span>Дополнительно</span><small>2 услуги</small></h3>
     <div class="plist">
       <div class="prow"><div><b>Френч</b><small>к любому покрытию</small></div><span class="num">+200 ₽</span></div>
-      <div class="prow"><div><b>Снятие чужой работы перед процедурой</b><small>если вы от другого мастера и делаете у Марины новый маникюр, педикюр или наращивание · около 30 минут. Просто снятие без новой работы — 300 ₽</small></div><span class="num">+200 ₽</span></div>
+      <div class="prow"><div><b>Снятие чужой работы перед процедурой</b><small>Если вы от другого мастера и делаете у Марины новый маникюр, педикюр или наращивание · около 30 минут. Просто снятие без новой работы — 300 ₽</small></div><span class="num">+200 ₽</span></div>
     </div>
     <a class="card cert cert-link" href="#sertifikat"><span class="eyebrow">Подарок</span><b>Подарочный сертификат на любую процедуру</b><span class="note">2 000, 3 000 или 5 000 ₽ · действует 3 месяца →</span></a>
     <div class="rules"><b>Оплата на месте</b><span>Наличными или переводом после процедуры. Если планы изменились, предупредите Марину заранее, лучше за сутки — она перенесёт запись на удобный день.</span></div>
@@ -1139,7 +1144,7 @@ div.f { display: grid; gap: 8px; }
         <li>Победитель международных чемпионатов — кубки и дипломы ниже</li>
         <li>Лицензированный инструктор школы MS Pro School</li>
         <li>Аппаратный и комбинированный маникюр, наращивание, сложный дизайн</li>
-        <li>Преподаю с нуля и повышение квалификации, онлайн и в студии</li>
+        <li>Обучаю с нуля и повышаю квалификацию мастеров — индивидуально, в студии</li>
       </ul>
       <div class="cta"><a class="btn" href="#zapis">Записаться к Марине</a></div>
     </div>
@@ -1370,7 +1375,7 @@ div.f { display: grid; gap: 8px; }
     ["Обучение", [
       ["Как проходит обучение?", "Очно в студии «М.А», один на один. Курс длится 2 или 3 дня подряд, с 10:00 до 17:00: теория и практика на моделях. Модели и материалы предоставляются."],
       ["Нужен ли опыт?", "Нет, обучаем с нуля. Если опыт есть, программу подстроим под вас."],
-      ["Зачем предоплата за обучение?", "Обучение идёт один на один: на дни курса Марина не принимает клиенток и закрывает их только под вас. Предоплата — примерно треть стоимости курса (5 000, 6 000 или 8 000 ₽) — закрепляет даты, остаток оплачивается в первый день."],
+      ["Зачем предоплата за обучение?", "Обучение идёт один на один: на дни курса Марина не принимает клиенток и закрывает их только под вас. Предоплата закрепляет даты: 5 000 ₽ за курс маникюра, 6 000 ₽ — педикюра, 8 000 ₽ — наращивания. Остаток оплачивается в первый день."],
       ["Можно ли вернуть предоплату?", "Да, если отменить обучение раньше чем за 7 дней до начала — вернём всю предоплату. Если отменить позже — предоплата не возвращается."]]]
   ];
   var SHADES = [["вишня", "#9E1F42"], ["нюд", "#D7A79A"], ["молочный", "#EFE3DC"], ["бордо", "#5B1426"], ["шампань", "#C9A46A"], ["графит", "#3A3438"]];
@@ -1576,9 +1581,10 @@ div.f { display: grid; gap: 8px; }
     document.querySelectorAll("#stepper i").forEach(function (el, i) { el.classList.toggle("on", i < n); });
   }
   function renderSvcOpts() {
-    $("bSvc").innerHTML = SERVICES.map(function (s) {
-      return '<button class="opt" data-s="' + s.id + '" aria-pressed="' + (bk.svc === s.id) + '"><span><b style="font-weight:700">' + s.name + '</b><small>' + dur(s.min) + '</small></span><b class="num">' + priceText(s) + '</b></button>';
-    }).join("");
+    // тот же порядок и группы, что в прайсе: руки, ноги
+    var opt = function (id) { var s = svc(id); return '<button class="opt" data-s="' + s.id + '" aria-pressed="' + (bk.svc === s.id) + '"><span><b style="font-weight:700">' + s.name + '</b><small>' + dur(s.min) + '</small></span><b class="num">' + priceText(s) + '</b></button>'; };
+    $("bSvc").innerHTML = '<span class="bgrp">Руки</span>' + ["man", "gel", "str", "cor", "ext", "ext4", "nit", "off"].map(opt).join("") +
+      '<span class="bgrp">Ноги</span>' + ["ped", "pedg", "pedf", "pedp", "pedh"].map(opt).join("");
   }
   $("bSvc").addEventListener("click", function (e) {
     var b = e.target.closest("[data-s]"); if (!b) return;
@@ -2573,8 +2579,8 @@ div.f { display: grid; gap: 8px; }
     var t = e.target.closest("[data-to]"); if (t) pendingTo = t.dataset.to;
   });
   function jumpTop() { window.scrollTo({ top: 0, behavior: "instant" }); }
-  var TITLES = { home: "М.А — маникюр, педикюр и обучение в Михайловке", uslugi: "Цены на маникюр и педикюр в Михайловке — М.А", raboty: "Работы мастера маникюра — Монро, Михайловка",
-    obuchenie: "Обучение маникюру и педикюру в Михайловке — М.А", "o-mastere": "Марина Шевченко, мастер маникюра — М.А", voprosy: "Вопросы и ответы — студия красоты Монро",
+  var TITLES = { home: "М.А — маникюр, педикюр и обучение в Михайловке", uslugi: "Цены на маникюр и педикюр в Михайловке — М.А", raboty: "Работы мастера маникюра — М.А, Михайловка",
+    obuchenie: "Обучение маникюру и педикюру в Михайловке — М.А", "o-mastere": "Марина Шевченко, мастер маникюра — М.А", voprosy: "Вопросы и ответы — М.А, Михайловка",
     sertifikat: "Подарочный сертификат на маникюр в Михайловке — М.А",
     kontakty: "Контакты — академия маникюра «М.А», Михайловка, ул. Обороны, 41", zapis: "Онлайн-запись на маникюр — М.А", admin: "Кабинет мастера — М.А" };
   function route() {
