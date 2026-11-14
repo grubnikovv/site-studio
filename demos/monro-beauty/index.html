@@ -488,6 +488,7 @@ div.f { display: grid; gap: 8px; }
 .qchip[aria-pressed="true"] { background: var(--lac); color: var(--lac-ink); border-color: var(--lac); box-shadow: 0 6px 18px color-mix(in srgb, var(--lac) 35%, transparent); animation: qpop .45s cubic-bezier(.3,1.6,.5,1); }
 .qchip[aria-pressed="true"]::before { width: 14px; margin-right: 6px; opacity: 1; transform: none; }
 @keyframes qpop { 0% { transform: scale(.92); } 60% { transform: scale(1.06); } 100% { transform: scale(1); } }
+.crange .acts #aCOpen { flex-basis: 100%; }
 .crange .acts { display: flex; gap: 8px; flex-wrap: wrap; }
 .atabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; background: var(--paper); border: 1.5px solid var(--line); border-radius: 14px; padding: 4px; position: sticky; top: calc(70px + env(safe-area-inset-top, 0px)); z-index: 5; }
 .atabs button { border: 0; background: none; border-radius: 10px; padding: 10px 2px; font-weight: 700; font-size: 13px; color: var(--mute); transition: background .25s, color .25s; }
@@ -778,8 +779,8 @@ div.f { display: grid; gap: 8px; }
       <label class="f">Имя<input type="text" id="tName" autocomplete="given-name"></label>
       <label class="f">Телефон<input type="tel" id="tPhone" autocomplete="tel" inputmode="tel" placeholder="+7"></label>
       <div class="sum" id="tSum"></div>
-      <label class="check"><input type="checkbox" id="tRules"><span>Согласна с правилами: предоплата закрепляет место. При отмене раньше чем за 7 дней до начала она возвращается, позже — нет.</span></label>
-      <label class="check"><input type="checkbox" id="tPd"><span>Согласна на обработку персональных данных (152-ФЗ).</span></label>
+      <label class="check"><input type="checkbox" id="tRules"><span>Согласен(на) с правилами: предоплата закрепляет место. При отмене раньше чем за 7 дней до начала она возвращается, позже — нет.</span></label>
+      <label class="check"><input type="checkbox" id="tPd"><span>Согласен(на) на обработку персональных данных (152-ФЗ).</span></label>
       <p class="err" id="tErr" hidden></p>
       <button class="btn" type="submit" id="tPay">Оплатить предоплату</button>
       <div class="tdone" id="tDone" hidden></div>
@@ -907,7 +908,7 @@ div.f { display: grid; gap: 8px; }
         <div class="seg3" id="bRem"><button type="button" data-v="tg" aria-pressed="true">Telegram</button><button type="button" data-v="sms" aria-pressed="false">SMS</button><button type="button" data-v="none" aria-pressed="false">Не нужно</button></div>
         <span class="note" id="bRemNote"></span>
       </div>
-      <label class="check"><input type="checkbox" id="bPd"><span>Согласна на обработку персональных данных для записи и напоминаний (152-ФЗ).</span></label>
+      <label class="check"><input type="checkbox" id="bPd"><span>Согласен(на) на обработку персональных данных для записи и напоминаний (152-ФЗ).</span></label>
       <p class="err" id="bErr" hidden></p>
       <button class="btn" type="submit" id="bPay">Записаться</button>
       <p class="note">Оплата на месте после процедуры: наличными или переводом.</p>
@@ -959,11 +960,11 @@ div.f { display: grid; gap: 8px; }
       <p class="note" id="aHoursNote">Клиентки записываются онлайн только в эти часы. Сами вы можете записать клиентку на любое время и в выходной через «+ Добавить запись». Нажмите на окно ниже, чтобы закрыть его для онлайн-записи.</p>
       <div class="grid-slots" id="aGrid"></div>
       <div class="crange" id="aRange">
-        <b>Закрыть промежуток</b>
+        <b>Закрыть или открыть промежуток</b>
         <div class="chips" id="aQuick"><button type="button" class="chip qchip" data-q="am" aria-pressed="false">До обеда</button><button type="button" class="chip qchip" data-q="pm" aria-pressed="false">После обеда</button><button type="button" class="chip qchip" data-q="day" aria-pressed="false">Весь день</button></div>
         <div class="row2"><label class="f">С<select id="aCFrom"></select></label><label class="f">До<select id="aCTo"></select></label></div>
         <label class="f">Причина, видно только вам<input type="text" id="aCWhy" placeholder="Например: врач, родительское собрание"></label>
-        <div class="acts"><button type="button" class="btn sm" id="aCGo">Закрыть это время</button><button type="button" class="btn sm ghost" id="aCOpen">Открыть всё на этот день</button></div>
+        <div class="acts"><button type="button" class="btn sm" id="aCGo">Закрыть это время</button><button type="button" class="btn sm ghost" id="aCOpenRange">Открыть это время</button><button type="button" class="btn sm ghost" id="aCOpen">Открыть всё на этот день</button></div>
       </div>
     </div>
     </section>
@@ -1521,9 +1522,9 @@ div.f { display: grid; gap: 8px; }
     $("aFrom").innerHTML = opt; $("aTo").innerHTML = opt; $("aFrom").value = wh[0]; $("aTo").value = wh[1];
     $("aHours").hidden = !work; $("aGrid").hidden = !work; $("aRange").hidden = !work;
     var ropt = "", rf = $("aCFrom").value, rt = $("aCTo").value;
-    for (var mm = wh[0]; mm <= wh[1]; mm += STEP) ropt += '<option value="' + mm + '">' + hm(mm) + '</option>';
+    for (var mm = EARLY; mm <= LATE; mm += STEP) ropt += '<option value="' + mm + '">' + hm(mm) + '</option>';
     $("aCFrom").innerHTML = ropt; $("aCTo").innerHTML = ropt;
-    $("aCFrom").value = rf && +rf >= wh[0] && +rf < wh[1] ? rf : wh[0];
+    $("aCFrom").value = rf && +rf >= EARLY && +rf < LATE ? rf : wh[0];
     $("aCTo").value = rt && +rt > +$("aCFrom").value && +rt <= wh[1] ? rt : Math.min(+$("aCFrom").value + 60, wh[1]);
     $("aHoursNote").textContent = work ? "Клиентки записываются онлайн только в эти часы. Сами вы можете записать клиентку на любое время и в выходной через «+ Добавить запись». Нажмите на окно ниже, чтобы закрыть его для онлайн-записи."
       : "Выходной: онлайн-запись закрыта. Записать клиентку вручную можно через «+ Добавить запись», или откройте день для онлайн-записи кнопкой выше.";
@@ -1585,6 +1586,22 @@ div.f { display: grid; gap: 8px; }
     var inside = dayBookings(aDate).filter(function (b) { return b.status === "booked" && b.start < to && b.start + bmin(b) > from; });
     save(); $("aCWhy").value = ""; quickOff(); renderAdmin();
     toast("Закрыто " + hm(from) + "–" + hm(to) + (inside.length ? ". В этом времени есть запись: " + inside.map(function (b) { return b.name + " " + hm(b.start); }).join(", ") + " — перенесите, если нужно" : ""));
+  };
+  // Открыть промежуток для онлайн-записи: снимаем закрытые окна, а если время вне рабочих часов — расширяем часы дня
+  $("aCOpenRange").onclick = function () {
+    var from = +$("aCFrom").value, to = +$("aCTo").value, wh = dayHours(aDate), msg = [];
+    if (to <= from) { toast("Конец должен быть позже начала"); return; }
+    var bl = st.blocks[aDate] || {}, n = 0;
+    for (var t = from; t < to; t += STEP) if (bl[t]) { delete bl[t]; n++; }
+    if (from < wh[0] || to > wh[1]) {
+      st.hours = st.hours || {};
+      var nh = [Math.min(wh[0], from), Math.max(wh[1], to)];
+      if (nh[0] === OPEN && nh[1] === CLOSE) delete st.hours[aDate]; else st.hours[aDate] = nh;
+      msg.push("часы дня теперь " + hm(nh[0]) + "–" + hm(nh[1]));
+    }
+    var lunchIn = from < LUNCH[1] && to > LUNCH[0];
+    save(); quickOff(); renderAdmin();
+    toast("Открыто для онлайн-записи " + hm(from) + "–" + hm(to) + (msg.length ? ": " + msg.join(", ") : "") + (lunchIn ? ". Обед " + hm(LUNCH[0]) + "–" + hm(LUNCH[1]) + " остаётся закрытым" : "") + (!n && !msg.length ? ". Это время и так было открыто" : ""));
   };
   $("aCOpen").onclick = function () { delete st.blocks[aDate]; save(); renderAdmin(); toast("Все окна этого дня открыты"); };
   $("aGrid").addEventListener("click", function (e) {
