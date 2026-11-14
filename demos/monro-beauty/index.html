@@ -192,6 +192,7 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 .contact dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 10px 18px; font-size: 15px; }
 .contact dt { color: var(--mute); }
 .contact dd { margin: 0; font-weight: 600; min-width: 0; }
+@media (max-width: 520px) { .contact dl { grid-template-columns: 1fr; gap: 2px; } .contact dt { font-size: 13px; } .contact dd { margin-bottom: 10px; } .contact dd:last-child { margin-bottom: 0; } }
 @media (max-width: 760px) { .contact { grid-template-columns: 1fr; } }
 footer { border-top: 1px solid var(--line); padding-block: 28px calc(28px + env(safe-area-inset-bottom, 0px)); color: var(--mute); font-size: 13px; }
 footer .wrap { display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
@@ -491,7 +492,9 @@ div.f { display: grid; gap: 8px; }
 .badge.new { background: color-mix(in srgb, var(--ok) 14%, var(--paper)); color: var(--ok); }
 .cl summary { list-style: none; cursor: pointer; display: grid; gap: 4px; }
 .cl summary::-webkit-details-marker { display: none; }
-.cl .r1 { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.cl .r1 { display: flex; justify-content: space-between; gap: 8px; align-items: center; flex-wrap: wrap; }
+.cl .r1 > span { display: inline-flex; gap: 4px; align-items: center; }
+.badge { line-height: 1.5; }
 .cl .hist { display: grid; gap: 4px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 13px; }
 .cl .hist div { display: flex; justify-content: space-between; gap: 10px; }
 .cl .hist span { color: var(--mute); }
@@ -507,6 +510,11 @@ div.f { display: grid; gap: 8px; }
 .bars i::before { content: ""; display: block; height: 100%; width: 100%; background: var(--lac); transform-origin: left; transform: scaleX(var(--w)); border-radius: 6px; }
 .certrow { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
 .mycerts { margin-top: 18px; }
+.till-warn { font-size: 14px; border-radius: 14px; padding: 10px 12px; background: color-mix(in srgb, var(--gold) 13%, var(--paper)); border: 1px solid color-mix(in srgb, var(--gold) 45%, var(--line)); }
+.share { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.share .btn:first-child { grid-column: 1 / -1; }
+.mc-acts { display: flex; gap: 8px; margin-top: 4px; }
+.mc-acts button { border: 1px solid rgba(255,255,255,.3); background: rgba(255,255,255,.08); color: #fff; border-radius: 999px; padding: 6px 14px; font-size: 13px; font-weight: 700; }
 .mc-list { display: grid; gap: 10px; }
 .mc { border-radius: 18px; padding: 16px 18px; color: #F6ECEF; display: grid; gap: 6px; background: radial-gradient(90% 120% at 100% 0%, #8E1D3D 0%, transparent 60%), linear-gradient(150deg, #3A0F1D, #1E0910 75%); }
 .mc .g-logo { font-size: 16px; }
@@ -538,7 +546,12 @@ div.f { display: grid; gap: 8px; }
 .g-logo { font-family: var(--display); letter-spacing: .22em; font-size: clamp(18px, 3vw, 24px); }
 .g-k { font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: #E9C98A; font-weight: 700; }
 .g-sum { font-family: var(--display); font-weight: 400; font-size: clamp(40px, 9vw, 64px); align-self: center; color: #fff; }
-.g-to { font-size: 15px; color: #E7D3D8; }
+.g-to { font-size: 15px; color: #E7D3D8; display: flex; align-items: center; gap: 8px; }
+.heart { width: 1.45em; height: 1.25em; flex: none; overflow: visible; transform: rotate(-8deg) translateY(-1px); }
+.heart path { fill: none; stroke: #fff; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.heart.draw path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: heartDraw 1.4s cubic-bezier(.45,.05,.3,1) .1s forwards; }
+@keyframes heartDraw { to { stroke-dashoffset: 0; } }
+.g-bot .heart { width: 1.3em; height: 1.1em; vertical-align: -3px; display: inline-block; }
 .g-bot { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; color: #C9AEB6; letter-spacing: .06em; flex-wrap: wrap; }
 .cert { margin-top: 26px; background: linear-gradient(135deg, color-mix(in srgb, var(--gold) 12%, var(--paper)), var(--paper) 60%); border-color: color-mix(in srgb, var(--gold) 35%, var(--line)); }
 .cert-h { display: grid; gap: 6px; }
@@ -770,12 +783,12 @@ div.f { display: grid; gap: 8px; }
 
 <!-- ===== СЕРТИФИКАТ ===== -->
 <main id="v-sertifikat" class="page" hidden>
-  <section class="phero"><div class="wrap"><span class="eyebrow">Подарок</span><h1>Подарочный сертификат</h1><p class="lead">Электронный сертификат на любую процедуру студии «Монро». Оплачивается полностью, появляется сразу после оплаты — его можно переслать в мессенджере и показать с телефона. Действует 3 месяца.</p></div></section>
+  <section class="phero"><div class="wrap"><span class="eyebrow">Подарок</span><h1>Подарочный сертификат</h1><p class="lead">Электронный сертификат на любую процедуру студии «Монро». Оплачивается полностью, появляется сразу после оплаты — его можно переслать в мессенджере и показать с телефона. Действует 3 месяца с дня покупки.</p></div></section>
   <section class="block tight"><div class="wrap gift">
     <div class="gcard" id="gCard" aria-label="Так будет выглядеть сертификат">
       <div class="g-top"><span class="g-logo">МОНРО</span><span class="g-k">подарочный сертификат</span></div>
       <b class="g-sum num" id="gSum">3 000 ₽</b>
-      <div class="g-to" id="gTo">на любую процедуру студии</div>
+      <div class="g-to" id="gTo"><span id="gToText">на любую процедуру студии</span><svg class="heart" id="gHeart" hidden viewBox="0 0 40 34" aria-hidden="true"><path pathLength="1" d="M19.6 30.4C14.8 26.6 5.2 19.9 3.6 12.8 2.4 7.3 6.9 2.6 11.8 4.1c3.6 1.1 6 4.5 7.3 7.6.9-3.6 3.7-7.8 8.3-8.5 5.2-.8 8.9 3.6 7.6 9-1.5 6.3-8.3 11.5-14.1 17.2-.5.5-1 .8-1.5 1.1"/></svg></div>
       <div class="g-bot"><span id="gCode">№ будет после оплаты</span><span id="gTill"></span></div>
     </div>
     <form class="card" id="cForm" novalidate>
@@ -783,11 +796,18 @@ div.f { display: grid; gap: 8px; }
       <div class="f"><span class="lbl">Номинал</span><div class="chips" id="cSum"><button type="button" class="chip" data-v="2000" aria-pressed="false">2 000 ₽</button><button type="button" class="chip" data-v="3000" aria-pressed="true">3 000 ₽</button><button type="button" class="chip" data-v="5000" aria-pressed="false">5 000 ₽</button></div></div>
       <label class="f">Кому, по желанию — напишем на сертификате<input type="text" id="cTo" maxlength="30" placeholder="Например: Любимой маме"></label>
       <div class="row2"><label class="f">Ваше имя<input type="text" id="cName" autocomplete="given-name"></label><label class="f">Телефон<input type="tel" id="cPhone" inputmode="tel" placeholder="+7"></label></div>
+      <div class="till-warn" id="cTillWarn"></div>
+      <label class="check"><input type="checkbox" id="cTerm"><span id="cTermText">Знаю, до какого числа действует сертификат.</span></label>
       <label class="check"><input type="checkbox" id="cPd"><span>Согласна на обработку персональных данных (152-ФЗ).</span></label>
       <p class="err" id="cErr" hidden></p>
       <button class="btn" type="submit" id="cGo">Оплатить 3 000 ₽</button>
       <p class="note" style="margin:0">Оплата полностью, картой или по СБП. Сертификат сохранится за вашим номером телефона — его всегда можно найти ниже, в блоке «Мои сертификаты».</p>
       <div class="tdone" id="cDone" hidden></div>
+      <div class="share" id="cShare" hidden>
+        <button type="button" class="btn" data-share="img">Поделиться картинкой</button>
+        <button type="button" class="btn ghost" data-share="link">Скопировать ссылку</button>
+        <button type="button" class="btn ghost" data-share="save">Сохранить картинку</button>
+      </div>
       <p class="demo" style="margin:0">Демо: оплата не списывается.</p>
     </form>
     <form class="card mycerts" id="mcForm" novalidate>
@@ -834,7 +854,7 @@ div.f { display: grid; gap: 8px; }
   <section class="block tight"><div class="wrap contact">
     <div class="box">
       <dl>
-        <dt>Адрес</dt><dd>Михайловка, ул. Обороны, 41</dd>
+        <dt>Адрес</dt><dd style="white-space:nowrap">Михайловка, ул.&nbsp;Обороны,&nbsp;41</dd>
         <dt>Часы</dt><dd>Пн–Пт, 10:00–19:00, по записи</dd>
         <dt>Телефон</dt><dd><a href="tel:+79954284788">+7 995 428-47-88</a></dd>
         <dt>WhatsApp</dt><dd><a href="https://wa.me/79954284788" target="_blank" rel="noopener">Написать Марине</a></dd>
@@ -1764,6 +1784,7 @@ div.f { display: grid; gap: 8px; }
   $("sNext").onclick = function () { if (sMonth < 0) { sMonth++; renderStats(); } };
 
   // ---------- подарочный сертификат: оплачивается полностью ----------
+  var HEART = '<svg class="heart" viewBox="0 0 40 34" aria-hidden="true"><path pathLength="1" d="M19.6 30.4C14.8 26.6 5.2 19.9 3.6 12.8 2.4 7.3 6.9 2.6 11.8 4.1c3.6 1.1 6 4.5 7.3 7.6.9-3.6 3.7-7.8 8.3-8.5 5.2-.8 8.9 3.6 7.6 9-1.5 6.3-8.3 11.5-14.1 17.2-.5.5-1 .8-1.5 1.1"/></svg>';
   var cSum = 3000;
   // номер: МН- и 4 знака без похожих букв и цифр, не повторяется с уже проданными
   function newCertCode() {
@@ -1775,6 +1796,76 @@ div.f { display: grid; gap: 8px; }
   function certBalance(c) { return c.balance == null ? (c.status === "used" ? 0 : c.sum) : c.balance; }
   function certState(c) { return certBalance(c) <= 0 || c.status === "used" ? ["Использован", ""] : c.till && c.till < dkey(new Date()) ? ["Истёк срок", "bad"] : certBalance(c) < c.sum ? ["Частично использован", "ok"] : ["Действует", "ok"]; }
   // Мои сертификаты: покупатель вводит свой телефон и видит все сертификаты с остатком
+  // ---------- поделиться сертификатом: картинка или ссылка ----------
+  var lastCode = null;
+  function certByCode(code) { return (st.certs || []).filter(function (c) { return c.code === code; })[0]; }
+  // в ссылке только латиница и цифры (без «МН-»), чтобы она не превращалась в %D0%9C…
+  function certLink(c) { return location.href.split("#")[0] + "#cert-" + certKey(c.code); }
+  // Рисуем сертификат на холсте 1200×750 — так он одинаково выглядит в любом мессенджере
+  function certImage(c) {
+    return (document.fonts ? document.fonts.ready : Promise.resolve()).then(function () {
+      var W = 1200, H = 750, cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+      var g = cv.getContext("2d"), r = 56;
+      g.beginPath(); g.moveTo(r, 0); g.arcTo(W, 0, W, H, r); g.arcTo(W, H, 0, H, r); g.arcTo(0, H, 0, 0, r); g.arcTo(0, 0, W, 0, r); g.closePath(); g.clip();
+      var bg = g.createLinearGradient(0, 0, W * .6, H); bg.addColorStop(0, "#3A0F1D"); bg.addColorStop(.75, "#1E0910"); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+      var gl = g.createRadialGradient(W, 0, 0, W, 0, W * .8); gl.addColorStop(0, "rgba(142,29,61,.9)"); gl.addColorStop(1, "rgba(142,29,61,0)"); g.fillStyle = gl; g.fillRect(0, 0, W, H);
+      var sh = g.createLinearGradient(W * .35, 0, W * .65, H); sh.addColorStop(0, "rgba(255,255,255,0)"); sh.addColorStop(.5, "rgba(255,255,255,.07)"); sh.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = sh; g.fillRect(0, 0, W, H);
+      g.textBaseline = "alphabetic"; g.fillStyle = "#F6ECEF";
+      g.font = '48px "Tenor Sans", serif'; g.letterSpacing = "10px"; g.fillText("МОНРО", 80, 130);
+      g.font = '700 22px Manrope, sans-serif'; g.letterSpacing = "6px"; g.fillStyle = "#E9C98A"; g.textAlign = "right"; g.fillText("ПОДАРОЧНЫЙ СЕРТИФИКАТ", W - 80, 124);
+      g.textAlign = "left"; g.letterSpacing = "0px"; g.fillStyle = "#fff"; g.font = '170px "Tenor Sans", serif'; g.fillText(rub(c.sum), 74, 420);
+      g.fillStyle = "#E7D3D8"; g.font = '40px Manrope, sans-serif';
+      var line = c.to ? "для: " + c.to : "на любую процедуру студии"; g.fillText(line, 80, 545);
+      if (c.to) { // сердечко тем же контуром, что на сайте
+        var x = 80 + g.measureText(line).width + 22;
+        g.save(); g.translate(x, 500); g.rotate(-8 * Math.PI / 180); g.scale(1.45, 1.45);
+        g.strokeStyle = "#fff"; g.lineWidth = 1.7; g.lineCap = "round"; g.lineJoin = "round";
+        g.stroke(new Path2D("M19.6 30.4C14.8 26.6 5.2 19.9 3.6 12.8 2.4 7.3 6.9 2.6 11.8 4.1c3.6 1.1 6 4.5 7.3 7.6.9-3.6 3.7-7.8 8.3-8.5 5.2-.8 8.9 3.6 7.6 9-1.5 6.3-8.3 11.5-14.1 17.2-.5.5-1 .8-1.5 1.1")); g.restore();
+      }
+      g.fillStyle = "#C9AEB6"; g.font = '600 28px Manrope, sans-serif'; g.letterSpacing = "2px";
+      g.fillText("№ " + c.code, 80, 660); g.textAlign = "right";
+      g.fillText("действует до " + longDate(new Date(c.till + "T12:00")) + " вкл.", W - 80, 660);
+      g.textAlign = "left"; g.font = '24px Manrope, sans-serif'; g.letterSpacing = "0px"; g.fillStyle = "#9E8189";
+      g.fillText("Михайловка, ул. Обороны, 41 · +7 995 428-47-88", 80, 712);
+      return new Promise(function (ok) { cv.toBlob(function (b) { ok(b); }, "image/png"); });
+    });
+  }
+  function copyText(t) {
+    return (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).catch(function () {
+      var ta = document.createElement("textarea"); ta.value = t; ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); } catch (e) {} ta.remove();
+    });
+  }
+  function saveBlob(blob, name) {
+    var a = document.createElement("a"), u = URL.createObjectURL(blob); a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(u); }, 4000);
+  }
+  function shareCert(kind, c) {
+    var text = "Подарочный сертификат в студию «Монро» на " + rub(c.sum) + (c.to ? " — " + c.to : "") + ". № " + c.code + ", действует до " + shortDate(c.till).replace(/\.$/, "") + ".";
+    if (kind === "link") { copyText(text + " " + certLink(c)).then(function () { toast("Ссылка скопирована — вставьте её в сообщение"); }); return; }
+    certImage(c).then(function (blob) {
+      var name = "sertifikat-monro-" + c.code.replace(/[^A-Z0-9]/gi, "") + ".png";
+      var file = typeof File === "function" ? new File([blob], name, { type: "image/png" }) : null;
+      if (kind === "img" && file && navigator.canShare && navigator.canShare({ files: [file] })) {
+        return navigator.share({ files: [file], title: "Подарочный сертификат", text: text + " " + certLink(c) }).catch(function () {});
+      }
+      if (kind === "img" && navigator.share) return navigator.share({ title: "Подарочный сертификат", text: text, url: certLink(c) }).catch(function () {});
+      saveBlob(blob, name); toast("Картинка сертификата сохранена");
+    });
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-share]"); if (!b) return;
+    var c = certByCode(b.dataset.code || lastCode); if (!c) { toast("Сертификат не найден"); return; }
+    shareCert(b.dataset.share, c);
+  });
+  // открыть сертификат по ссылке #cert-НОМЕР
+  function showCertFromHash(code) {
+    var c = findCert(decodeURIComponent(code));
+    if (!c) { $("cDone").innerHTML = "Сертификат № " + esc(decodeURIComponent(code)) + " не найден. В демо-версии сертификаты видны только на телефоне, где их купили; в рабочей версии ссылка будет открываться у всех."; $("cDone").hidden = false; return; }
+    cSum = c.sum; $("cTo").value = c.to || ""; renderGift(c.code); lastCode = c.code; $("cShare").hidden = false;
+    $("cDone").innerHTML = "<b>Сертификат № " + esc(c.code) + "</b> · остаток " + rub(certBalance(c)) + " · " + certState(c)[0].toLowerCase() + "."; $("cDone").hidden = false;
+    setTimeout(function () { $("gCard").scrollIntoView({ block: "center" }); }, 50);
+  }
   function renderMyCerts() {
     var d = $("mcPhone").value.replace(/\D/g, "").replace(/^8/, "7");
     var list = (st.certs || []).filter(function (c) { return c.phone.replace(/\D/g, "").replace(/^8/, "7") === d; }).reverse();
@@ -1782,17 +1873,26 @@ div.f { display: grid; gap: 8px; }
       var stt = certState(c);
       return '<div class="mc"><div class="g-top"><span class="g-logo">МОНРО</span><span class="pill ' + stt[1] + '">' + stt[0] + '</span></div>' +
         '<b class="mc-sum num">' + rub(certBalance(c)) + (certBalance(c) < c.sum ? ' <small>из ' + rub(c.sum) + '</small>' : '') + '</b>' +
-        '<div class="g-bot"><span>№ ' + esc(c.code) + (c.to ? ' · для: ' + esc(c.to) : '') + '</span><span>до ' + shortDate(c.till) + '</span></div></div>';
+        '<div class="g-bot"><span>№ ' + esc(c.code) + (c.to ? ' · для: ' + esc(c.to) + ' ' + HEART : '') + '</span><span>до ' + shortDate(c.till) + ' вкл.</span></div>' +
+        '<div class="mc-acts"><button type="button" data-share="img" data-code="' + esc(c.code) + '">Поделиться</button><button type="button" data-share="link" data-code="' + esc(c.code) + '">Ссылка</button></div></div>';
     }).join("") : '<p class="note">На этот номер сертификатов не нашли. Проверьте номер или позвоните Марине: +7 995 428-47-88.</p>';
   }
   $("mcForm").addEventListener("submit", function (e) { e.preventDefault(); if ($("mcPhone").value.replace(/\D/g, "").length < 11) { toast("Введите телефон полностью"); return; } renderMyCerts(); });
-  function certTill() { var d = new Date(); d.setMonth(d.getMonth() + 3); return d; }
+  // Срок как у большинства студий: 3 месяца с дня покупки, последний день — включительно
+  var CERT_MONTHS = 3;
+  function certTill() { var d = new Date(); d.setHours(12, 0, 0, 0); d.setMonth(d.getMonth() + CERT_MONTHS); d.setDate(d.getDate() - 1); return d; }
+  function longDate(d) { return d.toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" }).replace(/ г\.$/, ""); }
   function renderGift(code) {
     $("gSum").textContent = rub(cSum);
     var to = $("cTo").value.trim();
-    $("gTo").textContent = to ? "для: " + to : "на любую процедуру студии";
+    $("gToText").textContent = to ? "для: " + to : "на любую процедуру студии";
+    // сердечко появляется после имени получателя и прорисовывается линией, как от руки
+    var hrt = $("gHeart"); // у SVG нет свойства hidden — работаем с атрибутом
+    if (to && hrt.hasAttribute("hidden")) { hrt.removeAttribute("hidden"); hrt.classList.remove("draw"); void hrt.getBoundingClientRect(); hrt.classList.add("draw"); } else if (!to) hrt.setAttribute("hidden", "");
     $("gCode").textContent = code ? "№ " + code : "№ будет после оплаты";
-    $("gTill").textContent = "действует до " + certTill().toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" }).replace(/ г\.$/, "");
+    $("gTill").textContent = "действует до " + longDate(certTill()) + " включительно";
+    $("cTillWarn").innerHTML = "⏳ Сертификат действует <b>" + CERT_MONTHS + " месяца — до " + longDate(certTill()) + " включительно</b>. После этой даты оплатить им процедуру будет нельзя.";
+    $("cTermText").textContent = "Знаю, что сертификат действует до " + longDate(certTill()) + " включительно.";
     $("cGo").textContent = "Оплатить " + rub(cSum);
   }
   $("cSum").addEventListener("click", function (e) { var b = e.target.closest("[data-v]"); if (!b) return; cSum = Number(b.dataset.v); document.querySelectorAll("#cSum .chip").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); renderGift(); });
@@ -1800,7 +1900,7 @@ div.f { display: grid; gap: 8px; }
   $("cForm").addEventListener("submit", function (e) {
     e.preventDefault();
     var name = $("cName").value.trim(), phone = $("cPhone").value.trim();
-    var err = !name ? "Укажите имя." : phone.replace(/\D/g, "").length < 10 ? "Укажите телефон полностью." : !$("cPd").checked ? "Отметьте согласие на обработку данных." : "";
+    var err = !name ? "Укажите имя." : phone.replace(/\D/g, "").length < 10 ? "Укажите телефон полностью." : !$("cTerm").checked ? "Отметьте, что знаете срок действия сертификата." : !$("cPd").checked ? "Отметьте согласие на обработку данных." : "";
     $("cErr").textContent = err; $("cErr").hidden = !err; if (err) return;
     var btn = $("cGo"); btn.disabled = true; btn.textContent = "Оплата…";
     setTimeout(function () {
@@ -1811,7 +1911,8 @@ div.f { display: grid; gap: 8px; }
       $("mcPhone").value = phone;
       save(); renderGift(code); btn.disabled = false; btn.textContent = "Оплатить " + rub(cSum);
       $("cDone").innerHTML = "<b>Оплачено. Сертификат № " + code + "</b> на " + rub(cSum) + " готов. Сохраните скриншот или перешлите получателю. Его всегда можно найти в блоке «Мои сертификаты» по вашему телефону и показать Марине с экрана.";
-      $("cDone").hidden = false; $("cName").value = ""; $("cPhone").value = ""; $("cPd").checked = false;
+      $("cDone").hidden = false; $("cName").value = ""; $("cPhone").value = ""; $("cPd").checked = false; $("cTerm").checked = false;
+      lastCode = code; $("cShare").hidden = false;
       renderMyCerts();
       $("gCard").scrollIntoView({ behavior: "smooth", block: "center" });
       toast("Сертификат оплачен");
@@ -1952,7 +2053,8 @@ div.f { display: grid; gap: 8px; }
     kontakty: "Контакты — студия красоты Монро, Михайловка, ул. Обороны, 41", zapis: "Онлайн-запись на маникюр — Монро", admin: "Кабинет мастера — Монро" };
   function route() {
     var h = location.hash.slice(1), v = "home";
-    if (VIEWS.indexOf(h) > 0) v = h;
+    var certHash = h.indexOf("cert-") === 0 ? h.slice(5) : null;
+    if (certHash) v = "sertifikat"; else if (VIEWS.indexOf(h) > 0) v = h;
     var changed = v !== curView; curView = v;
     document.title = TITLES[v] || TITLES.home;
     if (changed && !$("eSheet").hidden) closeEditor();
@@ -1967,6 +2069,7 @@ div.f { display: grid; gap: 8px; }
     if (nx) $("nextPage").innerHTML = '<div class="wrap"><a href="#' + (nx[0] === "home" ? "top" : nx[0]) + '"><span><small>Следующий раздел</small><b>' + nx[1] + '</b></span><span class="arr"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a></div>';
     if (v === "zapis") { resetBooking(pendingPick); pendingPick = null; }
     if (v === "admin") renderTab();
+    if (certHash) showCertFromHash(certHash);
     if (pendingTo) { var el = $(pendingTo); pendingTo = null; if (el) { jumpTop(); setTimeout(function () { el.scrollIntoView({ behavior: "smooth", block: "center" }); }, 80); return; } }
     if (changed || !h || h === "top") jumpTop();
   }
