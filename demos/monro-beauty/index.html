@@ -277,6 +277,7 @@ input[type="text"], input[type="tel"], textarea, select { width: 100%; border: 1
 .pill.ok { background: color-mix(in srgb, var(--ok) 15%, var(--paper)); color: var(--ok); }
 .pill.bad { background: color-mix(in srgb, var(--lac) 13%, var(--paper)); color: var(--lac); }
 .bk .acts { display: flex; gap: 8px; flex-wrap: wrap; }
+.bk .acts button:disabled { opacity: .5; cursor: default; }
 .bk .acts button { border: 1.5px solid var(--line); background: var(--paper); border-radius: 999px; padding: 7px 12px; font-size: 13px; font-weight: 700; }
 .bk .info { font-size: 13px; color: var(--mute); }
 .grid-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 6px; }
@@ -775,6 +776,13 @@ div.f { display: grid; gap: 8px; }
       <p class="note">Так выглядит уведомление, которое Марина сразу получает в Telegram.</p>
       <a class="btn ghost" href="#top">На главную</a>
     </div>
+
+    <form class="card" id="myForm" novalidate>
+      <h3>Уже записаны?</h3>
+      <p class="note" style="margin:0">Введите телефон, который указывали при записи, — покажем ваши записи. Отменить можно здесь, перенести — позвоните Марине.</p>
+      <div class="row2"><label class="f">Телефон<input type="tel" id="myPhone" inputmode="tel" placeholder="+7"></label><button class="btn ghost" type="submit" style="align-self:end">Найти мои записи</button></div>
+      <div class="opts" id="myList"></div>
+    </form>
     <p class="demo">Демо-версия: записи хранятся только на этом телефоне. Их видно в разделе «<a href="#admin">Вход для мастера</a>».</p>
   </div>
 </main>
@@ -1092,6 +1100,7 @@ div.f { display: grid; gap: 8px; }
     setTimeout(function () {
       var s = svc(bk.svc), b = { id: "b" + Date.now().toString(36), date: bk.date, start: bk.start, svc: s.id, name: name, phone: $("bPhone").value.trim(), note: $("bNote").value.trim(), price: bk.price, remove: bk.remove, remind: bk.remind, status: "booked", created: Date.now() };
       st.bookings.push(b); save();
+      $("myPhone").value = b.phone; $("myList").innerHTML = "";
       $("bDone").textContent = whenText(b.date, b.start) + ". " + s.name + (b.remove ? " и снятие чужой работы" : "") + ". Адрес: ул. Обороны, 41.";
       $("bRemDone").innerHTML = b.remind === "none" ? "" : '<p class="note">' + esc(remindText(b.remind, b.date).replace("После записи нажмите", "Нажмите")) + '</p>' + (b.remind === "tg" ? '<button class="btn" type="button" id="bTgLink">Подключить напоминания в Telegram</button>' : "");
       var tl = $("bTgLink"); if (tl) tl.onclick = function () { toast("В рабочей версии откроется бот студии в Telegram"); };
@@ -1118,6 +1127,28 @@ div.f { display: grid; gap: 8px; }
     $("bRemNote").textContent = bk.date ? remindText(bk.remind, bk.date) : "";
   }
   $("bRem").addEventListener("click", function (e) { var b = e.target.closest("[data-v]"); if (b) { bk.remind = b.dataset.v; renderRem(); } });
+  // ---------- клиентка: мои записи и отмена ----------
+  function digits(p) { return String(p || "").replace(/\D/g, "").replace(/^8/, "7"); }
+  function myBookings(phone) {
+    var d = digits(phone), today = dkey(new Date());
+    return st.bookings.filter(function (b) { return !b.example && digits(b.phone) === d && b.date >= today; }).sort(function (a, b) { return (a.date + hm(a.start)).localeCompare(b.date + hm(b.start)); });
+  }
+  function renderMy() {
+    var list = myBookings($("myPhone").value);
+    $("myList").innerHTML = list.length ? list.map(function (b) {
+      var s = svc(b.svc), t = statusOf(b);
+      return '<div class="bk"><div class="r1"><b>' + whenText(b.date, b.start) + '</b><span class="pill ' + t[1] + '">' + (b.status === "cancelled" ? "Отменена" : t[0]) + '</span></div><div class="info">' + s.name + ' · ' + priceText(s) + '</div>' +
+        (b.status === "booked" ? '<div class="acts"><button type="button" data-my="' + b.id + '">Отменить запись</button></div>' : '') + '</div>';
+    }).join("") : '<p class="note">Записей на этот номер не нашли. Проверьте номер или позвоните Марине: +7 995 428-47-88.</p>';
+  }
+  $("myForm").addEventListener("submit", function (e) { e.preventDefault(); if (digits($("myPhone").value).length < 11) { toast("Введите телефон полностью"); return; } renderMy(); });
+  $("myList").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-my]"); if (!b) return;
+    if (b.dataset.sure !== "1") { b.dataset.sure = "1"; b.textContent = "Точно отменить? Нажмите ещё раз"; return; }
+    var rec = st.bookings.filter(function (x) { return x.id === b.dataset.my; })[0]; if (!rec) return;
+    rec.status = "cancelled"; rec.by = "client"; rec.cancelledAt = Date.now(); save(); renderMy();
+    toast("Запись отменена. Марина получит уведомление");
+  });
   function resetBooking(pick) {
     bk = { svc: pick || null, date: null, start: null, remove: false, remind: "tg" };
     renderRm();
@@ -1181,6 +1212,10 @@ div.f { display: grid; gap: 8px; }
   // ---------- кабинет мастера ----------
   var aDate = dkey(addDays(0)), flashId = null;
   var STATUS = { booked: ["Записана", ""], came: ["Пришла", "ok"], noshow: ["Не пришла", "bad"], cancelled: ["Отменена", ""] };
+  // кто отменил: клиентка сама (на сайте или по ссылке из напоминания) или мастер
+  function statusOf(b) { return b.status === "cancelled" && b.by === "client" ? ["Отменил(а)", "bad"] : (STATUS[b.status] || STATUS.booked); }
+  // вернуть запись на прежнее время можно, только если его никто не занял
+  function canRestore(b) { return freeSlots(b.date, bmin(b), b.id, true).some(function (x) { return x.t === b.start && x.free; }); }
   function ownCopy(rec) {
     var own = st.bookings.filter(function (x) { return x.id === rec.id; })[0];
     if (!own) { own = Object.assign({}, rec); st.bookings.push(own); }
@@ -1197,13 +1232,16 @@ div.f { display: grid; gap: 8px; }
     var free = freeSlots(aDate, 60).filter(function (x) { return x.free; }).length;
     $("aKpi").innerHTML = '<div class="kpi"><small>Записей</small><b class="num">' + active.length + '</b></div><div class="kpi"><small>Выручка дня</small><b class="num">' + rub(sumDay) + '</b></div><div class="kpi"><small>Свободных часов</small><b class="num">' + free + '</b></div>';
     $("aList").innerHTML = list.length ? list.map(function (b) {
-      var s = svc(b.svc), t = STATUS[b.status] || STATUS.booked;
+      var s = svc(b.svc), t = statusOf(b);
       return '<div class="bk' + (b.id === flashId ? " moved" : "") + '"><div class="r1"><b class="num">' + hm(b.start) + '–' + hm(b.start + bmin(b)) + '</b><span class="pill ' + t[1] + '">' + t[0] + '</span></div>' +
         '<div><b style="font-weight:700">' + esc(b.name) + '</b> · ' + esc(b.phone) + (b.example ? ' <span class="pill">пример</span>' : '') + '</div>' +
         '<div class="info">' + s.name + (b.remove ? ' + снятие чужой работы' : '') + ' · ' + rub(b.price || s.price) + (b.note ? ' · «' + esc(b.note) + '»' : '') + '</div>' +
         (b.remind && b.remind !== "none" ? '<div class="info">🔔 ' + (b.remind === "tg" ? "Telegram" : "SMS") + ' · ' + remindPlan(b.date).join(", ") + '</div>' : '') +
         (b.status === "booked" ? '<div class="acts"><button data-a="move" data-id="' + b.id + '">Перенести</button><button data-a="came" data-id="' + b.id + '">Пришла</button><button data-a="noshow" data-id="' + b.id + '">Не пришла</button><button data-a="cancel" data-id="' + b.id + '">Отменить</button></div>'
-          : '<div class="acts"><button data-a="restore" data-id="' + b.id + '">Вернуть в «Записана»</button></div>') + '</div>';
+          : b.status === "cancelled"
+            ? '<div class="acts"><button data-a="move" data-id="' + b.id + '">Перенести</button>' + (canRestore(b) ? '<button data-a="restore" data-id="' + b.id + '">Вернуть на это время</button>' : '<button disabled>Время уже занято</button>') + '</div>' +
+              (canRestore(b) ? '' : '<div class="info">На это время уже записана другая клиентка. Перенесите запись на свободное окно.</div>')
+            : '<div class="acts"><button data-a="restore" data-id="' + b.id + '">Вернуть в «Записана»</button></div>') + '</div>';
     }).join("") : '<p class="note">На этот день записей нет. Нажмите «+ Добавить запись», если записали клиентку по телефону.</p>';
     flashId = null;
     var iv = dayBookings(aDate).filter(function (b) { return b.status !== "cancelled"; }).map(function (b) { return [b.start, b.start + bmin(b)]; });
@@ -1233,9 +1271,10 @@ div.f { display: grid; gap: 8px; }
     var rec = dayBookings(aDate).filter(function (x) { return x.id === b.dataset.id; })[0]; if (!rec) return;
     if (b.dataset.a === "move") { openEditor(rec); return; }
     var own = ownCopy(rec);
+    if (b.dataset.a === "restore" && own.status === "cancelled" && !canRestore(own)) { toast("Это время уже занято. Перенесите запись на другое окно"); return; }
     own.status = { came: "came", noshow: "noshow", cancel: "cancelled", restore: "booked" }[b.dataset.a];
-    if (own.status === "booked" && !freeSlots(own.date, bmin(own), own.id, true).some(function (x) { return x.t === own.start && x.free; })) { own.status = "cancelled"; toast("Это время уже занято. Перенесите запись на другое окно"); }
-    else toast({ came: "Отмечено: пришла", noshow: "Отмечено: не пришла", cancel: "Запись отменена", restore: "Запись восстановлена" }[b.dataset.a]);
+    if (own.status === "cancelled") own.by = "master"; else delete own.by;
+    toast({ came: "Отмечено: пришла", noshow: "Отмечено: не пришла", cancel: "Запись отменена", restore: "Запись восстановлена" }[b.dataset.a]);
     save(); renderAdmin();
   });
   $("aTrain").addEventListener("click", function (e) {
@@ -1326,6 +1365,7 @@ div.f { display: grid; gap: 8px; }
     if (ed.move) {
       var own = ownCopy(findBooking(ed.id));
       own.date = ed.date; own.start = ed.start; flashId = own.id;
+      if (own.status === "cancelled") { own.status = "booked"; delete own.by; }
       toast("Перенесено на " + whenText(ed.date, ed.start));
     } else {
       var nb = { id: "b" + Date.now().toString(36), date: ed.date, start: ed.start, svc: ed.svc, remove: ed.remove, name: $("eName").value.trim(), phone: $("ePhone").value.trim() || "—", price: svc(ed.svc).price + (ed.remove ? REMOVE.price : 0), status: "booked", manual: true };
