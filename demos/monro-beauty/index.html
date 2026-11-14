@@ -40,7 +40,7 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { scroll-behavior: smooth; }
-main section[id] { scroll-margin-top: 86px; }
+main section[id] { scroll-margin-top: 100px; }
 body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; -webkit-tap-highlight-color: transparent; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 60; background: var(--bg); }
 button, input, select, textarea { font: inherit; color: inherit; }
@@ -64,12 +64,12 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 .brand { height: 50px; width: auto; aspect-ratio: 254 / 224; flex: none; color: inherit; --lg-accent: var(--lac); overflow: visible; }
 .brand-t { font-family: var(--body); font-size: 10px; font-weight: 700; letter-spacing: .24em; line-height: 1.5; text-transform: uppercase; color: var(--mute); white-space: nowrap; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.drawer .brand { height: 56px; }
-/* на телефоне в шапке только знак */
-.hdr .brand { height: 66px; }
-.hdr .brand-t { font-size: 10.5px; }
-@media (max-width: 700px) { .hdr .brand-t { display: none; } .hdr .wrap { height: 70px; } .hdr .brand { height: 60px; } }
-.drawer .brand-t { white-space: normal; max-width: 200px; }
+.drawer .brand { height: 68px; }
+.hdr .brand { height: 78px; }
+.hdr .wrap { height: 94px; }
+.hdr .brand-t { font-size: 11px; }
+@media (max-width: 700px) { .hdr .brand-t { width: min-content; white-space: normal; font-size: 9px; letter-spacing: .16em; line-height: 1.45; } .hdr .wrap { height: 84px; gap: 10px; } .hdr .brand { height: 68px; } .hdr .logo { gap: 8px; } }
+.drawer .brand-t { white-space: normal; max-width: 200px; font-size: 10.5px; }
 .nav { display: flex; gap: 26px; font-size: 14px; font-weight: 600; }
 .nav a { text-decoration: none; color: var(--mute); }
 .nav a:hover { color: var(--ink); }
@@ -834,7 +834,7 @@ div.f { display: grid; gap: 8px; }
   <div class="wrap">
     <div class="hdr-l">
       <button class="burger" id="burger" aria-label="Открыть меню" aria-expanded="false" aria-controls="drawer"><span></span><span></span></button>
-      <a class="logo" href="#top"><svg class="brand" aria-hidden="true"><use href="#lgm"></use></svg><span class="brand-t">Академия маникюра и педикюра</span><span class="sr">М.А — академия маникюра и педикюра</span></a>
+      <a class="logo" href="#top"><svg class="brand" aria-hidden="true"><use href="#lgm"></use></svg><span class="brand-t">Академия маникюра и&nbsp;педикюра</span><span class="sr">М.А — академия маникюра и педикюра</span></a>
     </div>
     <a class="btn sm" href="#zapis">Записаться</a>
   </div>
@@ -843,7 +843,7 @@ div.f { display: grid; gap: 8px; }
 <div class="scrim" id="scrim" hidden></div>
 <aside class="drawer" id="drawer" aria-label="Меню сайта" hidden>
   <div class="drawer-top">
-    <span class="logo"><svg class="brand" aria-hidden="true"><use href="#lgm"></use></svg><span class="brand-t">Академия маникюра и педикюра</span><span class="sr">М.А — академия маникюра и педикюра</span></span>
+    <span class="logo"><svg class="brand" aria-hidden="true"><use href="#lgm"></use></svg><span class="brand-t">Академия маникюра и&nbsp;педикюра</span><span class="sr">М.А — академия маникюра и педикюра</span></span>
     <button class="x" id="drawerClose" aria-label="Закрыть меню"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
   </div>
   <nav class="dnav" id="dnav">
@@ -1252,7 +1252,7 @@ div.f { display: grid; gap: 8px; }
 
 <footer>
   <div class="wrap">
-    <div class="fcol"><span class="logo"><svg class="brand" aria-hidden="true"><use href="#lgm"></use></svg><span class="brand-t">Академия маникюра и педикюра</span><span class="sr">М.А — академия маникюра и педикюра</span></span><span>Марина Шевченко · Михайловка, ул. Обороны, 41</span></div>
+    <div class="fcol"><span class="logo"><svg class="brand" aria-hidden="true"><use href="#lgm"></use></svg><span class="brand-t">Академия маникюра и&nbsp;педикюра</span><span class="sr">М.А — академия маникюра и педикюра</span></span><span>Марина Шевченко · Михайловка, ул. Обороны, 41</span></div>
     <div class="fnav"><a href="#uslugi">Услуги</a><a href="#obuchenie">Обучение</a><a href="#voprosy">Вопросы</a><a href="#kontakty">Контакты</a><a href="#admin">Вход для мастера</a></div>
   </div>
 </footer>
