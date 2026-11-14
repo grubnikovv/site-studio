@@ -724,10 +724,11 @@ div.f { display: grid; gap: 8px; }
 /* на узких экранах карточка растёт по содержимому, чтобы срок действия не обрезался */
 @media (max-width: 600px) { .gcard { aspect-ratio: auto; min-height: 210px; } .gcard .g-mark { height: 50px; } }
 @keyframes gshine { 55%, 100% { transform: translateX(450%) skewX(-12deg); } }
-.g-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.g-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: nowrap; }
+.g-top .g-k, .g-top .pill { text-align: right; flex: 0 1 auto; min-width: 0; }
 .g-mark { height: clamp(60px, 10vw, 84px); width: auto; aspect-ratio: 254 / 224; color: #F6ECEF; --lg-accent: #E9C98A; overflow: visible; }
 .g-brand { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
-.g-bt { font-size: 9.5px; font-weight: 700; letter-spacing: .2em; line-height: 1.5; text-transform: uppercase; color: #E7D3D8; }
+.g-bt { width: min-content; font-size: 9px; font-weight: 700; letter-spacing: .16em; line-height: 1.45; text-transform: uppercase; color: #E7D3D8; }
 .mc .g-bt { font-size: 8.5px; letter-spacing: .14em; }
 .g-k { font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: #E9C98A; font-weight: 700; }
 .g-sum { font-family: var(--display); font-weight: 400; font-size: clamp(40px, 9vw, 64px); align-self: center; color: #fff; }
@@ -1200,7 +1201,7 @@ div.f { display: grid; gap: 8px; }
   <section class="phero"><div class="wrap"><span class="eyebrow">Подарок</span><h1>Подарочный сертификат</h1><p class="lead">Электронный сертификат на любую процедуру студии «М.А». Оплачивается полностью, появляется сразу после оплаты — его можно переслать в мессенджере и показать с телефона. Действует 3 месяца с дня покупки.</p></div></section>
   <section class="block tight"><div class="wrap gift">
     <div class="gcard" id="gCard" aria-label="Так будет выглядеть сертификат">
-      <div class="g-top"><span class="g-brand"><svg class="g-mark" aria-hidden="true"><use href="#lgm"></use></svg><span class="g-bt">Академия маникюра<br>и&nbsp;педикюра</span></span><span class="g-k">подарочный сертификат</span></div>
+      <div class="g-top"><span class="g-brand"><svg class="g-mark" aria-hidden="true"><use href="#lgm"></use></svg><span class="g-bt">Академия маникюра и&nbsp;педикюра</span></span><span class="g-k">подарочный сертификат</span></div>
       <b class="g-sum num" id="gSum">3 000 ₽</b>
       <div class="g-to" id="gTo"><span id="gToText">на любую процедуру студии</span><svg class="heart" id="gHeart" hidden viewBox="0 0 40 34" aria-hidden="true"><path pathLength="1" d="M19.6 30.4C14.8 26.6 5.2 19.9 3.6 12.8 2.4 7.3 6.9 2.6 11.8 4.1c3.6 1.1 6 4.5 7.3 7.6.9-3.6 3.7-7.8 8.3-8.5 5.2-.8 8.9 3.6 7.6 9-1.5 6.3-8.3 11.5-14.1 17.2-.5.5-1 .8-1.5 1.1"/></svg></div>
       <div class="g-bot"><span id="gCode">№ будет после оплаты</span><span id="gTill"></span></div>
@@ -2636,7 +2637,7 @@ div.f { display: grid; gap: 8px; }
       g.textBaseline = "alphabetic"; g.fillStyle = "#F6ECEF";
       if (logoImg) g.drawImage(logoImg, 60, 46, 200, 200 * 224 / 254);
       g.font = '700 18px Manrope, sans-serif'; g.letterSpacing = "4px"; g.fillStyle = "#E7D3D8";
-      g.fillText("АКАДЕМИЯ МАНИКЮРА", 286, 118); g.fillText("И ПЕДИКЮРА", 286, 146);
+      g.fillText("АКАДЕМИЯ", 286, 104); g.fillText("МАНИКЮРА", 286, 132); g.fillText("И ПЕДИКЮРА", 286, 160);
       g.font = '700 22px Manrope, sans-serif'; g.letterSpacing = "6px"; g.fillStyle = "#E9C98A"; g.textAlign = "right"; g.fillText("ПОДАРОЧНЫЙ СЕРТИФИКАТ", W - 80, 124);
       g.textAlign = "left"; g.letterSpacing = "0px"; g.fillStyle = "#fff"; g.font = '170px "Tenor Sans", serif'; g.fillText(rub(c.sum), 74, 420);
       g.fillStyle = "#E7D3D8"; g.font = '40px Manrope, sans-serif';
@@ -2696,7 +2697,7 @@ div.f { display: grid; gap: 8px; }
     var list = (st.certs || []).filter(function (c) { return c.phone.replace(/\D/g, "").replace(/^8/, "7") === d; }).reverse();
     $("mcList").innerHTML = list.length ? list.map(function (c) {
       var stt = certState(c);
-      return '<div class="mc"><div class="g-top"><span class="g-brand"><svg class="g-mark" aria-hidden="true"><use href="#lgm"></use></svg><span class="g-bt">Академия маникюра<br>и&nbsp;педикюра</span></span><span class="pill ' + stt[1] + '">' + stt[0] + '</span></div>' +
+      return '<div class="mc"><div class="g-top"><span class="g-brand"><svg class="g-mark" aria-hidden="true"><use href="#lgm"></use></svg><span class="g-bt">Академия маникюра и&nbsp;педикюра</span></span><span class="pill ' + stt[1] + '">' + stt[0] + '</span></div>' +
         '<b class="mc-sum num">' + rub(certBalance(c)) + (certBalance(c) < c.sum ? ' <small>из ' + rub(c.sum) + '</small>' : '') + '</b>' +
         '<div class="g-bot"><span>№ ' + esc(c.code) + (c.to ? ' · для: ' + esc(c.to) + ' ' + HEART : '') + '</span><span>до ' + shortDate(c.till) + ' вкл.</span></div>' +
         '<div class="mc-acts"><button type="button" data-share="img" data-code="' + esc(c.code) + '">Поделиться</button><button type="button" data-share="link" data-code="' + esc(c.code) + '">Ссылка</button></div></div>';
