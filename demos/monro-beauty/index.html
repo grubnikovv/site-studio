@@ -471,6 +471,26 @@ footer .fnav a:hover { color: var(--ink); }
 .prog b { color: var(--ink); font-weight: 700; }
 .courses3 { display: grid; gap: 18px; margin-bottom: 30px; }
 .courses3 { gap: 12px; }
+.mdl { padding-top: clamp(20px, 4vw, 36px); }
+.mdl-card { border-radius: 26px; padding: clamp(20px, 3.5vw, 32px); background: linear-gradient(135deg, color-mix(in srgb, var(--lac) 14%, var(--paper)), var(--paper) 70%); border: 1px solid color-mix(in srgb, var(--lac) 30%, var(--line)); display: grid; gap: 14px; }
+.mdl-k { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--lac); }
+.mdl-k i { width: 8px; height: 8px; border-radius: 50%; background: var(--lac); animation: mpulse 1.8s ease-in-out infinite; }
+@keyframes mpulse { 50% { opacity: .3; transform: scale(.7); } }
+@media (prefers-reduced-motion: reduce) { .mdl-k i { animation: none; } }
+.mdl-card h2 { margin: 0; font-size: clamp(24px, 3.4vw, 34px); }
+.mdl-card > p { margin: 0; color: var(--mute); max-width: 62ch; }
+.mdl-list { display: grid; gap: 8px; }
+.mdl-list:not(.all) .mdl-row:nth-child(n+4) { display: none; }
+#mdlMore { justify-self: start; }
+.mdl-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; background: var(--paper); border: 1px solid var(--line); border-radius: 18px; padding: 12px 14px; }
+.mdl-i { display: grid; grid-template-columns: 112px minmax(0, 1fr); align-items: center; gap: 14px; min-width: 0; }
+.mdl-d b { display: block; font-size: 17px; }
+.mdl-d small, .mdl-w small { color: var(--mute); font-size: 13px; }
+.mdl-w b { display: block; font-weight: 700; }
+.mdl-free { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, var(--ok) 16%, var(--paper)); color: var(--ok); font-size: 12px; font-weight: 800; }
+@media (max-width: 640px) { .mdl-i { grid-template-columns: minmax(0, 1fr); gap: 2px; } .mdl-d b { display: inline; font-size: 15px; } .mdl-d small::before { content: ", "; } .mdl-w b { font-size: 14px; } .mdl-free { margin-left: 4px; } .mdl-row .btn { padding-inline: 14px; } .mdl-row .btn span { display: none; } }
+.mdl-acts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.mdl-acts button { font-size: 12.5px; }
 .tcourse { background: var(--paper); border: 1px solid var(--line); border-radius: 22px; padding: 0 clamp(18px, 3vw, 26px); min-width: 0; transition: border-color .25s; }
 .tcourse[open] { border-color: color-mix(in srgb, var(--lac) 35%, var(--line)); }
 .tcourse summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 14px; padding: 18px 0; }
@@ -1008,6 +1028,7 @@ div.f { display: grid; gap: 8px; }
 
 <!-- ===== УСЛУГИ ===== -->
 <main id="v-uslugi" class="page" hidden>
+  <section class="mdl" id="mdlBox" hidden><div class="wrap"><div class="mdl-card"><span class="mdl-k"><i></i>Ищем моделей</span><h2>Бесплатная процедура на обучении</h2><p>Ученица работает под контролем Марины. Процедура бесплатная, занимает около 5 часов. Нужна одна модель на каждый день.</p><div class="mdl-list" id="mdlList"></div><button type="button" class="btn sm ghost" id="mdlMore" hidden>Показать ещё</button></div></div></section>
   <section class="phero"><div class="wrap"><span class="eyebrow">Услуги и цены</span><h1>Маникюр, педикюр и наращивание</h1><p class="lead">В стоимость входят обработка, форма и покрытие. Инструменты проходят стерилизацию в сухожаре, крафт-пакет вскрывается при вас.</p></div></section>
   <section class="block tight"><div class="wrap">
     <h3 class="pgrp"><span>Руки</span><small id="nHands"></small></h3><div class="plist" id="pHands"></div>
@@ -1320,6 +1341,9 @@ div.f { display: grid; gap: 8px; }
       prog: ["Ставим формы и грамотно их подрезаем", "Моделируем гелем ногти формы квадрат и миндаль", "Покрытие гель-лак и современный дизайн", "Коррекция с поднятием свободного края с помощью аппарата", "Грамотный запил, чтобы не было отслоек", "Покрытие гель-лак и дизайн"],
       inc: "Курс проходит полностью на наших инструментах, материалах и моделях. Выдаётся сертификат." }
   ];
+  // модели: в первый день с 10 до 12 теория, модель приходит к 12; в остальные дни — к началу занятия
+  var MODEL = { first: 12 * 60, next: 10 * 60, hours: 5 };
+  var MODEL_SVC = { man: "Маникюр с покрытием гель-лак", ped: "Педикюр с покрытием гель-лак", ext: "Наращивание или коррекция ногтей" };
   function course(id) { return COURSES.filter(function (c) { return c.id === id; })[0] || COURSES[0]; }
   var FAQ = [
     ["Процедуры", [
@@ -1740,10 +1764,47 @@ div.f { display: grid; gap: 8px; }
       save(); btn.disabled = false;
       $("tDone").innerHTML = '<b>Даты закреплены за вами.</b> Курс «' + c.short + '»: ' + rangeText(days) + ', с 10:00 до 17:00. Марина свяжется с вами накануне.';
       $("tDone").hidden = false; ["tName", "tPhone"].forEach(function (id) { $(id).value = ""; }); $("tRules").checked = false; $("tPd").checked = false;
-      tr.date = null; renderTrain(); renderTrainBand(); toast("Предоплата получена, даты закреплены за вами");
+      tr.date = null; renderTrain(); renderTrainBand(); renderModels(); toast("Предоплата получена, даты закреплены за вами");
     }, 900);
   });
+  // тестовые записи на обучение (для демо): три курса в ближайшие недели
+  if (SHOW_EXAMPLES && !st.trainSeeded) {
+    st.trainSeeded = 1; st.training = st.training || [];
+    [["ped", 0, "Екатерина", "41"], ["man", 10, "Дарья", "17"], ["ext", 18, "Алина", "83"]].forEach(function (x) {
+      var c = course(x[0]), min = dkey(addDays(x[1])), k = trainStarts(c.days).filter(function (d) { return d >= min; })[0];
+      if (k) st.training.push({ id: "tex-" + x[0], course: c.id, date: k, days: trainDaysFrom(k, c.days), name: x[2], phone: "+7 9•• •••-••-" + x[3], price: c.price, pre: c.pre, status: "paid", example: true });
+    });
+    save();
+  }
+  // дни обучения, на которые ещё нужна модель
+  function modelNeeds() {
+    var today = dkey(addDays(0)), out = [];
+    (st.training || []).forEach(function (t) {
+      if (t.status !== "paid") return;
+      (t.days || [t.date]).forEach(function (k, i) {
+        if (k >= today && !(st.models || {})[k]) out.push({ k: k, i: i, t: t });
+      });
+    });
+    return out.sort(function (a, b) { return a.k < b.k ? -1 : 1; });
+  }
+  function modelTime(i) { return i === 0 ? MODEL.first : MODEL.next; }
+  function renderModels() {
+    var list = modelNeeds().slice(0, 9);
+    $("mdlBox").hidden = !list.length;
+    $("mdlList").classList.remove("all");
+    $("mdlMore").hidden = list.length <= 3;
+    $("mdlMore").textContent = "Показать ещё " + (list.length - 3) + " " + (list.length - 3 === 1 ? "дату" : list.length - 3 < 5 ? "даты" : "дат");
+    $("mdlList").innerHTML = list.map(function (m) {
+      var d = new Date(m.k + "T12:00"), what = MODEL_SVC[m.t.course] || MODEL_SVC.man;
+      var text = "Здравствуйте! Хочу быть моделью на обучении " + d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + " к " + hm(modelTime(m.i)) + " (" + what.toLowerCase() + ").";
+      return '<div class="mdl-row"><div class="mdl-i"><div class="mdl-d"><b>' + d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + '</b><small>' + d.toLocaleDateString("ru-RU", { weekday: "long" }) + '</small></div>' +
+        '<div class="mdl-w"><b>' + what + '<span class="mdl-free">бесплатно</span></b><small>прийти к ' + hm(modelTime(m.i)) + ' · около ' + MODEL.hours + ' ч</small></div></div>' +
+        '<a class="btn sm" href="https://wa.me/79954284788?text=' + encodeURIComponent(text) + '" target="_blank" rel="noopener">Записаться<span> моделью</span></a></div>';
+    }).join("");
+  }
+  $("mdlMore").addEventListener("click", function () { $("mdlList").classList.add("all"); this.hidden = true; });
   renderTrain();
+  renderModels();
   function renderTrainBand() {
     $("tbCourses").innerHTML = COURSES.map(function (c) {
       var k = trainStarts(c.days)[0];
@@ -1877,8 +1938,11 @@ div.f { display: grid; gap: 8px; }
     $("aTrain").innerHTML = trl.length ? trl.map(function (t) {
       var c = course(t.course || (t.dir === "ped" ? "ped" : "man")), tdays = t.days || [t.date];
       var stt = t.status === "paid" ? ["Предоплата получена", "ok"] : t.status === "refund" ? ["Отменена · предоплата возвращена", ""] : ["Отменена поздно · предоплата ваша", "bad"];
-      return '<div class="bk"><div class="r1"><b>' + rangeText(tdays) + ', ' + hm(TRAIN.from) + '–' + hm(TRAIN.to) + '</b><span class="pill ' + stt[1] + '">' + stt[0] + '</span></div><div><b style="font-weight:700">' + esc(t.name) + '</b> · ' + esc(t.phone) + '</div><div class="info">' + c.short + ' · ' + daysWord(tdays.length) + ' · ' + rub(t.price) + ' · предоплата ' + rub(t.pre) + '</div>' +
-        (t.status === "paid" ? '<div class="acts"><button data-t="' + t.id + '">Отменить</button></div>' : '') + '</div>';
+      return '<div class="bk"><div class="r1"><b>' + rangeText(tdays) + ', ' + hm(TRAIN.from) + '–' + hm(TRAIN.to) + '</b><span class="pill ' + stt[1] + '">' + stt[0] + '</span></div><div><b style="font-weight:700">' + esc(t.name) + '</b> · ' + esc(t.phone) + (t.example ? ' <span class="pill">пример</span>' : '') + '</div><div class="info">' + c.short + ' · ' + daysWord(tdays.length) + ' · ' + rub(t.price) + ' · предоплата ' + rub(t.pre) + '</div>' +
+        (t.status === "paid" ? '<div class="info">Модели:</div><div class="mdl-acts">' + tdays.map(function (k, i) {
+          var ok = (st.models || {})[k];
+          return '<button class="chip" data-m="' + k + '" aria-pressed="' + !!ok + '">' + new Date(k + "T12:00").toLocaleDateString("ru-RU", { day: "numeric", month: "short" }) + ' к ' + hm(modelTime(i)) + ' · ' + (ok ? "есть ✓" : "нужна") + '</button>';
+        }).join("") + '</div><div class="acts"><button data-t="' + t.id + '">Отменить</button></div>' : '') + '</div>';
     }).join("") : '<p class="note">Заявок пока нет. Они появятся, когда ученица оплатит предоплату на странице «Обучение».</p>';
   }
   $("aDays").addEventListener("click", function (e) { var b = e.target.closest("[data-d]"); if (b) { aDate = b.dataset.d; quickOff(); renderAdmin(); } });
@@ -1895,10 +1959,18 @@ div.f { display: grid; gap: 8px; }
     save(); renderAdmin();
   });
   $("aTrain").addEventListener("click", function (e) {
+    var m = e.target.closest("[data-m]");
+    if (m) {
+      st.models = st.models || {};
+      if (st.models[m.dataset.m]) delete st.models[m.dataset.m]; else st.models[m.dataset.m] = true;
+      save(); renderAdmin(); renderModels();
+      toast(st.models[m.dataset.m] ? "Модель есть — день убран из объявления" : "День снова в объявлении «Ищем моделей»");
+      return;
+    }
     var b = e.target.closest("[data-t]"); if (!b) return;
     var t = st.training.filter(function (x) { return x.id === b.dataset.t; })[0];
     var days = (new Date(t.date + "T10:00").getTime() - Date.now()) / 864e5;
-    t.status = days >= 7 ? "refund" : "late"; save(); renderAdmin(); renderTrain(); renderTrainBand();
+    t.status = days >= 7 ? "refund" : "late"; save(); renderAdmin(); renderTrain(); renderTrainBand(); renderModels();
     toast(days >= 7 ? "Отменено. Предоплата вернётся ученице" : "Поздняя отмена. Предоплата остаётся у вас");
   });
   // Быстрые варианты: до обеда, после обеда, весь день
