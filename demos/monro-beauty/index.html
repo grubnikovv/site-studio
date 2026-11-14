@@ -505,6 +505,17 @@ div.f { display: grid; gap: 8px; }
 .bars div { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; font-size: 13.5px; }
 .bars i { grid-column: 1 / -1; height: 6px; border-radius: 6px; background: var(--blush); overflow: hidden; }
 .bars i::before { content: ""; display: block; height: 100%; width: 100%; background: var(--lac); transform-origin: left; transform: scaleX(var(--w)); border-radius: 6px; }
+.certrow { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+.mycerts { margin-top: 18px; }
+.mc-list { display: grid; gap: 10px; }
+.mc { border-radius: 18px; padding: 16px 18px; color: #F6ECEF; display: grid; gap: 6px; background: radial-gradient(90% 120% at 100% 0%, #8E1D3D 0%, transparent 60%), linear-gradient(150deg, #3A0F1D, #1E0910 75%); }
+.mc .g-logo { font-size: 16px; }
+.mc-sum { font-family: var(--display); font-weight: 400; font-size: 34px; color: #fff; }
+.mc-sum small { font-family: var(--body); font-size: 14px; color: #C9AEB6; }
+.spend { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.spend input { width: 100%; border: 1.5px solid var(--line); background: var(--paper); border-radius: 12px; padding: 9px 12px; font-size: 16px; }
+.spend button { border: 1.5px solid var(--line); background: var(--paper); border-radius: 999px; padding: 7px 12px; font-size: 13px; font-weight: 700; }
+.spend button[data-st="used"] { grid-column: 1 / -1; }
 .cert-link { text-decoration: none; display: grid; gap: 4px; transition: transform .2s; }
 .cert-link:hover { transform: translateY(-2px); }
 .cert-link b { font-family: var(--display); font-weight: 400; font-size: 22px; }
@@ -761,14 +772,21 @@ div.f { display: grid; gap: 8px; }
     <form class="card" id="cForm" novalidate>
       <h3>Купить сертификат</h3>
       <div class="f"><span class="lbl">Номинал</span><div class="chips" id="cSum"><button type="button" class="chip" data-v="2000" aria-pressed="false">2 000 ₽</button><button type="button" class="chip" data-v="3000" aria-pressed="true">3 000 ₽</button><button type="button" class="chip" data-v="5000" aria-pressed="false">5 000 ₽</button></div></div>
+      <div class="f"><span class="lbl">Вид сертификата</span><div class="seg2" id="cKind"><button type="button" data-v="e" aria-pressed="true">Электронный</button><button type="button" data-v="p" aria-pressed="false">Бумажный</button></div><span class="note" id="cKindNote">Появится сразу после оплаты: сохраните скриншот или перешлите получателю.</span></div>
       <label class="f">Кому, по желанию — напишем на сертификате<input type="text" id="cTo" maxlength="30" placeholder="Например: Любимой маме"></label>
       <div class="row2"><label class="f">Ваше имя<input type="text" id="cName" autocomplete="given-name"></label><label class="f">Телефон<input type="tel" id="cPhone" inputmode="tel" placeholder="+7"></label></div>
       <label class="check"><input type="checkbox" id="cPd"><span>Согласна на обработку персональных данных (152-ФЗ).</span></label>
       <p class="err" id="cErr" hidden></p>
       <button class="btn" type="submit" id="cGo">Оплатить 3 000 ₽</button>
-      <p class="note" style="margin:0">Оплата полностью, картой или по СБП. Сертификат появится здесь сразу после оплаты — сохраните скриншот, Марина также пришлёт его в WhatsApp.</p>
+      <p class="note" style="margin:0">Оплата полностью, картой или по СБП. Сертификат сохранится за вашим номером телефона — его всегда можно найти ниже, в блоке «Мои сертификаты».</p>
       <div class="tdone" id="cDone" hidden></div>
       <p class="demo" style="margin:0">Демо: оплата не списывается.</p>
+    </form>
+    <form class="card mycerts" id="mcForm" novalidate>
+      <h3>Мои сертификаты</h3>
+      <p class="note" style="margin:0">Введите номер телефона, на который покупали сертификат. Покажите сертификат Марине при оплате процедуры — она спишет нужную сумму.</p>
+      <div class="certrow"><input type="tel" id="mcPhone" inputmode="tel" placeholder="+7" aria-label="Телефон покупателя"><button class="btn sm ghost" type="submit">Найти</button></div>
+      <div class="mc-list" id="mcList"></div>
     </form>
   </div></section>
 </main>
@@ -1736,7 +1754,33 @@ div.f { display: grid; gap: 8px; }
   $("sNext").onclick = function () { if (sMonth < 0) { sMonth++; renderStats(); } };
 
   // ---------- подарочный сертификат: оплачивается полностью ----------
-  var cSum = 3000;
+  var cSum = 3000, cKind = "e";
+  // номер: МН- и 4 знака без похожих букв и цифр, не повторяется с уже проданными
+  function newCertCode() {
+    var abc = "ABCDEFGHJKMNPQRSTUVWXYZ23456789", code;
+    do { code = "МН-"; for (var i = 0; i < 4; i++) code += abc[Math.floor(Math.random() * abc.length)]; }
+    while ((st.certs || []).some(function (c) { return c.code === code; }));
+    return code;
+  }
+  function certBalance(c) { return c.balance == null ? (c.status === "used" ? 0 : c.sum) : c.balance; }
+  function certState(c) { return certBalance(c) <= 0 || c.status === "used" ? ["Использован", ""] : c.till && c.till < dkey(new Date()) ? ["Истёк срок", "bad"] : certBalance(c) < c.sum ? ["Частично использован", "ok"] : ["Действует", "ok"]; }
+  $("cKind").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-v]"); if (!b) return; cKind = b.dataset.v;
+    document.querySelectorAll("#cKind button").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+    $("cKindNote").innerHTML = cKind === "p" ? "Оплатите здесь, затем позвоните Марине: <b>+7 995 428-47-88</b> — договоритесь, когда забрать бумажный сертификат в студии." : "Появится сразу после оплаты: сохраните скриншот или перешлите получателю.";
+  });
+  // Мои сертификаты: покупатель вводит свой телефон и видит все сертификаты с остатком
+  function renderMyCerts() {
+    var d = $("mcPhone").value.replace(/\D/g, "").replace(/^8/, "7");
+    var list = (st.certs || []).filter(function (c) { return c.phone.replace(/\D/g, "").replace(/^8/, "7") === d; }).reverse();
+    $("mcList").innerHTML = list.length ? list.map(function (c) {
+      var stt = certState(c);
+      return '<div class="mc"><div class="g-top"><span class="g-logo">МОНРО</span><span class="pill ' + stt[1] + '">' + stt[0] + '</span></div>' +
+        '<b class="mc-sum num">' + rub(certBalance(c)) + (certBalance(c) < c.sum ? ' <small>из ' + rub(c.sum) + '</small>' : '') + '</b>' +
+        '<div class="g-bot"><span>№ ' + esc(c.code) + (c.to ? ' · для: ' + esc(c.to) : '') + '</span><span>до ' + shortDate(c.till) + '</span></div></div>';
+    }).join("") : '<p class="note">На этот номер сертификатов не нашли. Проверьте номер или позвоните Марине: +7 995 428-47-88.</p>';
+  }
+  $("mcForm").addEventListener("submit", function (e) { e.preventDefault(); if ($("mcPhone").value.replace(/\D/g, "").length < 11) { toast("Введите телефон полностью"); return; } renderMyCerts(); });
   function certTill() { var d = new Date(); d.setMonth(d.getMonth() + 3); return d; }
   function renderGift(code) {
     $("gSum").textContent = rub(cSum);
@@ -1756,30 +1800,49 @@ div.f { display: grid; gap: 8px; }
     var btn = $("cGo"); btn.disabled = true; btn.textContent = "Оплата…";
     setTimeout(function () {
       // номер сертификата: МН- и 4 знака без похожих букв и цифр
-      var abc = "ABCDEFGHJKMNPQRSTUVWXYZ23456789", code = "МН-";
-      for (var i = 0; i < 4; i++) code += abc[Math.floor(Math.random() * abc.length)];
       st.certs = st.certs || [];
-      st.certs.push({ id: "c" + Date.now().toString(36), code: code, sum: cSum, to: $("cTo").value.trim(), name: name, phone: phone, status: "paid", created: dkey(new Date()), till: dkey(certTill()) });
+      var code = newCertCode();
+      st.certs.push({ id: "c" + Date.now().toString(36), code: code, sum: cSum, balance: cSum, kind: cKind, to: $("cTo").value.trim(), name: name, phone: phone, status: "paid", created: dkey(new Date()), till: dkey(certTill()), spent: [] });
+      $("mcPhone").value = phone;
       save(); renderGift(code); btn.disabled = false; btn.textContent = "Оплатить " + rub(cSum);
-      $("cDone").innerHTML = "<b>Оплачено. Сертификат № " + code + "</b> на " + rub(cSum) + " готов. Сохраните скриншот сертификата или покажите номер при записи.";
+      $("cDone").innerHTML = "<b>Оплачено. Сертификат № " + code + "</b> на " + rub(cSum) + (cKind === "p"
+        ? ". Теперь позвоните Марине: <a href=\"tel:+79954284788\">+7 995 428-47-88</a> — договоритесь, когда забрать бумажный сертификат."
+        : " готов. Сохраните скриншот или перешлите получателю.") + " Найти его можно в блоке «Мои сертификаты» по вашему телефону.";
       $("cDone").hidden = false; $("cName").value = ""; $("cPhone").value = ""; $("cPd").checked = false;
+      renderMyCerts();
       $("gCard").scrollIntoView({ behavior: "smooth", block: "center" });
       toast("Сертификат оплачен");
     }, 900);
   });
   renderGift();
   function renderCerts() {
-    var list = (st.certs || []).slice().reverse(), today = dkey(new Date());
-    var lab = function (c) { return c.status === "used" ? ["Использован", ""] : c.till && c.till < today ? ["Истёк срок", "bad"] : ["Оплачен", "ok"]; };
+    var list = (st.certs || []).slice().reverse();
     $("aCerts").innerHTML = list.length ? list.map(function (c) {
-      var l = lab(c);
-      return '<div class="bk"><div class="r1"><b class="num">' + rub(c.sum) + (c.code ? ' · № ' + esc(c.code) : '') + '</b><span class="pill ' + l[1] + '">' + l[0] + '</span></div>' +
+      var stt = certState(c), bal = certBalance(c), open = bal > 0 && c.status !== "used";
+      return '<div class="bk"><div class="r1"><b class="num">№ ' + esc(c.code || "—") + '</b><span class="pill ' + stt[1] + '">' + stt[0] + '</span></div>' +
+        '<div class="info">Номинал ' + rub(c.sum) + ' · <b style="color:var(--ink)">остаток ' + rub(bal) + '</b> · ' + (c.kind === "p" ? "бумажный" : "электронный") + ' · до ' + shortDate(c.till || c.created) + '</div>' +
         '<div><b style="font-weight:700">' + esc(c.name) + '</b> · ' + esc(c.phone) + (c.to ? ' · для: ' + esc(c.to) : '') + '</div>' +
-        '<div class="info">Куплен ' + shortDate(c.created) + (c.till ? ' · действует до ' + shortDate(c.till) : '') + '</div>' +
-        (c.status !== "used" ? '<div class="acts"><button type="button" data-cert="' + c.id + '" data-st="used">Отметить использованным</button></div>' : '') + '</div>';
+        ((c.spent || []).length ? '<div class="info">Списано: ' + c.spent.map(function (x) { return shortDate(x.d) + ' — ' + rub(x.sum); }).join(", ") + '</div>' : '') +
+        (open ? '<div class="spend"><input type="number" inputmode="numeric" min="1" max="' + bal + '" placeholder="Сумма, ₽" data-amt="' + c.id + '" aria-label="Сколько списать с сертификата"><button type="button" data-cert="' + c.id + '" data-st="part">Списать</button><button type="button" data-cert="' + c.id + '" data-st="used">Закрыть полностью</button></div>' : '') + '</div>';
     }).join("") : '<p class="note">Покупок пока нет. Они появятся, когда кто-то оплатит сертификат на странице «Подарочный сертификат».</p>';
   }
-  $("aCerts").addEventListener("click", function (e) { var b = e.target.closest("[data-cert]"); if (!b) return; var c = st.certs.filter(function (x) { return x.id === b.dataset.cert; })[0]; c.status = b.dataset.st; save(); renderCerts(); toast("Сертификат отмечен использованным"); });
+  $("aCerts").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-cert]"); if (!b) return;
+    var c = st.certs.filter(function (x) { return x.id === b.dataset.cert; })[0], bal = certBalance(c); c.spent = c.spent || [];
+    if (b.dataset.st === "part") {
+      var inp = document.querySelector('[data-amt="' + c.id + '"]'), sum = Math.round(Number(inp.value));
+      if (!(sum > 0)) { toast("Введите сумму, которую оплатили сертификатом"); inp.focus(); return; }
+      if (sum > bal) { toast("На сертификате только " + rub(bal)); return; }
+      c.balance = bal - sum; c.spent.push({ d: dkey(new Date()), sum: sum });
+      if (c.balance <= 0) c.status = "used";
+      toast("Списано " + rub(sum) + ". Остаток " + rub(c.balance));
+    } else {
+      if (b.dataset.sure !== "1") { b.dataset.sure = "1"; b.textContent = "Точно закрыть? Нажмите ещё раз"; return; }
+      if (bal > 0) c.spent.push({ d: dkey(new Date()), sum: bal });
+      c.balance = 0; c.status = "used"; toast("Сертификат закрыт");
+    }
+    save(); renderCerts();
+  });
 
   // ---------- боковое меню ----------
   var drawer = $("drawer"), scrim = $("scrim"), burger = $("burger"), drawerT;
@@ -1833,6 +1896,10 @@ div.f { display: grid; gap: 8px; }
     if (pendingTo) { var el = $(pendingTo); pendingTo = null; if (el) { jumpTop(); setTimeout(function () { el.scrollIntoView({ behavior: "smooth", block: "center" }); }, 80); return; } }
     if (changed || !h || h === "top") jumpTop();
   }
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest('a[href="#zapis"]');
+    if (a && location.hash === "#zapis") { e.preventDefault(); setTimeout(function () { resetBooking(pendingPick); pendingPick = null; jumpTop(); }, 0); }
+  });
   addEventListener("hashchange", route); route();
 
   var toastT;
