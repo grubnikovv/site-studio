@@ -234,6 +234,7 @@ footer a { color: var(--mute); }
 .slot { border: 1.5px solid var(--line); background: var(--bg); border-radius: 12px; padding: 10px 0; font-weight: 700; }
 .slot[aria-pressed="true"] { background: var(--lac); border-color: var(--lac); color: var(--lac-ink); }
 .slot.out { border-style: dashed; }
+.erange { font-size: 14px; color: var(--lac); min-height: 1em; }
 .slot:disabled { text-decoration: line-through; opacity: .35; cursor: default; }
 label.f { display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--mute); }
 input[type="text"], input[type="tel"], textarea, select { width: 100%; border: 1.5px solid var(--line); background: var(--bg); border-radius: 14px; padding: 13px 14px; font-size: 16px; }
@@ -804,7 +805,7 @@ div.f { display: grid; gap: 8px; }
     <p class="note" id="eWho"></p>
     <label class="f" id="eSvcL">Услуга<select id="eSvc"></select></label>
     <div class="f"><span class="lbl">День</span><div class="days" id="eDays"></div></div>
-    <div class="f"><span class="lbl">Время</span><div class="slots" id="eSlots"></div><span class="note">Пунктиром — время вне обычного графика. Вам записать можно, клиентки онлайн его не видят.</span></div>
+    <div class="f"><span class="lbl">Время</span><div class="slots" id="eSlots"></div><b class="erange" id="eRange"></b><span class="note">Зачёркнуто — процедура не поместится: залезет на другую клиентку. Пунктиром — время вне обычного графика или обед: вам записать можно, клиентки онлайн его не видят.</span></div>
     <label class="check" id="eRmL"><input type="checkbox" id="eRm"><span>Снятие чужой работы: +200 ₽, +30 минут</span></label>
     <div class="row2" id="eContact"><label class="f">Имя клиентки<input type="text" id="eName"></label><label class="f">Телефон<input type="tel" id="ePhone" inputmode="tel" placeholder="+7"></label></div>
     <p class="err" id="eErr" hidden></p>
@@ -1278,6 +1279,8 @@ div.f { display: grid; gap: 8px; }
       h += '<button class="day" data-d="' + k + '" aria-pressed="' + (k === ed.date) + '"' + (!cnt ? " disabled" : "") + '><small>' + (i === 0 ? "сег" : WD[d.getDay()]) + '</small><b class="num">' + d.getDate() + '</b><em>' + (off ? "выходной" : cnt ? cnt + " окон" : "занято") + '</em></button>';
     }
     $("eDays").innerHTML = h; $("eDays").scrollLeft = sl;
+    // показываем, какое время займёт процедура целиком, чтобы было видно, что она поместится
+    $("eRange").textContent = ed.start != null ? "Займёт: " + hm(ed.start) + "–" + hm(ed.start + bmin(ed)) + " (" + dur(bmin(ed)) + ")" : "";
     var list = edSlots();
     $("eSlots").innerHTML = list.length ? list.map(function (x) { return '<button class="slot num' + (x.out ? ' out' : '') + '" data-t="' + x.t + '"' + (x.free ? "" : " disabled") + ' aria-pressed="' + (ed.start === x.t) + '" title="' + (x.out ? 'вне обычного графика' : '') + '">' + hm(x.t) + '</button>'; }).join("") : '<p class="note" style="grid-column:1/-1">В этот день свободных окон нет.</p>';
   }
