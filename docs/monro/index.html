@@ -1699,6 +1699,8 @@ div.f { display: grid; gap: 8px; }
   $("eSave").onclick = function () {
     var err = ed.start == null ? "Выберите время." : "";
     if (!err && !ed.move && !$("eName").value.trim()) err = "Укажите имя клиентки.";
+    // перед сохранением ещё раз проверяем, что выбранное время свободно на всю длительность процедуры
+    if (!err && !freeSlots(ed.date, bmin(ed), ed.id, true).some(function (x) { return x.t === ed.start && x.free; })) { err = "Это время уже занято или процедура не помещается до следующей записи. Выберите другое."; ed.start = null; renderEditor(); }
     $("eErr").textContent = err; $("eErr").hidden = !err; if (err) return;
     if (ed.move) {
       var own = ownCopy(findBooking(ed.id));
