@@ -765,7 +765,7 @@ div.f { display: grid; gap: 8px; }
 
 <!-- ===== СЕРТИФИКАТ ===== -->
 <main id="v-sertifikat" class="page" hidden>
-  <section class="phero"><div class="wrap"><span class="eyebrow">Подарок</span><h1>Подарочный сертификат</h1><p class="lead">На любую процедуру студии «Монро». Оплачивается полностью, сразу после оплаты вы получите сертификат с номером. Действует 3 месяца.</p></div></section>
+  <section class="phero"><div class="wrap"><span class="eyebrow">Подарок</span><h1>Подарочный сертификат</h1><p class="lead">Электронный сертификат на любую процедуру студии «Монро». Оплачивается полностью, появляется сразу после оплаты — его можно переслать в мессенджере и показать с телефона. Действует 3 месяца.</p></div></section>
   <section class="block tight"><div class="wrap gift">
     <div class="gcard" id="gCard" aria-label="Так будет выглядеть сертификат">
       <div class="g-top"><span class="g-logo">МОНРО</span><span class="g-k">подарочный сертификат</span></div>
@@ -776,7 +776,6 @@ div.f { display: grid; gap: 8px; }
     <form class="card" id="cForm" novalidate>
       <h3>Купить сертификат</h3>
       <div class="f"><span class="lbl">Номинал</span><div class="chips" id="cSum"><button type="button" class="chip" data-v="2000" aria-pressed="false">2 000 ₽</button><button type="button" class="chip" data-v="3000" aria-pressed="true">3 000 ₽</button><button type="button" class="chip" data-v="5000" aria-pressed="false">5 000 ₽</button></div></div>
-      <div class="f"><span class="lbl">Вид сертификата</span><div class="seg2" id="cKind"><button type="button" data-v="e" aria-pressed="true">Электронный</button><button type="button" data-v="p" aria-pressed="false">Бумажный</button></div><span class="note" id="cKindNote">Появится сразу после оплаты: сохраните скриншот или перешлите получателю.</span></div>
       <label class="f">Кому, по желанию — напишем на сертификате<input type="text" id="cTo" maxlength="30" placeholder="Например: Любимой маме"></label>
       <div class="row2"><label class="f">Ваше имя<input type="text" id="cName" autocomplete="given-name"></label><label class="f">Телефон<input type="tel" id="cPhone" inputmode="tel" placeholder="+7"></label></div>
       <label class="check"><input type="checkbox" id="cPd"><span>Согласна на обработку персональных данных (152-ФЗ).</span></label>
@@ -1758,7 +1757,7 @@ div.f { display: grid; gap: 8px; }
   $("sNext").onclick = function () { if (sMonth < 0) { sMonth++; renderStats(); } };
 
   // ---------- подарочный сертификат: оплачивается полностью ----------
-  var cSum = 3000, cKind = "e";
+  var cSum = 3000;
   // номер: МН- и 4 знака без похожих букв и цифр, не повторяется с уже проданными
   function newCertCode() {
     var abc = "ABCDEFGHJKMNPQRSTUVWXYZ23456789", code;
@@ -1768,11 +1767,6 @@ div.f { display: grid; gap: 8px; }
   }
   function certBalance(c) { return c.balance == null ? (c.status === "used" ? 0 : c.sum) : c.balance; }
   function certState(c) { return certBalance(c) <= 0 || c.status === "used" ? ["Использован", ""] : c.till && c.till < dkey(new Date()) ? ["Истёк срок", "bad"] : certBalance(c) < c.sum ? ["Частично использован", "ok"] : ["Действует", "ok"]; }
-  $("cKind").addEventListener("click", function (e) {
-    var b = e.target.closest("[data-v]"); if (!b) return; cKind = b.dataset.v;
-    document.querySelectorAll("#cKind button").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
-    $("cKindNote").innerHTML = cKind === "p" ? "Оплатите здесь, затем позвоните Марине: <b>+7 995 428-47-88</b> — договоритесь, когда забрать бумажный сертификат в студии." : "Появится сразу после оплаты: сохраните скриншот или перешлите получателю.";
-  });
   // Мои сертификаты: покупатель вводит свой телефон и видит все сертификаты с остатком
   function renderMyCerts() {
     var d = $("mcPhone").value.replace(/\D/g, "").replace(/^8/, "7");
@@ -1806,12 +1800,10 @@ div.f { display: grid; gap: 8px; }
       // номер сертификата: МН- и 4 знака без похожих букв и цифр
       st.certs = st.certs || [];
       var code = newCertCode();
-      st.certs.push({ id: "c" + Date.now().toString(36), code: code, sum: cSum, balance: cSum, kind: cKind, to: $("cTo").value.trim(), name: name, phone: phone, status: "paid", created: dkey(new Date()), till: dkey(certTill()), spent: [] });
+      st.certs.push({ id: "c" + Date.now().toString(36), code: code, sum: cSum, balance: cSum, to: $("cTo").value.trim(), name: name, phone: phone, status: "paid", created: dkey(new Date()), till: dkey(certTill()), spent: [] });
       $("mcPhone").value = phone;
       save(); renderGift(code); btn.disabled = false; btn.textContent = "Оплатить " + rub(cSum);
-      $("cDone").innerHTML = "<b>Оплачено. Сертификат № " + code + "</b> на " + rub(cSum) + (cKind === "p"
-        ? ". Теперь позвоните Марине: <a href=\"tel:+79954284788\">+7 995 428-47-88</a> — договоритесь, когда забрать бумажный сертификат."
-        : " готов. Сохраните скриншот или перешлите получателю.") + " Найти его можно в блоке «Мои сертификаты» по вашему телефону.";
+      $("cDone").innerHTML = "<b>Оплачено. Сертификат № " + code + "</b> на " + rub(cSum) + " готов. Сохраните скриншот или перешлите получателю. Его всегда можно найти в блоке «Мои сертификаты» по вашему телефону и показать Марине с экрана.";
       $("cDone").hidden = false; $("cName").value = ""; $("cPhone").value = ""; $("cPd").checked = false;
       renderMyCerts();
       $("gCard").scrollIntoView({ behavior: "smooth", block: "center" });
@@ -1824,7 +1816,7 @@ div.f { display: grid; gap: 8px; }
     $("aCerts").innerHTML = list.length ? list.map(function (c) {
       var stt = certState(c), bal = certBalance(c), open = bal > 0 && c.status !== "used";
       return '<div class="bk"><div class="r1"><b class="num">№ ' + esc(c.code || "—") + '</b><span class="pill ' + stt[1] + '">' + stt[0] + '</span></div>' +
-        '<div class="info">Номинал ' + rub(c.sum) + ' · <b style="color:var(--ink)">остаток ' + rub(bal) + '</b> · ' + (c.kind === "p" ? "бумажный" : "электронный") + ' · до ' + shortDate(c.till || c.created) + '</div>' +
+        '<div class="info">Номинал ' + rub(c.sum) + ' · <b style="color:var(--ink)">остаток ' + rub(bal) + '</b> · до ' + shortDate(c.till || c.created) + '</div>' +
         '<div><b style="font-weight:700">' + esc(c.name) + '</b> · ' + esc(c.phone) + (c.to ? ' · для: ' + esc(c.to) : '') + '</div>' +
         ((c.spent || []).length ? '<div class="info">Списано: ' + c.spent.map(function (x) { return shortDate(x.d) + ' — ' + rub(x.sum); }).join(", ") + '</div>' : '') +
         (open ? '<div class="spend"><input type="number" inputmode="numeric" min="1" max="' + bal + '" placeholder="Сумма, ₽" data-amt="' + c.id + '" aria-label="Сколько списать с сертификата"><button type="button" data-cert="' + c.id + '" data-st="part">Списать</button><button type="button" data-cert="' + c.id + '" data-st="used">Закрыть полностью</button></div>' : '') + '</div>';
