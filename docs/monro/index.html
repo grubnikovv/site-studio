@@ -473,9 +473,24 @@ footer .fnav a:hover { color: var(--ink); }
 .prog li { padding: 14px 2px; border-bottom: 1px solid var(--line); color: var(--mute); }
 .prog b { color: var(--ink); font-weight: 700; }
 .courses3 { display: grid; gap: 18px; margin-bottom: 30px; }
-.tcourse { background: var(--paper); border: 1px solid var(--line); border-radius: 26px; padding: clamp(18px, 3vw, 28px); display: grid; gap: 16px; min-width: 0; }
+.courses3 { gap: 12px; }
+.tcourse { background: var(--paper); border: 1px solid var(--line); border-radius: 22px; padding: 0 clamp(18px, 3vw, 26px); min-width: 0; transition: border-color .25s; }
+.tcourse[open] { border-color: color-mix(in srgb, var(--lac) 35%, var(--line)); }
+.tcourse summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 14px; padding: 18px 0; }
+.tcourse summary::-webkit-details-marker { display: none; }
+.tcourse summary::after { content: ""; flex: none; width: 34px; height: 34px; border-radius: 50%; background: color-mix(in srgb, var(--lac) 10%, var(--paper)) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239E1F42' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") center / 18px no-repeat; transition: transform .3s; }
+.tcourse[open] summary::after { transform: rotate(180deg); }
+.tsum { display: grid; gap: 6px; min-width: 0; flex: 1; }
+.tline { color: var(--mute); font-size: 14px; }
+.tline b { color: var(--ink); font-weight: 700; }
+.tmore { font-size: 13px; font-weight: 700; color: var(--lac); }
+.tcourse[open] .tmore { display: none; }
+.tbody { display: grid; gap: 16px; padding: 0 0 22px; }
+.tcourse[open] .tbody { animation: topen .35s ease; }
+@keyframes topen { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .tcourse[open] .tbody { animation: none; } }
 .tcourse .tk { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--lac); }
-.tcourse h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(22px, 3vw, 28px); line-height: 1.2; }
+.tcourse h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: clamp(19px, 2.6vw, 24px); line-height: 1.25; }
 .tcourse .tfacts { margin: 0; grid-template-columns: repeat(4, minmax(0, 1fr)); }
 @media (max-width: 600px) { .tcourse .tfacts { grid-template-columns: repeat(2, minmax(0, 1fr)); } .tcourse .tfacts b { font-size: 15px; } }
 .tcourse .tfacts div { min-width: 0; padding: 12px; }
@@ -1679,11 +1694,12 @@ div.f { display: grid; gap: 8px; }
   }
   function daysWord(n) { return n + (n === 1 ? " день" : n < 5 ? " дня" : " дней"); }
   function courseCard(c) {
-    return '<article class="tcourse" id="kurs-' + c.id + '"><span class="tk">Курс · ' + daysWord(c.days) + '</span><h3>' + c.name + '</h3>' +
+    return '<details class="tcourse" id="kurs-' + c.id + '"><summary><span class="tsum"><span class="tk">Курс · ' + daysWord(c.days) + '</span><h3>' + c.name + '</h3>' +
+      '<span class="tline"><b class="num">' + rub(c.price) + '</b> · 10:00–17:00 · ' + c.models + ' модели</span><span class="tmore">Программа курса</span></span></summary><div class="tbody">' +
       '<div class="tfacts"><div><small>Длительность</small><b>' + daysWord(c.days) + '</b></div><div><small>Время</small><b class="num">10:00–17:00</b></div><div><small>Практика</small><b>' + c.models + ' модели</b></div><div><small>Стоимость</small><b class="num">' + rub(c.price) + '</b></div></div>' +
       '<ol class="prog' + (c.grp ? " tblocks" : "") + '">' + c.prog.map(function (p) { return "<li><span>" + p + "</span></li>"; }).join("") + '</ol>' +
       '<p class="inc">' + c.inc + ' Обучение индивидуальное: один ученик. Предоплата ' + rub(c.pre) + ' закрепляет даты.</p>' +
-      '<button type="button" class="btn sm ghost" data-course="' + c.id + '">Выбрать даты на этот курс</button></article>';
+      '<button type="button" class="btn sm ghost" data-course="' + c.id + '">Выбрать даты на этот курс</button></div></details>';
   }
   $("tCourses").innerHTML = COURSES.map(courseCard).join("");
   $("tCourses").addEventListener("click", function (e) {
@@ -1738,7 +1754,7 @@ div.f { display: grid; gap: 8px; }
       return '<li><a href="#obuchenie" data-course-pick="' + c.id + '"><i>' + c.days + ' дн</i><span>' + c.short + '<small>' + rub(c.price) + ' · ' + (k ? "ближайшие даты " + rangeText(trainDaysFrom(k, c.days)) : "даты уточняйте") + '</small></span></a></li>';
     }).join("");
   }
-  $("tbCourses").addEventListener("click", function (e) { var a = e.target.closest("[data-course-pick]"); if (a) { tr.course = a.dataset.coursePick; tr.date = null; renderTrain(); } });
+  $("tbCourses").addEventListener("click", function (e) { var a = e.target.closest("[data-course-pick]"); if (a) { tr.course = a.dataset.coursePick; tr.date = null; renderTrain(); var d = $("kurs-" + tr.course); if (d) d.open = true; } });
   renderTrainBand();
 
   // ---------- кабинет мастера ----------
