@@ -78,6 +78,18 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 .btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
 .btn.sm { padding: 10px 18px; font-size: 14px; }
 .btn:disabled { opacity: .45; cursor: default; transform: none; box-shadow: none; }
+/* главные кнопки: редкий блик по кнопке, мягкое нажатие и волна от пальца */
+.btn { position: relative; overflow: hidden; isolation: isolate; -webkit-tap-highlight-color: transparent; }
+.btn:active:not(:disabled) { transform: scale(.96); transition-duration: .08s; }
+.btn.glow::after { content: ""; position: absolute; inset: -2px auto -2px 0; width: 45%; z-index: -1; pointer-events: none; background: linear-gradient(100deg, transparent, rgba(255,255,255,.38), transparent); transform: translateX(-160%) skewX(-18deg); animation: bshine 5.5s ease-in-out 1.2s infinite; }
+.btn.light.glow::after { background: linear-gradient(100deg, transparent, rgba(158,31,66,.16), transparent); }
+@keyframes bshine { 0%, 62% { transform: translateX(-160%) skewX(-18deg); } 82%, 100% { transform: translateX(330%) skewX(-18deg); } }
+.btn .rip { position: absolute; border-radius: 50%; pointer-events: none; z-index: -1; background: currentColor; opacity: .28; transform: scale(0); animation: brip .6s ease-out forwards; }
+@keyframes brip { to { transform: scale(1); opacity: 0; } }
+.btn.glow:hover { box-shadow: 0 12px 28px color-mix(in srgb, var(--lac) 38%, transparent); }
+.btn.pop { animation: bpop .45s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes bpop { 40% { transform: scale(.94); } 70% { transform: scale(1.04); } }
+@media (prefers-reduced-motion: reduce) { .btn.glow::after, .btn .rip, .btn.pop { animation: none; display: none; } .btn.pop { display: inline-flex; } }
 @media (max-width: 820px) { .nav { display: none; } }
 
 /* первый экран */
@@ -561,6 +573,24 @@ div.f { display: grid; gap: 8px; }
 .seg2 button { border: 0; background: none; border-radius: 10px; padding: 10px; font-weight: 700; color: var(--mute); transition: background .25s, color .25s; }
 .seg2 button[aria-pressed="true"] { background: var(--lac); color: var(--lac-ink); }
 .rem-done { display: grid; gap: 10px; justify-items: center; }
+.remcard { display: grid; gap: 10px; padding: 16px; border-radius: 18px; background: color-mix(in srgb, var(--lac) 7%, var(--paper)); border: 1.5px solid color-mix(in srgb, var(--lac) 28%, var(--line)); }
+.rem-h { display: flex; align-items: center; gap: 12px; }
+.rem-h b { display: block; font-size: 16px; }
+.rem-h small { color: var(--mute); font-size: 13px; }
+.bell { font-size: 22px; display: inline-block; transform-origin: 50% 10%; animation: bell 4s ease-in-out 1s infinite; }
+@keyframes bell { 0%, 80%, 100% { transform: none; } 84% { transform: rotate(14deg); } 88% { transform: rotate(-12deg); } 92% { transform: rotate(8deg); } 96% { transform: rotate(-4deg); } }
+@media (prefers-reduced-motion: reduce) { .bell { animation: none; } }
+.rem-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 14px; }
+.rem-list li { position: relative; padding-left: 22px; color: var(--mute); }
+.rem-list li::before { content: "✓"; position: absolute; left: 2px; top: 0; color: var(--lac); font-weight: 800; }
+.rem-list b { color: var(--ink); font-weight: 700; }
+.remcard .lbl { font-size: 13px; font-weight: 700; color: var(--mute); }
+.rem-cta { display: grid; gap: 10px; width: 100%; max-width: 360px; padding: 16px; border-radius: 18px; background: color-mix(in srgb, var(--lac) 7%, var(--paper)); border: 1.5px solid color-mix(in srgb, var(--lac) 28%, var(--line)); text-align: center; }
+.rem-cta b { font-size: 16px; }
+.rem-cta p { margin: 0; color: var(--mute); font-size: 14px; }
+.rem-cta .btn { width: 100%; }
+.rem-two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.rem-two .btn { padding-inline: 10px; }
 .tdone { background: color-mix(in srgb, var(--ok) 10%, var(--paper)); border-radius: 16px; padding: 14px 16px; font-size: 14px; animation: fadein .4s ease both; }
 .tdone b { color: var(--ok); }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -923,7 +953,7 @@ div.f { display: grid; gap: 8px; }
       <button class="burger" id="burger" aria-label="Открыть меню" aria-expanded="false" aria-controls="drawer"><span></span><span></span></button>
       <a class="logo" href="#top"><svg class="brand" aria-hidden="true"><use href="#lgm"></use></svg><span class="brand-t">Академия маникюра и&nbsp;педикюра</span><span class="sr">М.А — академия маникюра и педикюра</span></a>
     </div>
-    <a class="btn sm" href="#zapis">Записаться</a>
+    <a class="btn glow sm" href="#zapis">Записаться</a>
   </div>
 </header>
 
@@ -969,7 +999,7 @@ div.f { display: grid; gap: 8px; }
         <p class="lead">Марина Шевченко, мастер маникюра и преподаватель. В профессии с 2017 года, победитель международных чемпионатов. Михайловка, ул. Обороны, 41.</p>
         <div class="price-from"><b class="num">от 1 700 ₽</b><span>маникюр с покрытием гель-лаком</span></div>
         <div class="cta">
-          <a class="btn" href="#zapis">Выбрать время онлайн</a>
+          <a class="btn glow" href="#zapis">Выбрать время онлайн</a>
           <a class="btn ghost" href="#obuchenie">Курсы обучения</a>
         </div>
         <div class="facts">
@@ -1002,7 +1032,7 @@ div.f { display: grid; gap: 8px; }
           <li><b>Сертификат</b> о прохождении курса</li>
         </ul>
         <div class="tb-cta">
-          <a class="btn light" href="#obuchenie">Записаться на обучение</a>
+          <a class="btn glow light" href="#obuchenie">Записаться на обучение</a>
           <div class="tb-price"><b class="num">от 15 000 ₽</b><span>предоплата — треть стоимости, закрепляет даты</span></div>
         </div>
       </div>
@@ -1049,7 +1079,7 @@ div.f { display: grid; gap: 8px; }
         <div class="step"><b>Имя и телефон</b><p>Без оплаты на сайте. Марина сразу получает вашу запись.</p></div>
         <div class="step"><b>Напоминание</b><p>За день до визита пришлём напоминание.</p></div>
       </div>
-      <div class="cta" style="margin-top:24px"><a class="btn" href="#zapis">Записаться онлайн</a><a class="btn ghost" href="#voprosy">Вопросы и ответы</a></div>
+      <div class="cta" style="margin-top:24px"><a class="btn glow" href="#zapis">Записаться онлайн</a><a class="btn ghost" href="#voprosy">Вопросы и ответы</a></div>
     </div>
   </section>
 </main>
@@ -1099,7 +1129,7 @@ div.f { display: grid; gap: 8px; }
       <label class="check"><input type="checkbox" id="tRules"><span>Согласен(на) с правилами: предоплата закрепляет даты. Если отменить раньше чем за 7 дней до начала — вернём всю предоплату, если позже — не вернём.</span></label>
       <label class="check"><input type="checkbox" id="tPd"><span>Согласен(на) на <a href="#soglasie" target="_blank">обработку персональных данных</a> и с <a href="#politika" target="_blank">политикой конфиденциальности</a>.</span></label>
       <p class="err" id="tErr" hidden></p>
-      <button class="btn" type="submit" id="tPay">Оплатить предоплату</button>
+      <button class="btn glow" type="submit" id="tPay">Оплатить предоплату</button>
       <div class="tdone" id="tDone" hidden></div>
       <p class="note">Демо: оплата не списывается.</p>
     </form>
@@ -1125,7 +1155,7 @@ div.f { display: grid; gap: 8px; }
       <label class="check"><input type="checkbox" id="cTerm"><span id="cTermText">Знаю, до какого числа действует сертификат.</span></label>
       <label class="check"><input type="checkbox" id="cPd"><span>Согласен(на) на <a href="#soglasie" target="_blank">обработку персональных данных</a> и с <a href="#politika" target="_blank">политикой конфиденциальности</a>.</span></label>
       <p class="err" id="cErr" hidden></p>
-      <button class="btn" type="submit" id="cGo">Оплатить 3 000 ₽</button>
+      <button class="btn glow" type="submit" id="cGo">Оплатить 3 000 ₽</button>
       <p class="note" style="margin:0">Оплата полностью, картой или по СБП. Сертификат сохранится за вашим номером телефона — его всегда можно найти ниже, в блоке «Мои сертификаты».</p>
       <div class="tdone" id="cDone" hidden></div>
       <div class="share" id="cShare" hidden>
@@ -1158,7 +1188,7 @@ div.f { display: grid; gap: 8px; }
         <li>Аппаратный и комбинированный маникюр, наращивание, сложный дизайн</li>
         <li>Обучаю с нуля и повышаю квалификацию мастеров — индивидуально, в студии</li>
       </ul>
-      <div class="cta"><a class="btn" href="#zapis">Записаться к Марине</a></div>
+      <div class="cta"><a class="btn glow" href="#zapis">Записаться к Марине</a></div>
     </div>
   </div></section>
   <section class="block" style="background:var(--paper)"><div class="wrap">
@@ -1256,8 +1286,10 @@ div.f { display: grid; gap: 8px; }
         <dt>Часы</dt><dd>Пн–Пт, 10:00–19:00, по записи</dd>
         <dt>Телефон</dt><dd><a href="tel:+79954284788">+7 995 428-47-88</a></dd>
         <dt>WhatsApp</dt><dd><a href="https://wa.me/79954284788" target="_blank" rel="noopener">Написать Марине</a></dd>
+        <dt>Telegram</dt><dd><a href="https://t.me/+79954284788" target="_blank" rel="noopener">Написать в Telegram</a></dd>
+        <dt>MAX</dt><dd>по номеру +7 995 428-47-88</dd>
       </dl>
-      <a class="btn" href="#zapis" style="justify-self:start">Записаться онлайн</a>
+      <a class="btn glow" href="#zapis" style="justify-self:start">Записаться онлайн</a>
     </div>
     <div class="box ph" style="aspect-ratio:auto;min-height:240px" role="img" aria-label="Место для карты">
       <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>
@@ -1294,13 +1326,20 @@ div.f { display: grid; gap: 8px; }
       <label class="f">Телефон<input type="tel" id="bPhone" autocomplete="tel" inputmode="tel" placeholder="+7" required></label>
       <label class="f">Комментарий, по желанию<input type="text" id="bNote" placeholder="Например: хочу дизайн как на фото"></label>
       <div class="sum" id="bSum"></div>
-      <div class="f"><span class="lbl">Напомнить о записи</span>
-        <div class="seg3" id="bRem"><button type="button" data-v="tg" aria-pressed="true">Telegram</button><button type="button" data-v="sms" aria-pressed="false">SMS</button><button type="button" data-v="none" aria-pressed="false">Не нужно</button></div>
+      <div class="remcard">
+        <div class="rem-h"><span class="bell" aria-hidden="true">🔔</span><div><b>Не забудьте о записи</b><small>Напоминания в мессенджере — бесплатно</small></div></div>
+        <ul class="rem-list">
+          <li>Напомним <b>за 2 дня</b> и <b>за 2 часа</b> до визита</li>
+          <li>Перенести или отменить — <b>одной кнопкой</b> в сообщении</li>
+          <li>Подскажем, <b>когда пора на коррекцию</b>, чтобы ногти не отросли</li>
+        </ul>
+        <span class="lbl">Куда присылать</span>
+        <div class="seg3" id="bRem"><button type="button" data-v="tg" aria-pressed="true">Telegram</button><button type="button" data-v="max" aria-pressed="false">MAX</button><button type="button" data-v="none" aria-pressed="false">Не нужно</button></div>
         <span class="note" id="bRemNote"></span>
       </div>
       <label class="check"><input type="checkbox" id="bPd"><span>Согласен(на) на <a href="#soglasie" target="_blank">обработку персональных данных</a> и с <a href="#politika" target="_blank">политикой конфиденциальности</a>.</span></label>
       <p class="err" id="bErr" hidden></p>
-      <button class="btn" type="submit" id="bPay">Записаться</button>
+      <button class="btn glow" type="submit" id="bPay">Записаться</button>
       <p class="note">Оплата на месте после процедуры: наличными или переводом.</p>
     </form>
 
@@ -1398,7 +1437,7 @@ div.f { display: grid; gap: 8px; }
   </div>
 </footer>
 
-<div class="mbar" id="mbar"><a class="btn" href="#obuchenie">Записаться на обучение</a></div>
+<div class="mbar" id="mbar"><a class="btn glow" href="#obuchenie">Записаться на обучение</a></div>
 <div class="toast" id="toast" role="status"><span class="t-text" id="toastText"></span><button type="button" class="t-ok" id="toastOk" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Понятно</button></div>
 
 <script>
@@ -1736,31 +1775,42 @@ div.f { display: grid; gap: 8px; }
       st.bookings.push(b); save();
       $("myPhone").value = b.phone; $("myList").innerHTML = "";
       $("bDone").textContent = whenText(b.date, b.start) + ". " + s.name + (b.remove ? " и снятие чужой работы" : "") + ". Адрес: ул. Обороны, 41.";
-      $("bRemDone").innerHTML = b.remind === "none" ? "" : '<p class="note">' + esc(remindText(b.remind, b.date).replace("После записи нажмите", "Нажмите")) + '</p>' + (b.remind === "tg" ? '<button class="btn" type="button" id="bTgLink">Подключить напоминания в Telegram</button>' : "");
-      var tl = $("bTgLink"); if (tl) tl.onclick = function () { toast("В рабочей версии откроется бот студии в Telegram"); };
-      $("bTg").textContent = "🆕 Новая запись\n" + s.name + (b.remove ? "\n+ снятие чужой работы" : "") + "\n" + whenText(b.date, b.start) + "\n" + name + ", " + b.phone + (b.note ? "\nКомментарий: " + b.note : "") + "\nНапоминания: " + (b.remind === "none" ? "не нужны" : (b.remind === "tg" ? "Telegram" : "SMS") + ", " + remindPlan(b.date).join(", "));
+      $("bRemDone").innerHTML = b.remind === "none"
+        ? '<div class="rem-cta"><b>🔔 Чтобы не забыть о записи</b><p>Подключите бесплатные напоминания: за 2 дня и за 2 часа до визита, перенос — одной кнопкой.</p><div class="rem-two"><button class="btn sm glow" type="button" data-bot="tg">Telegram</button><button class="btn sm glow" type="button" data-bot="max">MAX</button></div></div>'
+        : '<div class="rem-cta"><b>Остался один шаг</b><p>Нажмите кнопку и «Старт» в боте — без этого напоминания не придут. Это бесплатно.</p><button class="btn glow" type="button" data-bot="' + b.remind + '">🔔 Подключить в ' + (REM_NAME[b.remind] || "Telegram") + '</button></div>';
+      $("bRemDone").querySelectorAll("[data-bot]").forEach(function (x) { x.onclick = function () { x.classList.remove("pop"); void x.offsetWidth; x.classList.add("pop"); toast("В рабочей версии откроется бот студии в " + REM_NAME[x.dataset.bot] + " — нажмите в нём «Старт»"); }; });
+      $("bTg").textContent = "🆕 Новая запись\n" + s.name + (b.remove ? "\n+ снятие чужой работы" : "") + "\n" + whenText(b.date, b.start) + "\n" + name + ", " + b.phone + (b.note ? "\nКомментарий: " + b.note : "") + "\nНапоминания: " + (b.remind === "none" ? "не нужны" : (REM_NAME[b.remind] || "Telegram") + ", " + remindPlan(b.date).join(", "));
       btn.disabled = false; btn.textContent = "Записаться"; stepTo(4); window.scrollTo({ top: 0, behavior: "smooth" });
     }, 900);
   });
-  // Напоминания: за день всегда, за неделю — если запись больше чем за 8 дней
+  // Напоминания: за 2 дня (если запись не раньше), за 2 часа; о коррекции — через 3 недели после визита
+  var REM_NAME = { tg: "Telegram", max: "MAX", sms: "SMS" };
   function remindPlan(k) {
     var days = Math.round((new Date(k + "T12:00") - new Date(dkey(new Date()) + "T12:00")) / 864e5), when = [];
-    if (days > 8) when.push("за неделю");
-    if (days > 1) when.push("за день");
+    if (days >= 2) when.push("за 2 дня");
+    else if (days === 1) when.push("накануне");
     when.push("за 2 часа");
     return when;
   }
   function remindText(via, k) {
-    if (via === "none") return "Без напоминаний. Если планы изменятся, позвоните Марине.";
+    if (via === "none") return "Без напоминаний легко забыть о записи. Если планы изменятся, позвоните Марине.";
     var w = remindPlan(k).join(", ");
-    return via === "tg" ? "Напомним " + w + " до визита. После записи нажмите «Подключить напоминания» — откроется бот студии в Telegram."
-      : "Пришлём SMS на ваш номер " + w + " до визита.";
+    return "Напомним " + w + " до визита и через 3 недели — о коррекции. После записи останется нажать одну кнопку, чтобы подключить бота в " + (REM_NAME[via] || "Telegram") + ".";
   }
   function renderRem() {
     document.querySelectorAll("#bRem button").forEach(function (x) { x.setAttribute("aria-pressed", String(x.dataset.v === bk.remind)); });
     $("bRemNote").textContent = bk.date ? remindText(bk.remind, bk.date) : "";
   }
   $("bRem").addEventListener("click", function (e) { var b = e.target.closest("[data-v]"); if (b) { bk.remind = b.dataset.v; renderRem(); } });
+  // волна от пальца по кнопке (лёгкая: один span, удаляется после анимации)
+  var noMotion = matchMedia("(prefers-reduced-motion: reduce)");
+  document.addEventListener("pointerdown", function (e) {
+    var b = e.target.closest(".btn"); if (!b || b.disabled || noMotion.matches) return;
+    var r = b.getBoundingClientRect(), d = Math.max(r.width, r.height) * 2.2, sp = document.createElement("span");
+    sp.className = "rip"; sp.style.width = sp.style.height = d + "px";
+    sp.style.left = (e.clientX - r.left - d / 2) + "px"; sp.style.top = (e.clientY - r.top - d / 2) + "px";
+    b.appendChild(sp); setTimeout(function () { sp.remove(); }, 650);
+  });
   // ---------- клиентка: мои записи и отмена ----------
   function digits(p) { return String(p || "").replace(/\D/g, "").replace(/^8/, "7"); }
   function myBookings(phone) {
@@ -2025,7 +2075,7 @@ div.f { display: grid; gap: 8px; }
       return '<div class="bk' + (b.id === flashId ? " moved" : "") + '"><div class="r1"><b class="num">' + hm(b.start) + '–' + hm(b.start + bmin(b)) + '</b><span class="pill ' + t[1] + '">' + t[0] + '</span></div>' +
         '<div><b style="font-weight:700">' + esc(b.name) + '</b> · ' + esc(b.phone) + (b.example ? ' <span class="pill">пример</span>' : '') + '</div>' +
         '<div class="info">' + s.name + (b.remove ? ' + снятие чужой работы' : '') + ' · ' + rub(b.price || s.price) + (b.note ? ' · «' + esc(b.note) + '»' : '') + '</div>' +
-        (b.remind && b.remind !== "none" ? '<div class="info">🔔 ' + (b.remind === "tg" ? "Telegram" : "SMS") + ' · ' + remindPlan(b.date).join(", ") + '</div>' : '') +
+        (b.remind && b.remind !== "none" ? '<div class="info">🔔 ' + (REM_NAME[b.remind] || "Telegram") + ' · ' + remindPlan(b.date).join(", ") + '</div>' : '') +
         overlapNote(b) +
         certBlock(b) +
         (b.status === "booked" ? '<div class="acts"><button data-a="move" data-id="' + b.id + '">Перенести</button><button data-a="came" data-id="' + b.id + '">Пришла</button><button data-a="noshow" data-id="' + b.id + '">Не пришла</button><button data-a="cancel" data-id="' + b.id + '">Отменить</button></div>'
