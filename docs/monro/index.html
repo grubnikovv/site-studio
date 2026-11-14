@@ -809,7 +809,7 @@ div.f { display: grid; gap: 8px; }
     <p class="note" id="eWho"></p>
     <label class="f" id="eSvcL">Услуга<select id="eSvc"></select></label>
     <div class="f"><span class="lbl">День</span><div class="days" id="eDays"></div></div>
-    <div class="f"><span class="lbl">Время</span><div class="slots" id="eSlots"></div><b class="erange" id="eRange"></b><div class="ewarn" id="eWarn" role="status" hidden></div><span class="note">Зачёркнуто — процедура не поместится: залезет на другую клиентку. Пунктиром — время вне обычного графика. <span class="lg-lunch">Золотым — попадает на обед.</span> Вам записать можно, клиентки онлайн это время не видят.</span></div>
+    <div class="f"><span class="lbl">Время</span><div class="slots" id="eSlots"></div><b class="erange" id="eRange"></b><div class="ewarn" id="eWarn" role="status" hidden></div><span class="note">Зачёркнуто — процедура не поместится: залезет на другую клиентку. Пунктиром — время вне обычного графика. <span class="lg-lunch">Золотым — время обеда.</span> Вам записать можно, клиентки онлайн это время не видят.</span></div>
     <label class="check" id="eRmL"><input type="checkbox" id="eRm"><span>Снятие чужой работы: +200 ₽, +30 минут</span></label>
     <div class="row2" id="eContact"><label class="f">Имя клиентки<input type="text" id="eName"></label><label class="f">Телефон<input type="tel" id="ePhone" inputmode="tel" placeholder="+7"></label></div>
     <p class="err" id="eErr" hidden></p>
@@ -936,7 +936,7 @@ div.f { display: grid; gap: 8px; }
     for (var t = hr[0]; t + minutes <= hr[1]; t += STEP) {
       if (isToday && t < nowM) continue;
       var clash = iv.some(function (x) { return t < x[1] && t + minutes > x[0]; });
-      out.push({ t: t, free: !clash, out: !work || t < wh[0] || t + minutes > wh[1], lunch: work && t < LUNCH[1] && t + minutes > LUNCH[0] });
+      out.push({ t: t, free: !clash, out: !work || t < wh[0] || t + minutes > wh[1], lunch: work && t >= LUNCH[0] && t < LUNCH[1] });
     }
     return out;
   }
@@ -1299,7 +1299,7 @@ div.f { display: grid; gap: 8px; }
     $("eWarn").textContent = warn.length ? "⚠ " + warn.join(" ") + " Сохранить можно, если вы так договорились с клиенткой." : "";
     $("eSave").textContent = (ed.move ? "Перенести" : "Добавить запись") + (warn.length ? " всё равно" : "");
     var list = edSlots();
-    $("eSlots").innerHTML = list.length ? list.map(function (x) { return '<button class="slot num' + (x.out ? ' out' : '') + (x.lunch ? ' lunch' : '') + '" data-t="' + x.t + '"' + (x.free ? "" : " disabled") + ' aria-pressed="' + (ed.start === x.t) + '" title="' + (x.lunch ? 'попадает на обед' : x.out ? 'вне обычного графика' : '') + '">' + hm(x.t) + '</button>'; }).join("") : '<p class="note" style="grid-column:1/-1">В этот день свободных окон нет.</p>';
+    $("eSlots").innerHTML = list.length ? list.map(function (x) { return '<button class="slot num' + (x.out ? ' out' : '') + (x.lunch ? ' lunch' : '') + '" data-t="' + x.t + '"' + (x.free ? "" : " disabled") + ' aria-pressed="' + (ed.start === x.t) + '" title="' + (x.lunch ? 'время обеда' : x.out ? 'вне обычного графика' : '') + '">' + hm(x.t) + '</button>'; }).join("") : '<p class="note" style="grid-column:1/-1">В этот день свободных окон нет.</p>';
   }
   function openEditor(rec) {
     ed = rec ? { id: rec.id, svc: rec.svc, remove: !!rec.remove, date: rec.date, start: rec.start, move: true } : { id: null, svc: "gel", remove: false, date: aDate, start: null, move: false };
