@@ -489,15 +489,24 @@ footer .fnav a:hover { color: var(--ink); }
 .courses3 { display: grid; gap: 18px; margin-bottom: 30px; }
 .courses3 { gap: 12px; }
 .box.mapbox { padding: 0; overflow: hidden; display: grid; align-content: start; }
-.map { position: relative; height: 320px; background: repeating-linear-gradient(135deg, var(--blush) 0 14px, var(--paper) 14px 28px); }
-.map iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-.way { padding: 18px 20px 20px; display: grid; gap: 12px; }
-.way > b { font-size: 16px; }
-.way-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: 14px; }
-.way-list li { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 10px; }
-.way-list span { color: var(--mute); }
-.way-list i { font-style: normal; }
+.map { position: relative; display: block; height: 340px; overflow: hidden; background: #1D2433; }
+.map img { width: 100%; height: 100%; object-fit: cover; object-position: 56% 46%; transition: transform .6s ease; }
+.map:hover img { transform: scale(1.04); }
+.map-tag { position: absolute; left: 14px; bottom: 14px; background: var(--paper); color: var(--ink); font-size: 13px; font-weight: 700; padding: 7px 12px; border-radius: 999px; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+.way { padding: 16px 20px 18px; display: grid; gap: 10px; }
 .way-acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.map-src { color: var(--mute); font-size: 11.5px; }
+.vdlg { border: 0; padding: 0; background: transparent; max-width: min(420px, 92vw); width: 100%; overflow: visible; }
+.vdlg::backdrop { background: rgba(20, 10, 14, .72); backdrop-filter: blur(4px); }
+.vdlg[open] { animation: vin .3s ease; }
+@keyframes vin { from { opacity: 0; transform: translateY(14px) scale(.98); } }
+.vbox { position: relative; background: var(--paper); border-radius: 22px; overflow: hidden; }
+.vbox video { display: block; width: 100%; max-height: 78vh; background: #000; }
+.vempty { padding: 34px 22px 24px; display: grid; gap: 12px; text-align: center; justify-items: center; }
+.vempty b { font-size: 18px; }
+.vempty p { margin: 0; color: var(--mute); font-size: 14.5px; }
+.vclose { position: absolute; top: 10px; right: 10px; z-index: 2; width: 40px; height: 40px; border: 0; border-radius: 50%; background: rgba(0,0,0,.55); color: #fff; font-size: 22px; line-height: 1; display: grid; place-content: center; }
+@media (prefers-reduced-motion: reduce) { .vdlg[open] { animation: none; } .map img { transition: none; } }
 .legal { max-width: 760px; display: grid; gap: 14px; padding-bottom: 20px; }
 .legal h2 { font-size: clamp(20px, 2.6vw, 24px); margin: 18px 0 0; }
 .legal p, .legal li { margin: 0; color: var(--ink); line-height: 1.6; font-size: 15.5px; }
@@ -1302,20 +1311,17 @@ div.f { display: grid; gap: 8px; }
       <a class="btn glow" href="#zapis" style="justify-self:start">Записаться онлайн</a>
     </div>
     <div class="box mapbox">
-      <div class="map"><iframe title="Карта: Михайловка, ул. Обороны, 41" src="https://yandex.ru/map-widget/v1/?mode=search&amp;text=%D0%92%D0%BE%D0%BB%D0%B3%D0%BE%D0%B3%D1%80%D0%B0%D0%B4%D1%81%D0%BA%D0%B0%D1%8F%20%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C%2C%20%D0%9C%D0%B8%D1%85%D0%B0%D0%B9%D0%BB%D0%BE%D0%B2%D0%BA%D0%B0%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%9E%D0%B1%D0%BE%D1%80%D0%BE%D0%BD%D1%8B%2C%2041&amp;z=17" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+      <a class="map" href="https://yandex.ru/maps/?pt=43.235995,50.068875&amp;z=17&amp;l=map" target="_blank" rel="noopener" aria-label="Открыть улицу Обороны, 41 в Яндекс Картах"><img src="img/map.webp" width="860" height="1020" alt="Схема проезда: студия на улице Обороны, 41" loading="lazy" decoding="async"><span class="map-tag">ул. Обороны, 41</span></a>
       <div class="way">
-        <b>Как пройти</b>
-        <ol class="way-list">
-          <li><span>Вход</span><i class="fill">[с улицы или со двора, какая дверь]</i></li>
-          <li><span>Этаж</span><i class="fill">[этаж, кабинет или квартира, домофон]</i></li>
-          <li><span>Ориентир</span><i class="fill">[что рядом: магазин, остановка]</i></li>
-          <li><span>Парковка</span><i class="fill">[где оставить машину]</i></li>
-        </ol>
-        <div class="way-acts"><a class="btn sm glow" href="https://yandex.ru/maps/?rtext=~%D0%92%D0%BE%D0%BB%D0%B3%D0%BE%D0%B3%D1%80%D0%B0%D0%B4%D1%81%D0%BA%D0%B0%D1%8F%20%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C%2C%20%D0%9C%D0%B8%D1%85%D0%B0%D0%B9%D0%BB%D0%BE%D0%B2%D0%BA%D0%B0%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%9E%D0%B1%D0%BE%D1%80%D0%BE%D0%BD%D1%8B%2C%2041&amp;rtt=auto" target="_blank" rel="noopener">Построить маршрут</a><a class="btn sm ghost" href="https://yandex.ru/maps/?text=%D0%92%D0%BE%D0%BB%D0%B3%D0%BE%D0%B3%D1%80%D0%B0%D0%B4%D1%81%D0%BA%D0%B0%D1%8F%20%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C%2C%20%D0%9C%D0%B8%D1%85%D0%B0%D0%B9%D0%BB%D0%BE%D0%B2%D0%BA%D0%B0%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%9E%D0%B1%D0%BE%D1%80%D0%BE%D0%BD%D1%8B%2C%2041" target="_blank" rel="noopener">Открыть в Яндекс Картах</a></div>
+        <div class="way-acts"><button type="button" class="btn sm glow" id="wayVideo"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"></path></svg>Видео: как пройти</button><a class="btn sm ghost" href="https://yandex.ru/maps/?pt=43.235995,50.068875&amp;z=17&amp;l=map" target="_blank" rel="noopener">Открыть в Яндекс Картах</a></div>
+        <small class="map-src">Схема: © Яндекс Карты</small>
       </div>
+    </div>
     </div>
   </div></section>
 </main>
+
+<dialog class="vdlg" id="vDlg" aria-label="Видео: как пройти до студии"><div class="vbox"><button type="button" class="vclose" id="vClose" aria-label="Закрыть видео">×</button><div id="vBody"></div></div></dialog>
 
 <!-- ===== ЗАПИСЬ ===== -->
 <main id="v-zapis" class="page screen" hidden>
@@ -1830,6 +1836,18 @@ div.f { display: grid; gap: 8px; }
     sp.style.left = (e.clientX - r.left - d / 2) + "px"; sp.style.top = (e.clientY - r.top - d / 2) + "px";
     b.appendChild(sp); setTimeout(function () { sp.remove(); }, 650);
   });
+  // видео «как пройти»: впишите путь к файлу, когда видео будет готово (например "video/way.mp4")
+  var WAY_VIDEO = "", WAY_POSTER = "";
+  $("wayVideo").addEventListener("click", function () {
+    $("vBody").innerHTML = WAY_VIDEO
+      ? '<video controls playsinline autoplay muted preload="metadata"' + (WAY_POSTER ? ' poster="' + WAY_POSTER + '"' : '') + ' src="' + WAY_VIDEO + '"></video>'
+      : '<div class="vempty"><b>Видео скоро появится</b><p>Пока Марина подскажет дорогу по телефону — студия на улице Обороны, 41.</p><a class="btn sm glow" href="tel:+79954284788">Позвонить Марине</a></div>';
+    $("vDlg").showModal();
+  });
+  function closeVideo() { var v = $("vBody").querySelector("video"); if (v) v.pause(); $("vDlg").close(); }
+  $("vClose").addEventListener("click", closeVideo);
+  $("vDlg").addEventListener("click", function (e) { if (e.target === this) closeVideo(); });
+  $("vDlg").addEventListener("close", function () { var v = $("vBody").querySelector("video"); if (v) v.pause(); });
   // ---------- клиентка: мои записи и отмена ----------
   function digits(p) { return String(p || "").replace(/\D/g, "").replace(/^8/, "7"); }
   function myBookings(phone) {
