@@ -1908,7 +1908,9 @@ div.f { display: grid; gap: 8px; }
     return '<div><i>До</i><span>' + before + '</span></div><div><i>После</i><span>' + after + '</span></div>';
   }
   function renderAdmin() {
-    var sl = $("aDays").scrollLeft; $("aDays").innerHTML = dayBtns(aDate, false, -14);
+    // прошедшие дни не показываем: лента начинается с сегодня
+    if (aDate < dkey(addDays(0))) aDate = dkey(addDays(0));
+    var sl = $("aDays").scrollLeft; $("aDays").innerHTML = dayBtns(aDate, false, 0);
     if (!aScrolled) { aScrolled = true; requestAnimationFrame(function () { var t = $("aDays").querySelector('[data-d="' + dkey(addDays(0)) + '"]'); if (t) $("aDays").scrollLeft = t.offsetLeft - $("aDays").offsetLeft - 8; }); }
     else $("aDays").scrollLeft = sl;
     var list = dayBookings(aDate), active = list.filter(function (b) { return b.status !== "cancelled"; });
@@ -1966,7 +1968,8 @@ div.f { display: grid; gap: 8px; }
     $("aGrid").innerHTML = g;
     $("aDayOff").textContent = work ? "Сделать выходным" : "Сделать рабочим";
     renderCerts();
-    var trl = (st.training || []).slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+    var today = dkey(addDays(0));
+    var trl = (st.training || []).filter(function (t) { var d = t.days || [t.date]; return d[d.length - 1] >= today; }).sort(function (a, b) { return a.date < b.date ? -1 : 1; });
     $("aTrain").innerHTML = trl.length ? trl.map(function (t) {
       var c = course(t.course || (t.dir === "ped" ? "ped" : "man")), tdays = t.days || [t.date];
       var stt = t.status === "paid" ? ["Предоплата получена", "ok"] : t.status === "refund" ? ["Отменена · предоплата возвращена", ""] : ["Отменена поздно · предоплата ваша", "bad"];
