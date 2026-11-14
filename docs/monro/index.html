@@ -218,7 +218,8 @@ footer a { color: var(--mute); }
 .opts { display: grid; gap: 8px; }
 .opt { display: flex; justify-content: space-between; align-items: center; gap: 12px; text-align: left; background: var(--bg); border: 1.5px solid var(--line); border-radius: 16px; padding: 14px 16px; }
 .opt small { display: block; color: var(--mute); font-size: 13px; }
-.opt b { white-space: nowrap; }
+.opt > span { min-width: 0; }
+.opt > b { flex: none; white-space: nowrap; }
 .opt[aria-pressed="true"] { border-color: var(--lac); background: color-mix(in srgb, var(--lac) 7%, var(--paper)); }
 .days { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
 .day { flex: none; width: 62px; border: 1.5px solid var(--line); background: var(--bg); border-radius: 16px; padding: 8px 0; display: grid; justify-items: center; gap: 0; }
@@ -824,8 +825,8 @@ div.f { display: grid; gap: 8px; }
     { id: "gel", name: "Маникюр с покрытием гель-лак", price: 1700, min: 90, text: "Маникюр, выравнивание и покрытие гель-лаком в один тон." },
     { id: "str", name: "Маникюр, укрепление гелем и гель-лак", price: 2000, min: 120, text: "Укрепление натуральных ногтей гелем и покрытие гель-лаком." },
     { id: "cor", name: "Коррекция ногтей", price: 2000, min: 120, text: "Опил отросшей длины, ремонт, новое покрытие." },
-    { id: "ext", name: "Наращивание, длина до 3-й", price: 2600, min: 120, text: "Наращивание гелем с покрытием, короткая и средняя длина." },
-    { id: "ext4", name: "Наращивание, длина от 4-й", price: 3000, min: 150, text: "Наращивание гелем с покрытием, длинные ногти." },
+    { id: "ext", name: "Наращивание, длина до\u00a03-й", price: 2600, min: 120, text: "Наращивание гелем с покрытием, короткая и средняя длина." },
+    { id: "ext4", name: "Наращивание, длина от\u00a04-й", price: 3000, min: 150, text: "Наращивание гелем с покрытием, длинные ногти." },
     { id: "nit", name: "Титановая нить", price: 2500, min: 30, text: "Укрепление трещины ногтя титановой нитью, цена за один палец." },
     { id: "ped", name: "Педикюр: только пальчики", price: 1200, min: 60, foot: true, text: "Обработка пальчиков без покрытия." },
     { id: "pedg", name: "Педикюр: пальчики с гель-лаком", price: 2000, min: 90, foot: true, text: "Обработка пальчиков и покрытие гель-лаком." },
@@ -1204,10 +1205,12 @@ div.f { display: grid; gap: 8px; }
     }
     $("eDays").innerHTML = h; $("eDays").scrollLeft = sl;
     var list = edSlots();
-    $("eSlots").innerHTML = list.length ? list.map(function (x) { return '<button class="slot num" data-t="' + x.t + '"' + (x.free ? "" : " disabled") + ' aria-pressed="' + (ed.start === x.t) + '">' + hm(x.t) + '</button>'; }).join("") : '<p class="note">В этот день свободных окон нет.</p>';
+    $("eSlots").innerHTML = list.length ? list.map(function (x) { return '<button class="slot num" data-t="' + x.t + '"' + (x.free ? "" : " disabled") + ' aria-pressed="' + (ed.start === x.t) + '">' + hm(x.t) + '</button>'; }).join("") : '<p class="note" style="grid-column:1/-1">В этот день свободных окон нет.</p>';
   }
   function openEditor(rec) {
     ed = rec ? { id: rec.id, svc: rec.svc, remove: !!rec.remove, date: rec.date, start: rec.start, move: true } : { id: null, svc: "gel", remove: false, date: aDate, start: null, move: false };
+    // если выбранный день выходной или занят — открываем ближайший день со свободным временем
+    if (!freeSlots(ed.date, bmin(ed), ed.id).some(function (x) { return x.free; })) { for (var i = 0; i < 14; i++) { var k = dkey(addDays(i)); if (freeSlots(k, bmin(ed), ed.id).some(function (x) { return x.free; })) { ed.date = k; break; } } }
     $("eTitle").textContent = ed.move ? "Перенести запись" : "Новая запись";
     $("eWho").textContent = ed.move ? rec.name + " · " + svc(rec.svc).name + " · сейчас: " + whenText(rec.date, rec.start) : "Для клиентки, которая записалась по телефону или в мессенджере.";
     $("eSvcL").hidden = ed.move; $("eContact").hidden = ed.move; $("eRmL").hidden = ed.move; $("eRm").checked = false; $("eSvc").value = ed.svc; $("eName").value = ""; $("ePhone").value = ""; $("eErr").hidden = true;
@@ -1290,6 +1293,7 @@ div.f { display: grid; gap: 8px; }
     var h = location.hash.slice(1), v = "home";
     if (VIEWS.indexOf(h) > 0) v = h;
     var changed = v !== curView; curView = v;
+    if (changed && !$("eSheet").hidden) closeEditor();
     VIEWS.forEach(function (k) { var el = $("v-" + k); el.hidden = k !== v; if (k === v && changed) { el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter"); } });
     document.body.classList.toggle("home", v === "home");
     $("mbar").hidden = v === "zapis" || v === "admin" || v === "obuchenie";
