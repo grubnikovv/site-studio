@@ -73,6 +73,13 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 .hdr .brand-t { font-size: 11px; }
 @media (max-width: 700px) { .hdr .brand-t { width: min-content; white-space: normal; font-size: 9px; letter-spacing: .16em; line-height: 1.45; } .hdr .wrap { height: 84px; gap: 10px; } .hdr .brand { height: 68px; } .hdr .logo { gap: 8px; } }
 .drawer .brand-t { white-space: normal; max-width: 200px; font-size: 10.5px; }
+/* вариант 2 (?v2): надпись одной строкой под буквами, как в исходном логотипе */
+.v2 .hdr .logo, .v2 .drawer .logo { flex-direction: column; gap: 3px; }
+.v2 .hdr .brand { height: 72px; }
+.v2 .hdr .brand-t, .v2 .drawer .brand-t { width: auto; max-width: none; white-space: nowrap; font-size: 9px; letter-spacing: .2em; line-height: 1; color: var(--ink); margin-top: -4px; }
+.v2 .drawer .brand { height: 66px; }
+@media (max-width: 700px) { .v2 .hdr .brand { height: 62px; } .v2 .hdr .brand-t { font-size: 7.5px; letter-spacing: .13em; } }
+@media (max-width: 380px) { .v2 .hdr .brand-t { font-size: 7px; letter-spacing: .08em; } .v2 .hdr .wrap { gap: 6px; } }
 .nav { display: flex; gap: 26px; font-size: 14px; font-weight: 600; }
 .nav a { text-decoration: none; color: var(--mute); }
 .nav a:hover { color: var(--ink); }
@@ -834,6 +841,7 @@ div.f { display: grid; gap: 8px; }
 
 
 </symbol></svg>
+<script>if (/[?&]v=?2/.test(location.search)) document.documentElement.classList.add("v2");</script>
 <header class="hdr">
   <div class="wrap">
     <div class="hdr-l">
