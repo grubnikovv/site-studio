@@ -257,7 +257,8 @@ input[type="text"], input[type="tel"], textarea, select { width: 100%; border: 1
 .check input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--lac); flex: none; }
 .sum { display: grid; gap: 6px; background: var(--bg); border-radius: 16px; padding: 14px 16px; font-size: 14px; }
 .sum div { display: flex; justify-content: space-between; gap: 12px; }
-.sum span { color: var(--mute); }
+.sum span { color: var(--mute); min-width: 0; }
+.sum div > b, .sum div > span.num { white-space: nowrap; text-align: right; }
 .sum .big { font-size: 16px; font-weight: 800; }
 .err { color: var(--lac); font-size: 14px; margin: 0; }
 .note { font-size: 13px; color: var(--mute); margin: 0; }
@@ -852,7 +853,7 @@ div.f { display: grid; gap: 8px; }
   "use strict";
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
-  var rub = function (n) { return n.toLocaleString("ru-RU") + " ₽"; };
+  var rub = function (n) { return n.toLocaleString("ru-RU") + "\u00a0₽"; };
 
   // ---------- данные ----------
   var SERVICES = [
@@ -909,7 +910,7 @@ div.f { display: grid; gap: 8px; }
   function hm(m) { return Math.floor(m / 60) + ":" + String(m % 60).padStart(2, "0"); }
   // старые записи демо могли ссылаться на удалённую услугу — подставляем ближайшую
   function svc(id) { return SERVICES.filter(function (s) { return s.id === id; })[0] || SERVICES[1]; }
-  function priceText(s) { return (s.from ? "от " : "") + rub(s.price); }
+  function priceText(s) { return (s.from ? "от\u00a0" : "") + rub(s.price); }
 
   // Примеры занятых окон: одинаковые для каждого дня при любом открытии
   var NAMES = ["Анна", "Ольга", "Екатерина", "Дарья", "Ирина", "Светлана", "Мария", "Юлия"];
