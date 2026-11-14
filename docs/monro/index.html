@@ -475,6 +475,14 @@ div.f { display: grid; gap: 8px; }
 .rmq-i { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--gold); color: #fff; display: grid; place-content: center; font-weight: 800; font-size: 14px; }
 .rmq .seg2 { background: var(--paper); }
 .crange { display: grid; gap: 12px; margin-top: 6px; padding-top: 16px; border-top: 1px solid var(--line); }
+.qchip { position: relative; display: inline-flex; align-items: center; gap: 0; transition: background .3s, color .3s, border-color .3s, box-shadow .3s, padding .3s cubic-bezier(.3,1.5,.5,1); }
+.qchip::before { content: ""; width: 0; height: 14px; opacity: 0; transform: scale(.4) rotate(-20deg); background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.4'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.4'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / contain no-repeat;
+  transition: width .3s, opacity .3s, transform .4s cubic-bezier(.3,1.6,.5,1), margin .3s; }
+.qchip[aria-pressed="true"] { background: var(--lac); color: var(--lac-ink); border-color: var(--lac); box-shadow: 0 6px 18px color-mix(in srgb, var(--lac) 35%, transparent); animation: qpop .45s cubic-bezier(.3,1.6,.5,1); }
+.qchip[aria-pressed="true"]::before { width: 14px; margin-right: 6px; opacity: 1; transform: none; }
+@keyframes qpop { 0% { transform: scale(.92); } 60% { transform: scale(1.06); } 100% { transform: scale(1); } }
 .crange .acts { display: flex; gap: 8px; flex-wrap: wrap; }
 .atabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; background: var(--paper); border: 1.5px solid var(--line); border-radius: 14px; padding: 4px; position: sticky; top: calc(70px + env(safe-area-inset-top, 0px)); z-index: 5; }
 .atabs button { border: 0; background: none; border-radius: 10px; padding: 10px 2px; font-weight: 700; font-size: 13px; color: var(--mute); transition: background .25s, color .25s; }
@@ -903,7 +911,7 @@ div.f { display: grid; gap: 8px; }
       <div class="grid-slots" id="aGrid"></div>
       <div class="crange" id="aRange">
         <b>Закрыть промежуток</b>
-        <div class="chips" id="aQuick"><button type="button" class="chip" data-q="am">До обеда</button><button type="button" class="chip" data-q="pm">После обеда</button><button type="button" class="chip" data-q="day">Весь день</button></div>
+        <div class="chips" id="aQuick"><button type="button" class="chip qchip" data-q="am" aria-pressed="false">До обеда</button><button type="button" class="chip qchip" data-q="pm" aria-pressed="false">После обеда</button><button type="button" class="chip qchip" data-q="day" aria-pressed="false">Весь день</button></div>
         <div class="row2"><label class="f">С<select id="aCFrom"></select></label><label class="f">До<select id="aCTo"></select></label></div>
         <label class="f">Причина, видно только вам<input type="text" id="aCWhy" placeholder="Например: врач, родительское собрание"></label>
         <div class="acts"><button type="button" class="btn sm" id="aCGo">Закрыть это время</button><button type="button" class="btn sm ghost" id="aCOpen">Открыть всё на этот день</button></div>
@@ -1484,7 +1492,7 @@ div.f { display: grid; gap: 8px; }
         (t.status === "paid" ? '<div class="acts"><button data-t="' + t.id + '">Отменить</button></div>' : '') + '</div>';
     }).join("") : '<p class="note">Заявок пока нет. Они появятся, когда ученица оплатит предоплату на странице «Обучение».</p>';
   }
-  $("aDays").addEventListener("click", function (e) { var b = e.target.closest("[data-d]"); if (b) { aDate = b.dataset.d; renderAdmin(); } });
+  $("aDays").addEventListener("click", function (e) { var b = e.target.closest("[data-d]"); if (b) { aDate = b.dataset.d; quickOff(); renderAdmin(); } });
   $("aList").addEventListener("click", function (e) {
     var b = e.target.closest("[data-a]"); if (!b) return;
     var rec = dayBookings(aDate).filter(function (x) { return x.id === b.dataset.id; })[0]; if (!rec) return;
@@ -1504,13 +1512,19 @@ div.f { display: grid; gap: 8px; }
     toast(days >= 7 ? "Отменено. Предоплата вернётся ученице" : "Поздняя отмена. Предоплата остаётся у вас");
   });
   // Быстрые варианты: до обеда, после обеда, весь день
+  function quickOff() { document.querySelectorAll("#aQuick .qchip").forEach(function (x) { x.setAttribute("aria-pressed", "false"); }); }
   $("aQuick").addEventListener("click", function (e) {
     var b = e.target.closest("[data-q]"); if (!b) return;
     var wh = dayHours(aDate), q = b.dataset.q;
+    // повторное нажатие снимает выбор и возвращает время по умолчанию
+    if (b.getAttribute("aria-pressed") === "true") { quickOff(); $("aCFrom").value = wh[0]; $("aCTo").value = Math.min(wh[0] + 60, wh[1]); return; }
     var from = q === "pm" ? Math.max(LUNCH[1], wh[0]) : wh[0], to = q === "am" ? Math.min(LUNCH[0], wh[1]) : wh[1];
     if (to <= from) { toast("В этот день нет такого промежутка"); return; }
     $("aCFrom").value = from; $("aCTo").value = to;
+    quickOff(); b.setAttribute("aria-pressed", "true");
   });
+  // если время поменяли вручную — быстрый вариант больше не выбран
+  $("aCFrom").addEventListener("change", quickOff); $("aCTo").addEventListener("change", quickOff);
   $("aCGo").onclick = function () {
     var from = +$("aCFrom").value, to = +$("aCTo").value, why = $("aCWhy").value.trim().slice(0, 60);
     if (to <= from) { toast("Конец должен быть позже начала"); return; }
@@ -1518,7 +1532,7 @@ div.f { display: grid; gap: 8px; }
     for (var t = from; t < to; t += STEP) st.blocks[aDate][t] = why || 1;
     // записи в этом промежутке не трогаем — подсказываем, кого перенести
     var inside = dayBookings(aDate).filter(function (b) { return b.status === "booked" && b.start < to && b.start + bmin(b) > from; });
-    save(); $("aCWhy").value = ""; renderAdmin();
+    save(); $("aCWhy").value = ""; quickOff(); renderAdmin();
     toast("Закрыто " + hm(from) + "–" + hm(to) + (inside.length ? ". В этом времени есть запись: " + inside.map(function (b) { return b.name + " " + hm(b.start); }).join(", ") + " — перенесите, если нужно" : ""));
   };
   $("aCOpen").onclick = function () { delete st.blocks[aDate]; save(); renderAdmin(); toast("Все окна этого дня открыты"); };
