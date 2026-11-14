@@ -331,7 +331,7 @@ body.lock { overflow: hidden; }
 .dnav a[aria-current="page"]::before { content: ""; position: absolute; left: 0; top: 22px; width: 8px; height: 8px; border-radius: 50%; background: var(--lac); }
 .drawer.on .dnav a, .drawer.on .drawer-foot { animation: din .6s cubic-bezier(.2,.8,.2,1) both; }
 .drawer.on .dnav a:nth-child(1) { animation-delay: .08s; } .drawer.on .dnav a:nth-child(2) { animation-delay: .12s; } .drawer.on .dnav a:nth-child(3) { animation-delay: .16s; } .drawer.on .dnav a:nth-child(4) { animation-delay: .2s; }
-.drawer.on .dnav a:nth-child(5) { animation-delay: .24s; } .drawer.on .dnav a:nth-child(6) { animation-delay: .28s; } .drawer.on .dnav a:nth-child(7) { animation-delay: .32s; } .drawer.on .dnav a:nth-child(8) { animation-delay: .36s; } .drawer.on .drawer-foot { animation-delay: .42s; }
+.drawer.on .dnav a:nth-child(5) { animation-delay: .24s; } .drawer.on .dnav a:nth-child(6) { animation-delay: .28s; } .drawer.on .dnav a:nth-child(7) { animation-delay: .32s; } .drawer.on .dnav a:nth-child(8) { animation-delay: .36s; } .drawer.on .dnav a:nth-child(9) { animation-delay: .4s; } .drawer.on .drawer-foot { animation-delay: .42s; }
 @keyframes din { from { opacity: 0; transform: translateX(-18px); } }
 .drawer-foot { display: grid; gap: 12px; font-size: 14px; color: var(--mute); }
 .drawer-foot p { margin: 0; }
@@ -497,6 +497,21 @@ div.f { display: grid; gap: 8px; }
 .bars div { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; font-size: 13.5px; }
 .bars i { grid-column: 1 / -1; height: 6px; border-radius: 6px; background: var(--blush); overflow: hidden; }
 .bars i::before { content: ""; display: block; height: 100%; width: 100%; background: var(--lac); transform-origin: left; transform: scaleX(var(--w)); border-radius: 6px; }
+.cert-link { text-decoration: none; display: grid; gap: 4px; transition: transform .2s; }
+.cert-link:hover { transform: translateY(-2px); }
+.cert-link b { font-family: var(--display); font-weight: 400; font-size: 22px; }
+.gift { display: grid; grid-template-columns: 1fr 420px; gap: 32px; align-items: start; }
+@media (max-width: 900px) { .gift { grid-template-columns: 1fr; } }
+.gcard { position: relative; aspect-ratio: 1.6; max-width: 100%; border-radius: 24px; padding: clamp(18px, 4vw, 30px); color: #F6ECEF; overflow: hidden; display: grid; grid-template-rows: auto 1fr auto auto; gap: 6px;
+  background: radial-gradient(90% 120% at 100% 0%, #8E1D3D 0%, transparent 60%), linear-gradient(150deg, #3A0F1D, #1E0910 75%); box-shadow: 0 24px 50px rgba(30,9,16,.35); }
+.gcard::after { content: ""; position: absolute; top: -20%; bottom: -20%; width: 30%; left: 0; background: linear-gradient(100deg, transparent, rgba(255,255,255,.18), transparent); transform: translateX(-150%) skewX(-12deg); animation: gshine 5s ease-in-out infinite; }
+@keyframes gshine { 55%, 100% { transform: translateX(450%) skewX(-12deg); } }
+.g-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.g-logo { font-family: var(--display); letter-spacing: .22em; font-size: clamp(18px, 3vw, 24px); }
+.g-k { font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: #E9C98A; font-weight: 700; }
+.g-sum { font-family: var(--display); font-weight: 400; font-size: clamp(40px, 9vw, 64px); align-self: center; color: #fff; }
+.g-to { font-size: 15px; color: #E7D3D8; }
+.g-bot { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; color: #C9AEB6; letter-spacing: .06em; flex-wrap: wrap; }
 .cert { margin-top: 26px; background: linear-gradient(135deg, color-mix(in srgb, var(--gold) 12%, var(--paper)), var(--paper) 60%); border-color: color-mix(in srgb, var(--gold) 35%, var(--line)); }
 .cert-h { display: grid; gap: 6px; }
 /* шторка кабинета */
@@ -540,6 +555,7 @@ div.f { display: grid; gap: 8px; }
     <a href="#obuchenie" data-r="obuchenie">Обучение<small>очно в студии: маникюр и педикюр</small></a>
     <a href="#o-mastere" data-r="o-mastere">О мастере и награды</a>
     <a href="#voprosy" data-r="voprosy">Вопросы и ответы</a>
+    <a href="#sertifikat" data-r="sertifikat">Подарочный сертификат<small>на любую процедуру</small></a>
     <a href="#kontakty" data-r="kontakty">Контакты</a>
   </nav>
   <div class="drawer-foot">
@@ -671,15 +687,7 @@ div.f { display: grid; gap: 8px; }
       <div class="prow"><div><b>Френч</b><small>к любому покрытию</small></div><span class="num">+200 ₽</span></div>
       <div class="prow"><div><b>Снятие чужой работы перед процедурой</b><small>если вы от другого мастера и делаете у Марины новый маникюр, педикюр или наращивание · около 30 минут. Просто снятие без новой работы — 300 ₽</small></div><span class="num">+200 ₽</span></div>
     </div>
-    <form class="card cert" id="cForm" novalidate>
-      <div class="cert-h"><span class="eyebrow">Подарок</span><h3>Подарочный сертификат</h3><p class="note" style="margin:0">На любую процедуру студии. Действует 3 месяца. Оставьте заявку — Марина свяжется, договоритесь об оплате и красивом конверте.</p></div>
-      <div class="chips" id="cSum"><button type="button" class="chip" data-v="2000" aria-pressed="false">2 000 ₽</button><button type="button" class="chip" data-v="3000" aria-pressed="true">3 000 ₽</button><button type="button" class="chip" data-v="5000" aria-pressed="false">5 000 ₽</button></div>
-      <div class="row2"><label class="f">Ваше имя<input type="text" id="cName" autocomplete="given-name"></label><label class="f">Телефон<input type="tel" id="cPhone" inputmode="tel" placeholder="+7"></label></div>
-      <label class="check"><input type="checkbox" id="cPd"><span>Согласна на обработку персональных данных (152-ФЗ).</span></label>
-      <p class="err" id="cErr" hidden></p>
-      <button class="btn" type="submit" id="cGo">Заказать сертификат</button>
-      <div class="tdone" id="cDone" hidden></div>
-    </form>
+    <a class="card cert cert-link" href="#sertifikat"><span class="eyebrow">Подарок</span><b>Подарочный сертификат на любую процедуру</b><span class="note">2 000, 3 000 или 5 000 ₽ · действует 3 месяца →</span></a>
     <div class="rules"><b>Оплата на месте</b><span>Наличными или переводом после процедуры. Если планы изменились, предупредите Марину заранее, лучше за сутки — она перенесёт запись на удобный день.</span></div>
   </div></section>
 </main>
@@ -728,6 +736,31 @@ div.f { display: grid; gap: 8px; }
       <button class="btn" type="submit" id="tPay">Оплатить предоплату</button>
       <div class="tdone" id="tDone" hidden></div>
       <p class="note">Демо: оплата не списывается.</p>
+    </form>
+  </div></section>
+</main>
+
+<!-- ===== СЕРТИФИКАТ ===== -->
+<main id="v-sertifikat" class="page" hidden>
+  <section class="phero"><div class="wrap"><span class="eyebrow">Подарок</span><h1>Подарочный сертификат</h1><p class="lead">На любую процедуру студии «Монро». Оплачивается полностью, сразу после оплаты вы получите сертификат с номером. Действует 3 месяца.</p></div></section>
+  <section class="block tight"><div class="wrap gift">
+    <div class="gcard" id="gCard" aria-label="Так будет выглядеть сертификат">
+      <div class="g-top"><span class="g-logo">МОНРО</span><span class="g-k">подарочный сертификат</span></div>
+      <b class="g-sum num" id="gSum">3 000 ₽</b>
+      <div class="g-to" id="gTo">на любую процедуру студии</div>
+      <div class="g-bot"><span id="gCode">№ будет после оплаты</span><span id="gTill"></span></div>
+    </div>
+    <form class="card" id="cForm" novalidate>
+      <h3>Купить сертификат</h3>
+      <div class="f"><span class="lbl">Номинал</span><div class="chips" id="cSum"><button type="button" class="chip" data-v="2000" aria-pressed="false">2 000 ₽</button><button type="button" class="chip" data-v="3000" aria-pressed="true">3 000 ₽</button><button type="button" class="chip" data-v="5000" aria-pressed="false">5 000 ₽</button></div></div>
+      <label class="f">Кому, по желанию — напишем на сертификате<input type="text" id="cTo" maxlength="30" placeholder="Например: Любимой маме"></label>
+      <div class="row2"><label class="f">Ваше имя<input type="text" id="cName" autocomplete="given-name"></label><label class="f">Телефон<input type="tel" id="cPhone" inputmode="tel" placeholder="+7"></label></div>
+      <label class="check"><input type="checkbox" id="cPd"><span>Согласна на обработку персональных данных (152-ФЗ).</span></label>
+      <p class="err" id="cErr" hidden></p>
+      <button class="btn" type="submit" id="cGo">Оплатить 3 000 ₽</button>
+      <p class="note" style="margin:0">Оплата полностью, картой или по СБП. Сертификат появится здесь сразу после оплаты — сохраните скриншот, Марина также пришлёт его в WhatsApp.</p>
+      <div class="tdone" id="cDone" hidden></div>
+      <p class="demo" style="margin:0">Демо: оплата не списывается.</p>
     </form>
   </div></section>
 </main>
@@ -882,7 +915,7 @@ div.f { display: grid; gap: 8px; }
     </section>
     <section class="atab" data-tab="req" hidden>
       <div class="card"><h3>Заявки на обучение</h3><div class="opts" id="aTrain"></div></div>
-      <div class="card"><h3>Подарочные сертификаты</h3><div class="opts" id="aCerts"></div></div>
+      <div class="card"><h3>Проданные сертификаты</h3><div class="opts" id="aCerts"></div></div>
     </section>
   </div>
 </main>
@@ -1688,26 +1721,51 @@ div.f { display: grid; gap: 8px; }
   $("sPrev").onclick = function () { sMonth--; renderStats(); };
   $("sNext").onclick = function () { if (sMonth < 0) { sMonth++; renderStats(); } };
 
-  // ---------- подарочный сертификат ----------
+  // ---------- подарочный сертификат: оплачивается полностью ----------
   var cSum = 3000;
-  $("cSum").addEventListener("click", function (e) { var b = e.target.closest("[data-v]"); if (!b) return; cSum = Number(b.dataset.v); document.querySelectorAll("#cSum .chip").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); });
+  function certTill() { var d = new Date(); d.setMonth(d.getMonth() + 3); return d; }
+  function renderGift(code) {
+    $("gSum").textContent = rub(cSum);
+    var to = $("cTo").value.trim();
+    $("gTo").textContent = to ? "для: " + to : "на любую процедуру студии";
+    $("gCode").textContent = code ? "№ " + code : "№ будет после оплаты";
+    $("gTill").textContent = "действует до " + certTill().toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" }).replace(/ г\.$/, "");
+    $("cGo").textContent = "Оплатить " + rub(cSum);
+  }
+  $("cSum").addEventListener("click", function (e) { var b = e.target.closest("[data-v]"); if (!b) return; cSum = Number(b.dataset.v); document.querySelectorAll("#cSum .chip").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); renderGift(); });
+  $("cTo").addEventListener("input", function () { renderGift(); });
   $("cForm").addEventListener("submit", function (e) {
     e.preventDefault();
     var name = $("cName").value.trim(), phone = $("cPhone").value.trim();
     var err = !name ? "Укажите имя." : phone.replace(/\D/g, "").length < 10 ? "Укажите телефон полностью." : !$("cPd").checked ? "Отметьте согласие на обработку данных." : "";
     $("cErr").textContent = err; $("cErr").hidden = !err; if (err) return;
-    st.certs = st.certs || []; st.certs.push({ id: "c" + Date.now().toString(36), sum: cSum, name: name, phone: phone, status: "new", created: dkey(new Date()) }); save();
-    $("cDone").innerHTML = "<b>Заявка принята.</b> Марина позвонит или напишет, чтобы договориться об оплате и вручении сертификата на " + rub(cSum) + ".";
-    $("cDone").hidden = false; $("cName").value = ""; $("cPhone").value = ""; $("cPd").checked = false;
+    var btn = $("cGo"); btn.disabled = true; btn.textContent = "Оплата…";
+    setTimeout(function () {
+      // номер сертификата: МН- и 4 знака без похожих букв и цифр
+      var abc = "ABCDEFGHJKMNPQRSTUVWXYZ23456789", code = "МН-";
+      for (var i = 0; i < 4; i++) code += abc[Math.floor(Math.random() * abc.length)];
+      st.certs = st.certs || [];
+      st.certs.push({ id: "c" + Date.now().toString(36), code: code, sum: cSum, to: $("cTo").value.trim(), name: name, phone: phone, status: "paid", created: dkey(new Date()), till: dkey(certTill()) });
+      save(); renderGift(code); btn.disabled = false; btn.textContent = "Оплатить " + rub(cSum);
+      $("cDone").innerHTML = "<b>Оплачено. Сертификат № " + code + "</b> на " + rub(cSum) + " готов. Сохраните скриншот сертификата или покажите номер при записи.";
+      $("cDone").hidden = false; $("cName").value = ""; $("cPhone").value = ""; $("cPd").checked = false;
+      $("gCard").scrollIntoView({ behavior: "smooth", block: "center" });
+      toast("Сертификат оплачен");
+    }, 900);
   });
+  renderGift();
   function renderCerts() {
-    var list = (st.certs || []).slice().reverse();
+    var list = (st.certs || []).slice().reverse(), today = dkey(new Date());
+    var lab = function (c) { return c.status === "used" ? ["Использован", ""] : c.till && c.till < today ? ["Истёк срок", "bad"] : ["Оплачен", "ok"]; };
     $("aCerts").innerHTML = list.length ? list.map(function (c) {
-      return '<div class="bk"><div class="r1"><b class="num">' + rub(c.sum) + '</b><span class="pill ' + (c.status === "done" ? "ok" : "") + '">' + (c.status === "done" ? "Выдан" : c.status === "off" ? "Отменён" : "Новая заявка") + '</span></div><div><b style="font-weight:700">' + esc(c.name) + '</b> · ' + esc(c.phone) + '</div><div class="info">Заявка от ' + shortDate(c.created) + '</div>' +
-        (c.status === "new" ? '<div class="acts"><button type="button" data-cert="' + c.id + '" data-st="done">Оплачен и выдан</button><button type="button" data-cert="' + c.id + '" data-st="off">Отменить</button></div>' : '') + '</div>';
-    }).join("") : '<p class="note">Заявок пока нет. Они появятся, когда кто-то закажет сертификат на странице «Услуги и цены».</p>';
+      var l = lab(c);
+      return '<div class="bk"><div class="r1"><b class="num">' + rub(c.sum) + (c.code ? ' · № ' + esc(c.code) : '') + '</b><span class="pill ' + l[1] + '">' + l[0] + '</span></div>' +
+        '<div><b style="font-weight:700">' + esc(c.name) + '</b> · ' + esc(c.phone) + (c.to ? ' · для: ' + esc(c.to) : '') + '</div>' +
+        '<div class="info">Куплен ' + shortDate(c.created) + (c.till ? ' · действует до ' + shortDate(c.till) : '') + '</div>' +
+        (c.status !== "used" ? '<div class="acts"><button type="button" data-cert="' + c.id + '" data-st="used">Отметить использованным</button></div>' : '') + '</div>';
+    }).join("") : '<p class="note">Покупок пока нет. Они появятся, когда кто-то оплатит сертификат на странице «Подарочный сертификат».</p>';
   }
-  $("aCerts").addEventListener("click", function (e) { var b = e.target.closest("[data-cert]"); if (!b) return; var c = st.certs.filter(function (x) { return x.id === b.dataset.cert; })[0]; c.status = b.dataset.st; save(); renderCerts(); toast(c.status === "done" ? "Сертификат выдан" : "Заявка отменена"); });
+  $("aCerts").addEventListener("click", function (e) { var b = e.target.closest("[data-cert]"); if (!b) return; var c = st.certs.filter(function (x) { return x.id === b.dataset.cert; })[0]; c.status = b.dataset.st; save(); renderCerts(); toast("Сертификат отмечен использованным"); });
 
   // ---------- боковое меню ----------
   var drawer = $("drawer"), scrim = $("scrim"), burger = $("burger"), drawerT;
@@ -1729,8 +1787,8 @@ div.f { display: grid; gap: 8px; }
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeMenu(); });
 
   // ---------- маршруты ----------
-  var ORDER = [["home", "Главная"], ["uslugi", "Услуги и цены"], ["zapis", "Онлайн-запись"], ["raboty", "Портфолио"], ["obuchenie", "Обучение"], ["o-mastere", "О мастере и награды"], ["voprosy", "Вопросы и ответы"], ["kontakty", "Контакты"]];
-  var VIEWS = ["home", "uslugi", "raboty", "obuchenie", "o-mastere", "voprosy", "kontakty", "zapis", "admin"];
+  var ORDER = [["home", "Главная"], ["uslugi", "Услуги и цены"], ["zapis", "Онлайн-запись"], ["raboty", "Портфолио"], ["obuchenie", "Обучение"], ["o-mastere", "О мастере и награды"], ["voprosy", "Вопросы и ответы"], ["sertifikat", "Подарочный сертификат"], ["kontakty", "Контакты"]];
+  var VIEWS = ["home", "uslugi", "raboty", "obuchenie", "o-mastere", "voprosy", "sertifikat", "kontakty", "zapis", "admin"];
   var pendingPick = null, pendingTo = null, curView = null;
   document.addEventListener("click", function (e) {
     var a = e.target.closest("[data-pick]"); if (a) pendingPick = a.dataset.pick;
@@ -1739,6 +1797,7 @@ div.f { display: grid; gap: 8px; }
   function jumpTop() { window.scrollTo({ top: 0, behavior: "instant" }); }
   var TITLES = { home: "Монро — маникюр, педикюр и обучение в Михайловке", uslugi: "Цены на маникюр и педикюр в Михайловке — Монро", raboty: "Работы мастера маникюра — Монро, Михайловка",
     obuchenie: "Обучение маникюру и педикюру в Михайловке — Монро", "o-mastere": "Марина Шевченко, мастер маникюра — Монро", voprosy: "Вопросы и ответы — студия красоты Монро",
+    sertifikat: "Подарочный сертификат на маникюр в Михайловке — Монро",
     kontakty: "Контакты — студия красоты Монро, Михайловка, ул. Обороны, 41", zapis: "Онлайн-запись на маникюр — Монро", admin: "Кабинет мастера — Монро" };
   function route() {
     var h = location.hash.slice(1), v = "home";
