@@ -43,7 +43,7 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { scroll-behavior: smooth; }
-main section[id] { scroll-margin-top: 72px; }
+main section[id] { scroll-margin-top: 86px; }
 body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; -webkit-tap-highlight-color: transparent; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 60; background: var(--bg); }
 button, input, select, textarea { font: inherit; color: inherit; }
@@ -62,10 +62,17 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 
 /* шапка */
 .hdr { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
-.hdr .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; }
-.logo { display: inline-flex; align-items: center; text-decoration: none; color: var(--ink); line-height: 0; }
-.brand { height: 58px; width: auto; aspect-ratio: 232 / 202; color: inherit; --lg-accent: var(--lac); }
-.drawer .brand { height: 64px; }
+.hdr .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 78px; }
+.logo { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
+.brand { height: 50px; width: auto; aspect-ratio: 254 / 224; flex: none; color: inherit; --lg-accent: var(--lac); overflow: visible; }
+.brand-t { font-family: var(--body); font-size: 10px; font-weight: 700; letter-spacing: .24em; line-height: 1.5; text-transform: uppercase; color: var(--mute); white-space: nowrap; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.drawer .brand { height: 56px; }
+/* на телефоне в шапке только знак */
+.hdr .brand { height: 66px; }
+.hdr .brand-t { font-size: 10.5px; }
+@media (max-width: 700px) { .hdr .brand-t { display: none; } .hdr .wrap { height: 70px; } .hdr .brand { height: 60px; } }
+.drawer .brand-t { white-space: normal; max-width: 200px; }
 .nav { display: flex; gap: 26px; font-size: 14px; font-weight: 600; }
 .nav a { text-decoration: none; color: var(--mute); }
 .nav a:hover { color: var(--ink); }
@@ -408,7 +415,7 @@ section.block.tight { padding-block: 32px clamp(56px, 8vw, 96px); }
 .nextpage a:hover .arr { transform: translateX(6px); }
 footer .fcol { display: grid; gap: 6px; }
 footer .fcol .logo { color: var(--ink); }
-footer .brand { height: 84px; }
+footer .brand { height: 60px; }
 footer .fnav { display: flex; gap: 8px 20px; flex-wrap: wrap; align-items: center; }
 footer .fnav a { text-decoration: none; }
 footer .fnav a:hover { color: var(--ink); }
@@ -555,7 +562,7 @@ div.f { display: grid; gap: 8px; }
 @media (max-width: 600px) { .gcard { aspect-ratio: auto; min-height: 210px; } .gcard .g-mark { height: 50px; } }
 @keyframes gshine { 55%, 100% { transform: translateX(450%) skewX(-12deg); } }
 .g-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
-.g-mark { height: clamp(54px, 9vw, 74px); width: auto; aspect-ratio: 232 / 202; color: #F6ECEF; --lg-accent: #F2A0B8; }
+.g-mark { height: clamp(60px, 10vw, 84px); width: auto; aspect-ratio: 254 / 224; color: #F6ECEF; --lg-accent: #E9C98A; overflow: visible; }
 .g-k { font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: #E9C98A; font-weight: 700; }
 .g-sum { font-family: var(--display); font-weight: 400; font-size: clamp(40px, 9vw, 64px); align-self: center; color: #fff; }
 .g-to { font-size: 15px; color: #E7D3D8; display: flex; align-items: center; gap: 8px; }
@@ -585,7 +592,7 @@ div.f { display: grid; gap: 8px; }
 </style>
 <link rel="icon" href="data:,">
 </head><body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="lg" viewBox="94 94 232 202">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
 <defs>
 <g>
 <g id="lg-glyph-0-0">
@@ -654,7 +661,7 @@ div.f { display: grid; gap: 8px; }
 <clipPath id="lg-clip-3">
 <path clip-rule="nonzero" d="M 187.5 50.476562 L 324.324219 187.300781 L 187.5 324.125 L 50.671875 187.300781 Z M 187.5 50.476562 "/>
 </clipPath>
-</defs>
+</defs><symbol id="lg" viewBox="76 76 254 224">
 
 
 <g clip-path="url(#lg-clip-0)">
@@ -768,12 +775,70 @@ div.f { display: grid; gap: 8px; }
 <g fill="currentColor" fill-opacity="1">
 <use xlink:href="#lg-glyph-2-0" x="308.137766" y="235.442108"/>
 </g>
+</symbol><symbol id="lgm" viewBox="76 76 254 224">
+
+
+<g clip-path="url(#lg-clip-0)">
+<g clip-path="url(#lg-clip-1)">
+<g clip-path="url(#lg-clip-2)">
+<g clip-path="url(#lg-clip-3)">
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 119.085938 255.710938 C 81.351562 217.976562 81.351562 156.621094 119.085938 118.886719 C 156.820312 81.152344 218.175781 81.152344 255.910156 118.886719 L 255.179688 119.617188 C 217.847656 82.285156 157.148438 82.285156 119.816406 119.617188 C 82.484375 156.949219 82.484375 217.648438 119.816406 254.980469 C 157.148438 292.3125 217.847656 292.3125 255.179688 254.980469 L 255.910156 255.710938 C 218.175781 293.445312 156.820312 293.445312 119.085938 255.710938 Z M 119.085938 255.710938 "/>
+</g>
+</g>
+</g>
+</g>
+<g style="fill: var(--lg-accent, #9E1F42)" fill-opacity="1">
+<use xlink:href="#lg-glyph-0-0" x="113.244974" y="211.33834"/>
+</g>
+<g style="fill: var(--lg-accent, #9E1F42)" fill-opacity="1">
+<use xlink:href="#lg-glyph-0-1" x="209.524889" y="211.33834"/>
+</g>
+<g style="fill: var(--lg-accent, #9E1F42)" fill-opacity="1">
+<use xlink:href="#lg-glyph-0-2" x="235.361738" y="211.33834"/>
+</g>
+<g fill="currentColor" fill-opacity="1">
+<use xlink:href="#lg-glyph-1-0" x="154.448676" y="186.321754"/>
+</g>
+<g fill="currentColor" fill-opacity="1">
+<use xlink:href="#lg-glyph-1-1" x="201.710463" y="186.321754"/>
+</g>
+<g fill="currentColor" fill-opacity="1">
+<use xlink:href="#lg-glyph-1-2" x="206.046485" y="186.321754"/>
+</g>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </symbol></svg>
 <header class="hdr">
   <div class="wrap">
     <div class="hdr-l">
       <button class="burger" id="burger" aria-label="Открыть меню" aria-expanded="false" aria-controls="drawer"><span></span><span></span></button>
-      <a class="logo" href="#top"><svg class="brand" role="img" aria-label="М.А — академия маникюра и педикюра"><use href="#lg"></use></svg></a>
+      <a class="logo" href="#top"><svg class="brand" aria-hidden="true"><use href="#lgm"></use></svg><span class="brand-t">Академия маникюра и педикюра</span><span class="sr">М.А — академия маникюра и педикюра</span></a>
     </div>
     <a class="btn sm" href="#zapis">Записаться</a>
   </div>
@@ -782,7 +847,7 @@ div.f { display: grid; gap: 8px; }
 <div class="scrim" id="scrim" hidden></div>
 <aside class="drawer" id="drawer" aria-label="Меню сайта" hidden>
   <div class="drawer-top">
-    <span class="logo"><svg class="brand" role="img" aria-label="М.А — академия маникюра и педикюра"><use href="#lg"></use></svg></span>
+    <span class="logo"><svg class="brand" aria-hidden="true"><use href="#lgm"></use></svg><span class="brand-t">Академия маникюра и педикюра</span><span class="sr">М.А — академия маникюра и педикюра</span></span>
     <button class="x" id="drawerClose" aria-label="Закрыть меню"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
   </div>
   <nav class="dnav" id="dnav">
@@ -1191,7 +1256,7 @@ div.f { display: grid; gap: 8px; }
 
 <footer>
   <div class="wrap">
-    <div class="fcol"><span class="logo"><svg class="brand" role="img" aria-label="М.А — академия маникюра и педикюра"><use href="#lg"></use></svg></span><span>Марина Шевченко · Михайловка, ул. Обороны, 41</span></div>
+    <div class="fcol"><span class="logo"><svg class="brand" aria-hidden="true"><use href="#lgm"></use></svg><span class="brand-t">Академия маникюра и педикюра</span><span class="sr">М.А — академия маникюра и педикюра</span></span><span>Марина Шевченко · Михайловка, ул. Обороны, 41</span></div>
     <div class="fnav"><a href="#uslugi">Услуги</a><a href="#obuchenie">Обучение</a><a href="#voprosy">Вопросы</a><a href="#kontakty">Контакты</a><a href="#admin">Вход для мастера</a></div>
   </div>
 </footer>
@@ -2031,7 +2096,7 @@ div.f { display: grid; gap: 8px; }
   var logoImg = null;
   function loadLogo() {
     if (logoImg) return Promise.resolve();
-    var sym = document.getElementById("lg"), svgText = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="94 94 232 202" width="464" height="404" color="#F6ECEF">' + sym.innerHTML.replace(/var\(--lg-accent, #9E1F42\)/g, "#F2A0B8") + '</svg>';
+    var sym = document.getElementById("lg"), defsHtml = sym.parentNode.querySelector("defs").outerHTML.replace(/var\(--lg-accent, #9E1F42\)/g, "#E9C98A"), svgText = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="76 76 254 224" width="508" height="448" color="#F6ECEF">' + defsHtml + sym.innerHTML.replace(/var\(--lg-accent, #9E1F42\)/g, "#E9C98A") + '</svg>';
     return new Promise(function (ok) { var im = new Image(); im.onload = function () { logoImg = im; ok(); }; im.onerror = function () { ok(); }; im.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgText); });
   }
   function certImage(c) {
@@ -2043,7 +2108,7 @@ div.f { display: grid; gap: 8px; }
       var gl = g.createRadialGradient(W, 0, 0, W, 0, W * .8); gl.addColorStop(0, "rgba(142,29,61,.9)"); gl.addColorStop(1, "rgba(142,29,61,0)"); g.fillStyle = gl; g.fillRect(0, 0, W, H);
       var sh = g.createLinearGradient(W * .35, 0, W * .65, H); sh.addColorStop(0, "rgba(255,255,255,0)"); sh.addColorStop(.5, "rgba(255,255,255,.07)"); sh.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = sh; g.fillRect(0, 0, W, H);
       g.textBaseline = "alphabetic"; g.fillStyle = "#F6ECEF";
-      if (logoImg) g.drawImage(logoImg, 70, 40, 200, 200 * 202 / 232);
+      if (logoImg) g.drawImage(logoImg, 62, 34, 220, 220 * 224 / 254);
       g.font = '700 22px Manrope, sans-serif'; g.letterSpacing = "6px"; g.fillStyle = "#E9C98A"; g.textAlign = "right"; g.fillText("ПОДАРОЧНЫЙ СЕРТИФИКАТ", W - 80, 124);
       g.textAlign = "left"; g.letterSpacing = "0px"; g.fillStyle = "#fff"; g.font = '170px "Tenor Sans", serif'; g.fillText(rub(c.sum), 74, 420);
       g.fillStyle = "#E7D3D8"; g.font = '40px Manrope, sans-serif';
