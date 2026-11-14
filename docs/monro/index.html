@@ -237,7 +237,20 @@ footer a { color: var(--mute); }
 .slot.lunch { border-color: color-mix(in srgb, var(--gold) 60%, var(--line)); background: color-mix(in srgb, var(--gold) 16%, var(--bg)); color: var(--gold); }
 .lg-lunch { color: var(--gold); font-weight: 700; }
 .slot.lunch[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: #fff; }
-.ewarn { background: color-mix(in srgb, var(--gold) 16%, var(--paper)); border: 1px solid color-mix(in srgb, var(--gold) 55%, var(--line)); color: var(--ink); border-radius: 14px; padding: 10px 12px; font-size: 14px; font-weight: 600; animation: fadein .3s ease both; }
+.ewarn { position: relative; overflow: hidden; isolation: isolate; background: color-mix(in srgb, var(--gold) 14%, var(--paper)); border: 1px solid color-mix(in srgb, var(--gold) 60%, var(--line)); color: var(--ink); border-radius: 14px; padding: 10px 12px; font-size: 14px; font-weight: 600; animation: fadein .3s ease both; }
+.ewarn::before { content: ""; position: absolute; inset: 0; z-index: -1; background: radial-gradient(120% 140% at 0% 50%, color-mix(in srgb, var(--gold) 45%, transparent), transparent 70%); opacity: .25; animation: warnGlow 1.8s ease-in-out infinite; }
+.ewarn::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 40%; z-index: -1; background: linear-gradient(100deg, transparent, color-mix(in srgb, var(--gold) 35%, transparent), transparent); transform: translateX(-120%); animation: warnShine 2.6s ease-in-out infinite; }
+@keyframes warnGlow { 50% { opacity: 1; } }
+@keyframes warnShine { 60%, 100% { transform: translateX(320%); } }
+.ectx { display: grid; gap: 6px; font-size: 13.5px; }
+.ectx div { display: flex; gap: 8px; align-items: baseline; }
+.ectx i { font-style: normal; flex: none; width: 52px; color: var(--mute); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.ectx b { font-weight: 700; }
+.ectx .tight { color: var(--lac); font-weight: 700; }
+.gap-row { display: flex; justify-content: space-between; gap: 10px; padding: 9px 14px; border-radius: 14px; border: 1.5px dashed var(--line); font-size: 13.5px; color: var(--mute); }
+.gap-row b { color: var(--ok); font-weight: 700; }
+.gap-row.lunch { border-color: color-mix(in srgb, var(--gold) 50%, var(--line)); }
+.gap-row.lunch b { color: var(--gold); }
 .erange { font-size: 14px; color: var(--lac); min-height: 1em; }
 .slot:disabled { text-decoration: line-through; opacity: .35; cursor: default; }
 label.f { display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--mute); }
@@ -817,7 +830,7 @@ div.f { display: grid; gap: 8px; }
     <p class="note" id="eWho"></p>
     <label class="f" id="eSvcL">Услуга<select id="eSvc"></select></label>
     <div class="f"><span class="lbl">День</span><div class="days" id="eDays"></div></div>
-    <div class="f"><span class="lbl">Время</span><div class="slots" id="eSlots"></div><b class="erange" id="eRange"></b><div class="ewarn" id="eWarn" role="status" hidden></div><span class="note">Зачёркнуто — процедура не поместится: залезет на другую клиентку. Пунктиром — время вне обычного графика. <span class="lg-lunch">Золотым — время обеда.</span> Вам записать можно, клиентки онлайн это время не видят.</span></div>
+    <div class="f"><span class="lbl">Время</span><div class="slots" id="eSlots"></div><b class="erange" id="eRange"></b><div class="ectx" id="eCtx"></div><div class="ewarn" id="eWarn" role="status" hidden></div><span class="note">Зачёркнуто — процедура не поместится: залезет на другую клиентку. Пунктиром — время вне обычного графика. <span class="lg-lunch">Золотым — время обеда.</span> Вам записать можно, клиентки онлайн это время не видят.</span></div>
     <label class="check" id="eRmL"><input type="checkbox" id="eRm"><span>Снятие чужой работы: +200 ₽, +30 минут</span></label>
     <div class="row2" id="eContact"><label class="f">Имя клиентки<input type="text" id="eName"></label><label class="f">Телефон<input type="tel" id="ePhone" inputmode="tel" placeholder="+7"></label></div>
     <p class="err" id="eErr" hidden></p>
@@ -1229,13 +1242,47 @@ div.f { display: grid; gap: 8px; }
     for (var i = 0; i < DAYS; i++) { var r = dayBookings(dkey(addDays(i))).filter(function (x) { return x.id === id; })[0]; if (r) return r; }
     return st.bookings.filter(function (x) { return x.id === id; })[0];
   }
+  // Занятые отрезки дня: записи (кроме отменённых) и обед в рабочий день
+  function busyParts(k, ignore) {
+    var parts = dayBookings(k).filter(function (b) { return b.id !== ignore && b.status !== "cancelled"; })
+      .map(function (b) { return { s: b.start, e: b.start + bmin(b), what: esc(b.name) + ", " + svc(b.svc).name.toLowerCase() }; });
+    if (isWorkday(k)) parts.push({ s: LUNCH[0], e: LUNCH[1], what: "обед", lunch: true });
+    return parts.sort(function (a, b) { return a.s - b.s; });
+  }
+  function gapText(m) { return m >= 60 ? dur(m) : m + " мин"; }
+  // Что стоит до и после выбранного времени: соседняя запись или свободное окно
+  function neighbours(k, start, end, ignore) {
+    var parts = busyParts(k, ignore), wh = isWorkday(k) ? dayHours(k) : [start, end];
+    var prev = parts.filter(function (p) { return p.e <= start; }).pop(), next = parts.filter(function (p) { return p.s >= end; })[0];
+    var before = prev ? (prev.lunch ? "обед до " + hm(prev.e) : "<b>" + prev.what + "</b> до " + hm(prev.e)) : (start > wh[0] ? "свободно с " + hm(wh[0]) : "начало дня");
+    if (prev && start - prev.e > 0) before += " · окно " + gapText(start - prev.e);
+    if (prev && start === prev.e) before += ' · <span class="tight">впритык</span>';
+    var after = next ? (next.lunch ? "обед " + hm(next.s) + "–" + hm(next.e) : "в " + hm(next.s) + " <b>" + next.what + "</b> (до " + hm(next.e) + ")") : (end < wh[1] ? "свободно до " + hm(wh[1]) : "конец дня");
+    if (next && next.s === end) after += ' · <span class="tight">впритык</span>';
+    else if (next) after += " · окно " + gapText(next.s - end);
+    return '<div><i>До</i><span>' + before + '</span></div><div><i>После</i><span>' + after + '</span></div>';
+  }
   function renderAdmin() {
     var sl = $("aDays").scrollLeft; $("aDays").innerHTML = dayBtns(aDate, false); $("aDays").scrollLeft = sl;
     var list = dayBookings(aDate), active = list.filter(function (b) { return b.status !== "cancelled"; });
     var sumDay = active.filter(function (b) { return b.status !== "noshow"; }).reduce(function (s, b) { return s + (b.price || svc(b.svc).price); }, 0);
     var free = freeSlots(aDate, 60).filter(function (x) { return x.free; }).length;
     $("aKpi").innerHTML = '<div class="kpi"><small>Записей</small><b class="num">' + active.length + '</b></div><div class="kpi"><small>Выручка дня</small><b class="num">' + rub(sumDay) + '</b></div><div class="kpi"><small>Свободных часов</small><b class="num">' + free + '</b></div>';
-    $("aList").innerHTML = list.length ? list.map(function (b) {
+    var rows = list.map(function (b) { return { t: b.start, b: b }; });
+    if (isWorkday(aDate)) {
+      var wh = dayHours(aDate), cur = wh[0], parts = busyParts(aDate);
+      parts.forEach(function (p) {
+        if (p.s > cur && p.s <= wh[1]) rows.push({ t: cur, gap: [cur, Math.min(p.s, wh[1])] });
+        if (p.lunch) rows.push({ t: p.s, lunch: true });
+        cur = Math.max(cur, p.e);
+      });
+      if (cur < wh[1]) rows.push({ t: cur, gap: [cur, wh[1]] });
+    }
+    rows.sort(function (a, b) { return a.t - b.t || (a.b ? 1 : -1); });
+    $("aList").innerHTML = list.length ? rows.map(function (r) {
+      if (r.gap) return '<div class="gap-row"><span>Свободно ' + hm(r.gap[0]) + '–' + hm(r.gap[1]) + '</span><b>' + gapText(r.gap[1] - r.gap[0]) + '</b></div>';
+      if (r.lunch) return '<div class="gap-row lunch"><span>Обед ' + hm(LUNCH[0]) + '–' + hm(LUNCH[1]) + '</span><b>обед</b></div>';
+      var b = r.b;
       var s = svc(b.svc), t = statusOf(b);
       return '<div class="bk' + (b.id === flashId ? " moved" : "") + '"><div class="r1"><b class="num">' + hm(b.start) + '–' + hm(b.start + bmin(b)) + '</b><span class="pill ' + t[1] + '">' + t[0] + '</span></div>' +
         '<div><b style="font-weight:700">' + esc(b.name) + '</b> · ' + esc(b.phone) + (b.example ? ' <span class="pill">пример</span>' : '') + '</div>' +
@@ -1324,6 +1371,7 @@ div.f { display: grid; gap: 8px; }
     $("eDays").innerHTML = h; $("eDays").scrollLeft = sl;
     // показываем, какое время займёт процедура целиком, чтобы было видно, что она поместится
     $("eRange").textContent = ed.start != null ? "Займёт: " + hm(ed.start) + "–" + hm(ed.start + bmin(ed)) + " (" + dur(bmin(ed)) + ")" : "";
+    $("eCtx").innerHTML = ed.start != null ? neighbours(ed.date, ed.start, ed.start + bmin(ed), ed.id) : "";
     // предупреждения: процедура попадает на обед или выходит за рабочие часы дня
     var warn = [];
     if (ed.start != null) {
