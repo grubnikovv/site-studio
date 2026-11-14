@@ -498,6 +498,9 @@ footer .fnav a:hover { color: var(--ink); }
 .mform input, .mform select { padding: 10px 12px; font-size: 15px; border-radius: 12px; }
 @media (max-width: 560px) { .mform { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .mform select { grid-column: 1 / -1; } }
 .mbase { display: grid; gap: 8px; }
+.mtime { display: grid; grid-template-columns: minmax(0, 1fr) 170px; align-items: center; gap: 10px; font-size: 13px; color: var(--mute); }
+.mtime select { padding: 9px 12px; font-size: 15px; border-radius: 12px; }
+@media (max-width: 420px) { .mtime { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
 .mbase .bk { gap: 4px; }
 .tcourse { background: var(--paper); border: 1px solid var(--line); border-radius: 22px; padding: 0 clamp(18px, 3vw, 26px); min-width: 0; transition: border-color .25s; }
 .tcourse[open] { border-color: color-mix(in srgb, var(--lac) 35%, var(--line)); }
@@ -1036,7 +1039,7 @@ div.f { display: grid; gap: 8px; }
 
 <!-- ===== УСЛУГИ ===== -->
 <main id="v-uslugi" class="page" hidden>
-  <section class="mdl" id="mdlBox" hidden><div class="wrap"><div class="mdl-card"><span class="mdl-k"><i></i>Ищем моделей</span><h2>Бесплатная процедура на обучении</h2><p>Ученица работает под контролем Марины. Процедура бесплатная, займёт около 5 часов. Нужна одна модель на каждый день. Обучение идёт с 10:00 до 17:00 — точное время вашей процедуры Марина скажет по телефону после записи.</p><div class="mdl-list" id="mdlList"></div><button type="button" class="btn sm ghost" id="mdlMore" hidden>Показать ещё</button></div></div></section>
+  <section class="mdl" id="mdlBox" hidden><div class="wrap"><div class="mdl-card"><span class="mdl-k"><i></i>Ищем моделей</span><h2>Бесплатная процедура на обучении</h2><p>Ученица работает под контролем Марины. Процедура бесплатная, займёт около 5 часов. Нужна одна модель на каждый день. Обучение идёт с 10:00 до 17:00. Если время не указано, Марина скажет его по телефону после записи.</p><div class="mdl-list" id="mdlList"></div><button type="button" class="btn sm ghost" id="mdlMore" hidden>Показать ещё</button></div></div></section>
   <section class="phero"><div class="wrap"><span class="eyebrow">Услуги и цены</span><h1>Маникюр, педикюр и наращивание</h1><p class="lead">В стоимость входят обработка, форма и покрытие. Инструменты проходят стерилизацию в сухожаре, крафт-пакет вскрывается при вас.</p></div></section>
   <section class="block tight"><div class="wrap">
     <h3 class="pgrp"><span>Руки</span><small id="nHands"></small></h3><div class="plist" id="pHands"></div>
@@ -1824,9 +1827,10 @@ div.f { display: grid; gap: 8px; }
     $("mdlMore").textContent = "Показать ещё " + (list.length - 3) + " " + (list.length - 3 === 1 ? "дату" : list.length - 3 < 5 ? "даты" : "дат");
     $("mdlList").innerHTML = list.map(function (m) {
       var d = new Date(m.k + "T12:00"), what = MODEL_SVC[m.t.course] || MODEL_SVC.man;
-      var text = "Здравствуйте! Хочу быть моделью на обучении " + d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + " (" + what.toLowerCase() + "). Подскажите, во сколько прийти?";
+      var at = (st.modelTimes || {})[m.k];
+      var text = "Здравствуйте! Хочу быть моделью на обучении " + d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + (at ? " к " + hm(at) + " (" + what.toLowerCase() + ")." : " (" + what.toLowerCase() + "). Подскажите, во сколько прийти?");
       return '<div class="mdl-row"><div class="mdl-i"><div class="mdl-d"><b>' + d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + '</b><small>' + d.toLocaleDateString("ru-RU", { weekday: "long" }) + '</small></div>' +
-        '<div class="mdl-w"><b>' + what + '<span class="mdl-free">бесплатно</span></b><small>с 10:00 до 17:00 · время уточнит Марина</small></div></div>' +
+        '<div class="mdl-w"><b>' + what + '<span class="mdl-free">бесплатно</span></b><small>' + (at ? "прийти к " + hm(at) + " · около " + MODEL.hours + " ч" : "с 10:00 до 17:00 · время уточнит Марина") + '</small></div></div>' +
         '<a class="btn sm" href="https://wa.me/79954284788?text=' + encodeURIComponent(text) + '" target="_blank" rel="noopener">Записаться<span> моделью</span></a></div>';
     }).join("");
   }
@@ -1980,16 +1984,18 @@ div.f { display: grid; gap: 8px; }
     if (mEdit === k) {
       var base = modelBase();
       return h + '<datalist id="mList">' + base.map(function (x) { return '<option value="' + esc(x.name) + '">' + esc(x.phone) + '</option>'; }).join("") + '</datalist>' +
-        '<div class="mform"><input type="text" id="mName" placeholder="Имя модели" list="mList" value="' + esc(m ? m.name : "") + '" autocomplete="off"><input type="tel" id="mPhone" placeholder="+7" inputmode="tel" value="' + esc(m ? m.phone : "") + '"><select id="mTime">' + timeOpts(m ? m.time : modelTime(i)) + '</select></div>' +
+        '<div class="mform"><input type="text" id="mName" placeholder="Имя модели" list="mList" value="' + esc(m ? m.name : "") + '" autocomplete="off"><input type="tel" id="mPhone" placeholder="+7" inputmode="tel" value="' + esc(m ? m.phone : "") + '"><select id="mTime">' + timeOpts(m ? m.time : ((st.modelTimes || {})[k] || modelTime(i))) + '</select></div>' +
         '<div class="acts"><button data-ms="' + k + '">Сохранить</button><button data-mc="1">Отмена</button></div></div>';
     }
     if (m) return h + '<div class="mday-who"><b>' + esc(m.name) + '</b> · <a href="tel:+' + digits(m.phone) + '">' + esc(m.phone) + '</a> · к ' + hm(m.time) + '</div><div class="acts"><button data-me="' + k + '">Изменить</button><button data-mr="' + k + '">Убрать</button></div></div>';
-    return h + '<div class="info">Висит в объявлении «Ищем моделей» на сайте.</div><div class="acts"><button data-me="' + k + '">Записать модель</button></div></div>';
+    var at = (st.modelTimes || {})[k], o = '<option value="">с 10 до 17, уточню</option>';
+    for (var mm = TRAIN.from; mm < TRAIN.to; mm += STEP) o += '<option value="' + mm + '"' + (mm === at ? " selected" : "") + '>к ' + hm(mm) + '</option>';
+    return h + '<label class="mtime"><span>Время для модели в объявлении</span><select data-mt="' + k + '">' + o + '</select></label><div class="acts"><button data-me="' + k + '">Записать модель</button></div></div>';
   }
   function renderModelBase() {
     var base = modelBase(), need = modelNeeds()[0];
     $("aModels").innerHTML = base.length ? base.map(function (m) {
-      var ph = digits(m.phone), offer = need ? "Здравствуйте, " + m.name.replace(/ \(пример\)$/, "") + "! " + new Date(need.k + "T12:00").toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + " на обучении нужна модель: " + (MODEL_SVC[need.t.course] || "").toLowerCase() + ", бесплатно, около 5 часов. Сможете прийти?" : "";
+      var ph = digits(m.phone), offer = need ? "Здравствуйте, " + m.name.replace(/ \(пример\)$/, "") + "! " + new Date(need.k + "T12:00").toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + " на обучении нужна модель: " + (MODEL_SVC[need.t.course] || "").toLowerCase() + ", бесплатно, около 5 часов" + ((st.modelTimes || {})[need.k] ? ", прийти к " + hm(st.modelTimes[need.k]) : "") + ". Сможете прийти?" : "";
       return '<div class="bk"><div class="r1"><b>' + esc(m.name) + '</b><span class="pill">' + (m.days.length ? "была " + m.days.length + " " + (m.days.length === 1 ? "раз" : m.days.length < 5 ? "раза" : "раз") : "ещё не была") + '</span></div>' +
         '<div class="info">' + esc(m.phone) + (m.days.length ? ' · ' + m.days.map(function (k) { return new Date(k + "T12:00").toLocaleDateString("ru-RU", { day: "numeric", month: "short" }); }).join(", ") : '') + '</div>' +
         (ph.length === 11 ? '<div class="acts"><a class="btn sm ghost" href="tel:+' + ph + '">Позвонить</a>' + (offer ? '<a class="btn sm ghost" target="_blank" rel="noopener" href="https://wa.me/' + ph + '?text=' + encodeURIComponent(offer) + '">Предложить ' + new Date(need.k + "T12:00").toLocaleDateString("ru-RU", { day: "numeric", month: "short" }) + '</a>' : '') + '</div>' : '') + '</div>';
@@ -2018,6 +2024,7 @@ div.f { display: grid; gap: 8px; }
       if (digits(ph).length !== 11) { toast("Впишите телефон модели полностью"); return; }
       st.models = st.models || {}; st.modelBase = st.modelBase || [];
       st.models[ms.dataset.ms] = { name: nm, phone: ph, time: Number($("mTime").value) };
+      st.modelTimes = st.modelTimes || {}; st.modelTimes[ms.dataset.ms] = Number($("mTime").value);
       if (!st.modelBase.some(function (x) { return digits(x.phone) === digits(ph); })) st.modelBase.push({ name: nm, phone: ph });
       mEdit = null; save(); renderAdmin(); renderModels();
       toast("Модель записана, день убран из объявления на сайте"); return;
@@ -2028,6 +2035,13 @@ div.f { display: grid; gap: 8px; }
     var days = (new Date(t.date + "T10:00").getTime() - Date.now()) / 864e5;
     t.status = days >= 7 ? "refund" : "late"; save(); renderAdmin(); renderTrain(); renderTrainBand(); renderModels();
     toast(days >= 7 ? "Отменено. Предоплата вернётся ученице" : "Поздняя отмена. Предоплата остаётся у вас");
+  });
+  $("aTrain").addEventListener("change", function (e) {
+    var sel = e.target.closest("[data-mt]"); if (!sel) return;
+    st.modelTimes = st.modelTimes || {};
+    if (sel.value) st.modelTimes[sel.dataset.mt] = Number(sel.value); else delete st.modelTimes[sel.dataset.mt];
+    save(); renderModels(); renderModelBase();
+    toast(sel.value ? "В объявлении на сайте: прийти к " + hm(Number(sel.value)) : "В объявлении: с 10 до 17, время уточните по телефону");
   });
   $("aTrain").addEventListener("input", function (e) {
     if (e.target.id !== "mName") return;
