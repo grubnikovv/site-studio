@@ -474,6 +474,8 @@ div.f { display: grid; gap: 8px; }
 .rmq-h p { margin: 4px 0 0; font-size: 14px; color: var(--mute); }
 .rmq-i { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--gold); color: #fff; display: grid; place-content: center; font-weight: 800; font-size: 14px; }
 .rmq .seg2 { background: var(--paper); }
+.crange { display: grid; gap: 12px; margin-top: 6px; padding-top: 16px; border-top: 1px solid var(--line); }
+.crange .acts { display: flex; gap: 8px; flex-wrap: wrap; }
 .atabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; background: var(--paper); border: 1.5px solid var(--line); border-radius: 14px; padding: 4px; position: sticky; top: calc(70px + env(safe-area-inset-top, 0px)); z-index: 5; }
 .atabs button { border: 0; background: none; border-radius: 10px; padding: 10px 2px; font-weight: 700; font-size: 13px; color: var(--mute); transition: background .25s, color .25s; }
 .atabs button[aria-pressed="true"] { background: var(--lac); color: var(--lac-ink); }
@@ -866,6 +868,13 @@ div.f { display: grid; gap: 8px; }
       <div class="row2" id="aHours"><label class="f">Начало<select id="aFrom"></select></label><label class="f">Конец<select id="aTo"></select></label></div>
       <p class="note" id="aHoursNote">Клиентки записываются онлайн только в эти часы. Сами вы можете записать клиентку на любое время и в выходной через «+ Добавить запись». Нажмите на окно ниже, чтобы закрыть его для онлайн-записи.</p>
       <div class="grid-slots" id="aGrid"></div>
+      <div class="crange" id="aRange">
+        <b>Закрыть промежуток</b>
+        <div class="chips" id="aQuick"><button type="button" class="chip" data-q="am">До обеда</button><button type="button" class="chip" data-q="pm">После обеда</button><button type="button" class="chip" data-q="day">Весь день</button></div>
+        <div class="row2"><label class="f">С<select id="aCFrom"></select></label><label class="f">До<select id="aCTo"></select></label></div>
+        <label class="f">Причина, видно только вам<input type="text" id="aCWhy" placeholder="Например: врач, родительское собрание"></label>
+        <div class="acts"><button type="button" class="btn sm" id="aCGo">Закрыть это время</button><button type="button" class="btn sm ghost" id="aCOpen">Открыть всё на этот день</button></div>
+      </div>
     </div>
     </section>
     <section class="atab" data-tab="clients" hidden>
@@ -1355,7 +1364,8 @@ div.f { display: grid; gap: 8px; }
     Object.keys(st.blocks[k] || {}).map(Number).sort(function (a, b) { return a - b; }).forEach(function (m) {
       if (m < wh[0] || m >= wh[1] || hit(m, m + STEP) || (lunch && m >= lunch[0] && m < lunch[1])) return;
       var last = blocks[blocks.length - 1];
-      if (last && last[1] === m) last[1] = m + STEP; else blocks.push([m, m + STEP]);
+      var why = typeof st.blocks[k][m] === "string" ? st.blocks[k][m] : "";
+      if (last && last[1] === m && last[2] === why) last[1] = m + STEP; else blocks.push([m, m + STEP, why]);
     });
     var busy = act.concat(lunch ? [lunch] : [], blocks).sort(function (a, b) { return a[0] - b[0]; });
     var gaps = [], cur = wh[0];
@@ -1395,7 +1405,7 @@ div.f { display: grid; gap: 8px; }
     rows.sort(function (a, b) { return a.t - b.t || (a.b ? 1 : -1); });
     $("aList").innerHTML = list.length ? rows.map(function (r) {
       if (r.gap) return '<div class="gap-row"><span>Свободно ' + hm(r.gap[0]) + '–' + hm(r.gap[1]) + '</span><b>' + gapText(r.gap[1] - r.gap[0]) + '</b></div>';
-      if (r.block) return '<div class="gap-row block"><span>Закрыто для онлайн-записи ' + hm(r.block[0]) + '–' + hm(r.block[1]) + '</span><b>' + gapText(r.block[1] - r.block[0]) + '</b></div>';
+      if (r.block) return '<div class="gap-row block"><span>Закрыто ' + hm(r.block[0]) + '–' + hm(r.block[1]) + (r.block[2] ? ' · ' + esc(r.block[2]) : ' для онлайн-записи') + '</span><b>' + gapText(r.block[1] - r.block[0]) + '</b></div>';
       if (r.lunch) return '<div class="gap-row lunch"><span>Обед ' + hm(LUNCH[0]) + '–' + hm(LUNCH[1]) + '</span><b>обед</b></div>';
       var b = r.b;
       var s = svc(b.svc), t = statusOf(b);
@@ -1410,7 +1420,7 @@ div.f { display: grid; gap: 8px; }
             : '<div class="acts"><button data-a="restore" data-id="' + b.id + '">Вернуть в «Записана»</button></div>') + '</div>';
     }).join("") : '<p class="note">На этот день записей нет. Нажмите «+ Добавить запись», если записали клиентку по телефону.</p>' + rows.map(function (r) {
       return r.gap ? '<div class="gap-row"><span>Свободно ' + hm(r.gap[0]) + '–' + hm(r.gap[1]) + '</span><b>' + gapText(r.gap[1] - r.gap[0]) + '</b></div>'
-        : r.block ? '<div class="gap-row block"><span>Закрыто для онлайн-записи ' + hm(r.block[0]) + '–' + hm(r.block[1]) + '</span><b>' + gapText(r.block[1] - r.block[0]) + '</b></div>'
+        : r.block ? '<div class="gap-row block"><span>Закрыто ' + hm(r.block[0]) + '–' + hm(r.block[1]) + (r.block[2] ? ' · ' + esc(r.block[2]) : ' для онлайн-записи') + '</span><b>' + gapText(r.block[1] - r.block[0]) + '</b></div>'
         : r.lunch ? '<div class="gap-row lunch"><span>Обед ' + hm(LUNCH[0]) + '–' + hm(LUNCH[1]) + '</span><b>обед</b></div>' : '';
     }).join("");
     flashId = null;
@@ -1418,7 +1428,12 @@ div.f { display: grid; gap: 8px; }
     var g = "", wh = dayHours(aDate), work = isWorkday(aDate), opt = "";
     for (var m = EARLY; m <= LATE; m += STEP) opt += '<option value="' + m + '">' + hm(m) + '</option>';
     $("aFrom").innerHTML = opt; $("aTo").innerHTML = opt; $("aFrom").value = wh[0]; $("aTo").value = wh[1];
-    $("aHours").hidden = !work; $("aGrid").hidden = !work;
+    $("aHours").hidden = !work; $("aGrid").hidden = !work; $("aRange").hidden = !work;
+    var ropt = "", rf = $("aCFrom").value, rt = $("aCTo").value;
+    for (var mm = wh[0]; mm <= wh[1]; mm += STEP) ropt += '<option value="' + mm + '">' + hm(mm) + '</option>';
+    $("aCFrom").innerHTML = ropt; $("aCTo").innerHTML = ropt;
+    $("aCFrom").value = rf && +rf >= wh[0] && +rf < wh[1] ? rf : wh[0];
+    $("aCTo").value = rt && +rt > +$("aCFrom").value && +rt <= wh[1] ? rt : Math.min(+$("aCFrom").value + 60, wh[1]);
     $("aHoursNote").textContent = work ? "Клиентки записываются онлайн только в эти часы. Сами вы можете записать клиентку на любое время и в выходной через «+ Добавить запись». Нажмите на окно ниже, чтобы закрыть его для онлайн-записи."
       : "Выходной: онлайн-запись закрыта. Записать клиентку вручную можно через «+ Добавить запись», или откройте день для онлайн-записи кнопкой выше.";
     for (var t = wh[0]; t < wh[1]; t += STEP) {
@@ -1455,6 +1470,25 @@ div.f { display: grid; gap: 8px; }
     t.status = days >= 7 ? "refund" : "late"; save(); renderAdmin(); renderTrain(); renderTrainBand();
     toast(days >= 7 ? "Отменено. Предоплата вернётся ученице" : "Поздняя отмена. Предоплата остаётся у вас");
   });
+  // Быстрые варианты: до обеда, после обеда, весь день
+  $("aQuick").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-q]"); if (!b) return;
+    var wh = dayHours(aDate), q = b.dataset.q;
+    var from = q === "pm" ? Math.max(LUNCH[1], wh[0]) : wh[0], to = q === "am" ? Math.min(LUNCH[0], wh[1]) : wh[1];
+    if (to <= from) { toast("В этот день нет такого промежутка"); return; }
+    $("aCFrom").value = from; $("aCTo").value = to;
+  });
+  $("aCGo").onclick = function () {
+    var from = +$("aCFrom").value, to = +$("aCTo").value, why = $("aCWhy").value.trim().slice(0, 60);
+    if (to <= from) { toast("Конец должен быть позже начала"); return; }
+    st.blocks[aDate] = st.blocks[aDate] || {};
+    for (var t = from; t < to; t += STEP) st.blocks[aDate][t] = why || 1;
+    // записи в этом промежутке не трогаем — подсказываем, кого перенести
+    var inside = dayBookings(aDate).filter(function (b) { return b.status === "booked" && b.start < to && b.start + bmin(b) > from; });
+    save(); $("aCWhy").value = ""; renderAdmin();
+    toast("Закрыто " + hm(from) + "–" + hm(to) + (inside.length ? ". В этом времени есть запись: " + inside.map(function (b) { return b.name + " " + hm(b.start); }).join(", ") + " — перенесите, если нужно" : ""));
+  };
+  $("aCOpen").onclick = function () { delete st.blocks[aDate]; save(); renderAdmin(); toast("Все окна этого дня открыты"); };
   $("aGrid").addEventListener("click", function (e) {
     var b = e.target.closest("[data-g]"); if (!b || b.disabled) return;
     var t = b.dataset.g; st.blocks[aDate] = st.blocks[aDate] || {};
