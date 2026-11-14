@@ -488,6 +488,16 @@ footer .fnav a:hover { color: var(--ink); }
 .prog b { color: var(--ink); font-weight: 700; }
 .courses3 { display: grid; gap: 18px; margin-bottom: 30px; }
 .courses3 { gap: 12px; }
+.box.mapbox { padding: 0; overflow: hidden; display: grid; align-content: start; }
+.map { position: relative; height: 320px; background: repeating-linear-gradient(135deg, var(--blush) 0 14px, var(--paper) 14px 28px); }
+.map iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.way { padding: 18px 20px 20px; display: grid; gap: 12px; }
+.way > b { font-size: 16px; }
+.way-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: 14px; }
+.way-list li { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 10px; }
+.way-list span { color: var(--mute); }
+.way-list i { font-style: normal; }
+.way-acts { display: flex; flex-wrap: wrap; gap: 8px; }
 .legal { max-width: 760px; display: grid; gap: 14px; padding-bottom: 20px; }
 .legal h2 { font-size: clamp(20px, 2.6vw, 24px); margin: 18px 0 0; }
 .legal p, .legal li { margin: 0; color: var(--ink); line-height: 1.6; font-size: 15.5px; }
@@ -1291,9 +1301,18 @@ div.f { display: grid; gap: 8px; }
       </dl>
       <a class="btn glow" href="#zapis" style="justify-self:start">Записаться онлайн</a>
     </div>
-    <div class="box ph" style="aspect-ratio:auto;min-height:240px" role="img" aria-label="Место для карты">
-      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>
-      Здесь будет карта с проездом
+    <div class="box mapbox">
+      <div class="map"><iframe title="Карта: Михайловка, ул. Обороны, 41" src="https://yandex.ru/map-widget/v1/?mode=search&amp;text=%D0%92%D0%BE%D0%BB%D0%B3%D0%BE%D0%B3%D1%80%D0%B0%D0%B4%D1%81%D0%BA%D0%B0%D1%8F%20%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C%2C%20%D0%9C%D0%B8%D1%85%D0%B0%D0%B9%D0%BB%D0%BE%D0%B2%D0%BA%D0%B0%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%9E%D0%B1%D0%BE%D1%80%D0%BE%D0%BD%D1%8B%2C%2041&amp;z=17" loading="lazy" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div>
+      <div class="way">
+        <b>Как пройти</b>
+        <ol class="way-list">
+          <li><span>Вход</span><i class="fill">[с улицы или со двора, какая дверь]</i></li>
+          <li><span>Этаж</span><i class="fill">[этаж, кабинет или квартира, домофон]</i></li>
+          <li><span>Ориентир</span><i class="fill">[что рядом: магазин, остановка]</i></li>
+          <li><span>Парковка</span><i class="fill">[где оставить машину]</i></li>
+        </ol>
+        <div class="way-acts"><a class="btn sm glow" href="https://yandex.ru/maps/?rtext=~%D0%92%D0%BE%D0%BB%D0%B3%D0%BE%D0%B3%D1%80%D0%B0%D0%B4%D1%81%D0%BA%D0%B0%D1%8F%20%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C%2C%20%D0%9C%D0%B8%D1%85%D0%B0%D0%B9%D0%BB%D0%BE%D0%B2%D0%BA%D0%B0%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%9E%D0%B1%D0%BE%D1%80%D0%BE%D0%BD%D1%8B%2C%2041&amp;rtt=auto" target="_blank" rel="noopener">Построить маршрут</a><a class="btn sm ghost" href="https://yandex.ru/maps/?text=%D0%92%D0%BE%D0%BB%D0%B3%D0%BE%D0%B3%D1%80%D0%B0%D0%B4%D1%81%D0%BA%D0%B0%D1%8F%20%D0%BE%D0%B1%D0%BB%D0%B0%D1%81%D1%82%D1%8C%2C%20%D0%9C%D0%B8%D1%85%D0%B0%D0%B9%D0%BB%D0%BE%D0%B2%D0%BA%D0%B0%2C%20%D1%83%D0%BB%D0%B8%D1%86%D0%B0%20%D0%9E%D0%B1%D0%BE%D1%80%D0%BE%D0%BD%D1%8B%2C%2041" target="_blank" rel="noopener">Открыть в Яндекс Картах</a></div>
+      </div>
     </div>
   </div></section>
 </main>
