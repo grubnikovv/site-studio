@@ -305,8 +305,15 @@ input[type="text"], input[type="tel"], input[type="search"], textarea, select { 
 .gs.busy { background: var(--blush); color: var(--mute); cursor: default; }
 .gs.blocked { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 
-.toast { position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 16px); background: var(--ink); color: var(--bg); padding: 11px 18px; border-radius: 999px; font-weight: 700; font-size: 14px; z-index: 70; opacity: 0; transition: opacity .25s, transform .25s; pointer-events: none; max-width: calc(100% - 32px); text-align: center; }
-.toast.on { opacity: 1; transform: translate(-50%, 0); }
+.toast { position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); z-index: 70; width: max-content; max-width: min(420px, calc(100% - 32px));
+  display: flex; align-items: center; gap: 14px; padding: 12px 14px 12px 18px; border-radius: 16px; background: var(--ink); color: var(--bg); font-weight: 600; font-size: 14px; line-height: 1.4;
+  box-shadow: 0 18px 40px rgba(20,12,16,.28); opacity: 0; transform: translate(-50%, 16px) scale(.97); transition: opacity .3s, transform .35s cubic-bezier(.2,.9,.3,1.2); pointer-events: none; }
+.toast.on { opacity: 1; transform: translate(-50%, 0) scale(1); }
+.toast.sticky { pointer-events: auto; border-left: 3px solid var(--lac); }
+.toast .t-text { flex: 1; min-width: 0; }
+.toast .t-ok { flex: none; display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 10px; padding: 8px 12px; background: var(--lac); color: var(--lac-ink); font-weight: 800; font-size: 13px; }
+.toast .t-ok svg { width: 14px; height: 14px; }
+.toast .t-ok[hidden] { display: none; }
 
 .reveal { transition: transform .8s cubic-bezier(.22,1,.36,1), opacity .8s; }
 .reveal.pre { opacity: .001; transform: translateY(18px); }
@@ -1004,7 +1011,7 @@ div.f { display: grid; gap: 8px; }
 </footer>
 
 <div class="mbar" id="mbar"><a class="btn" href="#obuchenie">Записаться на обучение</a></div>
-<div class="toast" id="toast" role="status"></div>
+<div class="toast" id="toast" role="status"><span class="t-text" id="toastText"></span><button type="button" class="t-ok" id="toastOk" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Понятно</button></div>
 
 <script>
 (function () {
@@ -2084,7 +2091,14 @@ div.f { display: grid; gap: 8px; }
   addEventListener("hashchange", route); route();
 
   var toastT;
-  function toast(t) { var el = $("toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(function () { el.classList.remove("on"); }, 2400); }
+  // Короткие подтверждения исчезают сами; длинные и важные (с подсказкой, что делать) висят, пока не нажать «Понятно»
+  function toast(t, sticky) {
+    var el = $("toast"); sticky = sticky || t.length > 45;
+    $("toastText").textContent = t; $("toastOk").hidden = !sticky; el.classList.toggle("sticky", !!sticky);
+    el.classList.remove("on"); void el.offsetWidth; el.classList.add("on");
+    clearTimeout(toastT); if (!sticky) toastT = setTimeout(function () { el.classList.remove("on"); }, 2600);
+  }
+  $("toastOk").onclick = function () { $("toast").classList.remove("on", "sticky"); };
 })();
 </script>
 
