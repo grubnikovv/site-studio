@@ -2,6 +2,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="robots" content="noindex">
 <meta name="description" content="Маникюр, педикюр и обучение маникюру в Михайловке. Мастер Марина Шевченко, 10 лет опыта. Онлайн-запись, очное обучение.">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BeautySalon","name":"Монро — студия красоты","description":"Маникюр, педикюр, наращивание и обучение маникюру","telephone":"+7 995 428-47-88","priceRange":"от 300 ₽","address":{"@type":"PostalAddress","streetAddress":"ул. Обороны, 41","addressLocality":"Михайловка","addressRegion":"Волгоградская область","addressCountry":"RU"},"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday"],"opens":"10:00","closes":"19:00"}],"founder":{"@type":"Person","name":"Марина Шевченко"}}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tenor+Sans&family=Manrope:wght@400;600;700;800&display=swap">
@@ -252,7 +253,7 @@ footer a { color: var(--mute); }
 .erange { font-size: 14px; color: var(--lac); min-height: 1em; }
 .slot:disabled { text-decoration: line-through; opacity: .35; cursor: default; }
 label.f { display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--mute); }
-input[type="text"], input[type="tel"], textarea, select { width: 100%; border: 1.5px solid var(--line); background: var(--bg); border-radius: 14px; padding: 13px 14px; font-size: 16px; }
+input[type="text"], input[type="tel"], input[type="search"], textarea, select { width: 100%; border: 1.5px solid var(--line); background: var(--bg); border-radius: 14px; padding: 13px 14px; font-size: 16px; }
 .check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; }
 .check input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--lac); flex: none; }
 .sum { display: grid; gap: 6px; background: var(--bg); border-radius: 16px; padding: 14px 16px; font-size: 14px; }
@@ -357,6 +358,10 @@ section.block.tight { padding-block: 32px clamp(56px, 8vw, 96px); }
 .more:hover { text-decoration: underline; text-underline-offset: 4px; }
 .grp { font-size: 15px; font-family: var(--body); font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--mute); margin: 28px 0 10px; }
 .grp:first-child { margin-top: 0; }
+.pgrp { display: flex; align-items: center; gap: 14px; margin: 56px 0 6px; font-family: var(--display); font-weight: 400; font-size: clamp(26px, 4vw, 34px); color: var(--ink); }
+.pgrp:first-child { margin-top: 0; }
+.pgrp::after { content: ""; flex: 1; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--lac), transparent); opacity: .7; order: 2; }
+.pgrp small { order: 3; font-family: var(--body); font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--lac); white-space: nowrap; }
 .plist { display: grid; border-top: 1px solid var(--line); }
 .prow { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 2px; border-bottom: 1px solid var(--line); }
 .prow > div { display: grid; min-width: 0; }
@@ -466,6 +471,32 @@ div.f { display: grid; gap: 8px; }
 .rmq-h p { margin: 4px 0 0; font-size: 14px; color: var(--mute); }
 .rmq-i { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--gold); color: #fff; display: grid; place-content: center; font-weight: 800; font-size: 14px; }
 .rmq .seg2 { background: var(--paper); }
+.atabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; background: var(--paper); border: 1.5px solid var(--line); border-radius: 14px; padding: 4px; position: sticky; top: calc(70px + env(safe-area-inset-top, 0px)); z-index: 5; }
+.atabs button { border: 0; background: none; border-radius: 10px; padding: 10px 2px; font-weight: 700; font-size: 13px; color: var(--mute); transition: background .25s, color .25s; }
+.atabs button[aria-pressed="true"] { background: var(--lac); color: var(--lac-ink); }
+.atab { display: grid; gap: 20px; }
+.atab[hidden] { display: none; }
+.badge { font-size: 11px; font-weight: 800; border-radius: 999px; padding: 2px 8px; background: var(--blush); white-space: nowrap; }
+.badge.bad { background: color-mix(in srgb, var(--lac) 14%, var(--paper)); color: var(--lac); }
+.badge.new { background: color-mix(in srgb, var(--ok) 14%, var(--paper)); color: var(--ok); }
+.cl summary { list-style: none; cursor: pointer; display: grid; gap: 4px; }
+.cl summary::-webkit-details-marker { display: none; }
+.cl .r1 { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.cl .hist { display: grid; gap: 4px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 13px; }
+.cl .hist div { display: flex; justify-content: space-between; gap: 10px; }
+.cl .hist span { color: var(--mute); }
+.mnav { display: flex; gap: 6px; }
+.stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+@media (min-width: 640px) { .stat-grid { grid-template-columns: repeat(3, 1fr); } }
+.stat { background: var(--bg); border-radius: 16px; padding: 12px 14px; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; }
+.stat small { color: var(--mute); font-size: 12px; line-height: 1.3; }
+.stat b { font-size: 20px; line-height: 1.1; }
+.bars { display: grid; gap: 8px; margin-top: 6px; }
+.bars div { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; font-size: 13.5px; }
+.bars i { grid-column: 1 / -1; height: 6px; border-radius: 6px; background: var(--blush); overflow: hidden; }
+.bars i::before { content: ""; display: block; height: 100%; width: 100%; background: var(--lac); transform-origin: left; transform: scaleX(var(--w)); border-radius: 6px; }
+.cert { margin-top: 26px; background: linear-gradient(135deg, color-mix(in srgb, var(--gold) 12%, var(--paper)), var(--paper) 60%); border-color: color-mix(in srgb, var(--gold) 35%, var(--line)); }
+.cert-h { display: grid; gap: 6px; }
 /* шторка кабинета */
 .sheet-scrim { position: fixed; inset: 0; z-index: 90; background: rgba(20,12,16,.45); opacity: 0; transition: opacity .35s; }
 .sheet-scrim.on { opacity: 1; }
@@ -631,13 +662,22 @@ div.f { display: grid; gap: 8px; }
 <main id="v-uslugi" class="page" hidden>
   <section class="phero"><div class="wrap"><span class="eyebrow">Услуги и цены</span><h1>Маникюр, педикюр и наращивание</h1><p class="lead">В стоимость входят обработка, форма и покрытие. Инструменты проходят стерилизацию в сухожаре, крафт-пакет вскрывается при вас.</p></div></section>
   <section class="block tight"><div class="wrap">
-    <h3 class="grp">Руки</h3><div class="plist" id="pHands"></div>
-    <h3 class="grp">Ноги</h3><div class="plist" id="pFeet"></div>
-    <h3 class="grp">Дополнительно</h3>
+    <h3 class="pgrp"><span>Руки</span><small id="nHands"></small></h3><div class="plist" id="pHands"></div>
+    <h3 class="pgrp"><span>Ноги</span><small id="nFeet"></small></h3><div class="plist" id="pFeet"></div>
+    <h3 class="pgrp"><span>Дополнительно</span><small>2 услуги</small></h3>
     <div class="plist">
       <div class="prow"><div><b>Френч</b><small>к любому покрытию</small></div><span class="num">+200 ₽</span></div>
       <div class="prow"><div><b>Снятие чужой работы перед процедурой</b><small>если вы от другого мастера и делаете у Марины новый маникюр, педикюр или наращивание · около 30 минут. Просто снятие без новой работы — 300 ₽</small></div><span class="num">+200 ₽</span></div>
     </div>
+    <form class="card cert" id="cForm" novalidate>
+      <div class="cert-h"><span class="eyebrow">Подарок</span><h3>Подарочный сертификат</h3><p class="note" style="margin:0">На любую процедуру студии. Действует 3 месяца. Оставьте заявку — Марина свяжется, договоритесь об оплате и красивом конверте.</p></div>
+      <div class="chips" id="cSum"><button type="button" class="chip" data-v="2000" aria-pressed="false">2 000 ₽</button><button type="button" class="chip" data-v="3000" aria-pressed="true">3 000 ₽</button><button type="button" class="chip" data-v="5000" aria-pressed="false">5 000 ₽</button></div>
+      <div class="row2"><label class="f">Ваше имя<input type="text" id="cName" autocomplete="given-name"></label><label class="f">Телефон<input type="tel" id="cPhone" inputmode="tel" placeholder="+7"></label></div>
+      <label class="check"><input type="checkbox" id="cPd"><span>Согласна на обработку персональных данных (152-ФЗ).</span></label>
+      <p class="err" id="cErr" hidden></p>
+      <button class="btn" type="submit" id="cGo">Заказать сертификат</button>
+      <div class="tdone" id="cDone" hidden></div>
+    </form>
     <div class="rules"><b>Оплата на месте</b><span>Наличными или переводом после процедуры. Если планы изменились, предупредите Марину заранее, лучше за сутки — она перенесёт запись на удобный день.</span></div>
   </div></section>
 </main>
@@ -807,6 +847,13 @@ div.f { display: grid; gap: 8px; }
   <div class="wrap">
     <h2>Кабинет мастера</h2>
     <p class="demo">Демо: вход по паролю появится в рабочей версии. Записи с этого телефона и примеры клиенток для наглядности.</p>
+    <div class="atabs" id="aTabs" role="tablist">
+      <button type="button" data-tab="day" aria-pressed="true">День</button>
+      <button type="button" data-tab="clients" aria-pressed="false">Клиентки</button>
+      <button type="button" data-tab="stats" aria-pressed="false">Статистика</button>
+      <button type="button" data-tab="req" aria-pressed="false">Заявки</button>
+    </div>
+    <section class="atab" data-tab="day">
     <div class="days" id="aDays"></div>
     <div class="kpis" id="aKpi"></div>
     <div class="card"><div class="adm-top"><h3>Записи</h3><button class="btn sm" id="aAdd">+ Добавить запись</button></div><div class="opts" id="aList"></div></div>
@@ -816,7 +863,18 @@ div.f { display: grid; gap: 8px; }
       <p class="note" id="aHoursNote">Клиентки записываются онлайн только в эти часы. Сами вы можете записать клиентку на любое время и в выходной через «+ Добавить запись». Нажмите на окно ниже, чтобы закрыть его для онлайн-записи.</p>
       <div class="grid-slots" id="aGrid"></div>
     </div>
-    <div class="card"><h3>Заявки на обучение</h3><div class="opts" id="aTrain"></div></div>
+    </section>
+    <section class="atab" data-tab="clients" hidden>
+      <div class="card"><h3>Пора на коррекцию</h3><p class="note" style="margin:0">Клиентки, у которых прошло 3–4 недели после маникюра или педикюра, а новой записи нет. Напишите им — так постоянные клиентки возвращаются без рекламы.</p><div class="opts" id="aDue"></div></div>
+      <div class="card"><h3>Клиентки</h3><input type="search" id="aSearch" placeholder="Имя или телефон" aria-label="Поиск клиентки"><div class="opts" id="aClients"></div></div>
+    </section>
+    <section class="atab" data-tab="stats" hidden>
+      <div class="card"><div class="adm-top"><h3 id="sTitle">Статистика</h3><div class="mnav"><button type="button" class="btn sm ghost" id="sPrev" aria-label="Предыдущий месяц">‹</button><button type="button" class="btn sm ghost" id="sNext" aria-label="Следующий месяц">›</button></div></div><div id="aStats"></div></div>
+    </section>
+    <section class="atab" data-tab="req" hidden>
+      <div class="card"><h3>Заявки на обучение</h3><div class="opts" id="aTrain"></div></div>
+      <div class="card"><h3>Подарочные сертификаты</h3><div class="opts" id="aCerts"></div></div>
+    </section>
   </div>
 </main>
 
@@ -914,9 +972,40 @@ div.f { display: grid; gap: 8px; }
 
   // Примеры занятых окон: одинаковые для каждого дня при любом открытии
   var NAMES = ["Анна", "Ольга", "Екатерина", "Дарья", "Ирина", "Светлана", "Мария", "Юлия"];
+  var TAILS = ["12", "27", "36", "41", "53", "68", "74", "89"];  // у каждой примерной клиентки свой номер
+  // Прошлые визиты примерных клиенток: каждая ходит раз в 3–4 недели, у кого-то последний визит был давно — им «пора на коррекцию»
+  var EX_CLIENTS = [
+    { n: "Анна", tail: "12", svc: "gel", every: 21, off: 9 }, { n: "Ольга", tail: "27", svc: "pedp", every: 28, off: 12 },
+    { n: "Екатерина", tail: "36", svc: "gel", every: 21, off: 3 }, { n: "Дарья", tail: "41", svc: "ext", every: 21, off: 6 },
+    { n: "Ирина", tail: "53", svc: "str", every: 21, off: 24 }, { n: "Светлана", tail: "68", svc: "cor", every: 21, off: 19 },
+    { n: "Мария", tail: "74", svc: "pedg", every: 28, off: 31 }, { n: "Юлия", tail: "89", svc: "gel", every: 21, off: 15, flaky: true },
+    { n: "Виктория", tail: "95", svc: "man", every: 28, off: 40 }, { n: "Полина", tail: "07", svc: "ext4", every: 21, off: 2 }
+  ];
+  var pastCache = null;
+  function pastExamples() {
+    if (pastCache) return pastCache;
+    pastCache = {};
+    var today = new Date(dkey(new Date()) + "T12:00");
+    EX_CLIENTS.forEach(function (c, i) {
+      for (var n = 0, back = c.off; back <= 90; back += c.every, n++) {
+        var d = new Date(today); d.setDate(d.getDate() - back);
+        while (weekend(d)) d.setDate(d.getDate() - 1);  // визит в выходной переносим на пятницу
+        var k = dkey(d), list = pastCache[k] || (pastCache[k] = []);
+        var t = OPEN + list.reduce(function (m, b) { return Math.max(m, b.start + bmin(b) - OPEN); }, 0);
+        if (t < LUNCH[1] && t + svc(c.svc).min > LUNCH[0]) t = LUNCH[1];
+        if (t + svc(c.svc).min > CLOSE) continue;
+        list.push({ id: "ex-" + k + "-" + t, date: k, start: t, svc: c.svc, name: c.n, phone: "+7 9•• •••-••-" + c.tail,
+          status: c.flaky && n % 2 === 1 ? "noshow" : "came", example: true, seedDate: k });
+      }
+    });
+    return pastCache;
+  }
   function seeded(k) {
-    if (!SHOW_EXAMPLES || new Date(k + "T12:00") - new Date(dkey(new Date()) + "T12:00") > 7 * 864e5) return [];
+    var diff = new Date(k + "T12:00") - new Date(dkey(new Date()) + "T12:00");
+    if (!SHOW_EXAMPLES || diff > 7 * 864e5 || diff < -90 * 864e5) return [];
+    var past = diff < 0;
     if (weekend(new Date(k + "T12:00"))) return [];
+    if (past) return pastExamples()[k] || [];
     var h = 0; for (var i = 0; i < k.length; i++) h = (h * 31 + k.charCodeAt(i)) >>> 0;
     var r = function () { h = (h * 1103515245 + 12345) >>> 0; return h / 4294967296; };
     var out = [], t = OPEN + Math.floor(r() * 4) * STEP;
@@ -924,7 +1013,8 @@ div.f { display: grid; gap: 8px; }
       var s = SERVICES[Math.floor(r() * SERVICES.length)];
       if (t + s.min > CLOSE) break;
       if (t < LUNCH[1] && t + s.min > LUNCH[0]) { t = LUNCH[1]; continue; }
-      if (r() < .7) out.push({ id: "ex-" + k + "-" + t, date: k, start: t, svc: s.id, name: NAMES[Math.floor(r() * NAMES.length)], phone: "+7 9•• •••-••-" + String(10 + Math.floor(r() * 89)), status: "booked", example: true, seedDate: k });
+      var who = EX_CLIENTS[Math.floor(r() * 4)];
+      if (r() < .7) out.push({ id: "ex-" + k + "-" + t, date: k, start: t, svc: s.id, name: who.n, phone: "+7 9•• •••-••-" + who.tail, status: "booked", example: true, seedDate: k });
       t += s.min + STEP * (1 + Math.floor(r() * 4));
     }
     return out;
@@ -972,6 +1062,7 @@ div.f { display: grid; gap: 8px; }
   }
   $("homeSvc").innerHTML = ["gel", "ext", "pedp"].map(function (id) { return svcCard(svc(id)); }).join("");
   $("pHands").innerHTML = ["man", "gel", "str", "cor", "ext", "ext4", "nit", "off"].map(function (id) { return priceRow(svc(id)); }).join("");
+  $("nHands").textContent = "8 услуг"; $("nFeet").textContent = "5 услуг";
   $("pFeet").innerHTML = ["ped", "pedg", "pedf", "pedp", "pedh"].map(function (id) { return priceRow(svc(id)); }).join("");
 
   var phIcon = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 21V9a4 4 0 0 1 8 0v12"></path><path d="M10 9.5a2 2 0 0 1 4 0"></path></svg>';
@@ -1062,9 +1153,9 @@ div.f { display: grid; gap: 8px; }
   });
   // подпись месяца перед первым днём месяца в ленте, чтобы не путаться на двух месяцах вперёд
   function monthSep(d, i) { return i > 0 && d.getDate() === 1 ? '<span class="msep">' + d.toLocaleDateString("ru-RU", { month: "long" }) + '</span>' : ""; }
-  function dayBtns(sel, withFree) {
+  function dayBtns(sel, withFree, from) {
     var h = "";
-    for (var i = 0; i < DAYS; i++) {
+    for (var i = from || 0; i < DAYS; i++) {
       var d = addDays(i), k = dkey(d), off = !isWorkday(k);
       h += monthSep(d, i);
       var cnt = withFree && !off ? freeSlots(k, bmin(bk)).filter(function (s) { return s.free; }).length : null;
@@ -1225,7 +1316,7 @@ div.f { display: grid; gap: 8px; }
   renderTrainBand();
 
   // ---------- кабинет мастера ----------
-  var aDate = dkey(addDays(0)), flashId = null;
+  var aDate = dkey(addDays(0)), flashId = null, aScrolled = false, aTab = "day", sMonth = 0;
   var STATUS = { booked: ["Записана", ""], came: ["Пришла", "ok"], noshow: ["Не пришла", "bad"], cancelled: ["Отменена", ""] };
   // кто отменил: клиентка сама (на сайте или по ссылке из напоминания) или мастер
   function statusOf(b) { return b.status === "cancelled" && b.by === "client" ? ["Отменил(а)", "bad"] : (STATUS[b.status] || STATUS.booked); }
@@ -1285,7 +1376,9 @@ div.f { display: grid; gap: 8px; }
     return '<div><i>До</i><span>' + before + '</span></div><div><i>После</i><span>' + after + '</span></div>';
   }
   function renderAdmin() {
-    var sl = $("aDays").scrollLeft; $("aDays").innerHTML = dayBtns(aDate, false); $("aDays").scrollLeft = sl;
+    var sl = $("aDays").scrollLeft; $("aDays").innerHTML = dayBtns(aDate, false, -14);
+    if (!aScrolled) { aScrolled = true; requestAnimationFrame(function () { var t = $("aDays").querySelector('[data-d="' + dkey(addDays(0)) + '"]'); if (t) $("aDays").scrollLeft = t.offsetLeft - $("aDays").offsetLeft - 8; }); }
+    else $("aDays").scrollLeft = sl;
     var list = dayBookings(aDate), active = list.filter(function (b) { return b.status !== "cancelled"; });
     var sumDay = active.filter(function (b) { return b.status !== "noshow"; }).reduce(function (s, b) { return s + (b.price || svc(b.svc).price); }, 0);
     var plan = dayPlan(aDate), freeMin = plan.gaps.reduce(function (s, g) { return s + g[1] - g[0]; }, 0);
@@ -1330,6 +1423,7 @@ div.f { display: grid; gap: 8px; }
     }
     $("aGrid").innerHTML = g;
     $("aDayOff").textContent = work ? "Сделать выходным" : "Сделать рабочим";
+    renderCerts();
     var trl = (st.training || []).slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; });
     $("aTrain").innerHTML = trl.length ? trl.map(function (t) {
       var f = TRAIN.formats.filter(function (x) { return x.id === t.fmt; })[0] || TRAIN.formats[0];
@@ -1410,7 +1504,7 @@ div.f { display: grid; gap: 8px; }
     var list = edSlots();
     $("eSlots").innerHTML = list.length ? list.map(function (x) { return '<button class="slot num' + (x.out ? ' out' : '') + (x.lunch ? ' lunch' : '') + '" data-t="' + x.t + '"' + (x.free ? "" : " disabled") + ' aria-pressed="' + (ed.start === x.t) + '" title="' + (x.lunch ? 'время обеда' : x.out ? 'вне обычного графика' : '') + '">' + hm(x.t) + '</button>'; }).join("") : '<p class="note" style="grid-column:1/-1">В этот день свободных окон нет.</p>';
   }
-  function openEditor(rec) {
+  function openEditor(rec, pre) {
     ed = rec ? { id: rec.id, svc: rec.svc, remove: !!rec.remove, date: rec.date, start: rec.start, move: true } : { id: null, svc: "gel", remove: false, date: aDate, start: null, move: false };
     // если выбранный день выходной или занят — открываем ближайший день со свободным временем
     if (!freeSlots(ed.date, bmin(ed), ed.id, true).some(function (x) { return x.free; }) && rec === null) { for (var i = 0; i < DAYS; i++) { var k = dkey(addDays(i)); if (freeSlots(k, bmin(ed), ed.id, true).some(function (x) { return x.free; })) { ed.date = k; break; } } }
@@ -1418,6 +1512,7 @@ div.f { display: grid; gap: 8px; }
     $("eWho").textContent = ed.move ? rec.name + " · " + svc(rec.svc).name + " · сейчас: " + whenText(rec.date, rec.start) : "Для клиентки, которая записалась по телефону или в мессенджере.";
     $("eSvcL").hidden = ed.move; $("eContact").hidden = ed.move; $("eRmL").hidden = ed.move; $("eRm").checked = false; $("eSvc").value = ed.svc; $("eName").value = ""; $("ePhone").value = ""; $("eErr").hidden = true;
     $("eSave").textContent = ed.move ? "Перенести" : "Добавить запись";
+    if (pre) { ed.svc = pre.svc || ed.svc; $("eSvc").value = ed.svc; $("eName").value = pre.name || ""; $("ePhone").value = pre.phone && /\d{10}/.test(pre.phone.replace(/\D/g, "")) ? pre.phone : ""; }
     renderEditor();
     $("eScrim").hidden = false; $("eSheet").hidden = false; document.body.classList.add("lock");
     requestAnimationFrame(function () { requestAnimationFrame(function () { $("eScrim").classList.add("on"); $("eSheet").classList.add("on"); }); });
@@ -1427,6 +1522,7 @@ div.f { display: grid; gap: 8px; }
     setTimeout(function () { $("eScrim").hidden = true; $("eSheet").hidden = true; }, 450);
   }
   $("aAdd").onclick = function () { openEditor(null); };
+  window.__openEditor = openEditor;
   $("eClose").onclick = closeEditor; $("eScrim").onclick = closeEditor;
   $("eRm").onchange = function () { ed.remove = this.checked; ed.start = null; renderEditor(); };
   $("eSvc").onchange = function () { ed.svc = this.value; ed.start = null; if (svc(ed.svc).noRemove) { ed.remove = false; $("eRm").checked = false; } $("eRmL").hidden = !!svc(ed.svc).noRemove; renderEditor(); };
@@ -1445,7 +1541,7 @@ div.f { display: grid; gap: 8px; }
       var nb = { id: "b" + Date.now().toString(36), date: ed.date, start: ed.start, svc: ed.svc, remove: ed.remove, name: $("eName").value.trim(), phone: $("ePhone").value.trim() || "—", price: svc(ed.svc).price + (ed.remove ? REMOVE.price : 0), status: "booked", manual: true };
       st.bookings.push(nb); flashId = nb.id; toast("Запись добавлена");
     }
-    save(); aDate = ed.date; closeEditor(); renderAdmin();
+    save(); aDate = ed.date; closeEditor(); renderTab();
   };
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("eSheet").hidden) closeEditor(); });
 
@@ -1464,6 +1560,120 @@ div.f { display: grid; gap: 8px; }
     toast(t === "auto" ? "Тема как в телефоне" : t === "light" ? "Светлая тема" : "Тёмная тема");
   });
   themeShow(themeGet());
+
+  // ---------- кабинет: вкладки ----------
+  $("aTabs").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-tab]"); if (!b) return;
+    aTab = b.dataset.tab;
+    document.querySelectorAll("#aTabs button").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+    document.querySelectorAll(".atab").forEach(function (x) { x.hidden = x.dataset.tab !== aTab; });
+    renderTab();
+  });
+  function renderTab() { if (aTab === "clients") renderClients(); else if (aTab === "stats") renderStats(); else renderAdmin(); }
+
+  // Все записи за период: от -90 дней до горизонта записи
+  function allBookings() {
+    var out = [];
+    for (var i = -90; i < DAYS; i++) out = out.concat(dayBookings(dkey(addDays(i))));
+    return out;
+  }
+  // База клиенток собирается из записей по номеру телефона
+  var CORR = { gel: 21, str: 21, cor: 21, ext: 21, ext4: 21, pedg: 28, pedp: 28 };
+  function clientsDb() {
+    var map = {}, today = dkey(new Date());
+    allBookings().forEach(function (b) {
+      var key = b.example ? "ex" + b.phone : (b.phone.replace(/\D/g, "").replace(/^8/, "7") || b.name);
+      var c = map[key] || (map[key] = { name: b.name, phone: b.phone, example: !!b.example, visits: [], came: 0, noshow: 0, cancel: 0, future: null });
+      c.visits.push(b);
+      if (b.status === "came") c.came++;
+      if (b.status === "noshow") c.noshow++;
+      if (b.status === "cancelled") c.cancel++;
+      if (b.status === "booked" && b.date >= today && (!c.future || b.date < c.future.date)) c.future = b;
+    });
+    return Object.keys(map).map(function (k) {
+      var c = map[k]; c.visits.sort(function (a, b) { return (b.date + hm(b.start)).localeCompare(a.date + hm(a.start)); });
+      c.last = c.visits.filter(function (v) { return v.status === "came"; })[0] || null;
+      return c;
+    });
+  }
+  function shortDate(k) { return new Date(k + "T12:00").toLocaleDateString("ru-RU", { day: "numeric", month: "short" }); }
+  function waLink(c, text) { var d = c.phone.replace(/\D/g, "").replace(/^8/, "7"); return d.length === 11 ? "https://wa.me/" + d + "?text=" + encodeURIComponent(text) : ""; }
+  function renderClients() {
+    var db = clientsDb(), today = new Date(dkey(new Date()) + "T12:00");
+    // пора на коррекцию: последний визит на услугу с покрытием, прошло 3–4 недели, новой записи нет
+    var due = db.filter(function (c) { return c.last && !c.future && CORR[c.last.svc]; }).map(function (c) {
+      var days = Math.round((today - new Date(c.last.date + "T12:00")) / 864e5); return { c: c, days: days, need: CORR[c.last.svc] };
+    }).filter(function (x) { return x.days >= x.need - 3; }).sort(function (a, b) { return b.days - a.days; });
+    $("aDue").innerHTML = due.length ? due.map(function (x) {
+      var c = x.c, s = svc(c.last.svc), first = c.name;
+      var wa = waLink(c, "Здравствуйте, " + first + "! Это Марина, студия «Монро». Прошло " + Math.round(x.days / 7) + " нед. после " + s.name.toLowerCase() + " — пора обновить? Подберу удобное время.");
+      return '<div class="bk"><div class="r1"><b>' + esc(c.name) + '</b><span class="pill ' + (x.days >= x.need ? 'bad' : '') + '">' + x.days + ' дн. назад</span></div>' +
+        '<div class="info">' + s.name + ' · ' + shortDate(c.last.date) + (c.example ? ' · <span class="badge">пример</span>' : '') + '</div>' +
+        '<div class="acts">' + (wa ? '<a class="btn sm ghost" href="' + wa + '" target="_blank" rel="noopener">Написать в WhatsApp</a>' : '<button type="button" disabled>WhatsApp (у примера нет номера)</button>') +
+        '<button type="button" data-again="' + esc(c.phone) + '" data-svc="' + c.last.svc + '" data-name="' + esc(c.name) + '">Записать</button></div></div>';
+    }).join("") : '<p class="note">Пока никому не пора. Клиентки появятся здесь через 3–4 недели после визита.</p>';
+    var q = $("aSearch").value.trim().toLowerCase(), qd = q.replace(/\D/g, "");
+    var list = db.filter(function (c) { return !q || c.name.toLowerCase().indexOf(q) >= 0 || (qd && c.phone.replace(/\D/g, "").indexOf(qd) >= 0); })
+      .sort(function (a, b) { return (b.last ? b.last.date : "").localeCompare(a.last ? a.last.date : ""); });
+    $("aClients").innerHTML = list.length ? list.map(function (c) {
+      var badges = (c.noshow >= 2 ? '<span class="badge bad">часто не приходит</span>' : '') + (c.came <= 1 && !c.example ? '<span class="badge new">новая</span>' : '') + (c.example ? '<span class="badge">пример</span>' : '');
+      return '<details class="bk cl"><summary><div class="r1"><b>' + esc(c.name) + ' · <span class="num" style="font-weight:500">' + esc(c.phone) + '</span></b><span>' + badges + '</span></div>' +
+        '<div class="info">Визитов: ' + c.came + (c.noshow ? ' · неявок: ' + c.noshow : '') + (c.cancel ? ' · отмен: ' + c.cancel : '') + ' · последний: ' + (c.last ? shortDate(c.last.date) : '—') + (c.future ? ' · записана на ' + shortDate(c.future.date) : '') + '</div></summary>' +
+        '<div class="hist">' + c.visits.slice(0, 12).map(function (v) { return '<div><span>' + shortDate(v.date) + ', ' + hm(v.start) + '</span><b style="font-weight:600">' + svc(v.svc).name + ' · ' + statusOf(v)[0].toLowerCase() + '</b></div>'; }).join("") + '</div>' +
+        '<div class="acts" style="margin-top:10px"><button type="button" data-again="' + esc(c.phone) + '" data-svc="' + (c.visits[0] ? c.visits[0].svc : "gel") + '" data-name="' + esc(c.name) + '">Записать снова</button></div></details>';
+    }).join("") : '<p class="note">Никого не нашли.</p>';
+  }
+  $("aSearch").addEventListener("input", renderClients);
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-again]"); if (!b) return;
+    openEditor(null, { svc: b.dataset.svc, name: b.dataset.name, phone: b.dataset.again });
+  });
+
+  function renderStats() {
+    var base = new Date(); base.setDate(1); base.setMonth(base.getMonth() + sMonth);
+    var y = base.getFullYear(), m = base.getMonth(), key = y + "-" + String(m + 1).padStart(2, "0");
+    $("sTitle").textContent = base.toLocaleDateString("ru-RU", { month: "long", year: "numeric" }).replace(/ г\.$/, "").replace(/^./, function (c) { return c.toUpperCase(); });
+    $("sNext").disabled = sMonth >= 0;
+    var all = allBookings(), inM = all.filter(function (b) { return b.date.slice(0, 7) === key; }), today = dkey(new Date());
+    var came = inM.filter(function (b) { return b.status === "came"; }), rev = came.reduce(function (s, b) { return s + (b.price || svc(b.svc).price); }, 0);
+    var cancC = inM.filter(function (b) { return b.status === "cancelled" && b.by === "client"; }).length, cancM = inM.filter(function (b) { return b.status === "cancelled" && b.by !== "client"; }).length;
+    var nos = inM.filter(function (b) { return b.status === "noshow"; }).length, open = inM.filter(function (b) { return b.status === "booked" && b.date < today; }).length;
+    var planned = inM.filter(function (b) { return b.status === "booked" && b.date >= today; }), plannedRev = planned.reduce(function (s, b) { return s + (b.price || svc(b.svc).price); }, 0);
+    // новые клиентки: первый визит пришёлся на этот месяц
+    var firstSeen = {}; all.slice().sort(function (a, b) { return a.date.localeCompare(b.date); }).forEach(function (b) { if (b.status === "came" && !firstSeen[b.phone]) firstSeen[b.phone] = b.date; });
+    var fresh = Object.keys(firstSeen).filter(function (p) { return firstSeen[p].slice(0, 7) === key; }).length;
+    var by = {}; came.forEach(function (b) { by[b.svc] = (by[b.svc] || 0) + 1; });
+    var top = Object.keys(by).sort(function (a, b) { return by[b] - by[a]; }).slice(0, 4), mx = top.length ? by[top[0]] : 1;
+    var stat = function (a, b) { return '<div class="stat"><small>' + a + '</small><b class="num">' + b + '</b></div>'; };
+    $("aStats").innerHTML = '<div class="stat-grid">' + stat("Выручка", rub(rev)) + stat("Визитов", came.length) + stat("Средний чек", came.length ? rub(Math.round(rev / came.length / 10) * 10) : "—") +
+      stat("Новых клиенток", fresh) + stat("Отменили клиентки / вы", cancC + " / " + cancM) + stat("Не пришли", nos) + '</div>' +
+      (planned.length ? '<p class="note">Ещё записано до конца месяца: ' + planned.length + ' на ' + rub(plannedRev) + '.</p>' : '') +
+      (open ? '<p class="note" style="color:var(--lac)">Не отмечено ' + open + ' прошедших записей — откройте эти дни во вкладке «День» и нажмите «Пришла» или «Не пришла».</p>' : '') +
+      (top.length ? '<h3 class="grp">Популярные услуги</h3><div class="bars">' + top.map(function (id) { return '<div><span>' + svc(id).name + '</span><b class="num">' + by[id] + '</b><i style="--w:' + (by[id] / mx).toFixed(2) + '"></i></div>'; }).join("") + '</div>' : '<p class="note">В этом месяце визитов ещё нет.</p>');
+  }
+  $("sPrev").onclick = function () { sMonth--; renderStats(); };
+  $("sNext").onclick = function () { if (sMonth < 0) { sMonth++; renderStats(); } };
+
+  // ---------- подарочный сертификат ----------
+  var cSum = 3000;
+  $("cSum").addEventListener("click", function (e) { var b = e.target.closest("[data-v]"); if (!b) return; cSum = Number(b.dataset.v); document.querySelectorAll("#cSum .chip").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); }); });
+  $("cForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var name = $("cName").value.trim(), phone = $("cPhone").value.trim();
+    var err = !name ? "Укажите имя." : phone.replace(/\D/g, "").length < 10 ? "Укажите телефон полностью." : !$("cPd").checked ? "Отметьте согласие на обработку данных." : "";
+    $("cErr").textContent = err; $("cErr").hidden = !err; if (err) return;
+    st.certs = st.certs || []; st.certs.push({ id: "c" + Date.now().toString(36), sum: cSum, name: name, phone: phone, status: "new", created: dkey(new Date()) }); save();
+    $("cDone").innerHTML = "<b>Заявка принята.</b> Марина позвонит или напишет, чтобы договориться об оплате и вручении сертификата на " + rub(cSum) + ".";
+    $("cDone").hidden = false; $("cName").value = ""; $("cPhone").value = ""; $("cPd").checked = false;
+  });
+  function renderCerts() {
+    var list = (st.certs || []).slice().reverse();
+    $("aCerts").innerHTML = list.length ? list.map(function (c) {
+      return '<div class="bk"><div class="r1"><b class="num">' + rub(c.sum) + '</b><span class="pill ' + (c.status === "done" ? "ok" : "") + '">' + (c.status === "done" ? "Выдан" : c.status === "off" ? "Отменён" : "Новая заявка") + '</span></div><div><b style="font-weight:700">' + esc(c.name) + '</b> · ' + esc(c.phone) + '</div><div class="info">Заявка от ' + shortDate(c.created) + '</div>' +
+        (c.status === "new" ? '<div class="acts"><button type="button" data-cert="' + c.id + '" data-st="done">Оплачен и выдан</button><button type="button" data-cert="' + c.id + '" data-st="off">Отменить</button></div>' : '') + '</div>';
+    }).join("") : '<p class="note">Заявок пока нет. Они появятся, когда кто-то закажет сертификат на странице «Услуги и цены».</p>';
+  }
+  $("aCerts").addEventListener("click", function (e) { var b = e.target.closest("[data-cert]"); if (!b) return; var c = st.certs.filter(function (x) { return x.id === b.dataset.cert; })[0]; c.status = b.dataset.st; save(); renderCerts(); toast(c.status === "done" ? "Сертификат выдан" : "Заявка отменена"); });
 
   // ---------- боковое меню ----------
   var drawer = $("drawer"), scrim = $("scrim"), burger = $("burger"), drawerT;
@@ -1493,10 +1703,14 @@ div.f { display: grid; gap: 8px; }
     var t = e.target.closest("[data-to]"); if (t) pendingTo = t.dataset.to;
   });
   function jumpTop() { window.scrollTo({ top: 0, behavior: "instant" }); }
+  var TITLES = { home: "Монро — маникюр, педикюр и обучение в Михайловке", uslugi: "Цены на маникюр и педикюр в Михайловке — Монро", raboty: "Работы мастера маникюра — Монро, Михайловка",
+    obuchenie: "Обучение маникюру и педикюру в Михайловке — Монро", "o-mastere": "Марина Шевченко, мастер маникюра — Монро", voprosy: "Вопросы и ответы — студия красоты Монро",
+    kontakty: "Контакты — студия красоты Монро, Михайловка, ул. Обороны, 41", zapis: "Онлайн-запись на маникюр — Монро", admin: "Кабинет мастера — Монро" };
   function route() {
     var h = location.hash.slice(1), v = "home";
     if (VIEWS.indexOf(h) > 0) v = h;
     var changed = v !== curView; curView = v;
+    document.title = TITLES[v] || TITLES.home;
     if (changed && !$("eSheet").hidden) closeEditor();
     VIEWS.forEach(function (k) { var el = $("v-" + k); el.hidden = k !== v; if (k === v && changed) { el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter"); } });
     document.body.classList.toggle("home", v === "home");
@@ -1508,7 +1722,7 @@ div.f { display: grid; gap: 8px; }
     $("nextPage").hidden = !nx;
     if (nx) $("nextPage").innerHTML = '<div class="wrap"><a href="#' + (nx[0] === "home" ? "top" : nx[0]) + '"><span><small>Следующий раздел</small><b>' + nx[1] + '</b></span><span class="arr"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a></div>';
     if (v === "zapis") { resetBooking(pendingPick); pendingPick = null; }
-    if (v === "admin") renderAdmin();
+    if (v === "admin") renderTab();
     if (pendingTo) { var el = $(pendingTo); pendingTo = null; if (el) { jumpTop(); setTimeout(function () { el.scrollIntoView({ behavior: "smooth", block: "center" }); }, 80); return; } }
     if (changed || !h || h === "top") jumpTop();
   }
