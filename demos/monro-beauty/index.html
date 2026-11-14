@@ -722,6 +722,9 @@ div.f { display: grid; gap: 8px; }
 @keyframes gshine { 55%, 100% { transform: translateX(450%) skewX(-12deg); } }
 .g-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
 .g-mark { height: clamp(60px, 10vw, 84px); width: auto; aspect-ratio: 254 / 224; color: #F6ECEF; --lg-accent: #E9C98A; overflow: visible; }
+.g-brand { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
+.g-bt { font-size: 9.5px; font-weight: 700; letter-spacing: .2em; line-height: 1.5; text-transform: uppercase; color: #E7D3D8; }
+.mc .g-bt { font-size: 8.5px; letter-spacing: .14em; }
 .g-k { font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: #E9C98A; font-weight: 700; }
 .g-sum { font-family: var(--display); font-weight: 400; font-size: clamp(40px, 9vw, 64px); align-self: center; color: #fff; }
 .g-to { font-size: 15px; color: #E7D3D8; display: flex; align-items: center; gap: 8px; }
@@ -826,7 +829,7 @@ div.f { display: grid; gap: 8px; }
 <g clip-path="url(#lg-clip-1)">
 <g clip-path="url(#lg-clip-2)">
 <g clip-path="url(#lg-clip-3)">
-<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" d="M 119.085938 255.710938 C 81.351562 217.976562 81.351562 156.621094 119.085938 118.886719 C 156.820312 81.152344 218.175781 81.152344 255.910156 118.886719 L 255.179688 119.617188 C 217.847656 82.285156 157.148438 82.285156 119.816406 119.617188 C 82.484375 156.949219 82.484375 217.648438 119.816406 254.980469 C 157.148438 292.3125 217.847656 292.3125 255.179688 254.980469 L 255.910156 255.710938 C 218.175781 293.445312 156.820312 293.445312 119.085938 255.710938 Z M 119.085938 255.710938 "/>
+<path fill-rule="nonzero" fill="currentColor" fill-opacity="1" stroke="currentColor" stroke-width="0.75" d="M 119.085938 255.710938 C 81.351562 217.976562 81.351562 156.621094 119.085938 118.886719 C 156.820312 81.152344 218.175781 81.152344 255.910156 118.886719 L 255.179688 119.617188 C 217.847656 82.285156 157.148438 82.285156 119.816406 119.617188 C 82.484375 156.949219 82.484375 217.648438 119.816406 254.980469 C 157.148438 292.3125 217.847656 292.3125 255.179688 254.980469 L 255.910156 255.710938 C 218.175781 293.445312 156.820312 293.445312 119.085938 255.710938 Z M 119.085938 255.710938 "/>
 </g>
 </g>
 </g>
@@ -991,7 +994,7 @@ div.f { display: grid; gap: 8px; }
 
 
 
-<path d="M 255.88 118.92 A 96.7 96.7 0 1 0 279.47 217.18" fill="none" stroke="currentColor" stroke-width="1.03"/></symbol></svg>
+<path d="M 255.88 118.92 A 96.7 96.7 0 1 0 279.47 217.18" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol></svg>
 <header class="hdr">
   <div class="wrap">
     <div class="hdr-l">
@@ -1192,7 +1195,7 @@ div.f { display: grid; gap: 8px; }
   <section class="phero"><div class="wrap"><span class="eyebrow">Подарок</span><h1>Подарочный сертификат</h1><p class="lead">Электронный сертификат на любую процедуру студии «М.А». Оплачивается полностью, появляется сразу после оплаты — его можно переслать в мессенджере и показать с телефона. Действует 3 месяца с дня покупки.</p></div></section>
   <section class="block tight"><div class="wrap gift">
     <div class="gcard" id="gCard" aria-label="Так будет выглядеть сертификат">
-      <div class="g-top"><svg class="g-mark" aria-hidden="true"><use href="#lg"></use></svg><span class="g-k">подарочный сертификат</span></div>
+      <div class="g-top"><span class="g-brand"><svg class="g-mark" aria-hidden="true"><use href="#lgm"></use></svg><span class="g-bt">Академия маникюра<br>и&nbsp;педикюра</span></span><span class="g-k">подарочный сертификат</span></div>
       <b class="g-sum num" id="gSum">3 000 ₽</b>
       <div class="g-to" id="gTo"><span id="gToText">на любую процедуру студии</span><svg class="heart" id="gHeart" hidden viewBox="0 0 40 34" aria-hidden="true"><path pathLength="1" d="M19.6 30.4C14.8 26.6 5.2 19.9 3.6 12.8 2.4 7.3 6.9 2.6 11.8 4.1c3.6 1.1 6 4.5 7.3 7.6.9-3.6 3.7-7.8 8.3-8.5 5.2-.8 8.9 3.6 7.6 9-1.5 6.3-8.3 11.5-14.1 17.2-.5.5-1 .8-1.5 1.1"/></svg></div>
       <div class="g-bot"><span id="gCode">№ будет после оплаты</span><span id="gTill"></span></div>
@@ -2614,7 +2617,7 @@ div.f { display: grid; gap: 8px; }
   var logoImg = null;
   function loadLogo() {
     if (logoImg) return Promise.resolve();
-    var sym = document.getElementById("lg"), defsHtml = sym.parentNode.querySelector("defs").outerHTML.replace(/var\(--lg-accent, #9E1F42\)/g, "#E9C98A"), svgText = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="76 76 254 224" width="508" height="448" color="#F6ECEF">' + defsHtml + sym.innerHTML.replace(/var\(--lg-accent, #9E1F42\)/g, "#E9C98A") + '</svg>';
+    var sym = document.getElementById("lgm"), defsHtml = sym.parentNode.querySelector("defs").outerHTML.replace(/var\(--lg-accent, #9E1F42\)/g, "#E9C98A"), svgText = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="76 76 254 224" width="508" height="448" color="#F6ECEF">' + defsHtml + sym.innerHTML.replace(/var\(--lg-accent, #9E1F42\)/g, "#E9C98A") + '</svg>';
     return new Promise(function (ok) { var im = new Image(); im.onload = function () { logoImg = im; ok(); }; im.onerror = function () { ok(); }; im.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgText); });
   }
   function certImage(c) {
@@ -2626,7 +2629,9 @@ div.f { display: grid; gap: 8px; }
       var gl = g.createRadialGradient(W, 0, 0, W, 0, W * .8); gl.addColorStop(0, "rgba(142,29,61,.9)"); gl.addColorStop(1, "rgba(142,29,61,0)"); g.fillStyle = gl; g.fillRect(0, 0, W, H);
       var sh = g.createLinearGradient(W * .35, 0, W * .65, H); sh.addColorStop(0, "rgba(255,255,255,0)"); sh.addColorStop(.5, "rgba(255,255,255,.07)"); sh.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = sh; g.fillRect(0, 0, W, H);
       g.textBaseline = "alphabetic"; g.fillStyle = "#F6ECEF";
-      if (logoImg) g.drawImage(logoImg, 62, 34, 220, 220 * 224 / 254);
+      if (logoImg) g.drawImage(logoImg, 60, 46, 200, 200 * 224 / 254);
+      g.font = '700 18px Manrope, sans-serif'; g.letterSpacing = "4px"; g.fillStyle = "#E7D3D8";
+      g.fillText("АКАДЕМИЯ МАНИКЮРА", 286, 118); g.fillText("И ПЕДИКЮРА", 286, 146);
       g.font = '700 22px Manrope, sans-serif'; g.letterSpacing = "6px"; g.fillStyle = "#E9C98A"; g.textAlign = "right"; g.fillText("ПОДАРОЧНЫЙ СЕРТИФИКАТ", W - 80, 124);
       g.textAlign = "left"; g.letterSpacing = "0px"; g.fillStyle = "#fff"; g.font = '170px "Tenor Sans", serif'; g.fillText(rub(c.sum), 74, 420);
       g.fillStyle = "#E7D3D8"; g.font = '40px Manrope, sans-serif';
@@ -2686,7 +2691,7 @@ div.f { display: grid; gap: 8px; }
     var list = (st.certs || []).filter(function (c) { return c.phone.replace(/\D/g, "").replace(/^8/, "7") === d; }).reverse();
     $("mcList").innerHTML = list.length ? list.map(function (c) {
       var stt = certState(c);
-      return '<div class="mc"><div class="g-top"><svg class="g-mark" aria-hidden="true"><use href="#lg"></use></svg><span class="pill ' + stt[1] + '">' + stt[0] + '</span></div>' +
+      return '<div class="mc"><div class="g-top"><span class="g-brand"><svg class="g-mark" aria-hidden="true"><use href="#lgm"></use></svg><span class="g-bt">Академия маникюра<br>и&nbsp;педикюра</span></span><span class="pill ' + stt[1] + '">' + stt[0] + '</span></div>' +
         '<b class="mc-sum num">' + rub(certBalance(c)) + (certBalance(c) < c.sum ? ' <small>из ' + rub(c.sum) + '</small>' : '') + '</b>' +
         '<div class="g-bot"><span>№ ' + esc(c.code) + (c.to ? ' · для: ' + esc(c.to) + ' ' + HEART : '') + '</span><span>до ' + shortDate(c.till) + ' вкл.</span></div>' +
         '<div class="mc-acts"><button type="button" data-share="img" data-code="' + esc(c.code) + '">Поделиться</button><button type="button" data-share="link" data-code="' + esc(c.code) + '">Ссылка</button></div></div>';
