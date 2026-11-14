@@ -609,7 +609,7 @@ div.f { display: grid; gap: 8px; }
     <h3 class="grp">Дополнительно</h3>
     <div class="plist">
       <div class="prow"><div><b>Френч</b><small>к любому покрытию</small></div><span class="num">+200 ₽</span></div>
-      <div class="prow"><div><b>Снятие чужой работы</b><small>перед процедурой, если вы от другого мастера · около 30 минут</small></div><span class="num">200 ₽</span></div>
+      <div class="prow"><div><b>Снятие чужой работы перед процедурой</b><small>если вы от другого мастера и делаете у Марины новый маникюр, педикюр или наращивание · около 30 минут. Просто снятие без новой работы — 300 ₽</small></div><span class="num">+200 ₽</span></div>
     </div>
     <div class="rules"><b>Оплата на месте</b><span>Наличными или переводом после процедуры. Если планы изменились, предупредите Марину заранее, лучше за сутки — она перенесёт запись на удобный день.</span></div>
   </div></section>
@@ -823,6 +823,7 @@ div.f { display: grid; gap: 8px; }
     { id: "cor", name: "Коррекция ногтей", price: 2000, min: 120, text: "Опил отросшей длины, ремонт, новое покрытие." },
     { id: "ext", name: "Наращивание, длина до\u00a03-й", price: 2600, min: 120, text: "Наращивание гелем с покрытием, короткая и средняя длина." },
     { id: "ext4", name: "Наращивание, длина от\u00a04-й", price: 3000, min: 150, text: "Наращивание гелем с покрытием, длинные ногти." },
+    { id: "off", name: "Снятие покрытия", price: 300, min: 30, noRemove: true, text: "Только снятие гель-лака или наращивания, без новой работы." },
     { id: "nit", name: "Титановая нить", price: 2500, min: 30, text: "Укрепление трещины ногтя титановой нитью, цена за один палец." },
     { id: "ped", name: "Педикюр: только пальчики", price: 1200, min: 60, foot: true, text: "Обработка пальчиков без покрытия." },
     { id: "pedg", name: "Педикюр: пальчики с гель-лаком", price: 2000, min: 90, foot: true, text: "Обработка пальчиков и покрытие гель-лаком." },
@@ -838,7 +839,7 @@ div.f { display: grid; gap: 8px; }
       ["Сколько держится покрытие?", "Обычно 3–4 недели. Срок зависит от того, как быстро растут ногти, и от домашних дел: бытовая химия без перчаток сокращает носку."],
       ["Можно прийти со своим дизайном?", "Конечно. Пришлите фото при записи в комментарии, Марина заранее скажет, сколько займёт и сколько будет стоить."],
       ["Как обрабатываются инструменты?", "Мытьё, дезинфекция и стерилизация в сухожаре. Инструменты хранятся в крафт-пакетах, пакет вскрывается при вас."],
-      ["Снимаете чужую работу?", "Да. Если вы приходите от другого мастера, сначала Марина снимает чужое покрытие: 200 ₽ и около 30 минут. При онлайн-записи просто отметьте «Да, нужно снятие» — время рассчитается само."]]],
+      ["Снимаете чужую работу?", "Да. Если вы приходите от другого мастера на новый маникюр, педикюр или наращивание, сначала Марина снимает чужое покрытие: +200 ₽ и около 30 минут. Просто снятие без новой работы — 300 ₽, это отдельная услуга в записи. При онлайн-записи просто отметьте «Да, нужно снятие» — время рассчитается само."]]],
     ["Запись", [
       ["Нужно ли платить заранее?", "Нет. Запись на процедуры без предоплаты, оплата на месте после работы наличными или переводом."],
       ["Как отменить или перенести запись?", "Напишите или позвоните Марине, лучше за сутки. Она перенесёт запись на удобный день и время."],
@@ -916,7 +917,7 @@ div.f { display: grid; gap: 8px; }
     return '<div class="prow"><div><b>' + s.name + '</b><small>' + s.text + ' ' + dur(s.min) + '.</small></div><div class="pr-r"><span class="num">' + priceText(s) + '</span><a class="btn sm ghost" href="#zapis" data-pick="' + s.id + '">Записаться</a></div></div>';
   }
   $("homeSvc").innerHTML = ["gel", "ext", "pedp"].map(function (id) { return svcCard(svc(id)); }).join("");
-  $("pHands").innerHTML = ["man", "gel", "str", "cor", "ext", "ext4", "nit"].map(function (id) { return priceRow(svc(id)); }).join("");
+  $("pHands").innerHTML = ["man", "gel", "str", "cor", "ext", "ext4", "nit", "off"].map(function (id) { return priceRow(svc(id)); }).join("");
   $("pFeet").innerHTML = ["ped", "pedg", "pedf", "pedp", "pedh"].map(function (id) { return priceRow(svc(id)); }).join("");
 
   var phIcon = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 21V9a4 4 0 0 1 8 0v12"></path><path d="M10 9.5a2 2 0 0 1 4 0"></path></svg>';
@@ -999,7 +1000,10 @@ div.f { display: grid; gap: 8px; }
   }
   $("bSvc").addEventListener("click", function (e) {
     var b = e.target.closest("[data-s]"); if (!b) return;
-    bk.svc = b.dataset.s; bk.start = null; renderSvcOpts(); renderDays(); stepTo(2);
+    bk.svc = b.dataset.s; bk.start = null;
+    // для услуги «Снятие покрытия» вопрос про чужую работу не нужен
+    if (svc(bk.svc).noRemove) bk.remove = false;
+    $("bRmBox").hidden = !!svc(bk.svc).noRemove; renderRm(); renderSvcOpts(); renderDays(); stepTo(2);
     setTimeout(function () { $("b2").scrollIntoView({ behavior: "smooth", block: "start" }); }, 60);
   });
   function dayBtns(sel, withFree) {
@@ -1063,6 +1067,7 @@ div.f { display: grid; gap: 8px; }
   function resetBooking(pick) {
     bk = { svc: pick || null, date: null, start: null, remove: false };
     renderRm();
+    $("bRmBox").hidden = !!(bk.svc && svc(bk.svc).noRemove);
     ["bName", "bPhone", "bNote"].forEach(function (id) { $(id).value = ""; }); $("bPd").checked = false; $("bErr").hidden = true;
     renderSvcOpts(); if (bk.svc) { renderDays(); stepTo(2); } else stepTo(1);
   }
@@ -1222,7 +1227,7 @@ div.f { display: grid; gap: 8px; }
   $("aAdd").onclick = function () { openEditor(null); };
   $("eClose").onclick = closeEditor; $("eScrim").onclick = closeEditor;
   $("eRm").onchange = function () { ed.remove = this.checked; ed.start = null; renderEditor(); };
-  $("eSvc").onchange = function () { ed.svc = this.value; ed.start = null; renderEditor(); };
+  $("eSvc").onchange = function () { ed.svc = this.value; ed.start = null; if (svc(ed.svc).noRemove) { ed.remove = false; $("eRm").checked = false; } $("eRmL").hidden = !!svc(ed.svc).noRemove; renderEditor(); };
   $("eDays").addEventListener("click", function (e) { var b = e.target.closest("[data-d]"); if (b && !b.disabled) { ed.date = b.dataset.d; ed.start = null; renderEditor(); } });
   $("eSlots").addEventListener("click", function (e) { var b = e.target.closest("[data-t]"); if (b && !b.disabled) { ed.start = Number(b.dataset.t); renderEditor(); } });
   $("eSave").onclick = function () {
