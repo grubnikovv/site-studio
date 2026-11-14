@@ -528,6 +528,7 @@ div.f { display: grid; gap: 8px; }
 .mc .g-logo { font-size: 16px; }
 .mc-sum { font-family: var(--display); font-weight: 400; font-size: 34px; color: #fff; }
 .mc-sum small { font-family: var(--body); font-size: 14px; color: #C9AEB6; }
+.ovl { font-size: 13px; font-weight: 700; color: var(--lac); background: color-mix(in srgb, var(--lac) 10%, var(--paper)); border-radius: 12px; padding: 8px 10px; }
 .cpay { display: grid; gap: 10px; padding: 14px; border-radius: 16px; border: 1.5px solid color-mix(in srgb, var(--gold) 50%, var(--line)); background: color-mix(in srgb, var(--gold) 8%, var(--paper)); animation: fadein .3s ease both; }
 .cpay .x { width: 32px; height: 32px; border: 0; background: none; font-size: 22px; line-height: 1; color: var(--mute); }
 .cpay .sum { background: var(--paper); }
@@ -1104,12 +1105,21 @@ div.f { display: grid; gap: 8px; }
     });
     return pastCache;
   }
+  // Настоящие (не примерные) активные записи дня — примеры не должны на них наезжать
+  function realBusy(k) {
+    return st.bookings.filter(function (b) { return !b.example && b.date === k && b.status !== "cancelled"; })
+      .map(function (b) { return [b.start, b.start + bmin(b)]; });
+  }
+  function notOverReal(k, list) {
+    var real = realBusy(k);
+    return list.filter(function (e) { return !real.some(function (x) { return e.start < x[1] && e.start + bmin(e) > x[0]; }); });
+  }
   function seeded(k) {
     var diff = new Date(k + "T12:00") - new Date(dkey(new Date()) + "T12:00");
     if (!SHOW_EXAMPLES || diff > 7 * 864e5 || diff < -90 * 864e5) return [];
     var past = diff < 0;
     if (weekend(new Date(k + "T12:00"))) return [];
-    if (past) return pastExamples()[k] || [];
+    if (past) return notOverReal(k, pastExamples()[k] || []);
     var h = 0; for (var i = 0; i < k.length; i++) h = (h * 31 + k.charCodeAt(i)) >>> 0;
     var r = function () { h = (h * 1103515245 + 12345) >>> 0; return h / 4294967296; };
     var out = [], t = OPEN + Math.floor(r() * 4) * STEP;
@@ -1121,7 +1131,7 @@ div.f { display: grid; gap: 8px; }
       if (r() < .7) out.push({ id: "ex-" + k + "-" + t, date: k, start: t, svc: s.id, name: who.n, phone: "+7 9•• •••-••-" + who.tail, status: "booked", example: true, seedDate: k });
       t += s.min + STEP * (1 + Math.floor(r() * 4));
     }
-    return out;
+    return notOverReal(k, out);
   }
   // часы работы дня: свои, если мастер их поменял, иначе обычные
   function dayHours(k) { return (st.hours || {})[k] || [OPEN, CLOSE]; }
@@ -1504,6 +1514,7 @@ div.f { display: grid; gap: 8px; }
         '<div><b style="font-weight:700">' + esc(b.name) + '</b> · ' + esc(b.phone) + (b.example ? ' <span class="pill">пример</span>' : '') + '</div>' +
         '<div class="info">' + s.name + (b.remove ? ' + снятие чужой работы' : '') + ' · ' + rub(b.price || s.price) + (b.note ? ' · «' + esc(b.note) + '»' : '') + '</div>' +
         (b.remind && b.remind !== "none" ? '<div class="info">🔔 ' + (b.remind === "tg" ? "Telegram" : "SMS") + ' · ' + remindPlan(b.date).join(", ") + '</div>' : '') +
+        overlapNote(b) +
         certBlock(b) +
         (b.status === "booked" ? '<div class="acts"><button data-a="move" data-id="' + b.id + '">Перенести</button><button data-a="came" data-id="' + b.id + '">Пришла</button><button data-a="noshow" data-id="' + b.id + '">Не пришла</button><button data-a="cancel" data-id="' + b.id + '">Отменить</button></div>'
           : b.status === "cancelled"
@@ -1684,6 +1695,8 @@ div.f { display: grid; gap: 8px; }
   $("eSave").onclick = function () {
     var err = ed.start == null ? "Выберите время." : "";
     if (!err && !ed.move && !$("eName").value.trim()) err = "Укажите имя клиентки.";
+    // перед сохранением ещё раз проверяем, что выбранное время свободно на всю длительность процедуры
+    if (!err && !freeSlots(ed.date, bmin(ed), ed.id, true).some(function (x) { return x.t === ed.start && x.free; })) { err = "Это время уже занято или процедура не помещается до следующей записи. Выберите другое."; ed.start = null; renderEditor(); }
     $("eErr").textContent = err; $("eErr").hidden = !err; if (err) return;
     if (ed.move) {
       var own = ownCopy(findBooking(ed.id));
@@ -1943,6 +1956,11 @@ div.f { display: grid; gap: 8px; }
     }, 900);
   });
   renderGift();
+  function overlapNote(b) {
+    if (b.status === "cancelled") return "";
+    var e = b.start + bmin(b), hit = dayBookings(b.date).filter(function (o) { return o.id !== b.id && o.status !== "cancelled" && o.start < e && o.start + bmin(o) > b.start; });
+    return hit.length ? '<div class="ovl">⚠ Пересекается с записью: ' + hit.map(function (o) { return esc(o.name) + ' ' + hm(o.start) + '–' + hm(o.start + bmin(o)); }).join(", ") + '. Перенесите одну из записей.</div>' : "";
+  }
   function certKey(code) { return String(code || "").toUpperCase().replace(/[^A-ZА-Я0-9]/g, "").replace(/^(МН|MH|MN)/, ""); }
   function findCert(code) { var k = certKey(code); return k ? (st.certs || []).filter(function (c) { return certKey(c.code) === k; })[0] : null; }
   function certProblem(c) {
