@@ -233,6 +233,8 @@ footer a { color: var(--mute); }
 .slot.out { border-style: dashed; }
 .slot.lunch { border-color: color-mix(in srgb, var(--gold) 60%, var(--line)); background: color-mix(in srgb, var(--gold) 16%, var(--bg)); color: var(--gold); }
 .lg-lunch { color: var(--gold); font-weight: 700; }
+.slot.lunch[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: #fff; }
+.ewarn { background: color-mix(in srgb, var(--gold) 16%, var(--paper)); border: 1px solid color-mix(in srgb, var(--gold) 55%, var(--line)); color: var(--ink); border-radius: 14px; padding: 10px 12px; font-size: 14px; font-weight: 600; animation: fadein .3s ease both; }
 .erange { font-size: 14px; color: var(--lac); min-height: 1em; }
 .slot:disabled { text-decoration: line-through; opacity: .35; cursor: default; }
 label.f { display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--mute); }
@@ -803,7 +805,7 @@ div.f { display: grid; gap: 8px; }
     <p class="note" id="eWho"></p>
     <label class="f" id="eSvcL">Услуга<select id="eSvc"></select></label>
     <div class="f"><span class="lbl">День</span><div class="days" id="eDays"></div></div>
-    <div class="f"><span class="lbl">Время</span><div class="slots" id="eSlots"></div><b class="erange" id="eRange"></b><span class="note">Зачёркнуто — процедура не поместится: залезет на другую клиентку. Пунктиром — время вне обычного графика. <span class="lg-lunch">Золотым — попадает на обед.</span> Вам записать можно, клиентки онлайн это время не видят.</span></div>
+    <div class="f"><span class="lbl">Время</span><div class="slots" id="eSlots"></div><b class="erange" id="eRange"></b><div class="ewarn" id="eWarn" role="status" hidden></div><span class="note">Зачёркнуто — процедура не поместится: залезет на другую клиентку. Пунктиром — время вне обычного графика. <span class="lg-lunch">Золотым — попадает на обед.</span> Вам записать можно, клиентки онлайн это время не видят.</span></div>
     <label class="check" id="eRmL"><input type="checkbox" id="eRm"><span>Снятие чужой работы: +200 ₽, +30 минут</span></label>
     <div class="row2" id="eContact"><label class="f">Имя клиентки<input type="text" id="eName"></label><label class="f">Телефон<input type="tel" id="ePhone" inputmode="tel" placeholder="+7"></label></div>
     <p class="err" id="eErr" hidden></p>
@@ -1279,6 +1281,19 @@ div.f { display: grid; gap: 8px; }
     $("eDays").innerHTML = h; $("eDays").scrollLeft = sl;
     // показываем, какое время займёт процедура целиком, чтобы было видно, что она поместится
     $("eRange").textContent = ed.start != null ? "Займёт: " + hm(ed.start) + "–" + hm(ed.start + bmin(ed)) + " (" + dur(bmin(ed)) + ")" : "";
+    // предупреждения: процедура попадает на обед или выходит за рабочие часы дня
+    var warn = [];
+    if (ed.start != null) {
+      var end = ed.start + bmin(ed), wh = dayHours(ed.date);
+      if (!isWorkday(ed.date)) warn.push("Это ваш выходной.");
+      else {
+        if (ed.start < LUNCH[1] && end > LUNCH[0]) warn.push("Процедура попадает на ваш обед (" + hm(LUNCH[0]) + "–" + hm(LUNCH[1]) + ").");
+        if (ed.start < wh[0] || end > wh[1]) warn.push("Это вне вашего рабочего времени (" + hm(wh[0]) + "–" + hm(wh[1]) + ").");
+      }
+    }
+    $("eWarn").hidden = !warn.length;
+    $("eWarn").textContent = warn.length ? "⚠ " + warn.join(" ") + " Сохранить можно, если вы так договорились с клиенткой." : "";
+    $("eSave").textContent = (ed.move ? "Перенести" : "Добавить запись") + (warn.length ? " всё равно" : "");
     var list = edSlots();
     $("eSlots").innerHTML = list.length ? list.map(function (x) { return '<button class="slot num' + (x.out ? ' out' : '') + (x.lunch ? ' lunch' : '') + '" data-t="' + x.t + '"' + (x.free ? "" : " disabled") + ' aria-pressed="' + (ed.start === x.t) + '" title="' + (x.lunch ? 'попадает на обед' : x.out ? 'вне обычного графика' : '') + '">' + hm(x.t) + '</button>'; }).join("") : '<p class="note" style="grid-column:1/-1">В этот день свободных окон нет.</p>';
   }
