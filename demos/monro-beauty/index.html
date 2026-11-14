@@ -61,7 +61,7 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 .hdr { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
 .hdr .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; }
 .logo { display: inline-flex; align-items: center; text-decoration: none; color: var(--ink); line-height: 0; }
-.brand { height: 58px; width: auto; aspect-ratio: 232 / 202; color: inherit; }
+.brand { height: 58px; width: auto; aspect-ratio: 232 / 202; color: inherit; --lg-accent: var(--lac); }
 .drawer .brand { height: 64px; }
 .nav { display: flex; gap: 26px; font-size: 14px; font-weight: 600; }
 .nav a { text-decoration: none; color: var(--mute); }
@@ -548,9 +548,11 @@ div.f { display: grid; gap: 8px; }
 .gcard { position: relative; aspect-ratio: 1.6; max-width: 100%; border-radius: 24px; padding: clamp(18px, 4vw, 30px); color: #F6ECEF; overflow: hidden; display: grid; grid-template-rows: auto 1fr auto auto; gap: 6px;
   background: radial-gradient(90% 120% at 100% 0%, #8E1D3D 0%, transparent 60%), linear-gradient(150deg, #3A0F1D, #1E0910 75%); box-shadow: 0 24px 50px rgba(30,9,16,.35); }
 .gcard::after { content: ""; position: absolute; top: -20%; bottom: -20%; width: 30%; left: 0; background: linear-gradient(100deg, transparent, rgba(255,255,255,.18), transparent); transform: translateX(-150%) skewX(-12deg); animation: gshine 5s ease-in-out infinite; }
+/* на узких экранах карточка растёт по содержимому, чтобы срок действия не обрезался */
+@media (max-width: 600px) { .gcard { aspect-ratio: auto; min-height: 210px; } .gcard .g-mark { height: 50px; } }
 @keyframes gshine { 55%, 100% { transform: translateX(450%) skewX(-12deg); } }
 .g-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
-.g-mark { height: clamp(54px, 9vw, 74px); width: auto; aspect-ratio: 232 / 202; color: #F6ECEF; }
+.g-mark { height: clamp(54px, 9vw, 74px); width: auto; aspect-ratio: 232 / 202; color: #F6ECEF; --lg-accent: #F2A0B8; }
 .g-k { font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: #E9C98A; font-weight: 700; }
 .g-sum { font-family: var(--display); font-weight: 400; font-size: clamp(40px, 9vw, 64px); align-self: center; color: #fff; }
 .g-to { font-size: 15px; color: #E7D3D8; display: flex; align-items: center; gap: 8px; }
@@ -660,13 +662,13 @@ div.f { display: grid; gap: 8px; }
 </g>
 </g>
 </g>
-<g fill="#FD11C9" fill-opacity="1">
+<g style="fill: var(--lg-accent, #9E1F42)" fill-opacity="1">
 <use xlink:href="#lg-glyph-0-0" x="113.244974" y="211.33834"/>
 </g>
-<g fill="#FD11C9" fill-opacity="1">
+<g style="fill: var(--lg-accent, #9E1F42)" fill-opacity="1">
 <use xlink:href="#lg-glyph-0-1" x="209.524889" y="211.33834"/>
 </g>
-<g fill="#FD11C9" fill-opacity="1">
+<g style="fill: var(--lg-accent, #9E1F42)" fill-opacity="1">
 <use xlink:href="#lg-glyph-0-2" x="235.361738" y="211.33834"/>
 </g>
 <g fill="currentColor" fill-opacity="1">
@@ -2025,7 +2027,7 @@ div.f { display: grid; gap: 8px; }
   var logoImg = null;
   function loadLogo() {
     if (logoImg) return Promise.resolve();
-    var sym = document.getElementById("lg"), svgText = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="94 94 232 202" width="464" height="404" color="#F6ECEF">' + sym.innerHTML + '</svg>';
+    var sym = document.getElementById("lg"), svgText = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="94 94 232 202" width="464" height="404" color="#F6ECEF">' + sym.innerHTML.replace(/var\(--lg-accent, #9E1F42\)/g, "#F2A0B8") + '</svg>';
     return new Promise(function (ok) { var im = new Image(); im.onload = function () { logoImg = im; ok(); }; im.onerror = function () { ok(); }; im.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgText); });
   }
   function certImage(c) {
@@ -2116,7 +2118,7 @@ div.f { display: grid; gap: 8px; }
     var hrt = $("gHeart"); // у SVG нет свойства hidden — работаем с атрибутом
     if (to && hrt.hasAttribute("hidden")) { hrt.removeAttribute("hidden"); hrt.classList.remove("draw"); void hrt.getBoundingClientRect(); hrt.classList.add("draw"); } else if (!to) hrt.setAttribute("hidden", "");
     $("gCode").textContent = code ? "№ " + code : "№ будет после оплаты";
-    $("gTill").textContent = "действует до " + longDate(certTill()) + " включительно";
+    $("gTill").textContent = "действует до " + longDate(certTill()) + " вкл.";
     $("cTillWarn").innerHTML = "⏳ Сертификат действует <b>" + CERT_MONTHS + " месяца — до " + longDate(certTill()) + " включительно</b>. После этой даты оплатить им процедуру будет нельзя.";
     $("cTermText").textContent = "Знаю, что сертификат действует до " + longDate(certTill()) + " включительно.";
     $("cGo").textContent = "Оплатить " + rub(cSum);
