@@ -844,7 +844,7 @@ div.f { display: grid; gap: 8px; }
     { id: "pedh", name: "Педикюр со сложными стопами", price: 2500, from: true, min: 120, foot: true, text: "Трещины, мозоли, сильные огрубения. Итоговую цену Марина назовёт на месте, до 3 000 ₽." }
   ];
   var REMOVE = { price: 200, min: 30 };
-  var SHOW_EXAMPLES = false;  // примеры клиенток в кабинете для показа заказчику
+  var SHOW_EXAMPLES = true;  // несколько тестовых клиенток на ближайшую неделю, чтобы проверить перенос и отмену
   var DAYS = 62;  // на сколько дней вперёд открыта запись (~2 месяца)
   function bmin(b) { return svc(b.svc).min + (b.remove ? REMOVE.min : 0); }
   var TRAIN = { formats: [{ id: "solo", name: "Индивидуально, 1 на 1", price: 30000 }], pre: 5000, seats: 3 };
@@ -887,7 +887,7 @@ div.f { display: grid; gap: 8px; }
   // Примеры занятых окон: одинаковые для каждого дня при любом открытии
   var NAMES = ["Анна", "Ольга", "Екатерина", "Дарья", "Ирина", "Светлана", "Мария", "Юлия"];
   function seeded(k) {
-    if (!SHOW_EXAMPLES) return [];
+    if (!SHOW_EXAMPLES || new Date(k + "T12:00") - new Date(dkey(new Date()) + "T12:00") > 7 * 864e5) return [];
     if (weekend(new Date(k + "T12:00"))) return [];
     var h = 0; for (var i = 0; i < k.length; i++) h = (h * 31 + k.charCodeAt(i)) >>> 0;
     var r = function () { h = (h * 1103515245 + 12345) >>> 0; return h / 4294967296; };
@@ -895,6 +895,7 @@ div.f { display: grid; gap: 8px; }
     while (t < CLOSE - 60 && out.length < 3) {
       var s = SERVICES[Math.floor(r() * SERVICES.length)];
       if (t + s.min > CLOSE) break;
+      if (t < LUNCH[1] && t + s.min > LUNCH[0]) { t = LUNCH[1]; continue; }
       if (r() < .7) out.push({ id: "ex-" + k + "-" + t, date: k, start: t, svc: s.id, name: NAMES[Math.floor(r() * NAMES.length)], phone: "+7 9•• •••-••-" + String(10 + Math.floor(r() * 89)), status: "booked", example: true, seedDate: k });
       t += s.min + STEP * (1 + Math.floor(r() * 4));
     }
@@ -926,7 +927,7 @@ div.f { display: grid; gap: 8px; }
     for (var t = hr[0]; t + minutes <= hr[1]; t += STEP) {
       if (isToday && t < nowM) continue;
       var clash = iv.some(function (x) { return t < x[1] && t + minutes > x[0]; });
-      out.push({ t: t, free: !clash, out: !work || t < wh[0] || t + minutes > wh[1] });
+      out.push({ t: t, free: !clash, out: !work || t < wh[0] || t + minutes > wh[1] || (t < LUNCH[1] && t + minutes > LUNCH[0]) });
     }
     return out;
   }
