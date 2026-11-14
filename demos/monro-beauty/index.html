@@ -219,6 +219,7 @@ footer a { color: var(--mute); }
 .opt > b { flex: none; white-space: nowrap; }
 .opt[aria-pressed="true"] { border-color: var(--lac); background: color-mix(in srgb, var(--lac) 7%, var(--paper)); }
 .days { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; }
+.msep { flex: none; writing-mode: vertical-rl; transform: rotate(180deg); align-self: stretch; text-align: center; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--lac); padding: 0 2px; border-right: 1.5px solid var(--line); }
 .day { flex: none; width: 62px; border: 1.5px solid var(--line); background: var(--bg); border-radius: 16px; padding: 8px 0; display: grid; justify-items: center; gap: 0; }
 .day small { font-size: 11px; color: var(--mute); text-transform: uppercase; letter-spacing: .06em; }
 .day b { font-size: 19px; }
@@ -428,9 +429,13 @@ footer .fnav a:hover { color: var(--ink); }
 .prog b { color: var(--ink); font-weight: 700; }
 .lbl { font-size: 13px; font-weight: 700; color: var(--mute); }
 div.f { display: grid; gap: 8px; }
+.seg3 { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--bg); border: 1.5px solid var(--line); border-radius: 14px; padding: 4px; gap: 4px; }
+.seg3 button { border: 0; background: none; border-radius: 10px; padding: 10px 4px; font-weight: 700; font-size: 14px; color: var(--mute); transition: background .25s, color .25s; }
+.seg3 button[aria-pressed="true"] { background: var(--lac); color: var(--lac-ink); }
 .seg2 { display: grid; grid-template-columns: 1fr 1fr; background: var(--bg); border: 1.5px solid var(--line); border-radius: 14px; padding: 4px; gap: 4px; }
 .seg2 button { border: 0; background: none; border-radius: 10px; padding: 10px; font-weight: 700; color: var(--mute); transition: background .25s, color .25s; }
 .seg2 button[aria-pressed="true"] { background: var(--lac); color: var(--lac-ink); }
+.rem-done { display: grid; gap: 10px; justify-items: center; }
 .tdone { background: color-mix(in srgb, var(--ok) 10%, var(--paper)); border-radius: 16px; padding: 14px 16px; font-size: 14px; animation: fadein .4s ease both; }
 .tdone b { color: var(--ok); }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -741,7 +746,11 @@ div.f { display: grid; gap: 8px; }
       <label class="f">Телефон<input type="tel" id="bPhone" autocomplete="tel" inputmode="tel" placeholder="+7" required></label>
       <label class="f">Комментарий, по желанию<input type="text" id="bNote" placeholder="Например: хочу дизайн как на фото"></label>
       <div class="sum" id="bSum"></div>
-      <label class="check"><input type="checkbox" id="bPd"><span>Согласна на обработку персональных данных для записи (152-ФЗ).</span></label>
+      <div class="f"><span class="lbl">Напомнить о записи</span>
+        <div class="seg3" id="bRem"><button type="button" data-v="tg" aria-pressed="true">Telegram</button><button type="button" data-v="sms" aria-pressed="false">SMS</button><button type="button" data-v="none" aria-pressed="false">Не нужно</button></div>
+        <span class="note" id="bRemNote"></span>
+      </div>
+      <label class="check"><input type="checkbox" id="bPd"><span>Согласна на обработку персональных данных для записи и напоминаний (152-ФЗ).</span></label>
       <p class="err" id="bErr" hidden></p>
       <button class="btn" type="submit" id="bPay">Записаться</button>
       <p class="note">Оплата на месте после процедуры: наличными или переводом.</p>
@@ -752,6 +761,7 @@ div.f { display: grid; gap: 8px; }
         <div class="ok"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div>
         <h3>Вы записаны</h3>
         <p class="lead" id="bDone"></p>
+        <div class="rem-done" id="bRemDone"></div>
       </div>
       <div class="tg" aria-label="Пример уведомления мастеру">
         <div class="h"><i>М</i>Бот студии «Монро» → Марине</div>
@@ -834,6 +844,8 @@ div.f { display: grid; gap: 8px; }
     { id: "pedh", name: "Педикюр со сложными стопами", price: 2500, from: true, min: 120, foot: true, text: "Трещины, мозоли, сильные огрубения. Итоговую цену Марина назовёт на месте, до 3 000 ₽." }
   ];
   var REMOVE = { price: 200, min: 30 };
+  var SHOW_EXAMPLES = false;  // примеры клиенток в кабинете для показа заказчику
+  var DAYS = 62;  // на сколько дней вперёд открыта запись (~2 месяца)
   function bmin(b) { return svc(b.svc).min + (b.remove ? REMOVE.min : 0); }
   var TRAIN = { formats: [{ id: "solo", name: "Индивидуально, 1 на 1", price: 30000 }], pre: 5000, seats: 3 };
   var FAQ = [
@@ -860,7 +872,7 @@ div.f { display: grid; gap: 8px; }
   var EARLY = 7 * 60, LATE = 22 * 60;
 
   // ---------- хранилище демо ----------
-  var KEY = "monro-demo-v1";
+  var KEY = "monro-demo-v2";
   var st = { bookings: [], blocks: {}, dayoff: {}, bought: {} };
   try { st = Object.assign(st, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
   function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
@@ -875,6 +887,7 @@ div.f { display: grid; gap: 8px; }
   // Примеры занятых окон: одинаковые для каждого дня при любом открытии
   var NAMES = ["Анна", "Ольга", "Екатерина", "Дарья", "Ирина", "Светлана", "Мария", "Юлия"];
   function seeded(k) {
+    if (!SHOW_EXAMPLES) return [];
     if (weekend(new Date(k + "T12:00"))) return [];
     var h = 0; for (var i = 0; i < k.length; i++) h = (h * 31 + k.charCodeAt(i)) >>> 0;
     var r = function () { h = (h * 1103515245 + 12345) >>> 0; return h / 4294967296; };
@@ -1018,10 +1031,13 @@ div.f { display: grid; gap: 8px; }
     $("bRmBox").hidden = !!svc(bk.svc).noRemove; renderRm(); renderSvcOpts(); renderDays(); stepTo(2);
     setTimeout(function () { $("b2").scrollIntoView({ behavior: "smooth", block: "start" }); }, 60);
   });
+  // подпись месяца перед первым днём месяца в ленте, чтобы не путаться на двух месяцах вперёд
+  function monthSep(d, i) { return i > 0 && d.getDate() === 1 ? '<span class="msep">' + d.toLocaleDateString("ru-RU", { month: "long" }) + '</span>' : ""; }
   function dayBtns(sel, withFree) {
     var h = "";
-    for (var i = 0; i < 14; i++) {
+    for (var i = 0; i < DAYS; i++) {
       var d = addDays(i), k = dkey(d), off = !isWorkday(k);
+      h += monthSep(d, i);
       var cnt = withFree && !off ? freeSlots(k, bmin(bk)).filter(function (s) { return s.free; }).length : null;
       var dis = withFree && (off || cnt === 0);
       h += '<button class="day" data-d="' + k + '" aria-pressed="' + (sel === k) + '"' + (dis ? " disabled" : "") + '><small>' + (i === 0 ? "сег" : WD[d.getDay()]) + '</small><b class="num">' + d.getDate() + '</b><em>' + (off ? "выходной" : withFree ? (cnt ? cnt + " окон" : "занято") : d.toLocaleDateString("ru-RU", { month: "short" })) + '</em></button>';
@@ -1029,7 +1045,7 @@ div.f { display: grid; gap: 8px; }
     return h;
   }
   function renderDays() {
-    if (!bk.date) { for (var i = 0; i < 14; i++) { var k = dkey(addDays(i)); if (freeSlots(k, bmin(bk)).some(function (s) { return s.free; })) { bk.date = k; break; } } }
+    if (!bk.date) { for (var i = 0; i < DAYS; i++) { var k = dkey(addDays(i)); if (freeSlots(k, bmin(bk)).some(function (s) { return s.free; })) { bk.date = k; break; } } }
     var sl = $("bDays").scrollLeft; $("bDays").innerHTML = dayBtns(bk.date, true); $("bDays").scrollLeft = sl; renderSlots();
   }
   function renderSlots() {
@@ -1040,7 +1056,7 @@ div.f { display: grid; gap: 8px; }
   $("bDays").addEventListener("click", function (e) { var b = e.target.closest("[data-d]"); if (!b || b.disabled) return; bk.date = b.dataset.d; bk.start = null; renderDays(); stepTo(2); });
   $("bSlots").addEventListener("click", function (e) {
     var b = e.target.closest("[data-t]"); if (!b || b.disabled) return;
-    bk.start = Number(b.dataset.t); renderSlots(); renderSum(); stepTo(3);
+    bk.start = Number(b.dataset.t); renderSlots(); renderSum(); renderRem(); stepTo(3);
     setTimeout(function () { $("b3").scrollIntoView({ behavior: "smooth", block: "start" }); }, 60);
   });
   function whenText(k, t) { return new Date(k + "T12:00").toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }) + ", " + hm(t); }
@@ -1068,15 +1084,36 @@ div.f { display: grid; gap: 8px; }
     if (!still) { $("bErr").textContent = "Это время только что заняли. Выберите другое."; $("bErr").hidden = false; renderDays(); stepTo(2); return; }
     var btn = $("bPay"); btn.disabled = true; btn.textContent = "Записываю…";
     setTimeout(function () {
-      var s = svc(bk.svc), b = { id: "b" + Date.now().toString(36), date: bk.date, start: bk.start, svc: s.id, name: name, phone: $("bPhone").value.trim(), note: $("bNote").value.trim(), price: bk.price, remove: bk.remove, status: "booked", created: Date.now() };
+      var s = svc(bk.svc), b = { id: "b" + Date.now().toString(36), date: bk.date, start: bk.start, svc: s.id, name: name, phone: $("bPhone").value.trim(), note: $("bNote").value.trim(), price: bk.price, remove: bk.remove, remind: bk.remind, status: "booked", created: Date.now() };
       st.bookings.push(b); save();
-      $("bDone").textContent = whenText(b.date, b.start) + ". " + s.name + (b.remove ? " и снятие чужой работы" : "") + ". Адрес: ул. Обороны, 41. Напоминание придёт за день.";
-      $("bTg").textContent = "🆕 Новая запись\n" + s.name + (b.remove ? "\n+ снятие чужой работы" : "") + "\n" + whenText(b.date, b.start) + "\n" + name + ", " + b.phone + (b.note ? "\nКомментарий: " + b.note : "");
+      $("bDone").textContent = whenText(b.date, b.start) + ". " + s.name + (b.remove ? " и снятие чужой работы" : "") + ". Адрес: ул. Обороны, 41.";
+      $("bRemDone").innerHTML = b.remind === "none" ? "" : '<p class="note">' + esc(remindText(b.remind, b.date).replace("После записи нажмите", "Нажмите")) + '</p>' + (b.remind === "tg" ? '<button class="btn" type="button" id="bTgLink">Подключить напоминания в Telegram</button>' : "");
+      var tl = $("bTgLink"); if (tl) tl.onclick = function () { toast("В рабочей версии откроется бот студии в Telegram"); };
+      $("bTg").textContent = "🆕 Новая запись\n" + s.name + (b.remove ? "\n+ снятие чужой работы" : "") + "\n" + whenText(b.date, b.start) + "\n" + name + ", " + b.phone + (b.note ? "\nКомментарий: " + b.note : "") + "\nНапоминания: " + (b.remind === "none" ? "не нужны" : (b.remind === "tg" ? "Telegram" : "SMS") + ", " + remindPlan(b.date).join(", "));
       btn.disabled = false; btn.textContent = "Записаться"; stepTo(4); window.scrollTo({ top: 0, behavior: "smooth" });
     }, 900);
   });
+  // Напоминания: за день всегда, за неделю — если запись больше чем за 8 дней
+  function remindPlan(k) {
+    var days = Math.round((new Date(k + "T12:00") - new Date(dkey(new Date()) + "T12:00")) / 864e5), when = [];
+    if (days > 8) when.push("за неделю");
+    if (days > 1) when.push("за день");
+    when.push("за 2 часа");
+    return when;
+  }
+  function remindText(via, k) {
+    if (via === "none") return "Без напоминаний. Если планы изменятся, позвоните Марине.";
+    var w = remindPlan(k).join(", ");
+    return via === "tg" ? "Напомним " + w + " до визита. После записи нажмите «Подключить напоминания» — откроется бот студии в Telegram."
+      : "Пришлём SMS на ваш номер " + w + " до визита.";
+  }
+  function renderRem() {
+    document.querySelectorAll("#bRem button").forEach(function (x) { x.setAttribute("aria-pressed", String(x.dataset.v === bk.remind)); });
+    $("bRemNote").textContent = bk.date ? remindText(bk.remind, bk.date) : "";
+  }
+  $("bRem").addEventListener("click", function (e) { var b = e.target.closest("[data-v]"); if (b) { bk.remind = b.dataset.v; renderRem(); } });
   function resetBooking(pick) {
-    bk = { svc: pick || null, date: null, start: null, remove: false };
+    bk = { svc: pick || null, date: null, start: null, remove: false, remind: "tg" };
     renderRm();
     $("bRmBox").hidden = !!(bk.svc && svc(bk.svc).noRemove);
     ["bName", "bPhone", "bNote"].forEach(function (id) { $(id).value = ""; }); $("bPd").checked = false; $("bErr").hidden = true;
@@ -1092,7 +1129,7 @@ div.f { display: grid; gap: 8px; }
     return out;
   }
   // пример занятости для демо: часть дат уже выкуплена другими ученицами
-  function dateTaken(k) { return (st.training || []).some(function (t) { return t.date === k && t.status === "paid"; }) || k.charCodeAt(9) % 4 === 0; }
+  function dateTaken(k) { return (st.training || []).some(function (t) { return t.date === k && t.status === "paid"; }); }
   function nextFreeDate() { return trainDates().filter(function (k) { return !dateTaken(k); })[0]; }
   function renderTrain() {
     var f = TRAIN.formats[0];
@@ -1144,7 +1181,7 @@ div.f { display: grid; gap: 8px; }
     return own;
   }
   function findBooking(id) {
-    for (var i = 0; i < 14; i++) { var r = dayBookings(dkey(addDays(i))).filter(function (x) { return x.id === id; })[0]; if (r) return r; }
+    for (var i = 0; i < DAYS; i++) { var r = dayBookings(dkey(addDays(i))).filter(function (x) { return x.id === id; })[0]; if (r) return r; }
     return st.bookings.filter(function (x) { return x.id === id; })[0];
   }
   function renderAdmin() {
@@ -1158,6 +1195,7 @@ div.f { display: grid; gap: 8px; }
       return '<div class="bk' + (b.id === flashId ? " moved" : "") + '"><div class="r1"><b class="num">' + hm(b.start) + '–' + hm(b.start + bmin(b)) + '</b><span class="pill ' + t[1] + '">' + t[0] + '</span></div>' +
         '<div><b style="font-weight:700">' + esc(b.name) + '</b> · ' + esc(b.phone) + (b.example ? ' <span class="pill">пример</span>' : '') + '</div>' +
         '<div class="info">' + s.name + (b.remove ? ' + снятие чужой работы' : '') + ' · ' + rub(b.price || s.price) + (b.note ? ' · «' + esc(b.note) + '»' : '') + '</div>' +
+        (b.remind && b.remind !== "none" ? '<div class="info">🔔 ' + (b.remind === "tg" ? "Telegram" : "SMS") + ' · ' + remindPlan(b.date).join(", ") + '</div>' : '') +
         (b.status === "booked" ? '<div class="acts"><button data-a="move" data-id="' + b.id + '">Перенести</button><button data-a="came" data-id="' + b.id + '">Пришла</button><button data-a="noshow" data-id="' + b.id + '">Не пришла</button><button data-a="cancel" data-id="' + b.id + '">Отменить</button></div>'
           : '<div class="acts"><button data-a="restore" data-id="' + b.id + '">Вернуть в «Записана»</button></div>') + '</div>';
     }).join("") : '<p class="note">На этот день записей нет. Нажмите «+ Добавить запись», если записали клиентку по телефону.</p>';
@@ -1228,8 +1266,9 @@ div.f { display: grid; gap: 8px; }
   function edSlots() { return freeSlots(ed.date, bmin(ed), ed.id, true); }
   function renderEditor() {
     var sl = $("eDays").scrollLeft, h = "";
-    for (var i = 0; i < 14; i++) {
+    for (var i = 0; i < DAYS; i++) {
       var d = addDays(i), k = dkey(d), off = !isWorkday(k);
+      h += monthSep(d, i);
       var cnt = freeSlots(k, bmin(ed), ed.id, true).filter(function (x) { return x.free; }).length;
       h += '<button class="day" data-d="' + k + '" aria-pressed="' + (k === ed.date) + '"' + (!cnt ? " disabled" : "") + '><small>' + (i === 0 ? "сег" : WD[d.getDay()]) + '</small><b class="num">' + d.getDate() + '</b><em>' + (off ? "выходной" : cnt ? cnt + " окон" : "занято") + '</em></button>';
     }
@@ -1240,7 +1279,7 @@ div.f { display: grid; gap: 8px; }
   function openEditor(rec) {
     ed = rec ? { id: rec.id, svc: rec.svc, remove: !!rec.remove, date: rec.date, start: rec.start, move: true } : { id: null, svc: "gel", remove: false, date: aDate, start: null, move: false };
     // если выбранный день выходной или занят — открываем ближайший день со свободным временем
-    if (!freeSlots(ed.date, bmin(ed), ed.id, true).some(function (x) { return x.free; }) && rec === null) { for (var i = 0; i < 14; i++) { var k = dkey(addDays(i)); if (freeSlots(k, bmin(ed), ed.id, true).some(function (x) { return x.free; })) { ed.date = k; break; } } }
+    if (!freeSlots(ed.date, bmin(ed), ed.id, true).some(function (x) { return x.free; }) && rec === null) { for (var i = 0; i < DAYS; i++) { var k = dkey(addDays(i)); if (freeSlots(k, bmin(ed), ed.id, true).some(function (x) { return x.free; })) { ed.date = k; break; } } }
     $("eTitle").textContent = ed.move ? "Перенести запись" : "Новая запись";
     $("eWho").textContent = ed.move ? rec.name + " · " + svc(rec.svc).name + " · сейчас: " + whenText(rec.date, rec.start) : "Для клиентки, которая записалась по телефону или в мессенджере.";
     $("eSvcL").hidden = ed.move; $("eContact").hidden = ed.move; $("eRmL").hidden = ed.move; $("eRm").checked = false; $("eSvc").value = ed.svc; $("eName").value = ""; $("ePhone").value = ""; $("eErr").hidden = true;
