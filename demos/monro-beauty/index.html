@@ -328,7 +328,7 @@ body.lock { overflow: hidden; }
 .dnav a small { font-family: var(--body); font-size: 13px; color: var(--mute); margin-top: 3px; }
 .dnav a:hover { color: var(--lac); padding-left: 8px; }
 .dnav a[aria-current="page"] { color: var(--lac); padding-left: 18px; }
-.dnav a[aria-current="page"]::before { content: ""; position: absolute; left: 0; top: 22px; width: 8px; height: 8px; border-radius: 50%; background: var(--lac); }
+.dnav a[aria-current="page"]::before { content: ""; position: absolute; left: 0; top: calc(9px + .56em - 4.5px); width: 8px; height: 8px; border-radius: 50%; background: var(--lac); }
 .drawer.on .dnav a, .drawer.on .drawer-foot { animation: din .6s cubic-bezier(.2,.8,.2,1) both; }
 .drawer.on .dnav a:nth-child(1) { animation-delay: .08s; } .drawer.on .dnav a:nth-child(2) { animation-delay: .12s; } .drawer.on .dnav a:nth-child(3) { animation-delay: .16s; } .drawer.on .dnav a:nth-child(4) { animation-delay: .2s; }
 .drawer.on .dnav a:nth-child(5) { animation-delay: .24s; } .drawer.on .dnav a:nth-child(6) { animation-delay: .28s; } .drawer.on .dnav a:nth-child(7) { animation-delay: .32s; } .drawer.on .dnav a:nth-child(8) { animation-delay: .36s; } .drawer.on .dnav a:nth-child(9) { animation-delay: .4s; } .drawer.on .drawer-foot { animation-delay: .42s; }
