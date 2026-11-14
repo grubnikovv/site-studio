@@ -222,6 +222,23 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 .msg.m-tg { --mc: #1E88D2; --mc2: #45B4EE; }
 .msg.m-mx { --mc: #6A3DE8; --mc2: #3D8BFF; }
 .phero .msgs { margin-top: 6px; max-width: 820px; }
+.msgs.one { grid-template-columns: minmax(0, 1fr); }
+.cdlg { border: 0; padding: 0; background: transparent; width: min(420px, 92vw); max-width: none; overflow: visible; }
+.cdlg::backdrop { background: rgba(20, 10, 14, .6); backdrop-filter: blur(4px); }
+.cdlg[open] { animation: vin .3s ease; }
+.cbox { position: relative; background: var(--bg); border-radius: 24px; padding: 22px 18px 18px; display: grid; gap: 12px; }
+.cbox .vclose { top: 12px; right: 12px; background: color-mix(in srgb, var(--ink) 10%, transparent); color: var(--ink); }
+.cbox > b { font-family: var(--display); font-weight: 400; font-size: 22px; padding-right: 44px; }
+.cbox > p { margin: -4px 0 0; color: var(--mute); font-size: 14px; }
+.ch-call { text-align: center; color: var(--mute); font-size: 14px; text-decoration: none; padding: 4px; }
+.ch-call b { color: var(--ink); }
+/* маленькие круглые иконки мессенджеров (меню, подвал) */
+.chats { display: flex; gap: 10px; align-items: center; }
+.chats a { width: 42px; height: 42px; border-radius: 13px; display: grid; place-content: center; color: #fff; background: linear-gradient(135deg, var(--mc2), var(--mc)); box-shadow: 0 6px 14px color-mix(in srgb, var(--mc) 28%, transparent); transition: transform .2s; }
+.chats a:hover { transform: translateY(-2px); }
+.chats svg { width: 21px; height: 21px; }
+.chats a.m-wa { --mc: #1FA855; --mc2: #45D17A; } .chats a.m-tg { --mc: #1E88D2; --mc2: #45B4EE; } .chats a.m-mx { --mc: #6A3DE8; --mc2: #3D8BFF; }
+.chat-btn { display: inline-flex; }
 .contact dd { margin: 0; font-weight: 600; min-width: 0; }
 @media (max-width: 520px) { .contact dl { grid-template-columns: 1fr; gap: 2px; } .contact dt { font-size: 13px; } .contact dd { margin-bottom: 10px; } .contact dd:last-child { margin-bottom: 0; } }
 @media (max-width: 760px) { .contact { grid-template-columns: 1fr; } }
@@ -1043,6 +1060,7 @@ div.f { display: grid; gap: 8px; }
   <div class="drawer-foot">
     <a class="btn" href="#zapis">Записаться онлайн</a>
     <p><a href="tel:+79954284788">+7 995 428-47-88</a><br>Михайловка, ул. Обороны, 41<br>Пн–Пт, 10:00–19:00, по записи</p>
+    <div class="chats" aria-label="Написать Марине"><a class="m-wa" href="https://wa.me/message/22ORQIZQY6J2E1" target="_blank" rel="noopener" aria-label="Написать в WhatsApp"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 19.8l1.1-3.9A8.2 8.2 0 1 1 8.4 19z"></path><path d="M9.2 8.3c.3-.6.9-.6 1.1 0l.6 1.4c.1.3 0 .6-.2.8l-.5.5c.6 1.2 1.6 2.2 2.8 2.8l.5-.5c.2-.2.5-.3.8-.2l1.4.6c.6.2.6.8 0 1.1-.9.6-2 .8-3 .3a8.6 8.6 0 0 1-4-4c-.4-1-.2-2 .5-2.8z" fill="currentColor" stroke="none"></path></svg></a><a class="m-tg" href="https://t.me/monrobeauty" target="_blank" rel="noopener" aria-label="Написать в Telegram"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.7 4.3 3.6 11c-1 .4-1 1.5 0 1.8l4.3 1.4 1.7 5.1c.2.7 1.1.9 1.6.4l2.4-2.3 4.4 3.3c.6.5 1.5.1 1.7-.6l2.8-13.4c.2-1-.8-1.8-1.8-1.4zm-3.3 3.6-7.7 6.9-.3 3.2-1.3-4 9-5.8c.4-.3.7.1.3.4z"></path></svg></a><a class="m-mx" href="https://max.ru/u/f9LHodD0cOIMIZCDXDtzuEBoPq33rVYVNwVR5OZQWf6Tq2hFOaYc2Ox7LR4" target="_blank" rel="noopener" aria-label="Написать в MAX"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c-4.9 0-8.5 3.4-8.5 8 0 2 .7 3.8 1.9 5.2L4.6 20l3.6-1.2c1.1.5 2.4.7 3.8.7 4.9 0 8.5-3.4 8.5-8s-3.6-8-8.5-8z"></path><path d="M8.3 14.5V9.3l3.7 3.6 3.7-3.6v5.2"></path></svg></a></div>
     <div class="theme" role="group" aria-label="Тема сайта">
       <span>Тема</span>
       <div class="theme-seg" id="themeSeg">
@@ -1204,6 +1222,7 @@ div.f { display: grid; gap: 8px; }
       <button class="btn glow" type="submit" id="tPay">Оплатить предоплату</button>
       <div class="tdone" id="tDone" hidden></div>
       <p class="note">Демо: оплата не списывается.</p>
+      <button type="button" class="btn sm ghost chat-btn" data-chat="Здравствуйте! У меня вопрос по обучению." data-chat-title="Вопрос по обучению">Есть вопрос по курсу? Написать Марине</button>
     </form>
   </div></section>
 </main>
@@ -1374,6 +1393,15 @@ div.f { display: grid; gap: 8px; }
 </main>
 
 <dialog class="pdlg" id="pDlg" aria-label="Фото работы"><figure class="pbox"><img id="pImg" alt=""><figcaption><span id="pCap"></span><span id="pNum"></span></figcaption><button type="button" class="pnav prev" id="pPrev" aria-label="Предыдущее фото">‹</button><button type="button" class="pnav next" id="pNext" aria-label="Следующее фото">›</button><button type="button" class="vclose" id="pClose" aria-label="Закрыть фото">×</button></figure></dialog>
+<dialog class="cdlg" id="chDlg" aria-labelledby="chT"><div class="cbox"><button type="button" class="vclose" id="chClose" aria-label="Закрыть">×</button>
+  <b id="chT">Написать Марине</b><p id="chP">Выберите, где вам удобнее:</p>
+  <div class="msgs one">
+    <a class="msg m-wa" id="chWa" href="https://wa.me/message/22ORQIZQY6J2E1" target="_blank" rel="noopener"><span class="msg-ico" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 19.8l1.1-3.9A8.2 8.2 0 1 1 8.4 19z"></path><path d="M9.2 8.3c.3-.6.9-.6 1.1 0l.6 1.4c.1.3 0 .6-.2.8l-.5.5c.6 1.2 1.6 2.2 2.8 2.8l.5-.5c.2-.2.5-.3.8-.2l1.4.6c.6.2.6.8 0 1.1-.9.6-2 .8-3 .3a8.6 8.6 0 0 1-4-4c-.4-1-.2-2 .5-2.8z" fill="currentColor" stroke="none"></path></svg></span><span class="msg-t"><b>WhatsApp</b><small id="chWaS">Написать Марине</small></span><span class="msg-go" aria-hidden="true">→</span></a>
+    <a class="msg m-tg" id="chTg" href="https://t.me/monrobeauty" target="_blank" rel="noopener"><span class="msg-ico" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.7 4.3 3.6 11c-1 .4-1 1.5 0 1.8l4.3 1.4 1.7 5.1c.2.7 1.1.9 1.6.4l2.4-2.3 4.4 3.3c.6.5 1.5.1 1.7-.6l2.8-13.4c.2-1-.8-1.8-1.8-1.4zm-3.3 3.6-7.7 6.9-.3 3.2-1.3-4 9-5.8c.4-.3.7.1.3.4z"></path></svg></span><span class="msg-t"><b>Telegram</b><small>Написать Марине</small></span><span class="msg-go" aria-hidden="true">→</span></a>
+    <a class="msg m-mx" id="chMx" href="https://max.ru/u/f9LHodD0cOIMIZCDXDtzuEBoPq33rVYVNwVR5OZQWf6Tq2hFOaYc2Ox7LR4" target="_blank" rel="noopener"><span class="msg-ico" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c-4.9 0-8.5 3.4-8.5 8 0 2 .7 3.8 1.9 5.2L4.6 20l3.6-1.2c1.1.5 2.4.7 3.8.7 4.9 0 8.5-3.4 8.5-8s-3.6-8-8.5-8z"></path><path d="M8.3 14.5V9.3l3.7 3.6 3.7-3.6v5.2"></path></svg></span><span class="msg-t"><b>MAX</b><small>Написать Марине</small></span><span class="msg-go" aria-hidden="true">→</span></a>
+  </div>
+  <a class="ch-call" href="tel:+79954284788">или позвонить: <b class="num">+7 995 428-47-88</b></a>
+</div></dialog>
 <dialog class="vdlg" id="vDlg" aria-label="Видео: как пройти до студии"><div class="vbox"><button type="button" class="vclose" id="vClose" aria-label="Закрыть видео">×</button><div id="vBody"></div></div></dialog>
 
 <!-- ===== ЗАПИСЬ ===== -->
@@ -1438,7 +1466,8 @@ div.f { display: grid; gap: 8px; }
 
     <form class="card" id="myForm" novalidate>
       <h3>Уже записаны?</h3>
-      <p class="note" style="margin:0">Введите телефон, который указывали при записи, — покажем ваши записи. Отменить можно здесь, перенести — позвоните Марине.</p>
+      <p class="note" style="margin:0">Введите телефон, который указывали при записи, — покажем ваши записи. Отменить можно здесь, а перенести — напишите или позвоните Марине.</p>
+      <button type="button" class="btn sm ghost chat-btn" data-chat="Здравствуйте! Хочу перенести запись." data-chat-title="Перенести запись">Написать Марине</button>
       <div class="row2"><label class="f">Телефон<input type="tel" id="myPhone" inputmode="tel" placeholder="+7"></label><button class="btn ghost" type="submit" style="align-self:end">Найти мои записи</button></div>
       <div class="opts" id="myList"></div>
     </form>
@@ -1511,6 +1540,7 @@ div.f { display: grid; gap: 8px; }
 <footer>
   <div class="wrap">
     <div class="fcol"><span class="logo"><svg class="brand" aria-hidden="true"><use href="#lgm"></use></svg><span class="brand-t">Академия маникюра и&nbsp;педикюра</span><span class="sr">М.А — академия маникюра и педикюра</span></span><span>Марина Шевченко · Михайловка, ул. Обороны, 41</span></div>
+    <div class="chats" aria-label="Написать Марине"><a class="m-wa" href="https://wa.me/message/22ORQIZQY6J2E1" target="_blank" rel="noopener" aria-label="Написать в WhatsApp"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.2 19.8l1.1-3.9A8.2 8.2 0 1 1 8.4 19z"></path><path d="M9.2 8.3c.3-.6.9-.6 1.1 0l.6 1.4c.1.3 0 .6-.2.8l-.5.5c.6 1.2 1.6 2.2 2.8 2.8l.5-.5c.2-.2.5-.3.8-.2l1.4.6c.6.2.6.8 0 1.1-.9.6-2 .8-3 .3a8.6 8.6 0 0 1-4-4c-.4-1-.2-2 .5-2.8z" fill="currentColor" stroke="none"></path></svg></a><a class="m-tg" href="https://t.me/monrobeauty" target="_blank" rel="noopener" aria-label="Написать в Telegram"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.7 4.3 3.6 11c-1 .4-1 1.5 0 1.8l4.3 1.4 1.7 5.1c.2.7 1.1.9 1.6.4l2.4-2.3 4.4 3.3c.6.5 1.5.1 1.7-.6l2.8-13.4c.2-1-.8-1.8-1.8-1.4zm-3.3 3.6-7.7 6.9-.3 3.2-1.3-4 9-5.8c.4-.3.7.1.3.4z"></path></svg></a><a class="m-mx" href="https://max.ru/u/f9LHodD0cOIMIZCDXDtzuEBoPq33rVYVNwVR5OZQWf6Tq2hFOaYc2Ox7LR4" target="_blank" rel="noopener" aria-label="Написать в MAX"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c-4.9 0-8.5 3.4-8.5 8 0 2 .7 3.8 1.9 5.2L4.6 20l3.6-1.2c1.1.5 2.4.7 3.8.7 4.9 0 8.5-3.4 8.5-8s-3.6-8-8.5-8z"></path><path d="M8.3 14.5V9.3l3.7 3.6 3.7-3.6v5.2"></path></svg></a></div>
     <div class="fnav"><a href="#uslugi">Услуги</a><a href="#obuchenie">Обучение</a><a href="#voprosy">Вопросы</a><a href="#kontakty">Контакты</a><a href="#admin">Вход для мастера</a><a href="#politika">Политика конфиденциальности</a></div>
   </div>
 </footer>
@@ -1921,7 +1951,7 @@ div.f { display: grid; gap: 8px; }
     return when;
   }
   function remindText(via, k) {
-    if (via === "none") return "Без напоминаний легко забыть о записи. Если планы изменятся, позвоните Марине.";
+    if (via === "none") return "Без напоминаний легко забыть о записи. Если планы изменятся, напишите или позвоните Марине.";
     var w = remindPlan(k).join(", ");
     return "Напомним " + w + " до визита и через 3 недели — о коррекции. После записи останется нажать одну кнопку, чтобы подключить бота в " + (REM_NAME[via] || "Telegram") + ".";
   }
@@ -1944,13 +1974,30 @@ div.f { display: grid; gap: 8px; }
   $("wayVideo").addEventListener("click", function () {
     $("vBody").innerHTML = WAY_VIDEO
       ? '<video controls playsinline autoplay muted preload="metadata"' + (WAY_POSTER ? ' poster="' + WAY_POSTER + '"' : '') + ' src="' + WAY_VIDEO + '"></video>'
-      : '<div class="vempty"><b>Видео скоро появится</b><p>Пока Марина подскажет дорогу по телефону — студия на улице Обороны, 41.</p><a class="btn sm glow" href="tel:+79954284788">Позвонить Марине</a></div>';
+      : '<div class="vempty"><b>Видео скоро появится</b><p>Пока Марина подскажет дорогу в мессенджере или по телефону — студия на улице Обороны, 41.</p><button type="button" class="btn sm glow" data-chat="Здравствуйте! Подскажите, пожалуйста, как к вам пройти?" data-chat-title="Спросить дорогу">Написать или позвонить</button></div>';
     $("vDlg").showModal();
   });
   function closeVideo() { var v = $("vBody").querySelector("video"); if (v) v.pause(); $("vDlg").close(); }
   $("vClose").addEventListener("click", closeVideo);
   $("vDlg").addEventListener("click", function (e) { if (e.target === this) closeVideo(); });
   $("vDlg").addEventListener("close", function () { var v = $("vBody").querySelector("video"); if (v) v.pause(); });
+  // Окно «Написать Марине»: WhatsApp — сразу с готовым текстом, Telegram и MAX — текст копируется, его остаётся вставить
+  var chText = "";
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-chat]"); if (!b) return;
+    e.preventDefault(); chText = b.dataset.chat || "";
+    var dd = b.closest("dialog"); if (dd) dd.close();
+    $("chT").textContent = b.dataset.chatTitle || "Написать Марине";
+    $("chP").textContent = chText ? "Выберите, где вам удобнее. Текст сообщения уже готов:" : "Выберите, где вам удобнее:";
+    if (chText) $("chP").textContent += " «" + chText + "»";
+    $("chWa").href = chText ? "https://wa.me/79954284788?text=" + encodeURIComponent(chText) : "https://wa.me/message/22ORQIZQY6J2E1";
+    if (chText && navigator.clipboard) navigator.clipboard.writeText(chText).catch(function () {});
+    $("chDlg").showModal();
+  });
+  ["chTg", "chMx"].forEach(function (id) { $(id).addEventListener("click", function () { if (chText) toast("Текст скопирован — вставьте его в чат"); $("chDlg").close(); }); });
+  $("chWa").addEventListener("click", function () { $("chDlg").close(); });
+  $("chClose").onclick = function () { $("chDlg").close(); };
+  $("chDlg").addEventListener("click", function (e) { if (e.target === this) this.close(); });
   // ---------- клиентка: мои записи и отмена ----------
   function digits(p) { return String(p || "").replace(/\D/g, "").replace(/^8/, "7"); }
   function myBookings(phone) {
@@ -1963,7 +2010,7 @@ div.f { display: grid; gap: 8px; }
       var s = svc(b.svc), t = statusOf(b);
       return '<div class="bk"><div class="r1"><b>' + whenText(b.date, b.start) + '</b><span class="pill ' + t[1] + '">' + (b.status === "cancelled" ? "Отменена" : t[0]) + '</span></div><div class="info">' + s.name + ' · ' + priceText(s) + '</div>' +
         (b.status === "booked" ? '<div class="acts"><button type="button" data-my="' + b.id + '">Отменить запись</button></div>' : '') + '</div>';
-    }).join("") : '<p class="note">Записей на этот номер не нашли. Проверьте номер или позвоните Марине: +7 995 428-47-88.</p>';
+    }).join("") : '<p class="note">Записей на этот номер не нашли. Проверьте номер или напишите Марине.</p><button type="button" class="btn sm ghost" data-chat="Здравствуйте! Не могу найти свою запись на сайте." data-chat-title="Найти запись">Написать Марине</button>';
   }
   $("myForm").addEventListener("submit", function (e) { e.preventDefault(); if (digits($("myPhone").value).length < 11) { toast("Введите телефон полностью"); return; } renderMy(); });
   $("myList").addEventListener("click", function (e) {
@@ -2031,7 +2078,7 @@ div.f { display: grid; gap: 8px; }
     $("tDates").innerHTML = starts.length ? starts.slice(0, 12).map(function (k) {
       var days = trainDaysFrom(k, c.days), d1 = new Date(days[0] + "T12:00"), d2 = new Date(days[days.length - 1] + "T12:00");
       return '<button type="button" class="day tday" data-d="' + k + '" aria-pressed="' + (k === tr.date) + '"><small>' + WD[d1.getDay()] + "–" + WD[d2.getDay()] + '</small><b class="num">' + d1.getDate() + "–" + d2.getDate() + '</b><em>' + d1.toLocaleDateString("ru-RU", { month: "short" }) + '</em></button>';
-    }).join("") : '<p class="tdates-empty">В ближайшие 2 месяца нет ' + (c.days === 3 ? "трёх" : "двух") + ' свободных дней подряд. Позвоните или напишите Марине — подберём даты.</p>';
+    }).join("") : '<p class="tdates-empty">В ближайшие 2 месяца нет ' + (c.days === 3 ? "трёх" : "двух") + ' свободных дней подряд. Напишите Марине — подберём даты.</p><button type="button" class="btn sm ghost" data-chat="Здравствуйте! Хочу на курс «' + c.short + '». Подскажите, пожалуйста, ближайшие даты." data-chat-title="Подобрать даты курса">Написать Марине</button>';
     $("tDates").scrollLeft = sl;
     $("tDatesNote").textContent = starts.length ? "Курс идёт " + daysWord(c.days) + " подряд, с 10:00 до 17:00. Показаны только даты, где все дни свободны." : "";
     var days = tr.date ? trainDaysFrom(tr.date, c.days) : null;
@@ -2112,7 +2159,7 @@ div.f { display: grid; gap: 8px; }
       var text = "Здравствуйте! Хочу быть моделью на обучении " + d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + (at ? " к " + hm(at) + " (" + what.toLowerCase() + ")." : " (" + what.toLowerCase() + "). Подскажите, во сколько прийти?");
       return '<div class="mdl-row"><div class="mdl-i"><div class="mdl-d"><b>' + d.toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + '</b><small>' + d.toLocaleDateString("ru-RU", { weekday: "long" }) + '</small></div>' +
         '<div class="mdl-w"><b>' + what + '<span class="mdl-free">бесплатно</span></b><small>' + (at ? "прийти к " + hm(at) + " · около " + MODEL.hours + " ч" : "с 10:00 до 17:00 · время уточнит Марина") + '</small></div></div>' +
-        '<a class="btn sm" href="https://wa.me/79954284788?text=' + encodeURIComponent(text) + '" target="_blank" rel="noopener">Записаться<span> моделью</span></a></div>';
+        '<button type="button" class="btn sm" data-chat="' + esc(text) + '" data-chat-title="Записаться моделью">Записаться<span> моделью</span></button></div>';
     }).join("");
   }
   $("mdlMore").addEventListener("click", function () { $("mdlList").classList.add("all"); this.hidden = true; });
@@ -2712,7 +2759,7 @@ div.f { display: grid; gap: 8px; }
         '<b class="mc-sum num">' + rub(certBalance(c)) + (certBalance(c) < c.sum ? ' <small>из ' + rub(c.sum) + '</small>' : '') + '</b>' +
         '<div class="g-bot"><span>№ ' + esc(c.code) + (c.to ? ' · для: ' + esc(c.to) + ' ' + HEART : '') + '</span><span>до ' + shortDate(c.till) + ' вкл.</span></div>' +
         '<div class="mc-acts"><button type="button" data-share="img" data-code="' + esc(c.code) + '">Поделиться</button><button type="button" data-share="link" data-code="' + esc(c.code) + '">Ссылка</button></div></div>';
-    }).join("") : '<p class="note">На этот номер сертификатов не нашли. Проверьте номер или позвоните Марине: +7 995 428-47-88.</p>';
+    }).join("") : '<p class="note">На этот номер сертификатов не нашли. Проверьте номер или напишите Марине.</p><button type="button" class="btn sm ghost" data-chat="Здравствуйте! Не могу найти свой подарочный сертификат." data-chat-title="Найти сертификат">Написать Марине</button>';
   }
   $("mcForm").addEventListener("submit", function (e) { e.preventDefault(); if ($("mcPhone").value.replace(/\D/g, "").length < 11) { toast("Введите телефон полностью"); return; } renderMyCerts(); });
   // Срок как у большинства студий: 3 месяца с дня покупки, последний день — включительно
