@@ -229,6 +229,7 @@ footer a { color: var(--mute); }
 .slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 8px; }
 .slot { border: 1.5px solid var(--line); background: var(--bg); border-radius: 12px; padding: 10px 0; font-weight: 700; }
 .slot[aria-pressed="true"] { background: var(--lac); border-color: var(--lac); color: var(--lac-ink); }
+.slot.out { border-style: dashed; }
 .slot:disabled { text-decoration: line-through; opacity: .35; cursor: default; }
 label.f { display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--mute); }
 input[type="text"], input[type="tel"], textarea, select { width: 100%; border: 1.5px solid var(--line); background: var(--bg); border-radius: 14px; padding: 13px 14px; font-size: 16px; }
@@ -502,7 +503,7 @@ div.f { display: grid; gap: 8px; }
   <section class="hero" id="top">
     <div class="wrap">
       <div class="hero-txt">
-        <span class="promo"><i>−10%</i> на первый визит при онлайн-записи</span>
+        <span class="eyebrow">Студия маникюра и педикюра · Михайловка</span>
         <h1>Маникюр, на который <em>оборачиваются</em></h1>
         <p class="lead">Марина Шевченко, мастер маникюра и преподаватель. В профессии с 2017 года, победитель международных чемпионатов. Михайловка, ул. Обороны, 41.</p>
         <div class="price-from"><b class="num">от 1 700 ₽</b><span>маникюр с покрытием гель-лаком</span></div>
@@ -772,8 +773,9 @@ div.f { display: grid; gap: 8px; }
     <div class="kpis" id="aKpi"></div>
     <div class="card"><div class="adm-top"><h3>Записи</h3><button class="btn sm" id="aAdd">+ Добавить запись</button></div><div class="opts" id="aList"></div></div>
     <div class="card">
-      <div class="adm-top"><h3>Закрыть время</h3><button class="btn sm ghost" id="aDayOff">Выходной весь день</button></div>
-      <p class="note">Нажмите на окно, чтобы закрыть его для записи. Ещё раз — открыть.</p>
+      <div class="adm-top"><h3>График дня</h3><button class="btn sm ghost" id="aDayOff">Сделать выходным</button></div>
+      <div class="row2" id="aHours"><label class="f">Начало<select id="aFrom"></select></label><label class="f">Конец<select id="aTo"></select></label></div>
+      <p class="note" id="aHoursNote">Клиентки записываются онлайн только в эти часы. Сами вы можете записать клиентку на любое время и в выходной через «+ Добавить запись». Нажмите на окно ниже, чтобы закрыть его для онлайн-записи.</p>
       <div class="grid-slots" id="aGrid"></div>
     </div>
     <div class="card"><h3>Заявки на обучение</h3><div class="opts" id="aTrain"></div></div>
@@ -788,7 +790,7 @@ div.f { display: grid; gap: 8px; }
     <p class="note" id="eWho"></p>
     <label class="f" id="eSvcL">Услуга<select id="eSvc"></select></label>
     <div class="f"><span class="lbl">День</span><div class="days" id="eDays"></div></div>
-    <div class="f"><span class="lbl">Время</span><div class="slots" id="eSlots"></div></div>
+    <div class="f"><span class="lbl">Время</span><div class="slots" id="eSlots"></div><span class="note">Пунктиром — время вне обычного графика. Вам записать можно, клиентки онлайн его не видят.</span></div>
     <label class="check" id="eRmL"><input type="checkbox" id="eRm"><span>Снятие чужой работы: +200 ₽, +30 минут</span></label>
     <div class="row2" id="eContact"><label class="f">Имя клиентки<input type="text" id="eName"></label><label class="f">Телефон<input type="tel" id="ePhone" inputmode="tel" placeholder="+7"></label></div>
     <p class="err" id="eErr" hidden></p>
@@ -854,6 +856,8 @@ div.f { display: grid; gap: 8px; }
   var WD = ["вс", "пн", "вт", "ср", "чт", "пт", "сб"];
   var OPEN = 10 * 60, CLOSE = 19 * 60, STEP = 30, LUNCH = [13 * 60, 14 * 60];
   function weekend(d) { return d.getDay() === 0 || d.getDay() === 6; }
+  // Рамки, в которых мастер может записать клиентку вручную, даже вне обычного графика
+  var EARLY = 7 * 60, LATE = 22 * 60;
 
   // ---------- хранилище демо ----------
   var KEY = "monro-demo-v1";
@@ -871,6 +875,7 @@ div.f { display: grid; gap: 8px; }
   // Примеры занятых окон: одинаковые для каждого дня при любом открытии
   var NAMES = ["Анна", "Ольга", "Екатерина", "Дарья", "Ирина", "Светлана", "Мария", "Юлия"];
   function seeded(k) {
+    if (weekend(new Date(k + "T12:00"))) return [];
     var h = 0; for (var i = 0; i < k.length; i++) h = (h * 31 + k.charCodeAt(i)) >>> 0;
     var r = function () { h = (h * 1103515245 + 12345) >>> 0; return h / 4294967296; };
     var out = [], t = OPEN + Math.floor(r() * 4) * STEP;
@@ -882,26 +887,33 @@ div.f { display: grid; gap: 8px; }
     }
     return out;
   }
+  // часы работы дня: свои, если мастер их поменял, иначе обычные
+  function dayHours(k) { return (st.hours || {})[k] || [OPEN, CLOSE]; }
+  // рабочий ли день для онлайн-записи: будни — да, если не закрыты; выходные — только если мастер открыл
+  function isWorkday(k) { if (st.dayoff[k]) return false; return weekend(new Date(k + "T12:00")) ? !!(st.workday || {})[k] : true; }
   function dayBookings(k) {
     // примеры могут быть перенесены мастером на другой день — тогда показываем их там, куда перенесли
     var ex = seeded(k).map(function (b) { var o = st.bookings.filter(function (x) { return x.id === b.id; })[0]; return o || b; }).filter(function (b) { return b.date === k; });
     var own = st.bookings.filter(function (b) { return b.date === k && b.seedDate !== k; });
     return ex.concat(own).sort(function (a, b) { return a.start - b.start; });
   }
-  function busyIntervals(k, ignore) {
+  // master = запись из кабинета: любые часы с 7 до 22, выходные, обед и закрытые окна не мешают
+  function busyIntervals(k, ignore, master) {
     var iv = dayBookings(k).filter(function (b) { return b.id !== ignore && (b.status === "booked" || b.status === "came" || b.status === "noshow"); })
       .map(function (b) { return [b.start, b.start + bmin(b)]; });
+    if (master) return iv;
     Object.keys(st.blocks[k] || {}).forEach(function (m) { m = Number(m); iv.push([m, m + STEP]); });
     iv.push(LUNCH);
     return iv;
   }
-  function freeSlots(k, minutes, ignore) {
-    if (st.dayoff[k] || weekend(new Date(k + "T12:00"))) return [];
-    var iv = busyIntervals(k, ignore), out = [], now = new Date(), isToday = k === dkey(now), nowM = now.getHours() * 60 + now.getMinutes() + 60;
-    for (var t = OPEN; t + minutes <= CLOSE; t += STEP) {
+  function freeSlots(k, minutes, ignore, master) {
+    if (!master && !isWorkday(k)) return [];
+    var hr = master ? [EARLY, LATE] : dayHours(k), wh = dayHours(k), work = isWorkday(k);
+    var iv = busyIntervals(k, ignore, master), out = [], now = new Date(), isToday = k === dkey(now), nowM = now.getHours() * 60 + now.getMinutes() + (master ? 0 : 60);
+    for (var t = hr[0]; t + minutes <= hr[1]; t += STEP) {
       if (isToday && t < nowM) continue;
       var clash = iv.some(function (x) { return t < x[1] && t + minutes > x[0]; });
-      out.push({ t: t, free: !clash });
+      out.push({ t: t, free: !clash, out: !work || t < wh[0] || t + minutes > wh[1] });
     }
     return out;
   }
@@ -1009,7 +1021,7 @@ div.f { display: grid; gap: 8px; }
   function dayBtns(sel, withFree) {
     var h = "";
     for (var i = 0; i < 14; i++) {
-      var d = addDays(i), k = dkey(d), off = weekend(d) || st.dayoff[k];
+      var d = addDays(i), k = dkey(d), off = !isWorkday(k);
       var cnt = withFree && !off ? freeSlots(k, bmin(bk)).filter(function (s) { return s.free; }).length : null;
       var dis = withFree && (off || cnt === 0);
       h += '<button class="day" data-d="' + k + '" aria-pressed="' + (sel === k) + '"' + (dis ? " disabled" : "") + '><small>' + (i === 0 ? "сег" : WD[d.getDay()]) + '</small><b class="num">' + d.getDate() + '</b><em>' + (off ? "выходной" : withFree ? (cnt ? cnt + " окон" : "занято") : d.toLocaleDateString("ru-RU", { month: "short" })) + '</em></button>';
@@ -1040,9 +1052,8 @@ div.f { display: grid; gap: 8px; }
     toast(v ? "Добавили снятие: +200 ₽, +30 минут" : "Без снятия");
   });
   function renderSum() {
-    var s = svc(bk.svc), first = !st.bookings.some(function (b) { return !b.example; });
-    var price = first ? Math.round(s.price * 0.9 / 10) * 10 : s.price;
-    $("bSum").innerHTML = '<div><span>' + s.name + '</span><b>' + rub(price) + (first ? " (−10%)" : "") + '</b></div>' +
+    var s = svc(bk.svc), price = s.price;
+    $("bSum").innerHTML = '<div><span>' + s.name + '</span><b>' + priceText(s) + '</b></div>' +
       (bk.remove ? '<div><span>Снятие чужой работы</span><b class="num">' + rub(REMOVE.price) + '</b></div>' : '') +
       '<div><span>Когда</span><b>' + whenText(bk.date, bk.start) + '</b></div><div><span>Длительность</span><b>' + dur(bmin(bk)) + '</b></div>' +
       (bk.remove ? '<div class="big"><span style="color:inherit">Итого</span><span class="num">' + rub(price + REMOVE.price) + '</span></div>' : '');
@@ -1152,13 +1163,18 @@ div.f { display: grid; gap: 8px; }
     }).join("") : '<p class="note">На этот день записей нет. Нажмите «+ Добавить запись», если записали клиентку по телефону.</p>';
     flashId = null;
     var iv = dayBookings(aDate).filter(function (b) { return b.status !== "cancelled"; }).map(function (b) { return [b.start, b.start + bmin(b)]; });
-    var g = "";
-    for (var t = OPEN; t < CLOSE; t += STEP) {
+    var g = "", wh = dayHours(aDate), work = isWorkday(aDate), opt = "";
+    for (var m = EARLY; m <= LATE; m += STEP) opt += '<option value="' + m + '">' + hm(m) + '</option>';
+    $("aFrom").innerHTML = opt; $("aTo").innerHTML = opt; $("aFrom").value = wh[0]; $("aTo").value = wh[1];
+    $("aHours").hidden = !work; $("aGrid").hidden = !work;
+    $("aHoursNote").textContent = work ? "Клиентки записываются онлайн только в эти часы. Сами вы можете записать клиентку на любое время и в выходной через «+ Добавить запись». Нажмите на окно ниже, чтобы закрыть его для онлайн-записи."
+      : "Выходной: онлайн-запись закрыта. Записать клиентку вручную можно через «+ Добавить запись», или откройте день для онлайн-записи кнопкой выше.";
+    for (var t = wh[0]; t < wh[1]; t += STEP) {
       var lunch = t >= LUNCH[0] && t < LUNCH[1], busy = lunch || iv.some(function (x) { return t < x[1] && t + STEP > x[0]; }), blk = st.blocks[aDate] && st.blocks[aDate][t];
       g += '<button class="gs num' + (busy ? " busy" : blk ? " blocked" : "") + '" data-g="' + t + '"' + (busy ? " disabled" : "") + '>' + (lunch ? "обед" : hm(t)) + '</button>';
     }
     $("aGrid").innerHTML = g;
-    $("aDayOff").textContent = st.dayoff[aDate] ? "Открыть день" : "Выходной весь день";
+    $("aDayOff").textContent = work ? "Сделать выходным" : "Сделать рабочим";
     var trl = (st.training || []).slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; });
     $("aTrain").innerHTML = trl.length ? trl.map(function (t) {
       var f = TRAIN.formats.filter(function (x) { return x.id === t.fmt; })[0] || TRAIN.formats[0];
@@ -1174,7 +1190,7 @@ div.f { display: grid; gap: 8px; }
     if (b.dataset.a === "move") { openEditor(rec); return; }
     var own = ownCopy(rec);
     own.status = { came: "came", noshow: "noshow", cancel: "cancelled", restore: "booked" }[b.dataset.a];
-    if (own.status === "booked" && !freeSlots(own.date, bmin(own), own.id).some(function (x) { return x.t === own.start && x.free; })) { own.status = "cancelled"; toast("Это время уже занято. Перенесите запись на другое окно"); }
+    if (own.status === "booked" && !freeSlots(own.date, bmin(own), own.id, true).some(function (x) { return x.t === own.start && x.free; })) { own.status = "cancelled"; toast("Это время уже занято. Перенесите запись на другое окно"); }
     else toast({ came: "Отмечено: пришла", noshow: "Отмечено: не пришла", cancel: "Запись отменена", restore: "Запись восстановлена" }[b.dataset.a]);
     save(); renderAdmin();
   });
@@ -1191,27 +1207,40 @@ div.f { display: grid; gap: 8px; }
     if (st.blocks[aDate][t]) delete st.blocks[aDate][t]; else st.blocks[aDate][t] = 1;
     save(); renderAdmin();
   });
-  $("aDayOff").onclick = function () { if (st.dayoff[aDate]) delete st.dayoff[aDate]; else st.dayoff[aDate] = 1; save(); renderAdmin(); toast(st.dayoff[aDate] ? "День закрыт для записи" : "День открыт"); };
+  $("aDayOff").onclick = function () {
+    st.workday = st.workday || {};
+    if (isWorkday(aDate)) { st.dayoff[aDate] = 1; delete st.workday[aDate]; }
+    else { delete st.dayoff[aDate]; if (weekend(new Date(aDate + "T12:00"))) st.workday[aDate] = 1; }
+    save(); renderAdmin(); toast(isWorkday(aDate) ? "День открыт для онлайн-записи" : "Выходной: онлайн-запись закрыта");
+  };
+  function saveHours() {
+    var a = Number($("aFrom").value), b = Number($("aTo").value);
+    if (b - a < 60) { toast("Рабочий день должен быть не короче часа"); renderAdmin(); return; }
+    st.hours = st.hours || {};
+    if (a === OPEN && b === CLOSE) delete st.hours[aDate]; else st.hours[aDate] = [a, b];
+    save(); renderAdmin(); toast("Часы на этот день: " + hm(a) + "–" + hm(b));
+  }
+  $("aFrom").onchange = saveHours; $("aTo").onchange = saveHours;
 
   // Шторка: добавить запись вручную или перенести существующую
   var ed = null;
   $("eSvc").innerHTML = SERVICES.map(function (s) { return '<option value="' + s.id + '">' + s.name + ' · ' + priceText(s) + ' · ' + dur(s.min) + '</option>'; }).join("");
-  function edSlots() { return freeSlots(ed.date, bmin(ed), ed.id); }
+  function edSlots() { return freeSlots(ed.date, bmin(ed), ed.id, true); }
   function renderEditor() {
     var sl = $("eDays").scrollLeft, h = "";
     for (var i = 0; i < 14; i++) {
-      var d = addDays(i), k = dkey(d), off = weekend(d) || st.dayoff[k];
-      var cnt = off ? 0 : freeSlots(k, bmin(ed), ed.id).filter(function (x) { return x.free; }).length;
+      var d = addDays(i), k = dkey(d), off = !isWorkday(k);
+      var cnt = freeSlots(k, bmin(ed), ed.id, true).filter(function (x) { return x.free; }).length;
       h += '<button class="day" data-d="' + k + '" aria-pressed="' + (k === ed.date) + '"' + (!cnt ? " disabled" : "") + '><small>' + (i === 0 ? "сег" : WD[d.getDay()]) + '</small><b class="num">' + d.getDate() + '</b><em>' + (off ? "выходной" : cnt ? cnt + " окон" : "занято") + '</em></button>';
     }
     $("eDays").innerHTML = h; $("eDays").scrollLeft = sl;
     var list = edSlots();
-    $("eSlots").innerHTML = list.length ? list.map(function (x) { return '<button class="slot num" data-t="' + x.t + '"' + (x.free ? "" : " disabled") + ' aria-pressed="' + (ed.start === x.t) + '">' + hm(x.t) + '</button>'; }).join("") : '<p class="note" style="grid-column:1/-1">В этот день свободных окон нет.</p>';
+    $("eSlots").innerHTML = list.length ? list.map(function (x) { return '<button class="slot num' + (x.out ? ' out' : '') + '" data-t="' + x.t + '"' + (x.free ? "" : " disabled") + ' aria-pressed="' + (ed.start === x.t) + '" title="' + (x.out ? 'вне обычного графика' : '') + '">' + hm(x.t) + '</button>'; }).join("") : '<p class="note" style="grid-column:1/-1">В этот день свободных окон нет.</p>';
   }
   function openEditor(rec) {
     ed = rec ? { id: rec.id, svc: rec.svc, remove: !!rec.remove, date: rec.date, start: rec.start, move: true } : { id: null, svc: "gel", remove: false, date: aDate, start: null, move: false };
     // если выбранный день выходной или занят — открываем ближайший день со свободным временем
-    if (!freeSlots(ed.date, bmin(ed), ed.id).some(function (x) { return x.free; })) { for (var i = 0; i < 14; i++) { var k = dkey(addDays(i)); if (freeSlots(k, bmin(ed), ed.id).some(function (x) { return x.free; })) { ed.date = k; break; } } }
+    if (!freeSlots(ed.date, bmin(ed), ed.id, true).some(function (x) { return x.free; }) && rec === null) { for (var i = 0; i < 14; i++) { var k = dkey(addDays(i)); if (freeSlots(k, bmin(ed), ed.id, true).some(function (x) { return x.free; })) { ed.date = k; break; } } }
     $("eTitle").textContent = ed.move ? "Перенести запись" : "Новая запись";
     $("eWho").textContent = ed.move ? rec.name + " · " + svc(rec.svc).name + " · сейчас: " + whenText(rec.date, rec.start) : "Для клиентки, которая записалась по телефону или в мессенджере.";
     $("eSvcL").hidden = ed.move; $("eContact").hidden = ed.move; $("eRmL").hidden = ed.move; $("eRm").checked = false; $("eSvc").value = ed.svc; $("eName").value = ""; $("ePhone").value = ""; $("eErr").hidden = true;
