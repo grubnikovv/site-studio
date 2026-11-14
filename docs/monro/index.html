@@ -406,6 +406,19 @@ section.block.tight { padding-block: 32px clamp(56px, 8vw, 96px); }
 .chip { border: 1.5px solid var(--line); background: var(--paper); border-radius: 999px; padding: 8px 16px; font-size: 14px; font-weight: 700; transition: background .25s, color .25s, border-color .25s; }
 .chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .gal .ph { transition: opacity .35s, transform .35s; }
+.ph.work { padding: 0; border: 0; background: var(--blush); overflow: hidden; cursor: zoom-in; display: block; }
+.ph.work img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s ease; }
+.ph.work:hover img { transform: scale(1.05); }
+.pdlg { border: 0; padding: 0; background: transparent; width: min(560px, 94vw); max-width: none; overflow: visible; }
+.pdlg::backdrop { background: rgba(12, 6, 9, .88); }
+.pdlg[open] { animation: vin .3s ease; }
+.pbox { position: relative; margin: 0; }
+.pbox img { display: block; width: 100%; max-height: 80vh; object-fit: contain; border-radius: 18px; background: #111; }
+.pbox figcaption { display: flex; justify-content: space-between; gap: 12px; color: #EADCE0; font-size: 14px; padding: 10px 4px 0; }
+.pbox figcaption span:last-child { color: #A8999F; flex: none; }
+.pnav { position: absolute; top: 40%; width: 44px; height: 44px; border: 0; border-radius: 50%; background: rgba(0,0,0,.5); color: #fff; font-size: 28px; line-height: 1; display: grid; place-content: center; padding-bottom: 4px; }
+.pnav.prev { left: 8px; } .pnav.next { right: 8px; }
+@media (prefers-reduced-motion: reduce) { .ph.work img { transition: none; } .pdlg[open] { animation: none; } }
 .gal.small { grid-template-columns: repeat(4, 1fr); }
 .gal.small .ph:nth-child(1) { grid-column: auto; grid-row: auto; aspect-ratio: 4 / 5; }
 @media (max-width: 700px) { .gal.small { grid-template-columns: repeat(2, 1fr); } }
@@ -1329,6 +1342,7 @@ div.f { display: grid; gap: 8px; }
   </div></section>
 </main>
 
+<dialog class="pdlg" id="pDlg" aria-label="Фото работы"><figure class="pbox"><img id="pImg" alt=""><figcaption><span id="pCap"></span><span id="pNum"></span></figcaption><button type="button" class="pnav prev" id="pPrev" aria-label="Предыдущее фото">‹</button><button type="button" class="pnav next" id="pNext" aria-label="Следующее фото">›</button><button type="button" class="vclose" id="pClose" aria-label="Закрыть фото">×</button></figure></dialog>
 <dialog class="vdlg" id="vDlg" aria-label="Видео: как пройти до студии"><div class="vbox"><button type="button" class="vclose" id="vClose" aria-label="Закрыть видео">×</button><div id="vBody"></div></div></dialog>
 
 <!-- ===== ЗАПИСЬ ===== -->
@@ -1666,10 +1680,57 @@ div.f { display: grid; gap: 8px; }
   $("pFeet").innerHTML = ["ped", "pedg", "pedf", "pedp", "pedh", "nit"].map(function (id) { return priceRow(svc(id)); }).join("");
 
   var phIcon = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 21V9a4 4 0 0 1 8 0v12"></path><path d="M10 9.5a2 2 0 0 1 4 0"></path></svg>';
-  var GAL = [["m", "Маникюр"], ["d", "Дизайн"], ["e", "Наращивание"], ["p", "Педикюр"], ["m", "Маникюр"], ["d", "Дизайн"], ["e", "Наращивание"], ["m", "Маникюр"], ["p", "Педикюр"], ["d", "Дизайн"], ["m", "Маникюр"], ["e", "Наращивание"]];
-  function ph(g) { return '<div class="ph" data-c="' + g[0] + '" role="img" aria-label="Место для фото: ' + g[1] + '">' + phIcon + 'Фото: ' + g[1].toLowerCase() + '</div>'; }
-  $("homeGal").innerHTML = GAL.slice(0, 4).map(ph).join("");
-  $("gal").innerHTML = GAL.map(ph).join("");
+  // работы Марины: [номер файла, раздел (m — маникюр, p — педикюр, e — наращивание, d — дизайн), подпись, ширина, высота]
+  var WORKS = [
+    [6, "e", "Длинный квадратный френч", 640, 853],
+    [2, "d", "Молочный маникюр с цветами и золотой поталью", 640, 855],
+    [12, "e", "Наращивание, оранжевый неоновый френч", 640, 853],
+    [7, "p", "Педикюр с красным гель-лаком", 625, 1080],
+    [4, "m", "Короткий френч с серебряными сердечками", 640, 853],
+    [1, "d", "Неоновый френч и цветные линии на миндальных ногтях", 640, 853],
+    [14, "e", "Длинные стилеты с дизайном", 640, 496],
+    [9, "p", "Педикюр, нюдовый гель-лак с блеском", 640, 853],
+    [8, "m", "Френч с переливающимися хлопьями", 640, 853],
+    [3, "d", "Серебряные и чёрные волны с блёстками", 640, 853],
+    [11, "e", "Наращивание, квадратный френч", 640, 712],
+    [17, "m", "Миндальный френч со стразами", 640, 480],
+    [10, "p", "Педикюр с ярко-красным покрытием", 640, 880],
+    [19, "d", "Дизайн «зебра» на молочной базе", 640, 1138],
+    [15, "e", "Стилеты в коричневых и сливовых тонах", 640, 853],
+    [5, "m", "Нюдовый френч с блёстками на безымянном пальце", 640, 692],
+    [20, "d", "Зимний дизайн с ягодами", 640, 853],
+    [13, "e", "Наращивание, классический френч", 640, 853],
+    [18, "m", "Чёрный маникюр с блёстками", 640, 1385],
+    [16, "e", "Очень длинное наращивание с розовыми блёстками", 640, 480]
+  ];
+  function nn(i) { return (i < 10 ? "0" : "") + i; }
+  function work(w, k) {
+    return '<button type="button" class="ph work" data-c="' + w[1] + '" data-k="' + k + '" aria-label="Открыть фото: ' + w[2] + '"><img src="img/works/' + nn(w[0]) + '.webp" width="' + w[3] + '" height="' + w[4] + '" alt="' + w[2] + '" loading="lazy" decoding="async"></button>';
+  }
+  $("homeGal").innerHTML = WORKS.slice(0, 4).map(work).join("");
+  $("gal").innerHTML = WORKS.map(work).join("");
+  // просмотр фото на весь экран: листать стрелками или свайпом, закрыть крестиком или нажатием мимо
+  var pIdx = 0, pList = [];
+  function showPhoto() {
+    var w = WORKS[pList[pIdx]];
+    $("pImg").src = "img/works/" + nn(w[0]) + "-l.webp"; $("pImg").alt = w[2];
+    $("pCap").textContent = w[2]; $("pNum").textContent = (pIdx + 1) + " / " + pList.length;
+  }
+  function openPhoto(k, scope) {
+    pList = [].map.call(scope.querySelectorAll(".work:not([hidden])"), function (x) { return Number(x.dataset.k); });
+    pIdx = Math.max(0, pList.indexOf(k)); showPhoto(); $("pDlg").showModal();
+  }
+  ["homeGal", "gal"].forEach(function (id) {
+    $(id).addEventListener("click", function (e) { var b = e.target.closest(".work"); if (b) openPhoto(Number(b.dataset.k), $(id)); });
+  });
+  function stepPhoto(d) { pIdx = (pIdx + d + pList.length) % pList.length; showPhoto(); }
+  $("pPrev").onclick = function () { stepPhoto(-1); }; $("pNext").onclick = function () { stepPhoto(1); };
+  $("pClose").onclick = function () { $("pDlg").close(); };
+  $("pDlg").addEventListener("click", function (e) { if (e.target === this) this.close(); });
+  $("pDlg").addEventListener("keydown", function (e) { if (e.key === "ArrowLeft") stepPhoto(-1); if (e.key === "ArrowRight") stepPhoto(1); });
+  var tx = null;
+  $("pDlg").addEventListener("touchstart", function (e) { tx = e.touches[0].clientX; }, { passive: true });
+  $("pDlg").addEventListener("touchend", function (e) { if (tx === null) return; var dx = e.changedTouches[0].clientX - tx; tx = null; if (Math.abs(dx) > 50) stepPhoto(dx < 0 ? 1 : -1); });
   $("galFilter").addEventListener("click", function (e) {
     var b = e.target.closest("[data-f]"); if (!b) return;
     document.querySelectorAll("#galFilter .chip").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
