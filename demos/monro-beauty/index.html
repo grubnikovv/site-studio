@@ -476,6 +476,18 @@ footer .fnav a:hover { color: var(--ink); }
 .prog b { color: var(--ink); font-weight: 700; }
 .courses3 { display: grid; gap: 18px; margin-bottom: 30px; }
 .courses3 { gap: 12px; }
+.legal { max-width: 760px; display: grid; gap: 14px; padding-bottom: 20px; }
+.legal h2 { font-size: clamp(20px, 2.6vw, 24px); margin: 18px 0 0; }
+.legal p, .legal li { margin: 0; color: var(--ink); line-height: 1.6; font-size: 15.5px; }
+.legal ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.legal a { color: var(--lac); }
+.legal .btn { color: inherit; }
+.ltable { display: grid; border-top: 1px solid var(--line); }
+.ltable div { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.ltable span { color: var(--mute); line-height: 1.55; }
+@media (max-width: 600px) { .ltable div { grid-template-columns: minmax(0, 1fr); gap: 4px; } }
+.fill { background: #FFE58A; color: #3A2A00; border-radius: 4px; padding: 0 4px; }
+.check a { color: var(--lac); text-decoration: underline; text-underline-offset: 3px; }
 .mdl { padding-top: clamp(20px, 4vw, 36px); }
 .mdl-card { border-radius: 26px; padding: clamp(20px, 3.5vw, 32px); background: linear-gradient(135deg, color-mix(in srgb, var(--lac) 14%, var(--paper)), var(--paper) 70%); border: 1px solid color-mix(in srgb, var(--lac) 30%, var(--line)); display: grid; gap: 14px; }
 .mdl-k { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--lac); }
@@ -1085,7 +1097,7 @@ div.f { display: grid; gap: 8px; }
       <label class="f">Телефон<input type="tel" id="tPhone" autocomplete="tel" inputmode="tel" placeholder="+7"></label>
       <div class="sum" id="tSum"></div>
       <label class="check"><input type="checkbox" id="tRules"><span>Согласен(на) с правилами: предоплата закрепляет даты. Если отменить раньше чем за 7 дней до начала — вернём всю предоплату, если позже — не вернём.</span></label>
-      <label class="check"><input type="checkbox" id="tPd"><span>Согласен(на) на обработку персональных данных (152-ФЗ).</span></label>
+      <label class="check"><input type="checkbox" id="tPd"><span>Согласен(на) на <a href="#soglasie" target="_blank">обработку персональных данных</a> и с <a href="#politika" target="_blank">политикой конфиденциальности</a>.</span></label>
       <p class="err" id="tErr" hidden></p>
       <button class="btn" type="submit" id="tPay">Оплатить предоплату</button>
       <div class="tdone" id="tDone" hidden></div>
@@ -1111,7 +1123,7 @@ div.f { display: grid; gap: 8px; }
       <div class="row2"><label class="f">Ваше имя<input type="text" id="cName" autocomplete="given-name"></label><label class="f">Телефон<input type="tel" id="cPhone" inputmode="tel" placeholder="+7"></label></div>
       <div class="till-warn" id="cTillWarn"></div>
       <label class="check"><input type="checkbox" id="cTerm"><span id="cTermText">Знаю, до какого числа действует сертификат.</span></label>
-      <label class="check"><input type="checkbox" id="cPd"><span>Согласен(на) на обработку персональных данных (152-ФЗ).</span></label>
+      <label class="check"><input type="checkbox" id="cPd"><span>Согласен(на) на <a href="#soglasie" target="_blank">обработку персональных данных</a> и с <a href="#politika" target="_blank">политикой конфиденциальности</a>.</span></label>
       <p class="err" id="cErr" hidden></p>
       <button class="btn" type="submit" id="cGo">Оплатить 3 000 ₽</button>
       <p class="note" style="margin:0">Оплата полностью, картой или по СБП. Сертификат сохранится за вашим номером телефона — его всегда можно найти ниже, в блоке «Мои сертификаты».</p>
@@ -1162,6 +1174,79 @@ div.f { display: grid; gap: 8px; }
 </main>
 
 <!-- ===== КОНТАКТЫ ===== -->
+<main id="v-politika" class="page" hidden>
+  <section class="phero"><div class="wrap"><span class="eyebrow">Документы</span><h1>Политика обработки персональных данных</h1><p class="lead">Как студия «М.А» собирает, хранит и защищает ваши данные. Редакция от <span id="polDate">14 ноября 2026</span> г.</p></div></section>
+  <section class="block tight"><div class="wrap legal">
+    <h2>1. Общие положения</h2>
+    <p>1.1. Политика составлена по Федеральному закону от 27.07.2006 № 152-ФЗ «О персональных данных» и действует для всех данных, которые оператор получает через этот сайт, по телефону и в мессенджерах.</p>
+    <p>1.2. Оператор персональных данных — Шевченко Марина <span class="fill">[отчество]</span>, плательщик налога на профессиональный доход (самозанятая), ИНН <span class="fill">[ИНН]</span> (далее — «Оператор»). Адрес: Волгоградская область, г. Михайловка, ул. Обороны, 41. Телефон и WhatsApp: <a href="tel:+79954284788">+7 995 428-47-88</a>.</p>
+    <p>1.3. Оператор обрабатывает данные законно и честно: только для указанных целей, только нужный объём и не дольше, чем требуется.</p>
+
+    <h2>2. Какие данные и зачем мы обрабатываем</h2>
+    <div class="ltable">
+      <div><b>Запись на процедуру</b><span>Имя, телефон, выбранная услуга, дата и время, комментарий, способ напоминания. Чтобы записать вас, напомнить о визите, связаться при переносе и вести историю посещений.</span></div>
+      <div><b>Подарочный сертификат</b><span>Имя и телефон покупателя, имя получателя (по желанию), номер, номинал и остаток сертификата. Чтобы выпустить сертификат, найти его по телефону и списать оплату.</span></div>
+      <div><b>Обучение</b><span>Имя, телефон, выбранный курс и даты, сведения о предоплате. Чтобы закрепить даты, связаться перед обучением, выдать сертификат о прохождении курса.</span></div>
+      <div><b>Модели на обучение</b><span>Имя, телефон, дата и время процедуры. Чтобы договориться о бесплатной процедуре и при необходимости пригласить снова.</span></div>
+      <div><b>Работа сайта</b><span>Технические данные: файлы cookie и локальное хранилище браузера, а при подключении Яндекс Метрики — обезличенные сведения о посещениях (тип устройства, браузер, просмотренные страницы). Чтобы сайт работал и становился удобнее.</span></div>
+    </div>
+    <p>Оператор не обрабатывает специальные категории данных (о здоровье, убеждениях и т. п.) и биометрические данные. Не указывайте их в комментариях к записи.</p>
+
+    <h2>3. Основания обработки</h2>
+    <p>Ваше согласие на обработку персональных данных, которое вы даёте, отмечая галочку в форме на сайте (<a href="#soglasie" target="_blank">текст согласия</a>), или устно при записи по телефону; исполнение договора об оказании услуги или обучения; требования налогового законодательства — для сведений об оплатах.</p>
+
+    <h2>4. Как мы обрабатываем данные</h2>
+    <p>4.1. Действия с данными: сбор, запись, систематизация, накопление, хранение, уточнение, извлечение, использование, передача (предоставление, доступ), блокирование, удаление и уничтожение. Обработка смешанная — с помощью компьютера и без него.</p>
+    <p>4.2. Данные хранятся на сервере, расположенном в Российской Федерации. Доступ к ним есть только у Оператора через личный кабинет с паролем.</p>
+    <p>4.3. Данные не продаются и не передаются третьим лицам для рекламы. Передача возможна только:</p>
+    <ul>
+      <li>хостинг-провайдеру, на сервере которого работает сайт, — для хранения;</li>
+      <li>сервису уведомлений (Telegram или СМС) — чтобы Оператор узнал о новой записи и чтобы вам пришло напоминание, если вы его выбрали;</li>
+      <li>банку — при оплате сертификата или предоплаты за обучение; данные банковской карты вводятся на стороне банка и Оператору не передаются;</li>
+      <li>государственным органам — только в случаях, прямо предусмотренных законом.</li>
+    </ul>
+    <p>4.4. Если для уведомлений используется Telegram, данные записи (имя, телефон, услуга, время) могут передаваться на его серверы за пределами России. Такая передача происходит только с вашего согласия.</p>
+
+    <h2>5. Сроки хранения</h2>
+    <p>5.1. Данные о записях и сертификатах хранятся, пока нужны для обслуживания, но не дольше 3 лет после последнего визита или окончания срока сертификата. Данные моделей — не дольше 3 лет после последней процедуры.</p>
+    <p>5.2. Сведения об оплатах хранятся в сроки, установленные налоговым законодательством.</p>
+    <p>5.3. После окончания срока или при отзыве согласия данные уничтожаются в течение 30 дней, если закон не требует хранить их дольше.</p>
+
+    <h2>6. Ваши права</h2>
+    <p>Вы можете:</p>
+    <ul>
+      <li>узнать, какие ваши данные есть у Оператора и как они обрабатываются;</li>
+      <li>потребовать исправить, заблокировать или удалить данные, если они неточны, устарели или не нужны для целей обработки;</li>
+      <li>отозвать согласие на обработку;</li>
+      <li>обжаловать действия Оператора в Роскомнадзоре или в суде.</li>
+    </ul>
+    <p>Для этого напишите или позвоните по телефону <a href="tel:+79954284788">+7 995 428-47-88</a> (WhatsApp) либо направьте письменное обращение по адресу: г. Михайловка, ул. Обороны, 41. Оператор ответит в течение 10 рабочих дней. Срок может быть продлён ещё на 5 рабочих дней — с объяснением причины.</p>
+
+    <h2>7. Как защищены данные</h2>
+    <p>Сайт работает по защищённому протоколу HTTPS. Вход в кабинет мастера — только по паролю. Делаются резервные копии. Данные из заявок видит только Оператор. Оператор не передаёт пароль от кабинета другим людям.</p>
+
+    <h2>8. Изменение политики</h2>
+    <p>Оператор может обновлять политику. Новая редакция действует с момента публикации на этой странице. Действующая версия всегда доступна в подвале сайта по ссылке «Политика конфиденциальности».</p>
+    <p class="legal-links"><a class="btn sm ghost" href="#soglasie">Согласие на обработку данных</a></p>
+  </div></section>
+</main>
+<main id="v-soglasie" class="page" hidden>
+  <section class="phero"><div class="wrap"><span class="eyebrow">Документы</span><h1>Согласие на обработку персональных данных</h1></div></section>
+  <section class="block tight"><div class="wrap legal">
+    <p>Отмечая галочку «Согласен(на) на обработку персональных данных» в форме на сайте, я свободно, своей волей и в своём интересе даю согласие Шевченко Марина <span class="fill">[отчество]</span>, плательщик налога на профессиональный доход (самозанятая), ИНН <span class="fill">[ИНН]</span>, адрес: Волгоградская область, г. Михайловка, ул. Обороны, 41 (далее — «Оператор»), на обработку моих персональных данных на следующих условиях.</p>
+    <h2>Какие данные</h2>
+    <p>Имя, номер телефона, а также сведения, которые я указываю в форме: выбранная услуга или курс, дата и время, комментарий, способ напоминания, имя получателя подарочного сертификата.</p>
+    <h2>Цели</h2>
+    <p>Запись на процедуру или обучение, напоминание о визите, связь со мной по поводу записи, выпуск и учёт подарочного сертификата, ведение истории посещений.</p>
+    <h2>Действия</h2>
+    <p>Сбор, запись, систематизация, накопление, хранение, уточнение, извлечение, использование, передача (предоставление, доступ) хостинг-провайдеру и сервису уведомлений, блокирование, удаление и уничтожение. Обработка смешанная — с помощью компьютера и без него.</p>
+    <h2>Передача за границу</h2>
+    <p>Я согласен(на), что для уведомления мастера о моей записи и для напоминаний мои имя, телефон и данные записи могут передаваться через мессенджер Telegram, серверы которого находятся за пределами России.</p>
+    <h2>Срок и отзыв</h2>
+    <p>Согласие действует до достижения целей обработки, но не дольше 3 лет после моего последнего визита. Я могу отозвать согласие в любой момент, сообщив Оператору по телефону или в WhatsApp <a href="tel:+79954284788">+7 995 428-47-88</a> либо письмом по адресу Оператора. После отзыва данные будут уничтожены в течение 30 дней.</p>
+    <p>Я ознакомлен(а) с <a href="#politika">Политикой обработки персональных данных</a>.</p>
+  </div></section>
+</main>
 <main id="v-kontakty" class="page" hidden>
   <section class="phero"><div class="wrap"><span class="eyebrow">Контакты</span><h1>Где принимаю</h1></div></section>
   <section class="block tight"><div class="wrap contact">
@@ -1213,7 +1298,7 @@ div.f { display: grid; gap: 8px; }
         <div class="seg3" id="bRem"><button type="button" data-v="tg" aria-pressed="true">Telegram</button><button type="button" data-v="sms" aria-pressed="false">SMS</button><button type="button" data-v="none" aria-pressed="false">Не нужно</button></div>
         <span class="note" id="bRemNote"></span>
       </div>
-      <label class="check"><input type="checkbox" id="bPd"><span>Согласен(на) на обработку персональных данных для записи и напоминаний (152-ФЗ).</span></label>
+      <label class="check"><input type="checkbox" id="bPd"><span>Согласен(на) на <a href="#soglasie" target="_blank">обработку персональных данных</a> и с <a href="#politika" target="_blank">политикой конфиденциальности</a>.</span></label>
       <p class="err" id="bErr" hidden></p>
       <button class="btn" type="submit" id="bPay">Записаться</button>
       <p class="note">Оплата на месте после процедуры: наличными или переводом.</p>
@@ -1309,7 +1394,7 @@ div.f { display: grid; gap: 8px; }
 <footer>
   <div class="wrap">
     <div class="fcol"><span class="logo"><svg class="brand" aria-hidden="true"><use href="#lgm"></use></svg><span class="brand-t">Академия маникюра и&nbsp;педикюра</span><span class="sr">М.А — академия маникюра и педикюра</span></span><span>Марина Шевченко · Михайловка, ул. Обороны, 41</span></div>
-    <div class="fnav"><a href="#uslugi">Услуги</a><a href="#obuchenie">Обучение</a><a href="#voprosy">Вопросы</a><a href="#kontakty">Контакты</a><a href="#admin">Вход для мастера</a></div>
+    <div class="fnav"><a href="#uslugi">Услуги</a><a href="#obuchenie">Обучение</a><a href="#voprosy">Вопросы</a><a href="#kontakty">Контакты</a><a href="#admin">Вход для мастера</a><a href="#politika">Политика конфиденциальности</a></div>
   </div>
 </footer>
 
@@ -2572,7 +2657,7 @@ div.f { display: grid; gap: 8px; }
 
   // ---------- маршруты ----------
   var ORDER = [["home", "Главная"], ["uslugi", "Услуги и цены"], ["zapis", "Онлайн-запись"], ["raboty", "Портфолио"], ["obuchenie", "Обучение"], ["o-mastere", "О мастере и награды"], ["voprosy", "Вопросы и ответы"], ["sertifikat", "Подарочный сертификат"], ["kontakty", "Контакты"]];
-  var VIEWS = ["home", "uslugi", "raboty", "obuchenie", "o-mastere", "voprosy", "sertifikat", "kontakty", "zapis", "admin"];
+  var VIEWS = ["home", "uslugi", "raboty", "obuchenie", "o-mastere", "voprosy", "sertifikat", "kontakty", "zapis", "admin", "politika", "soglasie"];
   var pendingPick = null, pendingTo = null, curView = null;
   document.addEventListener("click", function (e) {
     var a = e.target.closest("[data-pick]"); if (a) pendingPick = a.dataset.pick;
@@ -2582,7 +2667,7 @@ div.f { display: grid; gap: 8px; }
   var TITLES = { home: "М.А — маникюр, педикюр и обучение в Михайловке", uslugi: "Цены на маникюр и педикюр в Михайловке — М.А", raboty: "Работы мастера маникюра — М.А, Михайловка",
     obuchenie: "Обучение маникюру и педикюру в Михайловке — М.А", "o-mastere": "Марина Шевченко, мастер маникюра — М.А", voprosy: "Вопросы и ответы — М.А, Михайловка",
     sertifikat: "Подарочный сертификат на маникюр в Михайловке — М.А",
-    kontakty: "Контакты — академия маникюра «М.А», Михайловка, ул. Обороны, 41", zapis: "Онлайн-запись на маникюр — М.А", admin: "Кабинет мастера — М.А" };
+    kontakty: "Контакты — академия маникюра «М.А», Михайловка, ул. Обороны, 41", zapis: "Онлайн-запись на маникюр — М.А", admin: "Кабинет мастера — М.А", politika: "Политика обработки персональных данных — М.А", soglasie: "Согласие на обработку персональных данных — М.А" };
   function route() {
     var h = location.hash.slice(1), v = "home";
     var certHash = h.indexOf("cert-") === 0 ? h.slice(5) : null;
@@ -2592,7 +2677,7 @@ div.f { display: grid; gap: 8px; }
     if (changed && !$("eSheet").hidden) closeEditor();
     VIEWS.forEach(function (k) { var el = $("v-" + k); el.hidden = k !== v; if (k === v && changed) { el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter"); } });
     document.body.classList.toggle("home", v === "home");
-    $("mbar").hidden = v === "zapis" || v === "admin" || v === "obuchenie";
+    $("mbar").hidden = v === "zapis" || v === "admin" || v === "obuchenie" || v === "politika" || v === "soglasie";
     drawer.querySelectorAll("[data-r]").forEach(function (a) { if (a.dataset.r === v || false) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
     var i = -1; ORDER.forEach(function (o, j) { if (o[0] === v) i = j; });
     var nx = i >= 0 && v !== "zapis" ? ORDER[(i + 1) % ORDER.length] : null;
