@@ -730,6 +730,7 @@ div.f { display: grid; gap: 8px; }
 .share .btn:first-child { grid-column: 1 / -1; }
 .mc-acts { display: flex; gap: 8px; margin-top: 4px; }
 .mc-acts button { border: 1px solid rgba(255,255,255,.3); background: rgba(255,255,255,.08); color: #fff; border-radius: 999px; padding: 6px 14px; font-size: 13px; font-weight: 700; }
+.mc-acts .mc-open { border-radius: 999px; padding: 6px 16px; font-size: 13px; font-weight: 700; text-decoration: none; background: #fff; color: #5B1426; }
 .mc-list { display: grid; gap: 10px; }
 .mc { border-radius: 18px; padding: 16px 18px; color: #F6ECEF; display: grid; gap: 6px; background: radial-gradient(90% 120% at 100% 0%, #8E1D3D 0%, transparent 60%), linear-gradient(150deg, #3A0F1D, #1E0910 75%); }
 .mc .g-mark { height: 46px; }
@@ -2797,12 +2798,14 @@ div.f { display: grid; gap: 8px; }
   function renderMyCerts() {
     var d = $("mcPhone").value.replace(/\D/g, "").replace(/^8/, "7");
     var list = (st.certs || []).filter(function (c) { return c.phone.replace(/\D/g, "").replace(/^8/, "7") === d; }).reverse();
+    // один сертификат — сразу открываем его страницу; несколько — список, у каждого кнопка «Открыть»
+    if (list.length === 1) { location.hash = "cert-" + certKey(list[0].code); return; }
     $("mcList").innerHTML = list.length ? list.map(function (c) {
       var stt = certState(c);
       return '<div class="mc"><div class="g-top"><span class="g-brand"><svg class="g-mark" aria-hidden="true"><use href="#lgm"></use></svg><span class="g-bt">Академия маникюра и&nbsp;педикюра</span></span><span class="pill ' + stt[1] + '">' + stt[0] + '</span></div>' +
         '<b class="mc-sum num">' + rub(certBalance(c)) + (certBalance(c) < c.sum ? ' <small>из ' + rub(c.sum) + '</small>' : '') + '</b>' +
         '<div class="g-bot"><span>№ ' + esc(c.code) + (c.to ? ' · для: ' + esc(c.to) + ' ' + HEART : '') + '</span><span>до ' + shortDate(c.till) + ' вкл.</span></div>' +
-        '<div class="mc-acts"><button type="button" data-share="img" data-code="' + esc(c.code) + '">Поделиться</button><button type="button" data-share="link" data-code="' + esc(c.code) + '">Ссылка</button></div></div>';
+        '<div class="mc-acts"><a class="mc-open" href="#cert-' + certKey(c.code) + '">Открыть</a><button type="button" data-share="img" data-code="' + esc(c.code) + '">Поделиться</button><button type="button" data-share="link" data-code="' + esc(c.code) + '">Ссылка</button></div></div>';
     }).join("") : '<p class="note">На этот номер сертификатов не нашли. Проверьте номер или напишите Марине.</p><button type="button" class="btn sm ghost" data-chat="Здравствуйте! Не могу найти свой подарочный сертификат." data-chat-title="Найти сертификат">Написать Марине</button>';
   }
   $("mcForm").addEventListener("submit", function (e) { e.preventDefault(); if ($("mcPhone").value.replace(/\D/g, "").length < 11) { toast("Введите телефон полностью"); return; } renderMyCerts(); });
