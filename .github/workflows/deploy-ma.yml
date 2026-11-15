@@ -61,3 +61,5 @@ jobs:
           echo "Сайт: $code"
           curl -s -X POST "$SITE/server/api.php" -H 'Content-Type: application/json' -d '{"type":"x"}'; echo
           curl -s --max-time 60 "$SITE/server/poll.php?key=$ADMIN_KEY&diag=1"
+          curl -s --max-time 60 "$SITE/server/poll.php?key=$ADMIN_KEY"
+          curl -s --max-time 60 "$SITE/server/poll.php?key=$ADMIN_KEY&diag=1" | tail -n +4

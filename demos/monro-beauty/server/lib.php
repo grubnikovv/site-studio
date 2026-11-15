@@ -28,16 +28,22 @@ function db() {
 // Вызов Telegram Bot API. Ошибки пишем в лог, но не роняем страницу.
 function tg($method, $params = []) {
     $url = rtrim(cfg('tg_api'), '/') . '/bot' . cfg('bot_token') . '/' . $method;
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_POST => true, CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => ($method === 'getUpdates' ? 40 : 15),
-        CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
-        CURLOPT_POSTFIELDS => json_encode($params, JSON_UNESCAPED_UNICODE),
-    ]);
-    $res = curl_exec($ch);
+    // Связь с Telegram из России бывает нестабильной: до 4 попыток, быстрый таймаут подключения, только IPv4
+    for ($try = 1; $try <= 4; $try++) {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true, CURLOPT_RETURNTRANSFER => true, CURLOPT_CONNECTTIMEOUT => 4,
+            CURLOPT_TIMEOUT => ($method === 'getUpdates' ? 40 : 15), CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+            CURLOPT_POSTFIELDS => json_encode($params, JSON_UNESCAPED_UNICODE),
+        ]);
+        $res = curl_exec($ch);
+        $err = curl_error($ch); $connected = curl_getinfo($ch, CURLINFO_CONNECT_TIME) > 0;
+        curl_close($ch);
+        if ($res !== false || $connected) break;  // повторяем только если не удалось подключиться
+    }
     $ok = $res !== false && (json_decode($res, true)['ok'] ?? false);
-    if (!$ok) logline('tg ' . $method . ' failed: ' . ($res === false ? curl_error($ch) : $res));
-    curl_close($ch);
+    if (!$ok) logline('tg ' . $method . ' failed (попыток ' . $try . '): ' . ($res === false ? $err : $res));
     return $res === false ? null : json_decode($res, true);
 }
 
