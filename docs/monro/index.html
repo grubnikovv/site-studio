@@ -671,6 +671,10 @@ div.f { display: grid; gap: 8px; }
 .a-login { max-width: 420px; margin: 8px auto 24px; display: grid; gap: 10px; }
 .a-login h3 { margin: 0; }
 .a-login input { width: 100%; }
+.pass-w { position: relative; }
+.pass-w input { padding-right: 52px; }
+.pass-eye { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border: 0; background: none; color: var(--mute); display: grid; place-content: center; border-radius: 10px; }
+.pass-eye[aria-pressed="false"] .eye-x { display: none; }
 #v-admin.locked .atabs, #v-admin.locked .atab, #v-admin.locked .bellwrap, #v-admin.locked .a-out { display: none !important; }
 .a-save { margin: -6px 0 12px; font-size: 13px; color: var(--mute); }
 .a-save.bad { color: #B3261E; font-weight: 700; }
@@ -1637,7 +1641,7 @@ div.f { display: grid; gap: 8px; }
       <h3>Вход для мастера</h3>
       <p class="note">Введите пароль кабинета. Вход запомнится на этом телефоне на полгода.</p>
       <label for="aPass">Пароль</label>
-      <input type="password" id="aPass" autocomplete="current-password" required>
+      <div class="pass-w"><input type="password" id="aPass" autocomplete="current-password" required><button type="button" class="pass-eye" id="aEye" aria-label="Показать пароль" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="eye-x" d="M4 4l16 16"/></svg></button></div>
       <p class="err" id="aPassErr" hidden></p>
       <button class="btn" type="submit" id="aPassGo">Войти</button>
     </form>
@@ -3583,6 +3587,11 @@ div.f { display: grid; gap: 8px; }
     $("aSave").hidden = !SYNC || locked; outBtn.hidden = !SYNC || locked;
     document.querySelectorAll("[data-demo]").forEach(function (el) { el.hidden = SYNC; });
   }
+  $("aEye").onclick = function () {
+    var show = $("aPass").type === "password";
+    $("aPass").type = show ? "text" : "password";
+    this.setAttribute("aria-pressed", show); this.setAttribute("aria-label", show ? "Скрыть пароль" : "Показать пароль");
+  };
   $("aLogin").addEventListener("submit", function (e) {
     e.preventDefault();
     var btn = $("aPassGo"); btn.disabled = true; $("aPassErr").hidden = true;
