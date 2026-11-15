@@ -2204,7 +2204,7 @@ div.f { display: grid; gap: 8px; }
       $("bRemDone").querySelectorAll("[data-bot]").forEach(function (x) {
         x.onclick = function () {
           x.classList.remove("pop"); void x.offsetWidth; x.classList.add("pop");
-          if (x.dataset.bot === "tg" && API) { botLink.then(function (r) { if (r && r.tg) location.href = r.tg; else toast("Не удалось открыть бота. Напишите Марине — она подключит напоминания"); }); return; }
+          if (x.dataset.bot === "tg" && API) { botLink.then(function (r) { if (r && r.tg) { try { navigator.sendBeacon(API, JSON.stringify({ type: "poke" })); } catch (e) {} location.href = r.tg; } else toast("Не удалось открыть бота. Напишите Марине — она подключит напоминания"); }); return; }
           toast("В рабочей версии откроется бот студии в " + REM_NAME[x.dataset.bot] + " — нажмите в нём «Старт»");
         };
       });

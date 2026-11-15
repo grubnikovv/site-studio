@@ -1,7 +1,7 @@
 <?php
 // Приём событий с сайта: новая запись, отмена, брони обучения и сертификаты.
 // Сайт шлёт POST с JSON. Ответ — JSON.
-require __DIR__ . '/lib.php';
+require __DIR__ . '/bot.php';
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $allow = array_filter(array_map('trim', explode(',', (string)cfg('allow_origin'))));
@@ -25,7 +25,6 @@ $in = json_decode(file_get_contents('php://input'), true) ?: [];
 if (!empty($in['website'])) json_out(['ok' => true]);  // ловушка для ботов
 
 // Ключ ссылки на бота: без него чужую запись к себе не привязать
-function link_key($id) { return substr(hash_hmac('sha256', $id, cfg('admin_key')), 0, 10); }
 function clean($s, $max) { return mb_substr(trim(preg_replace('/\s+/u', ' ', strip_tags((string)$s))), 0, $max); }
 
 $type = $in['type'] ?? '';
@@ -63,6 +62,9 @@ if ($type === 'cancel') {
     notify_admins("❌ <b>Клиентка отменила запись</b>\n" . h($b['name']) . ', ' . phone_nice($b['phone']) . "\n" . h($b['svc']) . "\n" . when_text($b['date'], $b['start']) . "\nВремя освободилось.");
     json_out(['ok' => true]);
 }
+
+// Клиентка открывает бота с сайта: послушать Telegram полминуты, чтобы бот ответил сразу (если на хостинге нет cron)
+if ($type === 'poke') { reply_then_continue(['ok' => true]); poll_run(25); exit; }
 
 // Прочие события (обучение, сертификаты): просто уведомление Марине
 if ($type === 'note') {

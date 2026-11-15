@@ -76,6 +76,17 @@ function phone_ok($p) {
 // +7 900 111-22-33
 function phone_nice($d) { return '+7 ' . substr($d, 1, 3) . ' ' . substr($d, 4, 3) . '-' . substr($d, 7, 2) . '-' . substr($d, 9); }
 
+// Отдать ответ браузеру сразу, а скрипт пусть ещё поработает (например, послушает Telegram)
+function reply_then_continue($data) {
+    ignore_user_abort(true); @set_time_limit(90);
+    $body = json_encode($data, JSON_UNESCAPED_UNICODE);
+    header('Content-Type: application/json; charset=utf-8');
+    header('Content-Length: ' . strlen($body)); header('Connection: close');
+    echo $body;
+    if (function_exists('fastcgi_finish_request')) fastcgi_finish_request();
+    else { while (ob_get_level()) ob_end_flush(); flush(); }
+}
+
 function json_out($data, $code = 200) {
     http_response_code($code);
     header('Content-Type: application/json; charset=utf-8');
