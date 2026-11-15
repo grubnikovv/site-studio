@@ -75,7 +75,7 @@ function doc_public($doc) {
     $out['bookings'] = array_values(array_map(fn($b) => array_intersect_key($b, array_flip(['id', 'date', 'start', 'svc', 'remove', 'status', 'dur', 'example'])), $doc['bookings']));
     $out['training'] = array_values(array_map(fn($t) => array_intersect_key($t, array_flip(['id', 'course', 'date', 'days', 'status', 'hold', 'claimed', 'example'])), $doc['training']));
     $models = [];
-    foreach (($doc['models'] ?? []) as $k => $m) $models[$k] = is_array($m) ? array_intersect_key($m, array_flip(['time'])) : $m;
+    foreach (($doc['models'] ?? []) as $k => $m) $models[$k] = is_array($m) ? array_intersect_key($m, array_flip(['time'])) + (!empty($m['name']) ? ['taken' => true] : []) : $m;
     $out['models'] = (object)$models;
     unset($out['certs'], $out['notes'], $out['modelBase'], $out['deleted']);
     foreach (['blocks', 'dayoff', 'hours', 'modelTimes', 'workday', 'bought'] as $k) if (isset($out[$k])) $out[$k] = (object)$out[$k];

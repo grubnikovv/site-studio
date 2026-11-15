@@ -1973,8 +1973,8 @@ div.f { display: grid; gap: 8px; }
     if (typeof renderBell === "function") renderBell();
     if (curView === "admin" && token && $("eSheet").hidden) renderTab();
     if (curView === "zapis" && bk && bk.date && !$("b2").hidden) renderDays();
-    if (curView === "obuchenie") { renderTrain(); renderTrainBand(); renderModels(); }
-    if (curView === "home" || curView === "obuchenie") { try { renderTrainBand(); renderModels(); } catch (e) {} }
+    // обучение и «Ищем моделей» есть на нескольких страницах — обновляем всегда
+    try { renderTrain(); renderTrainBand(); renderModels(); } catch (e) {}
   }
   // Срок хранения по политике: данные клиентки удаляются через 3 года после её последнего визита.
   // Прошедшие визиты остаются без имени и телефона (для статистики выручки), отменённые удаляются целиком.
@@ -2683,7 +2683,7 @@ div.f { display: grid; gap: 8px; }
     return out.sort(function (a, b) { return a.k < b.k ? -1 : 1; });
   }
   function modelTime(i) { return i === 0 ? MODEL.first : MODEL.next; }
-  function modelOf(k) { var m = (st.models || {})[k]; return m && m.name ? m : null; }
+  function modelOf(k) { var m = (st.models || {})[k]; return m && (m.name || m.taken) ? m : null; }  // taken — модель есть (посетителю имя не показываем)
   function digits(p) { return String(p || "").replace(/\D/g, "").replace(/^8/, "7"); }
   // база моделей: все, кого мама когда-либо записывала, с датами
   function modelBase() {
@@ -3639,7 +3639,7 @@ div.f { display: grid; gap: 8px; }
     if (v === "zapis") { resetBooking(pendingPick); pendingPick = null; }
     if (v === "admin" && (!SYNC || token)) renderTab();
     if (!SYNC) lockAdmin();
-    if (SYNC && changed && (v === "zapis" || v === "obuchenie" || v === "admin")) fetchState();
+    if (SYNC && changed) fetchState();
     if (certHash) showCertFromHash(certHash);
     if (pendingTo) { var el = $(pendingTo); pendingTo = null; if (el) { jumpTop(); setTimeout(function () { el.scrollIntoView({ behavior: "smooth", block: "center" }); }, 80); return; } }
     if (changed || !h || h === "top") jumpTop();
@@ -3732,7 +3732,7 @@ div.f { display: grid; gap: 8px; }
         });
       });
     });
-    setInterval(function () { if (document.visibilityState === "visible" && (token || curView === "zapis" || curView === "obuchenie")) fetchState(); }, 20000);
+    setInterval(function () { if (document.visibilityState === "visible" && (token || curView === "zapis" || curView === "obuchenie" || curView === "uslugi" || curView === "home")) fetchState(); }, 20000);
     document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") fetchState(); });
   }
   addEventListener("hashchange", route); route();
