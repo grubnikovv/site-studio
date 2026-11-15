@@ -45,20 +45,27 @@ function doc_note(&$doc, $icon, $title, $text, $go = null) {
     $doc['notes'] = array_slice(array_values(array_filter($doc['notes'], fn($n) => ($n['t'] ?? 0) > $lim)), 0, 200);
 }
 
-// Брони обучения и сертификаты, не оплаченные за 30 минут, отменяются сами
+// Брони обучения и сертификаты держатся 30 минут: за это время нужно оплатить, а Марине — нажать «Оплата пришла».
+// Не успели — бронь удаляется, Марине приходит сообщение с контактами (вдруг деньги всё же пришли).
 function doc_expire(&$doc) {
     $now = now_ms(); $changed = false;
-    foreach ($doc['training'] as &$t) {
-        if (($t['status'] ?? '') === 'wait' && empty($t['claimed']) && ($t['hold'] ?? 0) < $now) {
-            $t['status'] = 'nopay'; $changed = true;
-            doc_note($doc, '⌛', 'Бронь обучения отменилась', ($t['name'] ?? '') . ' не оплатила за 30 минут — даты снова свободны', ['tab' => 'req']);
+    foreach (['training', 'certs'] as $kind) {
+        $keep = [];
+        foreach ($doc[$kind] as $x) {
+            if (($x['status'] ?? '') !== 'wait' || ($x['hold'] ?? PHP_INT_MAX) >= $now) { $keep[] = $x; continue; }
+            $changed = true;
+            $who = ($x['name'] ?? '') . ', ' . ($x['phone'] ?? '');
+            $what = $kind === 'training' ? 'Бронь обучения' : 'Сертификат № ' . ($x['code'] ?? '');
+            if (!empty($x['claimed'])) {
+                $txt = $who . ' нажала «Я оплатил(а)», но оплату не подтвердили за 30 минут. Если деньги пришли — свяжитесь и оформите заново или верните.';
+                doc_note($doc, '⚠️', $what . ' удалена', $txt, ['tab' => 'req']);
+                notify_admins('⚠️ <b>' . h($what) . ' удалена</b>' . "\n" . h($txt));
+            } else {
+                doc_note($doc, '⌛', $what . ' отменена', $who . ' не оплатила за 30 минут' . ($kind === 'training' ? ' — даты снова свободны' : ''), ['tab' => 'req']);
+            }
         }
+        $doc[$kind] = $keep;
     }
-    unset($t);
-    foreach ($doc['certs'] as &$c) {
-        if (($c['status'] ?? '') === 'wait' && empty($c['claimed']) && ($c['hold'] ?? PHP_INT_MAX) < $now) { $c['status'] = 'nopay'; $changed = true; }
-    }
-    unset($c);
     return $changed;
 }
 

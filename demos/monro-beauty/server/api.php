@@ -202,16 +202,16 @@ if ($type === 'cert') {
 // Клиентка нажала «Я оплатил(а)»
 if ($type === 'claim') {
     $kind = ($in['kind'] ?? '') === 't' ? 'training' : 'certs'; $id = (string)($in['id'] ?? ''); $phone = phone_ok($in['phone'] ?? '');
-    [$doc, $v] = doc_load(true);
+    [$doc, $v] = doc_load(true); doc_expire($doc);
     $hit = null; foreach ($doc[$kind] as $i => $x) if (($x['id'] ?? '') === $id && digits_phone($x['phone'] ?? '') === $phone && $phone) $hit = $i;
     if ($hit === null) fail('Заявка не найдена.');
     $x = &$doc[$kind][$hit];
     if (($x['status'] ?? '') === 'wait' && empty($x['claimed'])) {
-        $x['claimed'] = now_ms(); $x['hold'] = now_ms() + 24 * 3600 * 1000;
+        $x['claimed'] = now_ms();  // срок брони не продлеваем: 30 минут на всё
         if ($kind === 'training') { $t = '💳 Ученица оплатила — проверьте'; $txt = ($x['name'] ?? '') . ' · предоплата ' . number_format((int)($x['pre'] ?? 0), 0, ',', ' ') . ' ₽ · проверьте поступление в Сбере'; }
         else { $t = '💳 Сертификат оплачен — проверьте'; $txt = '№ ' . ($x['code'] ?? '') . ' на ' . number_format((int)($x['sum'] ?? 0), 0, ',', ' ') . ' ₽ · ' . ($x['name'] ?? '') . ' · проверьте поступление в Сбере'; }
         doc_note($doc, '💳', mb_substr($t, 2), $txt, ['tab' => 'req']);
-        notify_admins('<b>' . h($t) . "</b>\n" . h($txt) . "\nОтметьте в кабинете «Оплата пришла».");
+        notify_admins('<b>' . h($t) . "</b>\n" . h($txt) . "\nОтметьте в кабинете «Оплата пришла» до " . date('H:i', (int)($x['hold'] / 1000)) . " — иначе бронь удалится сама.");
     }
     unset($x);
     done($doc, $v);

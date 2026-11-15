@@ -17,5 +17,9 @@ if (isset($_GET['diag'])) {  // проверка связи: poll.php?key=...&di
     exit;
 }
 poll_run(PHP_SAPI === 'cli' ? (int)(getenv('POLL_SECS') ?: 50) : 20);
+// просроченные брони обучения и сертификаты — удалить, даже если сайт никто не открывал
+require_once __DIR__ . '/store.php';
+[$doc, $v] = doc_load(true);
+if (doc_expire($doc)) doc_save($doc, $v); else doc_abort();
 include __DIR__ . '/cron.php';
 if (PHP_SAPI !== 'cli') echo "Готово: сообщения боту обработаны.\n";

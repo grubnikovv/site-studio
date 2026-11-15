@@ -1810,7 +1810,7 @@ div.f { display: grid; gap: 8px; }
   var MODEL_SVC = { man: "Маникюр с покрытием гель-лак", ped: "Педикюр с покрытием гель-лак", ext: "Наращивание или коррекция ногтей" };
   // Оплата напрямую: ссылка на оплату по СБП из «Своё дело» в СберБанк Онлайн (появится при запуске).
   // Сайт сам не видит оплату: Марина отмечает «Оплата пришла» в кабинете.
-  // payMin — сколько минут держим бронь до нажатия «Я оплатил(а)»; checkHours — сколько ждём, пока Марина проверит оплату
+  // payMin — сколько минут держится бронь: за это время нужно оплатить, а Марине — нажать «Оплата пришла». Иначе бронь удаляется сама
   var PAY = { link: "https://www.sberbank.ru/ru/choise_bank?requisiteNumber=79950305079&bankCode=100000000111", payMin: 30, checkHours: 24 };  // ТЕСТ: ссылка Влада, заменить на мамину
   function tgPreview(text) {
     return "";  // в рабочей версии уведомление Марине приходит ботом; клиентам его не показываем
@@ -2486,7 +2486,7 @@ div.f { display: grid; gap: 8px; }
   document.addEventListener("click", function (e) {
     var b = e.target.closest("[data-claim]"); if (!b) return;
     var r = findClaim(b.dataset.claim); if (!r || r.status !== "wait") return;
-    r.claimed = Date.now(); if (b.dataset.claim[0] === "t") r.hold = Date.now() + PAY.checkHours * 36e5;
+    r.claimed = Date.now();  // бронь всё равно держится 30 минут: за это время Марина подтверждает оплату
     if (SYNC) {
       var kind = b.dataset.claim[0] === "t" ? "training" : "certs"; if (mine[kind][r.id]) addMine(kind, r);
       apiSend({ type: "claim", kind: b.dataset.claim[0], id: r.id, phone: r.phone });
@@ -2504,7 +2504,7 @@ div.f { display: grid; gap: 8px; }
       var left = Number(t.dataset.until) - Date.now(), box = t.closest(".paybox");
       if (left > 0) { var m = Math.floor(left / 6e4), sec = Math.floor(left % 6e4 / 1e3); t.innerHTML = 'Бронь держится <b>' + (m < 10 ? "0" : "") + m + ":" + (sec < 10 ? "0" : "") + sec + '</b>'; t.classList.toggle("soon", left < 5 * 6e4); return; }
       var r = findClaim(box.dataset.box);
-      if (r && r.status === "wait" && !r.claimed) { r.status = "nopay"; save(); if (box.dataset.box[0] === "t") note("⌛", "Бронь обучения отменилась", r.name + " не оплатила за 30 минут — даты снова свободны", { tab: "req" }); }
+      if (r && r.status === "wait") { r.status = "nopay"; save(); if (box.dataset.box[0] === "t") note("⌛", "Бронь обучения отменилась", r.name + " не оплатила за 30 минут — даты снова свободны", { tab: "req" }); }
       box.innerHTML = '<div class="ptimer bad">Время вышло — бронь отменена.</div><p>' + (box.dataset.box[0] === "t" ? 'Даты снова свободны. Если вы уже оплатили — напишите Марине, она всё проверит.' : 'Если вы уже оплатили — напишите Марине, она всё проверит.') + '</p><button type="button" class="btn ghost" data-chat="Здравствуйте, Марина! Бронь на сайте отменилась, но я уже оплатил(а). Проверьте, пожалуйста." data-chat-title="Бронь отменилась">Написать Марине</button>';
       if (box.dataset.box[0] === "t") { renderTrain(); renderTrainBand(); }
     });
@@ -2852,12 +2852,12 @@ div.f { display: grid; gap: 8px; }
     $("aTrain").innerHTML = trl.length ? trl.map(function (t) {
       var c = course(t.course || (t.dir === "ped" ? "ped" : "man")), tdays = t.days || [t.date];
       if (t.status === "wait" && !(t.hold > Date.now())) t.status = "nopay";
-      var stt = t.status === "wait" ? (t.claimed ? ["Ученица оплатила — проверьте", "bad"] : ["Бронь, ждёт оплату · до " + new Date(t.hold).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }), "bad"]) : t.status === "nopay" ? ["Не оплачена · даты свободны", ""] : t.status === "paid" ? ["Предоплата получена", "ok"] : t.status === "refund" ? ["Отменена · предоплата возвращена", ""] : ["Отменена поздно · предоплата ваша", "bad"];
+      var stt = t.status === "wait" ? (t.claimed ? ["Оплатила — подтвердите до " + new Date(t.hold).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }), "bad"] : ["Бронь, ждёт оплату · до " + new Date(t.hold).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }), "bad"]) : t.status === "nopay" ? ["Не оплачена · даты свободны", ""] : t.status === "paid" ? ["Предоплата получена", "ok"] : t.status === "refund" ? ["Отменена · предоплата возвращена", ""] : ["Отменена поздно · предоплата ваша", "bad"];
       var canDel = t.status !== "paid" && !(t.status === "wait" && t.hold > Date.now());
       return '<div class="bk" data-tcard="' + t.id + '"><div class="r1"><b>' + rangeText(tdays) + ', ' + hm(TRAIN.from) + '–' + hm(TRAIN.to) + '</b><span class="r1-r"><span class="pill ' + stt[1] + '">' + stt[0] + '</span>' +
         (canDel ? '<button type="button" class="trash" data-tdel="' + t.id + '" aria-label="Удалить заявку"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></button>' : '') + '</span></div>' +
         (canDel ? '<div class="sure" data-tsure="' + t.id + '" hidden><span>Удалить заявку насовсем?</span><button type="button" class="sure-yes" data-tdelok="' + t.id + '">Удалить</button><button type="button" class="sure-no" data-tdelno>Отмена</button></div>' : '') + '<div><b style="font-weight:700">' + esc(t.name) + '</b> · ' + esc(t.phone) + (t.example ? ' <span class="pill">пример</span>' : '') + '</div><div class="info">' + c.short + ' · ' + daysWord(tdays.length) + ' · ' + rub(t.price) + ' · предоплата ' + rub(t.pre) + '</div>' +
-        (t.status === "wait" ? '<div class="info">' + (t.claimed ? 'Ученица нажала «Я оплатил(а)». Проверьте поступление ' + rub(t.pre) + ' в СберБанк Онлайн. Даты держатся до ' + new Date(t.hold).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + '.' : 'Ученица ещё оплачивает. Если не нажмёт «Я оплатил(а)» за 30 минут — бронь отменится сама.') + '</div><div class="acts"><button data-tpay="' + t.id + '">Оплата пришла</button><button data-tno="' + t.id + '">Отменить заявку</button></div>' : '') +
+        (t.status === "wait" ? '<div class="info">' + (t.claimed ? 'Ученица нажала «Я оплатил(а)». Проверьте поступление ' + rub(t.pre) + ' в СберБанк Онлайн и нажмите «Оплата пришла» до ' + new Date(t.hold).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }) + ' — иначе бронь удалится сама.' : 'Ученица ещё оплачивает. Если не нажмёт «Я оплатил(а)» за 30 минут — бронь отменится сама.') + '</div><div class="acts"><button data-tpay="' + t.id + '">Оплата пришла</button><button data-tno="' + t.id + '">Отменить заявку</button></div>' : '') +
         (t.status === "paid" ? (dkey(new Date()) <= refundTill(t)
           ? '<div class="keep">💰 <b>Не тратьте ' + rub(t.pre) + ' до ' + shortDate(refundTill(t)) + ' включительно.</b> Если ученица отменит до этой даты — предоплату нужно вернуть. С ' + shortDate(dkey(new Date(new Date(refundTill(t) + "T12:00").getTime() + 864e5))) + ' она ваша.</div>'
           : '<div class="keep ok">✅ <b>Предоплата ' + rub(t.pre) + ' ваша.</b> До начала меньше 7 дней — при отмене она не возвращается.</div>') : '') +
@@ -3563,7 +3563,7 @@ div.f { display: grid; gap: 8px; }
         '<div class="info">Номинал ' + rub(c.sum) + ' · <b style="color:var(--ink)">остаток ' + rub(bal) + '</b> · до ' + shortDate(c.till || c.created) + '</div>' +
         '<div><b style="font-weight:700">' + esc(c.name) + '</b> · ' + esc(c.phone) + (c.to ? ' · для: ' + esc(c.to) : '') + '</div>' +
         ((c.spent || []).length ? '<div class="info">Списано: ' + c.spent.map(function (x) { return shortDate(x.d) + ' — ' + rub(x.sum) + (x.who ? ' (' + esc(x.who) + ', запись ' + shortDate(x.date) + ')' : ''); }).join(", ") + '</div>' : '') +
-        (c.status === "wait" ? '<div class="info">' + (c.claimed ? 'Покупатель нажал «Я оплатил(а)». ' : 'Покупатель ещё оплачивает. ') + 'Проверьте поступление ' + rub(c.sum) + ' в СберБанк Онлайн.</div><div class="acts"><button data-cpay="' + c.id + '">Оплата пришла</button><button data-cno="' + c.id + '">Удалить — не оплачен</button></div>' : '') +
+        (c.status === "wait" ? '<div class="info">' + (c.claimed ? 'Покупатель нажал «Я оплатил(а)». ' : 'Покупатель ещё оплачивает. ') + 'Проверьте поступление ' + rub(c.sum) + ' в СберБанк Онлайн' + (c.hold ? ' и нажмите «Оплата пришла» до ' + new Date(c.hold).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }) + ' — иначе сертификат удалится сам' : '') + '.</div><div class="acts"><button data-cpay="' + c.id + '">Оплата пришла</button><button data-cno="' + c.id + '">Удалить — не оплачен</button></div>' : '') +
         (open ? '<div class="spend"><input type="number" inputmode="numeric" min="1" max="' + bal + '" placeholder="Сумма, ₽" data-amt="' + c.id + '" aria-label="Сколько списать с сертификата"><button type="button" data-cert="' + c.id + '" data-st="part">Списать</button><button type="button" data-cert="' + c.id + '" data-st="used">Закрыть полностью</button></div>' : '') + '</div>';
     }).join("") : '<p class="note">Покупок пока нет. Они появятся, когда кто-то оплатит сертификат на странице «Подарочный сертификат».</p>';
   }
