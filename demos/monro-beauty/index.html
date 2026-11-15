@@ -786,6 +786,25 @@ div.f { display: grid; gap: 8px; }
 .tab-n { display: inline-grid; place-content: center; min-width: 20px; height: 20px; margin-left: 6px; padding: 0 6px; border-radius: 999px; background: #C0392B; color: #fff; font-size: 12px; font-weight: 800; vertical-align: 1px; }
 .paybox .btn.locked { opacity: .45; }
 .hp { position: absolute !important; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.adm-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.adm-head h2 { margin: 0; }
+.bellwrap { position: relative; }
+.bell-btn { position: relative; width: 46px; height: 46px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); display: grid; place-content: center; }
+.bell-btn.ring svg { animation: bell 2.5s ease-in-out infinite; transform-origin: 50% 10%; }
+.bell-n { position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: #C0392B; color: #fff; font-size: 12px; font-weight: 800; display: grid; place-content: center; box-shadow: 0 0 0 2px var(--bg); }
+.npanel { position: absolute; right: 0; top: 54px; z-index: 30; width: min(360px, calc(100vw - 32px)); max-height: 70vh; overflow: auto; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 18px 40px rgba(0,0,0,.18); }
+.np-h { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 16px 8px; position: sticky; top: 0; background: var(--paper); }
+.np-h span { color: var(--mute); font-size: 12px; }
+.np-list { display: grid; padding: 0 8px 8px; }
+.ni { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; text-align: left; width: 100%; border: 0; background: none; padding: 10px 8px; border-radius: 12px; color: var(--ink); }
+.ni:hover { background: color-mix(in srgb, var(--lac) 6%, transparent); }
+.ni.new { background: color-mix(in srgb, var(--lac) 9%, transparent); }
+.ni i { font-style: normal; font-size: 18px; line-height: 1.2; }
+.ni b { display: block; font-size: 14px; }
+.ni span { display: block; color: var(--mute); font-size: 13px; line-height: 1.4; }
+.ni small { display: block; color: var(--mute); font-size: 11.5px; margin-top: 2px; }
+.ni.new b::after { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #C0392B; margin-left: 6px; vertical-align: 2px; }
+.np-empty { padding: 6px 12px 14px; color: var(--mute); font-size: 14px; }
 .paybox p { margin: 0; color: var(--mute); font-size: 14px; }
 .paybox .btn { width: 100%; }
 .pk { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 28px; align-items: start; }
@@ -1595,7 +1614,11 @@ div.f { display: grid; gap: 8px; }
 <!-- ===== АДМИНКА ===== -->
 <main id="v-admin" class="page screen" hidden>
   <div class="wrap">
-    <h2>Кабинет мастера</h2>
+    <div class="adm-head"><h2>Кабинет мастера</h2>
+      <div class="bellwrap"><button type="button" class="bell-btn" id="nBell" aria-label="Уведомления" aria-expanded="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6.5 2 6.5H4S6 14 6 9z"></path><path d="M10 19a2 2 0 0 0 4 0"></path></svg><span class="bell-n" id="nCount" hidden></span></button>
+        <div class="npanel" id="nPanel" hidden><div class="np-h"><b>Уведомления</b><span>за 2 недели</span></div><div class="np-list" id="nList"></div></div>
+      </div>
+    </div>
     <p class="demo">Тестовая версия: записи хранятся только на этом телефоне. В рабочей версии — вход по паролю и общая база для всех устройств.</p>
     <div class="atabs" id="aTabs" role="tablist">
       <button type="button" data-tab="day" aria-pressed="true">День</button>
@@ -1791,6 +1814,14 @@ div.f { display: grid; gap: 8px; }
     if (changed) save();
   }
   purgeOld();
+  // Уведомления для мастера: храним 2 недели, потом удаляем
+  (function () { var n0 = (st.notes || []).length; st.notes = (st.notes || []).filter(function (n) { return Date.now() - n.t < 14 * 864e5; }); if (st.notes.length !== n0) save(); })();
+  function note(icon, title, text, go) {
+    st.notes = st.notes || [];
+    st.notes.unshift({ id: "n" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), t: Date.now(), icon: icon, title: title, text: text, go: go || null, read: false });
+    st.notes = st.notes.slice(0, 200); save();
+    if (typeof renderBell === "function") renderBell();
+  }
 
   function dkey(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
   function addDays(n) { var d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + n); return d; }
@@ -2153,6 +2184,7 @@ div.f { display: grid; gap: 8px; }
     setTimeout(function () {
       var s = svc(bk.svc), b = { id: "b" + Date.now().toString(36), date: bk.date, start: bk.start, svc: s.id, name: name, phone: phoneNice(ph), note: $("bNote").value.trim().slice(0, 200), price: bk.price, remove: bk.remove, remind: bk.remind, status: "booked", created: Date.now() };
       st.bookings.push(b); save();
+      note("📅", "Новая запись", b.name + " · " + s.name + " · " + whenText(b.date, b.start), { tab: "day", date: b.date });
       $("myPhone").value = b.phone; $("myList").innerHTML = "";
       $("bDone").textContent = whenText(b.date, b.start) + ". " + s.name + (b.remove ? " и снятие чужой работы" : "") + ". Адрес: ул. Обороны, 41.";
       $("bRemDone").innerHTML = b.remind === "none"
@@ -2242,6 +2274,8 @@ div.f { display: grid; gap: 8px; }
     var b = e.target.closest("[data-claim]"); if (!b) return;
     var r = findClaim(b.dataset.claim); if (!r || r.status !== "wait") return;
     r.claimed = Date.now(); if (b.dataset.claim[0] === "t") r.hold = Date.now() + PAY.checkHours * 36e5;
+    if (b.dataset.claim[0] === "t") note("💳", "Ученица оплатила — проверьте", r.name + " · предоплата " + rub(r.pre) + " · проверьте поступление в Сбере", { tab: "req" });
+    else note("💳", "Сертификат оплачен — проверьте", "№ " + r.code + " на " + rub(r.sum) + " · " + r.name + " · проверьте поступление в Сбере", { tab: "req" });
     save();
     var box = b.closest(".paybox"); box.querySelector(".ptimer").outerHTML = '<div class="ptimer ok">✓ Спасибо! Марина проверит оплату и подтвердит' + (b.dataset.claim[0] === "t" ? ' — даты держим за вами' : '') + ' ' + HEART.replace('class="heart"', 'class="heart draw"') + '</div>';
     b.textContent = "Написать Марине ещё раз";
@@ -2253,7 +2287,7 @@ div.f { display: grid; gap: 8px; }
       var left = Number(t.dataset.until) - Date.now(), box = t.closest(".paybox");
       if (left > 0) { var m = Math.floor(left / 6e4), sec = Math.floor(left % 6e4 / 1e3); t.innerHTML = 'Бронь держится <b>' + (m < 10 ? "0" : "") + m + ":" + (sec < 10 ? "0" : "") + sec + '</b>'; t.classList.toggle("soon", left < 5 * 6e4); return; }
       var r = findClaim(box.dataset.box);
-      if (r && r.status === "wait" && !r.claimed) { r.status = box.dataset.box[0] === "t" ? "nopay" : "nopay"; save(); }
+      if (r && r.status === "wait" && !r.claimed) { r.status = "nopay"; save(); if (box.dataset.box[0] === "t") note("⌛", "Бронь обучения отменилась", r.name + " не оплатила за 30 минут — даты снова свободны", { tab: "req" }); }
       box.innerHTML = '<div class="ptimer bad">Время вышло — бронь отменена.</div><p>' + (box.dataset.box[0] === "t" ? 'Даты снова свободны. Если вы уже оплатили — напишите Марине, она всё проверит.' : 'Если вы уже оплатили — напишите Марине, она всё проверит.') + '</p><button type="button" class="btn ghost" data-chat="Здравствуйте, Марина! Бронь на сайте отменилась, но я уже оплатил(а). Проверьте, пожалуйста." data-chat-title="Бронь отменилась">Написать Марине</button>';
       if (box.dataset.box[0] === "t") { renderTrain(); renderTrainBand(); }
     });
@@ -2296,6 +2330,7 @@ div.f { display: grid; gap: 8px; }
     if (b.dataset.sure !== "1") { b.dataset.sure = "1"; b.textContent = "Точно отменить? Нажмите ещё раз"; return; }
     var rec = st.bookings.filter(function (x) { return x.id === b.dataset.my; })[0]; if (!rec) return;
     rec.status = "cancelled"; rec.by = "client"; rec.cancelledAt = Date.now(); certUndo(rec, true); save(); renderMy();
+    note("❌", "Клиентка отменила запись", rec.name + " · " + svc(rec.svc).name + " · " + whenText(rec.date, rec.start) + " — время освободилось", { tab: "day", date: rec.date });
     toast("Запись отменена. Марина получит уведомление");
   });
   function resetBooking(pick) {
@@ -2386,6 +2421,7 @@ div.f { display: grid; gap: 8px; }
       st.training = st.training || [];
       st.training.push({ id: "t" + Date.now().toString(36), course: c.id, date: days[0], days: days, name: name, phone: phone, price: c.price, pre: c.pre, status: "wait", hold: Date.now() + PAY.payMin * 6e4 });
       var tid = st.training[st.training.length - 1];
+      note("🎓", "Бронь обучения — ждёт оплату", name + " · «" + c.short + "» · " + rangeText(days) + " · предоплата " + rub(c.pre), { tab: "req" });
       save(); btn.disabled = false; btn.textContent = "Забронировать и оплатить " + rub(c.pre);
       $("tDone").innerHTML = '<b>Даты забронированы на 30 минут.</b> Курс «' + c.short + '»: ' + rangeText(days) + ', с 10:00 до 17:00. Оплатите предоплату и нажмите «Я оплатил(а)» — после проверки Марины даты закрепятся окончательно.' +
         payBox(c.pre, "Здравствуйте, Марина! Я оплатила предоплату " + rub(c.pre) + " за курс «" + c.name + "». Даты: " + rangeText(days) + ", с 10:00 до 17:00. Меня зовут " + name + ", телефон " + phone + ".", "t:" + tid.id, tid.hold) +
@@ -2844,6 +2880,44 @@ div.f { display: grid; gap: 8px; }
     document.querySelectorAll(".atab").forEach(function (x) { x.hidden = x.dataset.tab !== aTab; });
     renderTab();
   });
+  function renderBell() {
+    var n = (st.notes || []).filter(function (x) { return !x.read; }).length;
+    $("nCount").hidden = !n; $("nCount").textContent = n > 99 ? "99+" : n; $("nBell").classList.toggle("ring", n > 0);
+    if (!$("nPanel").hidden) renderNotes();
+  }
+  function ago(t) {
+    var m = Math.round((Date.now() - t) / 6e4);
+    if (m < 1) return "только что"; if (m < 60) return m + " мин назад";
+    var d = new Date(t), today = dkey(new Date()), yest = dkey(addDays(-1)), k = dkey(d), time = d.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+    return k === today ? "сегодня в " + time : k === yest ? "вчера в " + time : d.toLocaleDateString("ru-RU", { day: "numeric", month: "short" }) + " в " + time;
+  }
+  function renderNotes() {
+    var list = st.notes || [];
+    $("nList").innerHTML = list.length ? list.map(function (n) {
+      return '<button type="button" class="ni' + (n.read ? '' : ' new') + '" data-note="' + n.id + '"><i>' + n.icon + '</i><span><b>' + esc(n.title) + '</b><span>' + esc(n.text) + '</span><small>' + ago(n.t) + '</small></span></button>';
+    }).join("") : '<p class="np-empty">Пока уведомлений нет. Здесь появятся новые записи, отмены, брони обучения и сертификаты.</p>';
+  }
+  $("nBell").addEventListener("click", function (e) {
+    e.stopPropagation();
+    var open = $("nPanel").hidden; $("nPanel").hidden = !open; this.setAttribute("aria-expanded", String(open));
+    if (open) {
+      renderNotes();
+      // открыла — значит прочитала (отметка видна, пока панель открыта)
+      (st.notes || []).forEach(function (n) { n.read = true; }); save();
+      $("nCount").hidden = true; $("nBell").classList.remove("ring");
+    }
+  });
+  document.addEventListener("click", function (e) { if (!$("nPanel").hidden && !e.target.closest(".bellwrap")) { $("nPanel").hidden = true; $("nBell").setAttribute("aria-expanded", "false"); } });
+  $("nList").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-note]"); if (!b) return;
+    var n = (st.notes || []).filter(function (x) { return x.id === b.dataset.note; })[0]; if (!n || !n.go) return;
+    $("nPanel").hidden = true;
+    var tabBtn = document.querySelector('#aTabs [data-tab="' + n.go.tab + '"]');
+    if (n.go.date) aDate = n.go.date;
+    if (tabBtn) tabBtn.click(); else renderTab();
+    if (n.go.tab === "day") setTimeout(function () { var x = document.querySelector('#aDays [data-d="' + n.go.date + '"]'); if (x) x.scrollIntoView({ block: "nearest", inline: "center" }); }, 50);
+  });
+  renderBell();
   function renderTab() { if (aTab === "clients") renderClients(); else if (aTab === "stats") renderStats(); else renderAdmin(); }
 
   // Все записи за период: от -90 дней до горизонта записи
@@ -3119,6 +3193,7 @@ div.f { display: grid; gap: 8px; }
       var code = newCertCode();
       st.certs.push({ id: "c" + Date.now().toString(36), code: code, sum: cSum, balance: cSum, to: $("cTo").value.trim().replace(/https?:\S+|www\.\S+/g, "").slice(0, 30), name: name, phone: phone, status: "wait", created: dkey(new Date()), till: dkey(certTill()), spent: [] });
       var cid = st.certs[st.certs.length - 1], until = Date.now() + PAY.payMin * 6e4;
+      note("🎁", "Новый сертификат — ждёт оплату", "№ " + code + " на " + rub(cSum) + " · " + name, { tab: "req" });
       $("mcPhone").value = phone;
       save(); renderGift(code); btn.disabled = false; btn.textContent = "Оплатить " + rub(cSum);
       $("cDone").innerHTML = "<b>Сертификат № " + code + "</b> на " + rub(cSum) + " создан и ждёт оплаты. Оплатите по СБП — как только Марина подтвердит поступление, он станет активным и его можно будет подарить." + payBox(cSum, "Здравствуйте, Марина! Я оплатил(а) подарочный сертификат № " + code + " на " + rub(cSum) + ". Меня зовут " + name + ", телефон " + phone + ".", "c:" + cid.id, until) +
