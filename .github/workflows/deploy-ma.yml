@@ -54,7 +54,10 @@ jobs:
           lftp -u "$FTP_USER,$FTP_PASSWORD" "$FTP_HOST" -e "set ftp:ssl-allow yes; set ssl:verify-certificate no; set net:max-retries 3; mirror -R --verbose=1 --exclude-glob server/data/ out/ $DIR/; bye"
       - name: Проверить
         if: steps.chk.outputs.ok == 'true'
+        env:
+          ADMIN_KEY: ${{ secrets.ADMIN_KEY }}
         run: |
           code=$(curl -s -o /dev/null -w '%{http_code}' "$SITE/")
           echo "Сайт: $code"
           curl -s -X POST "$SITE/server/api.php" -H 'Content-Type: application/json' -d '{"type":"x"}'; echo
+          curl -s --max-time 60 "$SITE/server/poll.php?key=$ADMIN_KEY&diag=1"
