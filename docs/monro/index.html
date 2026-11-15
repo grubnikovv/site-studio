@@ -778,8 +778,10 @@ div.f { display: grid; gap: 8px; }
 .ptimer { justify-self: start; padding: 6px 12px; border-radius: 999px; font-size: 14px; background: color-mix(in srgb, var(--lac) 10%, var(--paper)); color: var(--ink); }
 .ptimer b { font-variant-numeric: tabular-nums; color: var(--lac); }
 .ptimer.soon { background: color-mix(in srgb, #C0392B 14%, var(--paper)); }
-.ptimer.ok { background: color-mix(in srgb, var(--ok) 14%, var(--paper)); color: var(--ok); font-weight: 700; }
-.ptimer.bad { background: color-mix(in srgb, #C0392B 12%, var(--paper)); color: #C0392B; font-weight: 700; }
+.ptimer.ok { background: color-mix(in srgb, var(--ok) 14%, var(--paper)); color: var(--ok); font-weight: 700; border-radius: 12px; padding: 10px 14px; line-height: 1.45; }
+.ptimer.ok .heart { display: inline-block; vertical-align: -4px; margin-left: 2px; }
+.ptimer.ok .heart path { stroke: currentColor; }
+.ptimer.bad { background: color-mix(in srgb, #C0392B 12%, var(--paper)); color: #C0392B; font-weight: 700; border-radius: 12px; padding: 10px 14px; }
 .tab-n { display: inline-grid; place-content: center; min-width: 20px; height: 20px; margin-left: 6px; padding: 0 6px; border-radius: 999px; background: #C0392B; color: #fff; font-size: 12px; font-weight: 800; vertical-align: 1px; }
 .paybox .btn.locked { opacity: .45; }
 .paybox p { margin: 0; color: var(--mute); font-size: 14px; }
@@ -2182,7 +2184,7 @@ div.f { display: grid; gap: 8px; }
     var r = findClaim(b.dataset.claim); if (!r || r.status !== "wait") return;
     r.claimed = Date.now(); if (b.dataset.claim[0] === "t") r.hold = Date.now() + PAY.checkHours * 36e5;
     save();
-    var box = b.closest(".paybox"); box.querySelector(".ptimer").outerHTML = '<div class="ptimer ok">✓ Спасибо! Марина проверит оплату и подтвердит' + (b.dataset.claim[0] === "t" ? ' — даты держим за вами' : '') + '</div>';
+    var box = b.closest(".paybox"); box.querySelector(".ptimer").outerHTML = '<div class="ptimer ok">✓ Спасибо! Марина проверит оплату и подтвердит' + (b.dataset.claim[0] === "t" ? ' — даты держим за вами' : '') + ' ' + HEART.replace('class="heart"', 'class="heart draw"') + '</div>';
     b.textContent = "Написать Марине ещё раз";
     var tg = box.parentNode.querySelector(".tg .msg");
     if (tg) tg.textContent = (b.dataset.claim[0] === "t" ? "💳 Ученица нажала «Я оплатил(а)»\n" + r.name + ", " + r.phone + "\nПроверьте поступление " + rub(r.pre) + " в Сбере и нажмите «Оплата пришла» в кабинете." : "💳 Покупатель нажал «Я оплатил(а)»\nСертификат № " + r.code + " на " + rub(r.sum) + "\n" + r.name + ", " + r.phone + "\nПроверьте поступление в Сбере.");
