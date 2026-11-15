@@ -3069,7 +3069,7 @@ div.f { display: grid; gap: 8px; }
     $("nList").innerHTML = list.length ? list.map(function (n) {
       return '<button type="button" class="ni' + (n.read ? '' : ' new') + '" data-note="' + n.id + '"><i>' + n.icon + '</i><span><b>' + esc(n.title) + '</b><span>' + esc(n.text) + '</span><small>' + ago(n.t) + '</small></span></button>';
     }).join("") : '<p class="np-empty">Пока уведомлений нет. Здесь появятся новые записи, отмены, брони обучения и сертификаты.</p>';
-    $("nList").insertAdjacentHTML("beforeend", '<button type="button" class="btn sm ghost np-test" id="nTest">Показать тестовые уведомления</button>');
+    if (!SYNC) $("nList").insertAdjacentHTML("beforeend", '<button type="button" class="btn sm ghost np-test" id="nTest">Показать тестовые уведомления</button>');
   }
   $("nBell").addEventListener("click", function (e) {
     e.stopPropagation();
