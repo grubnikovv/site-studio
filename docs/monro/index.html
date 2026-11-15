@@ -476,7 +476,7 @@ section.block.tight { padding-block: 32px clamp(56px, 8vw, 96px); }
 .pdlg::backdrop { background: rgba(12, 6, 9, .88); }
 .pdlg[open] { animation: vin .3s ease; }
 .pbox { position: relative; margin: 0; }
-.pbox img { display: block; width: 100%; max-height: 80vh; object-fit: contain; border-radius: 18px; background: #111; }
+.pbox img { transition: opacity .15s; min-height: 200px; display: block; width: 100%; max-height: 80vh; object-fit: contain; border-radius: 18px; background: #111; }
 .pbox figcaption { display: flex; justify-content: space-between; gap: 12px; color: #EADCE0; font-size: 14px; padding: 10px 4px 0; }
 .pbox figcaption span:last-child { color: #A8999F; flex: none; }
 .pnav { position: absolute; top: 40%; width: 44px; height: 44px; border: 0; border-radius: 50%; background: rgba(0,0,0,.5); color: #fff; font-size: 28px; line-height: 1; display: grid; place-content: center; }
@@ -1917,9 +1917,19 @@ div.f { display: grid; gap: 8px; }
   $("gal").innerHTML = WORKS.map(work).join("");
   // просмотр фото на весь экран: листать стрелками или свайпом, закрыть крестиком или нажатием мимо
   var pIdx = 0, pList = [];
+  // Смена фото в окне: старое сразу убираем; сначала маленькая копия (уже загружена), потом подменяем на большую
+  var pToken = 0;
+  function setViewer(small, large, alt) {
+    var img = $("pImg"), my = ++pToken;
+    img.style.opacity = "0"; img.alt = alt;
+    var hi = new Image();
+    hi.onload = function () { if (my === pToken) { img.src = large; img.style.opacity = "1"; } };
+    if (small) { var lo = new Image(); lo.onload = function () { if (my === pToken && img.style.opacity === "0") { img.src = small; img.style.opacity = "1"; } }; lo.src = small; }
+    hi.src = large;
+  }
   function showPhoto() {
     var w = WORKS[pList[pIdx]];
-    $("pImg").src = "img/works/" + nn(w[0]) + "-l.webp"; $("pImg").alt = w[2];
+    setViewer("img/works/" + nn(w[0]) + ".webp", "img/works/" + nn(w[0]) + "-l.webp", w[2]);
     $("pCap").textContent = w[2]; $("pNum").textContent = (pIdx + 1) + " / " + pList.length;
   }
   function openPhoto(k, scope) {
@@ -1933,6 +1943,7 @@ div.f { display: grid; gap: 8px; }
   function stepPhoto(d) { if ($("pDlg").classList.contains("aw")) { awIdx = (awIdx + d + awList.length) % awList.length; showAw(); return; } pIdx = (pIdx + d + pList.length) % pList.length; showPhoto(); }
   $("pPrev").onclick = function () { stepPhoto(-1); }; $("pNext").onclick = function () { stepPhoto(1); };
   $("pClose").onclick = function () { $("pDlg").close(); };
+  $("pDlg").addEventListener("close", function () { pToken++; $("pImg").removeAttribute("src"); $("pImg").style.opacity = "0"; });
   $("pDlg").addEventListener("click", function (e) { if (e.target === this) this.close(); });
   $("pDlg").addEventListener("keydown", function (e) { if (e.key === "ArrowLeft") stepPhoto(-1); if (e.key === "ArrowRight") stepPhoto(1); });
   var tx = null;
@@ -1968,7 +1979,7 @@ div.f { display: grid; gap: 8px; }
   }).join("");
   var awList = [], awIdx = 0, awCur = null;
   function showAw() {
-    $("pImg").src = "img/awards/" + awList[awIdx] + "-l.webp"; $("pImg").alt = awCur.title;
+    var f = awList[awIdx]; setViewer(Number(f) <= 6 ? "img/awards/" + f + ".webp" : "", "img/awards/" + f + "-l.webp", awCur.title);
     $("pCap").textContent = awCur.caps ? awCur.caps[awIdx] : awCur.place + " · " + awCur.title; $("pNum").textContent = awList.length > 1 ? (awIdx + 1) + " / " + awList.length : awCur.where;
   }
   $("awards").addEventListener("click", function (e) {
