@@ -1274,7 +1274,7 @@ div.f { display: grid; gap: 8px; }
       <p class="err" id="tErr" hidden></p>
       <button class="btn glow" type="submit" id="tPay">Оплатить предоплату</button>
       <div class="tdone" id="tDone" hidden></div>
-      <p class="note">Оплата по СБП — напрямую на счёт Марины в СберБанке. Демо: деньги не списываются.</p>
+      <p class="note">Оплата по СБП — напрямую на счёт в СберБанке. Демо: деньги не списываются.</p>
       <button type="button" class="btn sm ghost chat-btn" data-chat="Здравствуйте! У меня вопрос по обучению." data-chat-title="Вопрос по обучению">Есть вопрос по курсу? Написать Марине</button>
     </form>
   </div></section>
@@ -1304,14 +1304,14 @@ div.f { display: grid; gap: 8px; }
       <label class="check"><input type="checkbox" id="cPd"><span>Согласен(на) на <a href="#soglasie" target="_blank">обработку персональных данных</a> и с <a href="#politika" target="_blank">политикой конфиденциальности</a>.</span></label>
       <p class="err" id="cErr" hidden></p>
       <button class="btn glow" type="submit" id="cGo">Оплатить 3 000 ₽</button>
-      <p class="note" style="margin:0">Оплата полностью по СБП, напрямую на счёт Марины в СберБанке. Сертификат сохранится за вашим номером телефона — его всегда можно найти ниже, в блоке «Мои сертификаты».</p>
+      <p class="note" style="margin:0">Оплата полностью по СБП, напрямую на счёт в СберБанке. Сертификат сохранится за вашим номером телефона — его всегда можно найти ниже, в блоке «Мои сертификаты».</p>
       <div class="tdone" id="cDone" hidden></div>
       <div class="share" id="cShare" hidden>
         <button type="button" class="btn" data-share="img">Поделиться картинкой</button>
         <button type="button" class="btn ghost" data-share="link">Скопировать ссылку</button>
         <button type="button" class="btn ghost" data-share="save">Сохранить картинку</button>
       </div>
-      <p class="demo" style="margin:0">Оплата по СБП — напрямую на счёт Марины в СберБанке. Демо: деньги не списываются.</p>
+      <p class="demo" style="margin:0">Оплата по СБП — напрямую на счёт в СберБанке. Демо: деньги не списываются.</p>
     </form>
     <form class="card mycerts" id="mcForm" novalidate>
       <h3>Мои сертификаты</h3>
@@ -1713,7 +1713,7 @@ div.f { display: grid; gap: 8px; }
   function payBox(sum, msg, claim, deadline) {
     return '<div class="paybox" data-box="' + claim + '"><div class="ptimer" data-until="' + deadline + '">Бронь держится <b>30:00</b></div>' +
       '<b>1. Оплатите ' + rub(sum) + ' по СБП</b>' +
-      '<p>Откроется перевод по СБП — выберите свой банк и <b>введите сумму ' + rub(sum) + '</b>. Деньги придут Марине на счёт в СберБанке.</p>' +
+      '<p>Откроется перевод по СБП — выберите свой банк и <b>введите сумму ' + rub(sum) + '</b>. Деньги придут на счёт в СберБанке.</p>' +
       '<button type="button" class="btn glow" data-paynow="' + sum + '">Оплатить по СБП</button>' +
       '<b>2. Нажмите «Я оплатил(а)» в течение 30 минут</b><p>Иначе бронь отменится. Затем отправьте Марине готовое сообщение в удобный мессенджер — какой курс и даты вы выбрали.</p>' +
       '<button type="button" class="btn ghost" data-claim="' + claim + '" data-chat="' + esc(msg) + '" data-chat-title="Сообщить об оплате">Я оплатил(а)</button></div>';
