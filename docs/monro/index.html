@@ -172,6 +172,9 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 .aw-ph img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s ease; }
 .aw-ph:hover img { transform: scale(1.04); }
 .aw-place { position: absolute; left: 10px; top: 10px; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 800; color: #3A2600; background: linear-gradient(135deg, #F6DFA4, #E0B65C); box-shadow: 0 6px 16px rgba(0,0,0,.18); }
+.aw-count { position: absolute; right: 10px; bottom: 10px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; color: #fff; background: rgba(20, 12, 16, .55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,.25); box-shadow: 0 6px 16px rgba(0,0,0,.2); animation: awc 3.5s ease-in-out 1.5s infinite; }
+@keyframes awc { 0%, 80%, 100% { transform: none; } 88% { transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .aw-count { animation: none; } }
 .aw-place.pe { color: #fff; background: linear-gradient(135deg, var(--lac), #5B1426); }
 .aw-place.p2 { color: #2E3338; background: linear-gradient(135deg, #F2F4F6, #B9C0C7); }
 .aw-place.p3 { color: #3B1E08; background: linear-gradient(135deg, #F0C9A0, #C88A55); }
@@ -1965,7 +1968,7 @@ div.f { display: grid; gap: 8px; }
   AWARDS.reverse();
   // обучение у бренда — отдельная карточка в конце, две фотографии
   AWARDS.push({ f: "05", more: ["06", "07", "08", "09", "10", "11", "12"], w: 640, h: 853, place: "Инструктор", badge: "🎓", title: "Инструктор MS Professional (MS PRO)",
-    nom: "6 свидетельств учебного центра «MS PRO School» (лицензия Минобрнауки Самарской области): специалист по маникюру и педикюру, инструктор по маникюру, наращиванию и педикюру · 8 фото", where: "Самара, 2022–2023",
+    nom: "6 свидетельств учебного центра «MS PRO School» (лицензия Минобрнауки Самарской области): специалист по маникюру и педикюру, инструктор по маникюру, наращиванию и педикюру", where: "Самара, 2022–2023",
     caps: ["Кубки и свидетельства за инструкторские курсы", "Кубки инструктора MS Professional",
       "Свидетельство: специалист по маникюру, 3 уровень квалификации · 81 ч · 2022",
       "Свидетельство: инструктор по маникюру — комбинированный маникюр, гель-лак под кутикулу, современный дизайн · 74 ч · 2022",
@@ -1974,7 +1977,7 @@ div.f { display: grid; gap: 8px; }
       "Свидетельство: специалист по педикюру, 3 уровень квалификации · 84 ч · 2022",
       "Свидетельство: инструктор по педикюру — комбинированный педикюр, гель-лак · 74 ч · 2023"] });
   $("awards").innerHTML = AWARDS.map(function (a, i) {
-    return '<figure class="award"><button type="button" class="aw-ph" data-aw="' + i + '" aria-label="Открыть фото: ' + a.title + '"><img src="img/awards/' + a.f + '.webp" width="' + a.w + '" height="' + a.h + '" alt="Кубок и диплом: ' + a.title + ', ' + a.place + '" loading="lazy" decoding="async"><span class="aw-place ' + (a.badge ? 'pe' : 'p' + parseInt(a.place, 10)) + '">' + (a.badge || '🏆') + ' ' + a.place + '</span></button>' +
+    return '<figure class="award"><button type="button" class="aw-ph" data-aw="' + i + '" aria-label="Открыть фото: ' + a.title + '"><img src="img/awards/' + a.f + '.webp" width="' + a.w + '" height="' + a.h + '" alt="Кубок и диплом: ' + a.title + ', ' + a.place + '" loading="lazy" decoding="async"><span class="aw-place ' + (a.badge ? 'pe' : 'p' + parseInt(a.place, 10)) + '">' + (a.badge || '🏆') + ' ' + a.place + '</span>' + (a.more ? '<span class="aw-count"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="7" width="13" height="13" rx="2.5"></rect><path d="M4 16V6a2 2 0 0 1 2-2h10"></path></svg>' + (a.more.length + 1) + ' фото · смотреть</span>' : '') + '</button>' +
       '<figcaption><b>' + a.title + '</b><span>' + a.nom + '</span><small>' + a.where + '</small></figcaption></figure>';
   }).join("");
   var awList = [], awIdx = 0, awCur = null;
