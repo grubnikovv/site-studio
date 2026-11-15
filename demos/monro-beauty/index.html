@@ -1818,7 +1818,15 @@ div.f { display: grid; gap: 8px; }
   purgeOld();
   // Уведомления для мастера: храним 2 недели, потом удаляем
   (function () { var n0 = (st.notes || []).length; st.notes = (st.notes || []).filter(function (n) { return Date.now() - n.t < 14 * 864e5; }); if (st.notes.length !== n0) save(); })();
+  // Сервер бота (заполнить при запуске на хостинге, например "/server/api.php"). Пусто — работаем без сервера.
+  var API = "", BOT = "ma_mihaylovka_bot";
+  function apiSend(data) {
+    if (!API) return Promise.resolve(null);
+    return fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) })
+      .then(function (r) { return r.json(); }).catch(function () { return null; });
+  }
   function note(icon, title, text, go) {
+    if (go && go.tab === "req") apiSend({ type: "note", icon: icon, title: title, text: text });  // брони и сертификаты — Марине в Telegram
     st.notes = st.notes || [];
     st.notes.unshift({ id: "n" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), t: Date.now(), icon: icon, title: title, text: text, go: go || null, read: false });
     st.notes = st.notes.slice(0, 200); save();
@@ -2186,13 +2194,20 @@ div.f { display: grid; gap: 8px; }
     setTimeout(function () {
       var s = svc(bk.svc), b = { id: "b" + Date.now().toString(36), date: bk.date, start: bk.start, svc: s.id, name: name, phone: phoneNice(ph), note: $("bNote").value.trim().slice(0, 200), price: bk.price, remove: bk.remove, remind: bk.remind, status: "booked", created: Date.now() };
       st.bookings.push(b); save();
+      var botLink = apiSend({ type: "booking", id: b.id, date: b.date, start: b.start, dur: bmin(b), svc: s.name + (b.remove ? " + снятие" : ""), coat: CORR[s.id] ? 1 : 0, name: b.name, phone: b.phone, remind: b.remind });
       note("📅", "Новая запись", b.name + " · " + s.name + " · " + whenText(b.date, b.start), { tab: "day", date: b.date });
       $("myPhone").value = b.phone; $("myList").innerHTML = "";
       $("bDone").textContent = whenText(b.date, b.start) + ". " + s.name + (b.remove ? " и снятие чужой работы" : "") + ". Адрес: ул. Обороны, 41.";
       $("bRemDone").innerHTML = b.remind === "none"
         ? '<div class="rem-cta"><b>🔔 Чтобы не забыть о записи</b><p>Подключите бесплатные напоминания: за 2 дня и за 2 часа до визита, перенос — одной кнопкой.</p><div class="rem-two"><button class="btn sm glow" type="button" data-bot="tg">Telegram</button><button class="btn sm glow" type="button" data-bot="max">MAX</button></div></div>'
         : '<div class="rem-cta"><b>Остался один шаг</b><p>Нажмите кнопку и «Старт» в боте — без этого напоминания не придут. Это бесплатно.</p><button class="btn glow" type="button" data-bot="' + b.remind + '">🔔 Подключить в ' + (REM_NAME[b.remind] || "Telegram") + '</button></div>';
-      $("bRemDone").querySelectorAll("[data-bot]").forEach(function (x) { x.onclick = function () { x.classList.remove("pop"); void x.offsetWidth; x.classList.add("pop"); toast("В рабочей версии откроется бот студии в " + REM_NAME[x.dataset.bot] + " — нажмите в нём «Старт»"); }; });
+      $("bRemDone").querySelectorAll("[data-bot]").forEach(function (x) {
+        x.onclick = function () {
+          x.classList.remove("pop"); void x.offsetWidth; x.classList.add("pop");
+          if (x.dataset.bot === "tg" && API) { botLink.then(function (r) { if (r && r.tg) location.href = r.tg; else toast("Не удалось открыть бота. Напишите Марине — она подключит напоминания"); }); return; }
+          toast("В рабочей версии откроется бот студии в " + REM_NAME[x.dataset.bot] + " — нажмите в нём «Старт»");
+        };
+      });
       $("bTg").textContent = "🆕 Новая запись\n" + s.name + (b.remove ? "\n+ снятие чужой работы" : "") + "\n" + whenText(b.date, b.start) + "\n" + name + ", " + b.phone + (b.note ? "\nКомментарий: " + b.note : "") + "\nНапоминания: " + (b.remind === "none" ? "не нужны" : (REM_NAME[b.remind] || "Telegram") + ", " + remindPlan(b.date).join(", "));
       btn.disabled = false; btn.textContent = "Записаться"; stepTo(4); window.scrollTo({ top: 0, behavior: "smooth" });
     }, 900);
@@ -2332,6 +2347,7 @@ div.f { display: grid; gap: 8px; }
     if (b.dataset.sure !== "1") { b.dataset.sure = "1"; b.textContent = "Точно отменить? Нажмите ещё раз"; return; }
     var rec = st.bookings.filter(function (x) { return x.id === b.dataset.my; })[0]; if (!rec) return;
     rec.status = "cancelled"; rec.by = "client"; rec.cancelledAt = Date.now(); certUndo(rec, true); save(); renderMy();
+    apiSend({ type: "cancel", id: rec.id, phone: rec.phone });
     note("❌", "Клиентка отменила запись", rec.name + " · " + svc(rec.svc).name + " · " + whenText(rec.date, rec.start) + " — время освободилось", { tab: "day", date: rec.date });
     toast("Запись отменена. Марина получит уведомление");
   });
