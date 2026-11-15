@@ -1830,7 +1830,7 @@ div.f { display: grid; gap: 8px; }
   // Оплата напрямую: ссылка на оплату по СБП из «Своё дело» в СберБанк Онлайн (появится при запуске).
   // Сайт сам не видит оплату: Марина отмечает «Оплата пришла» в кабинете.
   // payMin — сколько минут держится бронь: за это время нужно оплатить, а Марине — нажать «Оплата пришла». Иначе бронь удаляется сама
-  var PAY = { link: "https://www.sberbank.ru/ru/choise_bank?requisiteNumber=79950305079&bankCode=100000000111", payMin: 30, checkHours: 24 };  // ТЕСТ: ссылка Влада, заменить на мамину
+  var PAY = { link: "https://www.sberbank.ru/ru/choise_bank?requisiteNumber=79954284788&bankCode=100000000111", payMin: 30, checkHours: 24 };  // СБП на счёт Марины в СберБанке
   function tgPreview(text) {
     return "";  // в рабочей версии уведомление Марине приходит ботом; клиентам его не показываем
     return '<div class="tg" style="margin-top:12px" aria-label="Пример уведомления Марине"><div class="h"><i>М</i>Бот студии «М.А» → Марине</div><div class="msg">' + esc(text) + '</div></div>';
