@@ -1768,6 +1768,33 @@ div.f { display: grid; gap: 8px; }
   var st = { bookings: [], blocks: {}, dayoff: {}, bought: {} };
   try { st = Object.assign(st, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
   function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+  // Срок хранения по политике: данные клиентки удаляются через 3 года после её последнего визита.
+  // Прошедшие визиты остаются без имени и телефона (для статистики выручки), отменённые удаляются целиком.
+  function purgeOld() {
+    var lim = new Date(); lim.setFullYear(lim.getFullYear() - 3);
+    var cut = lim.getFullYear() + "-" + String(lim.getMonth() + 1).padStart(2, "0") + "-" + String(lim.getDate()).padStart(2, "0");
+    var dg = function (p) { return String(p || "").replace(/\D/g, "").replace(/^8/, "7"); }, last = {}, changed = false;
+    (st.bookings || []).forEach(function (b) { var k = dg(b.phone); if (k && (!last[k] || b.date > last[k])) last[k] = b.date; });
+    st.bookings = (st.bookings || []).filter(function (b) {
+      var k = dg(b.phone); if (!k || !(last[k] < cut)) return true;
+      changed = true; if (b.status === "cancelled") return false;
+      b.name = "Клиентка удалена"; b.phone = ""; b.note = ""; b.anon = true; delete b.remind; return true;
+    });
+    (st.training || []).forEach(function (t) {
+      var end = (t.days || [t.date]).slice(-1)[0];
+      if (t.phone && end < cut) { t.name = "Ученица удалена"; t.phone = ""; changed = true; }
+    });
+    (st.certs || []).forEach(function (c) {
+      if (c.phone && (c.till || c.created) < cut) { c.name = "Покупатель удалён"; c.phone = ""; c.to = ""; changed = true; }
+    });
+    var lastM = {};
+    Object.keys(st.models || {}).forEach(function (k) { var m = st.models[k]; if (!m || !m.phone) return; if (k < cut) { delete st.models[k]; changed = true; } else lastM[dg(m.phone)] = 1; });
+    var before = (st.modelBase || []).length;
+    st.modelBase = (st.modelBase || []).filter(function (m) { return lastM[dg(m.phone)] || !m.added || m.added >= cut; });
+    if (st.modelBase.length !== before) changed = true;
+    if (changed) save();
+  }
+  purgeOld();
 
   function dkey(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
   function addDays(n) { var d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + n); return d; }
@@ -2631,7 +2658,7 @@ div.f { display: grid; gap: 8px; }
       st.models = st.models || {}; st.modelBase = st.modelBase || [];
       st.models[ms.dataset.ms] = { name: nm, phone: ph, time: Number($("mTime").value) };
       st.modelTimes = st.modelTimes || {}; st.modelTimes[ms.dataset.ms] = Number($("mTime").value);
-      if (!st.modelBase.some(function (x) { return digits(x.phone) === digits(ph); })) st.modelBase.push({ name: nm, phone: ph });
+      if (!st.modelBase.some(function (x) { return digits(x.phone) === digits(ph); })) st.modelBase.push({ name: nm, phone: ph, added: dkey(new Date()) });
       mEdit = null; save(); renderAdmin(); renderModels();
       toast("Модель записана, день убран из объявления на сайте"); return;
     }
