@@ -1855,7 +1855,15 @@ div.f { display: grid; gap: 8px; }
   ];
   AWARDS.reverse();
   // обучение у бренда — отдельная карточка в конце, две фотографии
-  AWARDS.push({ f: "05", more: ["06"], w: 640, h: 853, place: "Инструктор", badge: "🎓", title: "Инструктор MS Professional (MS PRO)", nom: "Кубки и свидетельства за инструкторские курсы бренда · 2 фото", where: "2022–2023" });
+  AWARDS.push({ f: "05", more: ["06", "07", "08", "09", "10", "11", "12"], w: 640, h: 853, place: "Инструктор", badge: "🎓", title: "Инструктор MS Professional (MS PRO)",
+    nom: "6 свидетельств учебного центра «MS PRO School» (лицензия Минобрнауки Самарской области): специалист по маникюру и педикюру, инструктор по маникюру, наращиванию и педикюру · 8 фото", where: "Самара, 2022–2023",
+    caps: ["Кубки и свидетельства за инструкторские курсы", "Кубки инструктора MS Professional",
+      "Свидетельство: специалист по маникюру, 3 уровень квалификации · 81 ч · 2022",
+      "Свидетельство: инструктор по маникюру — комбинированный маникюр, гель-лак под кутикулу, современный дизайн · 74 ч · 2022",
+      "Свидетельство: инструктор по маникюру — современные виды наращивания и коррекция ногтей · 74 ч · 2022",
+      "Свидетельство: инструктор по маникюру — наращивание на верхних формах акригелем · 74 ч · 2022",
+      "Свидетельство: специалист по педикюру, 3 уровень квалификации · 84 ч · 2022",
+      "Свидетельство: инструктор по педикюру — комбинированный педикюр, гель-лак · 74 ч · 2023"] });
   $("awards").innerHTML = AWARDS.map(function (a, i) {
     return '<figure class="award"><button type="button" class="aw-ph" data-aw="' + i + '" aria-label="Открыть фото: ' + a.title + '"><img src="img/awards/' + a.f + '.webp" width="' + a.w + '" height="' + a.h + '" alt="Кубок и диплом: ' + a.title + ', ' + a.place + '" loading="lazy" decoding="async"><span class="aw-place ' + (a.badge ? 'pe' : 'p' + parseInt(a.place, 10)) + '">' + (a.badge || '🏆') + ' ' + a.place + '</span></button>' +
       '<figcaption><b>' + a.title + '</b><span>' + a.nom + '</span><small>' + a.where + '</small></figcaption></figure>';
@@ -1863,7 +1871,7 @@ div.f { display: grid; gap: 8px; }
   var awList = [], awIdx = 0, awCur = null;
   function showAw() {
     $("pImg").src = "img/awards/" + awList[awIdx] + "-l.webp"; $("pImg").alt = awCur.title;
-    $("pCap").textContent = awCur.place + " · " + awCur.title; $("pNum").textContent = awList.length > 1 ? (awIdx + 1) + " / " + awList.length : awCur.where;
+    $("pCap").textContent = awCur.caps ? awCur.caps[awIdx] : awCur.place + " · " + awCur.title; $("pNum").textContent = awList.length > 1 ? (awIdx + 1) + " / " + awList.length : awCur.where;
   }
   $("awards").addEventListener("click", function (e) {
     var b = e.target.closest("[data-aw]"); if (!b) return; var a = AWARDS[Number(b.dataset.aw)];
