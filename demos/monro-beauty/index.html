@@ -767,6 +767,9 @@ div.f { display: grid; gap: 8px; }
 .cert-link { text-decoration: none; display: grid; gap: 4px; transition: transform .2s; }
 .cert-link:hover { transform: translateY(-2px); }
 .cert-link b { font-family: var(--display); font-weight: 400; font-size: 22px; }
+.keep { font-size: 13.5px; line-height: 1.45; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, #E0B65C 18%, var(--paper)); border: 1px solid color-mix(in srgb, #E0B65C 45%, var(--line)); }
+.keep.ok { background: color-mix(in srgb, var(--ok) 12%, var(--paper)); border-color: color-mix(in srgb, var(--ok) 35%, var(--line)); }
+.keep-sum { display: grid; gap: 8px; margin-bottom: 10px; }
 .paybox { display: grid; gap: 10px; margin-top: 12px; padding: 16px; border-radius: 18px; background: var(--paper); border: 1.5px solid color-mix(in srgb, var(--lac) 30%, var(--line)); text-align: left; }
 .mc-wait { align-self: center; color: #F2C9D3; font-size: 13px; }
 .paybox p { margin: 0; color: var(--mute); font-size: 14px; }
@@ -1561,7 +1564,7 @@ div.f { display: grid; gap: 8px; }
       <div class="card"><div class="adm-top"><h3 id="sTitle">Статистика</h3><div class="mnav"><button type="button" class="btn sm ghost" id="sPrev" aria-label="Предыдущий месяц">‹</button><button type="button" class="btn sm ghost" id="sNext" aria-label="Следующий месяц">›</button></div></div><div id="aStats"></div></div>
     </section>
     <section class="atab" data-tab="req" hidden>
-      <div class="card"><h3>Заявки на обучение</h3><div class="opts" id="aTrain"></div></div>
+      <div class="card"><h3>Заявки на обучение</h3><div class="keep-sum" id="aKeep"></div><div class="opts" id="aTrain"></div></div>
       <div class="card"><h3>Модели</h3><p class="note">Нашли модель сами — нажмите «Записать модель» у нужного дня обучения: впишите имя, телефон и время, и день уйдёт из объявления на сайте. Здесь хранятся все модели, их можно снова позвать.</p><div class="mbase" id="aModels"></div></div>
       <div class="card"><h3>Проданные сертификаты</h3><div class="opts" id="aCerts"></div></div>
     </section>
@@ -1767,6 +1770,7 @@ div.f { display: grid; gap: 8px; }
     return iv;
   }
   // обучение, которое идёт в этот день (дни курса закрыты для записи целиком, в том числе после 17:00)
+  function refundTill(t) { var d = new Date(t.date + "T12:00"); d.setDate(d.getDate() - 7); return dkey(d); }
   function trainActive(t) { return t.status === "paid" || (t.status === "wait" && t.hold > Date.now()); }
   function trainOn(k) {
     return (st.training || []).filter(function (t) { return trainActive(t) && (t.days || [t.date]).indexOf(k) >= 0; })[0] || null;
@@ -2401,8 +2405,14 @@ div.f { display: grid; gap: 8px; }
       var stt = t.status === "wait" ? ["Ждёт оплату до " + new Date(t.hold).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }), "bad"] : t.status === "nopay" ? ["Не оплачена · даты свободны", ""] : t.status === "paid" ? ["Предоплата получена", "ok"] : t.status === "refund" ? ["Отменена · предоплата возвращена", ""] : ["Отменена поздно · предоплата ваша", "bad"];
       return '<div class="bk"><div class="r1"><b>' + rangeText(tdays) + ', ' + hm(TRAIN.from) + '–' + hm(TRAIN.to) + '</b><span class="pill ' + stt[1] + '">' + stt[0] + '</span></div><div><b style="font-weight:700">' + esc(t.name) + '</b> · ' + esc(t.phone) + (t.example ? ' <span class="pill">пример</span>' : '') + '</div><div class="info">' + c.short + ' · ' + daysWord(tdays.length) + ' · ' + rub(t.price) + ' · предоплата ' + rub(t.pre) + '</div>' +
         (t.status === "wait" ? '<div class="info">Проверьте поступление ' + rub(t.pre) + ' в СберБанк Онлайн. Даты держатся 24 часа, потом освободятся сами.</div><div class="acts"><button data-tpay="' + t.id + '">Оплата пришла</button><button data-tno="' + t.id + '">Отменить заявку</button></div>' : '') +
+        (t.status === "paid" ? (dkey(new Date()) <= refundTill(t)
+          ? '<div class="keep">💰 <b>Не тратьте ' + rub(t.pre) + ' до ' + shortDate(refundTill(t)) + ' включительно.</b> Если ученица отменит до этой даты — предоплату нужно вернуть. С ' + shortDate(dkey(new Date(new Date(refundTill(t) + "T12:00").getTime() + 864e5))) + ' она ваша.</div>'
+          : '<div class="keep ok">✅ <b>Предоплата ' + rub(t.pre) + ' ваша.</b> До начала меньше 7 дней — при отмене она не возвращается.</div>') : '') +
         (t.status === "paid" ? tdays.map(function (k, i) { return modelDay(k, i, c); }).join("") + '<div class="acts"><button data-t="' + t.id + '">Отменить обучение</button></div>' : '') + '</div>';
     }).join("") : '<p class="note">Заявок пока нет. Они появятся, когда ученица оплатит предоплату на странице «Обучение».</p>';
+    var hold = trl.filter(function (t) { return t.status === "paid" && dkey(new Date()) <= refundTill(t); });
+    $("aKeep").innerHTML = '<p class="note" style="margin:0">Правило возврата: если ученица отменяет <b>раньше чем за 7 дней</b> до начала — предоплату возвращаете переводом в Сбере. Если за 6 дней и меньше — предоплата ваша.</p>' +
+      (hold.length ? '<div class="keep">💰 Пока не тратьте: <b>' + rub(hold.reduce(function (a, t) { return a + t.pre; }, 0)) + '</b> — ' + hold.map(function (t) { return esc(t.name) + ' до ' + shortDate(refundTill(t)); }).join(", ") + '</div>' : '');
     renderModelBase();
   }
   // модель на день обучения: мама сама записывает имя, телефон и время
@@ -2463,9 +2473,9 @@ div.f { display: grid; gap: 8px; }
     if (mr) { delete st.models[mr.dataset.mr]; save(); renderAdmin(); renderModels(); toast("День снова в объявлении «Ищем моделей»"); return; }
     var b = e.target.closest("[data-t]"); if (!b) return;
     var t = st.training.filter(function (x) { return x.id === b.dataset.t; })[0];
-    var days = (new Date(t.date + "T10:00").getTime() - Date.now()) / 864e5;
-    t.status = days >= 7 ? "refund" : "late"; save(); renderAdmin(); renderTrain(); renderTrainBand(); renderModels();
-    toast(days >= 7 ? "Отменено. Предоплата вернётся ученице" : "Поздняя отмена. Предоплата остаётся у вас");
+    var back = dkey(new Date()) <= refundTill(t);
+    t.status = back ? "refund" : "late"; save(); renderAdmin(); renderTrain(); renderTrainBand(); renderModels();
+    toast(back ? "Отменено. Верните ученице предоплату " + rub(t.pre) + " переводом в Сбере" : "Отмена позже срока. Предоплата остаётся у вас");
   });
   $("aTrain").addEventListener("click", function (e) {
     var a = e.target.closest("[data-tpay]"), n = e.target.closest("[data-tno]"); if (!a && !n) return;
