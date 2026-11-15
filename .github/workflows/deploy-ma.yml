@@ -1,0 +1,46 @@
+# Выкладка сайта «М.А» с ботом на хостинг (Timeweb). Запуск вручную: Actions → «Выложить сайт М.А» → Run workflow.
+# Нужны секреты репозитория: BOT_TOKEN, ADMIN_KEY, FTP_PASSWORD. В логах они не печатаются.
+name: Выложить сайт М.А
+on:
+  workflow_dispatch:
+    inputs:
+      dir:
+        description: Папка сайта на хостинге
+        default: public_html
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SITE: http://cm538897.tw1.ru
+      FTP_HOST: vh480.timeweb.ru
+      FTP_USER: cm538897
+    steps:
+      - uses: actions/checkout@v4
+      - name: Собрать
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          ADMIN_KEY: ${{ secrets.ADMIN_KEY }}
+        run: |
+          test -n "$BOT_TOKEN" && test ${#ADMIN_KEY} -ge 16 || { echo "Нет секретов BOT_TOKEN или ADMIN_KEY (не короче 16 символов)"; exit 1; }
+          mkdir out && cp -r docs/monro/. out/
+          sed -i 's#var API = ""#var API = "/server/api.php"#' out/index.html
+          grep -q 'var API = "/server/api.php"' out/index.html
+          mkdir out/server && cp demos/monro-beauty/server/*.php demos/monro-beauty/server/.htaccess out/server/ && rm -f out/server/config.php
+          php -r 'file_put_contents("out/server/config.php", "<?php return " . var_export([
+            "bot_token" => getenv("BOT_TOKEN"), "bot_name" => "ma_mihaylovka_bot", "admin_key" => getenv("ADMIN_KEY"),
+            "site_url" => getenv("SITE") . "/", "allow_origin" => getenv("SITE"),
+            "db_path" => "__DB__", "tz" => "Europe/Volgograd", "tg_api" => "https://api.telegram.org"], true) . ";\n");'
+          sed -i "s#'__DB__'#__DIR__ . '/data/bot.sqlite'#" out/server/config.php
+          php -l out/server/config.php
+      - name: Загрузить по FTP
+        env:
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          DIR: ${{ inputs.dir }}
+        run: |
+          sudo apt-get install -y -qq lftp >/dev/null
+          lftp -u "$FTP_USER,$FTP_PASSWORD" "$FTP_HOST" -e "set ftp:ssl-allow yes; set ssl:verify-certificate no; set net:max-retries 3; mirror -R --verbose=1 --exclude-glob server/data/ out/ $DIR/; bye"
+      - name: Проверить
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' "$SITE/")
+          echo "Сайт: $code"
+          curl -s -X POST "$SITE/server/api.php" -H 'Content-Type: application/json' -d '{"type":"x"}'; echo

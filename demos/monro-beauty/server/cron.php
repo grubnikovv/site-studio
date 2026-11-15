@@ -1,7 +1,7 @@
 <?php
 // Напоминания клиенткам. Запускать каждые 10 минут (крон на хостинге):
 //   php /путь/к/server/cron.php
-require __DIR__ . '/lib.php';
+require_once __DIR__ . '/lib.php';
 if (PHP_SAPI !== 'cli' && ($_GET['key'] ?? '') !== cfg('admin_key')) { http_response_code(403); exit; }
 
 $db = db(); $now = time(); $sent = 0;

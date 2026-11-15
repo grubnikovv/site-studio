@@ -30,7 +30,7 @@ function tg($method, $params = []) {
     $url = rtrim(cfg('tg_api'), '/') . '/bot' . cfg('bot_token') . '/' . $method;
     $ch = curl_init($url);
     curl_setopt_array($ch, [
-        CURLOPT_POST => true, CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 15,
+        CURLOPT_POST => true, CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => ($method === 'getUpdates' ? 40 : 15),
         CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
         CURLOPT_POSTFIELDS => json_encode($params, JSON_UNESCAPED_UNICODE),
     ]);
