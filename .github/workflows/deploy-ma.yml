@@ -16,7 +16,7 @@ jobs:
     env:
       SITE: http://cm538897.tw1.ru
       FTP_HOST: vh480.timeweb.ru
-      FTP_USER: cm538897
+      FTP_USER: cm538897_deploy
     steps:
       - name: Есть ли секреты
         id: chk
