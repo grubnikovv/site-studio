@@ -1652,11 +1652,13 @@ div.f { display: grid; gap: 8px; }
   // Оплата напрямую: ссылка на оплату по СБП из «Своё дело» в СберБанк Онлайн (появится при запуске).
   // Сайт сам не видит оплату: Марина отмечает «Оплата пришла» в кабинете.
   var PAY = { link: "", holdHours: 24 };
-  function payBox(sum, what) {
-    return '<div class="paybox"><b>Оплатите ' + rub(sum) + ' по СБП</b>' +
-      '<p>Деньги придут Марине на счёт в СберБанке. Чек «Мой налог» Марина пришлёт после оплаты.</p>' +
-      '<button type="button" class="btn glow" data-paynow="' + sum + '">Оплатить ' + rub(sum) + ' через СБП</button>' +
-      '<button type="button" class="btn ghost" data-paid="' + what + '">Я оплатил(а)</button></div>';
+  // после оплаты клиент пишет Марине в удобный мессенджер — текст уже готов
+  function payBox(sum, msg) {
+    return '<div class="paybox"><b>1. Оплатите ' + rub(sum) + ' по СБП</b>' +
+      '<p>Деньги придут Марине на счёт в СберБанке.</p>' +
+      '<button type="button" class="btn glow" data-paynow="' + sum + '">Оплатить по СБП</button>' +
+      '<b>2. Напишите Марине</b><p>После оплаты сообщите, какой курс и даты вы выбрали. Сообщение уже готово — выберите WhatsApp, Telegram или MAX.</p>' +
+      '<button type="button" class="btn ghost" data-chat="' + esc(msg) + '" data-chat-title="Сообщить об оплате">Написать Марине</button></div>';
   }
   function course(id) { return COURSES.filter(function (c) { return c.id === id; })[0] || COURSES[0]; }
   var FAQ = [
@@ -2100,8 +2102,6 @@ div.f { display: grid; gap: 8px; }
   document.addEventListener("click", function (e) {
     var p = e.target.closest("[data-paynow]");
     if (p) { if (PAY.link) window.open(PAY.link, "_blank", "noopener"); else toast("В рабочей версии откроется оплата по СБП в приложении вашего банка"); return; }
-    var d = e.target.closest("[data-paid]");
-    if (d) { d.disabled = true; d.textContent = "Спасибо! Марина проверит поступление"; toast(d.dataset.paid === "cert" ? "Как только Марина подтвердит оплату, сертификат станет активным" : "Как только Марина подтвердит оплату, даты закрепятся за вами"); }
   });
   // ---------- клиентка: мои записи и отмена ----------
   function digits(p) { return String(p || "").replace(/\D/g, "").replace(/^8/, "7"); }
@@ -2207,7 +2207,7 @@ div.f { display: grid; gap: 8px; }
       st.training = st.training || [];
       st.training.push({ id: "t" + Date.now().toString(36), course: c.id, date: days[0], days: days, name: name, phone: phone, price: c.price, pre: c.pre, status: "wait", hold: Date.now() + PAY.holdHours * 36e5 });
       save(); btn.disabled = false; btn.textContent = "Забронировать и оплатить " + rub(c.pre);
-      $("tDone").innerHTML = '<b>Даты держим за вами 24 часа.</b> Курс «' + c.short + '»: ' + rangeText(days) + ', с 10:00 до 17:00. Оплатите предоплату — после подтверждения Марины даты закрепятся окончательно.' + payBox(c.pre, "train");
+      $("tDone").innerHTML = '<b>Даты держим за вами 24 часа.</b> Курс «' + c.short + '»: ' + rangeText(days) + ', с 10:00 до 17:00. Оплатите предоплату — после подтверждения Марины даты закрепятся окончательно.' + payBox(c.pre, "Здравствуйте, Марина! Я оплатила предоплату " + rub(c.pre) + " за курс «" + c.name + "». Даты: " + rangeText(days) + ", с 10:00 до 17:00. Меня зовут " + name + ", телефон " + phone + ".");
       $("tDone").hidden = false; ["tName", "tPhone"].forEach(function (id) { $(id).value = ""; }); $("tRules").checked = false; $("tPd").checked = false;
       tr.date = null; renderTrain(); renderTrainBand(); renderModels(); toast("Заявка принята — оплатите предоплату по СБП");
     }, 900);
@@ -2884,11 +2884,11 @@ div.f { display: grid; gap: 8px; }
       '<a class="pk-more" href="#sertifikat" data-to="mcForm">Мои сертификаты и подарок другу →</a></div>';
     lastCode = c.code;
   }
-  function renderMyCerts() {
+  function renderMyCerts(stay) {
     var d = $("mcPhone").value.replace(/\D/g, "").replace(/^8/, "7");
     var list = (st.certs || []).filter(function (c) { return c.phone.replace(/\D/g, "").replace(/^8/, "7") === d; }).reverse();
     // один сертификат — сразу открываем его страницу; несколько — список, у каждого кнопка «Открыть»
-    if (list.length === 1) { location.hash = "cert-" + certKey(list[0].code); return; }
+    if (list.length === 1 && !stay) { location.hash = "cert-" + certKey(list[0].code); return; }
     $("mcList").innerHTML = list.length ? list.map(function (c) {
       var stt = certState(c);
       return '<div class="mc"><div class="g-top"><span class="g-brand"><svg class="g-mark" aria-hidden="true"><use href="#lgm"></use></svg><span class="g-bt">Академия маникюра и&nbsp;педикюра</span></span><span class="pill ' + stt[1] + '">' + stt[0] + '</span></div>' +
@@ -2930,11 +2930,11 @@ div.f { display: grid; gap: 8px; }
       st.certs.push({ id: "c" + Date.now().toString(36), code: code, sum: cSum, balance: cSum, to: $("cTo").value.trim(), name: name, phone: phone, status: "wait", created: dkey(new Date()), till: dkey(certTill()), spent: [] });
       $("mcPhone").value = phone;
       save(); renderGift(code); btn.disabled = false; btn.textContent = "Оплатить " + rub(cSum);
-      $("cDone").innerHTML = "<b>Сертификат № " + code + "</b> на " + rub(cSum) + " создан и ждёт оплаты. Оплатите по СБП — как только Марина подтвердит поступление, он станет активным и его можно будет подарить." + payBox(cSum, "cert");
+      $("cDone").innerHTML = "<b>Сертификат № " + code + "</b> на " + rub(cSum) + " создан и ждёт оплаты. Оплатите по СБП — как только Марина подтвердит поступление, он станет активным и его можно будет подарить." + payBox(cSum, "Здравствуйте, Марина! Я оплатил(а) подарочный сертификат № " + code + " на " + rub(cSum) + ". Меня зовут " + name + ", телефон " + phone + ".");
       $("cDone").hidden = false; $("cName").value = ""; $("cPhone").value = ""; $("cPd").checked = false; $("cTerm").checked = false;
       lastCode = code; $("cShare").hidden = true;
-      renderMyCerts();
-      $("gCard").scrollIntoView({ behavior: "smooth", block: "center" });
+      renderMyCerts(true);
+      $("cDone").scrollIntoView({ behavior: "smooth", block: "center" });
       toast("Сертификат создан — оплатите его по СБП");
     }, 900);
   });
