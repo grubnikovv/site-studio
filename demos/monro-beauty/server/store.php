@@ -157,3 +157,18 @@ function mirror_bookings($ops, $doc) {
            ->execute([$b['date'], (int)$b['start'], (int)($b['dur'] ?? 60), $status, time(), $id]);
     }
 }
+
+// ---------- пароль кабинета ----------
+// Пароль из config.php — начальный. После смены в кабинете хранится только его хэш в базе.
+function kv_get($k) { $q = store_init()->prepare('SELECT v FROM kv WHERE k = ?'); $q->execute([$k]); return $q->fetchColumn(); }
+function kv_put($k, $v) { store_init()->prepare('INSERT OR REPLACE INTO kv (k, v) VALUES (?, ?)')->execute([$k, (string)$v]); }
+function kv_del($k) { store_init()->prepare('DELETE FROM kv WHERE k = ?')->execute([$k]); }
+
+function pass_ok($pass) {
+    $h = kv_get('pass_hash');
+    if ($h) return password_verify((string)$pass, $h);
+    $c = (string)cfg('cabinet_pass');
+    return strlen($c) >= 6 && hash_equals($c, (string)$pass);
+}
+function pass_set($pass) { kv_put('pass_hash', password_hash((string)$pass, PASSWORD_DEFAULT)); }
+function pass_weak($p) { return mb_strlen((string)$p) < 6 ? 'Пароль — не короче 6 символов.' : (mb_strlen((string)$p) > 64 ? 'Слишком длинный пароль.' : ''); }

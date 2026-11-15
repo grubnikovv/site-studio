@@ -679,6 +679,11 @@ div.f { display: grid; gap: 8px; }
 .a-save { margin: -6px 0 12px; font-size: 13px; color: var(--mute); }
 .a-save.bad { color: #B3261E; font-weight: 700; }
 .a-out { margin: 28px auto 0; display: block; }
+.a-acts { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 28px; }
+.a-acts .a-out { margin: 0; }
+#aResetStep2:not([hidden]) { display: grid; gap: 10px; }
+.a-link { border: 0; background: none; color: var(--lac); font-weight: 700; font-size: 14px; padding: 8px 0; justify-self: center; }
+#v-admin.locked .a-acts, #v-admin.pwd .atabs, #v-admin.pwd .atab, #v-admin.pwd .a-acts { display: none !important; }
 .seg3 { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--bg); border: 1.5px solid var(--line); border-radius: 14px; padding: 4px; gap: 4px; }
 .seg3 button { border: 0; background: none; border-radius: 10px; padding: 10px 4px; font-weight: 700; font-size: 14px; color: var(--mute); transition: background .25s, color .25s; }
 .seg3 button[aria-pressed="true"] { background: var(--lac); color: var(--lac-ink); }
@@ -1651,9 +1656,35 @@ div.f { display: grid; gap: 8px; }
       <h3>Вход для мастера</h3>
       <p class="note">Введите пароль кабинета. Вход запомнится на этом телефоне на полгода.</p>
       <label for="aPass">Пароль</label>
-      <div class="pass-w"><input type="password" id="aPass" autocomplete="current-password" required><button type="button" class="pass-eye" id="aEye" aria-label="Показать пароль" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="eye-x" d="M4 4l16 16"/></svg></button></div>
+      <div class="pass-w"><input type="password" id="aPass" autocomplete="current-password" required><button type="button" class="pass-eye" aria-label="Показать пароль" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="eye-x" d="M4 4l16 16"/></svg></button></div>
       <p class="err" id="aPassErr" hidden></p>
       <button class="btn" type="submit" id="aPassGo">Войти</button>
+      <button type="button" class="a-link" id="aForgot">Забыли пароль?</button>
+    </form>
+    <form class="card a-login" id="aReset" hidden>
+      <h3>Новый пароль</h3>
+      <p class="note" id="aResetNote">Пришлём код из 6 цифр в Telegram мастера — в бот студии, куда приходят уведомления о записях.</p>
+      <button class="btn" type="button" id="aCodeGo">Прислать код в Telegram</button>
+      <div id="aResetStep2" hidden>
+        <label for="aCode">Код из Telegram</label>
+        <input type="text" id="aCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456">
+        <label for="aNew1">Новый пароль</label>
+        <div class="pass-w"><input type="password" id="aNew1" autocomplete="new-password" required><button type="button" class="pass-eye" aria-label="Показать пароль" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="eye-x" d="M4 4l16 16"/></svg></button></div>
+        <p class="err" id="aResetErr" hidden></p>
+        <button class="btn" type="submit" id="aResetGo">Сохранить и войти</button>
+      </div>
+      <button type="button" class="a-link" id="aBack">← Назад ко входу</button>
+    </form>
+    <form class="card a-login" id="aPwd" hidden>
+      <h3>Сменить пароль</h3>
+      <label for="aOld">Текущий пароль</label>
+      <div class="pass-w"><input type="password" id="aOld" autocomplete="current-password" required><button type="button" class="pass-eye" aria-label="Показать пароль" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="eye-x" d="M4 4l16 16"/></svg></button></div>
+      <label for="aNew2">Новый пароль</label>
+      <div class="pass-w"><input type="password" id="aNew2" autocomplete="new-password" required><button type="button" class="pass-eye" aria-label="Показать пароль" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="eye-x" d="M4 4l16 16"/></svg></button></div>
+      <p class="note">Не короче 6 символов. На других телефонах кабинет попросит войти заново.</p>
+      <p class="err" id="aPwdErr" hidden></p>
+      <button class="btn" type="submit" id="aPwdGo">Сохранить пароль</button>
+      <button type="button" class="a-link" id="aPwdBack">Отмена</button>
     </form>
     <p class="a-save" id="aSave" hidden></p>
     <div class="atabs" id="aTabs" role="tablist">
@@ -3604,7 +3635,7 @@ div.f { display: grid; gap: 8px; }
   function lockAdmin() {
     var locked = SYNC && !token;
     $("v-admin").classList.toggle("locked", locked); $("aLogin").hidden = !locked;
-    $("aSave").hidden = !SYNC || locked; outBtn.hidden = !SYNC || locked;
+    $("aSave").hidden = !SYNC || locked; outBtn.parentNode.hidden = !SYNC || locked;
     document.querySelectorAll("[data-demo]").forEach(function (el) { el.hidden = SYNC; });
     // в браузере мастера вместо «Записаться» — колокольчик и кабинет
     var master = SYNC ? !!token : curView === "admin";  // в демо — пока открыт кабинет
@@ -3612,19 +3643,60 @@ div.f { display: grid; gap: 8px; }
     if (master) renderBell();
   }
 
-  $("aEye").onclick = function () {
-    var show = $("aPass").type === "password";
-    $("aPass").type = show ? "text" : "password";
-    this.setAttribute("aria-pressed", show); this.setAttribute("aria-label", show ? "Скрыть пароль" : "Показать пароль");
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest(".pass-eye"); if (!b) return;
+    var inp = b.parentNode.querySelector("input"), show = inp.type === "password";
+    inp.type = show ? "text" : "password";
+    b.setAttribute("aria-pressed", show); b.setAttribute("aria-label", show ? "Скрыть пароль" : "Показать пароль");
+  });
+  function errBox(id, t) { $(id).textContent = t || ""; $(id).hidden = !t; }
+  function loggedIn(t) { token = t; lsSet("ma-token", token); lockAdmin(); setSaved(true); fetchState(true).then(function () { renderTab(); }); }
+  // забыли пароль: код в Telegram
+  $("aForgot").onclick = function () { $("aLogin").hidden = true; $("aReset").hidden = false; $("aResetStep2").hidden = true; $("aCodeGo").hidden = false; };
+  $("aBack").onclick = function () { $("aReset").hidden = true; lockAdmin(); };
+  $("aCodeGo").onclick = function () {
+    var btn = this; btn.disabled = true;
+    apiSend({ type: "pass_reset_req" }).then(function (r) {
+      btn.disabled = false;
+      if (!r || !r.ok) { toast((r && r.error) || "Нет связи с сервером"); return; }
+      $("aResetNote").textContent = r.again ? "Код уже отправлен недавно — посмотрите сообщения от бота студии в Telegram." : "Код отправлен в Telegram. Он действует 15 минут.";
+      btn.hidden = true; $("aResetStep2").hidden = false; $("aCode").focus();
+    });
   };
+  $("aReset").addEventListener("submit", function (e) {
+    e.preventDefault(); errBox("aResetErr");
+    var btn = $("aResetGo"); btn.disabled = true;
+    apiSend({ type: "pass_reset", code: $("aCode").value, new: $("aNew1").value }).then(function (r) {
+      btn.disabled = false;
+      if (!r || !r.ok) { errBox("aResetErr", (r && r.error) || "Нет связи с сервером"); return; }
+      $("aCode").value = ""; $("aNew1").value = ""; $("aReset").hidden = true;
+      loggedIn(r.token); toast("Пароль изменён, вы в кабинете");
+    });
+  });
+  // смена пароля в кабинете
+  var acts = document.createElement("div"); acts.className = "a-acts";
+  var pwdBtn = document.createElement("button"); pwdBtn.type = "button"; pwdBtn.className = "btn sm ghost"; pwdBtn.textContent = "Сменить пароль";
+  pwdBtn.onclick = function () { $("v-admin").classList.add("pwd"); $("aPwd").hidden = false; jumpTop(); };
+  outBtn.parentNode.insertBefore(acts, outBtn); acts.appendChild(pwdBtn); acts.appendChild(outBtn);
+  function closePwd() { $("v-admin").classList.remove("pwd"); $("aPwd").hidden = true; $("aOld").value = ""; $("aNew2").value = ""; errBox("aPwdErr"); }
+  $("aPwdBack").onclick = closePwd;
+  $("aPwd").addEventListener("submit", function (e) {
+    e.preventDefault(); errBox("aPwdErr");
+    var btn = $("aPwdGo"); btn.disabled = true;
+    apiSend({ type: "pass_change", token: token, old: $("aOld").value, new: $("aNew2").value }).then(function (r) {
+      btn.disabled = false;
+      if (r && r.relogin) { closePwd(); logout(); return; }
+      if (!r || !r.ok) { errBox("aPwdErr", (r && r.error) || "Нет связи с сервером"); return; }
+      closePwd(); toast("Пароль изменён");
+    });
+  });
   $("aLogin").addEventListener("submit", function (e) {
     e.preventDefault();
     var btn = $("aPassGo"); btn.disabled = true; $("aPassErr").hidden = true;
     apiSend({ type: "login", pass: $("aPass").value }).then(function (r) {
       btn.disabled = false;
       if (!r || !r.ok) { $("aPassErr").textContent = (r && r.error) || "Нет связи с сервером"; $("aPassErr").hidden = false; return; }
-      token = r.token; lsSet("ma-token", token); $("aPass").value = "";
-      lockAdmin(); setSaved(true); fetchState(true).then(function () { renderTab(); });
+      $("aPass").value = ""; loggedIn(r.token);
     });
   });
   if (SYNC) {

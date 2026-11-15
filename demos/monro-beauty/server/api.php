@@ -50,8 +50,42 @@ if ($type === 'state') {
 }
 
 if ($type === 'login') {
-    $pass = (string)cfg('cabinet_pass');
-    if (strlen($pass) < 6 || !hash_equals($pass, (string)($in['pass'] ?? ''))) { sleep(1); json_out(['ok' => false, 'error' => 'Неверный пароль']); }
+    if (!pass_ok($in['pass'] ?? '')) { sleep(1); json_out(['ok' => false, 'error' => 'Неверный пароль']); }
+    json_out(['ok' => true, 'token' => session_new()]);
+}
+
+// Смена пароля в кабинете
+if ($type === 'pass_change') {
+    if (!$admin) json_out(['ok' => false, 'error' => 'Войдите в кабинет заново', 'relogin' => true]);
+    if (!pass_ok($in['old'] ?? '')) { sleep(1); json_out(['ok' => false, 'error' => 'Текущий пароль введён неверно']); }
+    if ($e = pass_weak($in['new'] ?? '')) json_out(['ok' => false, 'error' => $e]);
+    pass_set($in['new']);
+    // остальные телефоны выходят из кабинета, этот остаётся
+    store_init()->prepare('DELETE FROM sessions WHERE token <> ?')->execute([hash('sha256', (string)$in['token'])]);
+    notify_admins("🔐 Пароль кабинета на сайте изменён. Если это были не вы — нажмите на сайте «Забыли пароль?».");
+    json_out(['ok' => true]);
+}
+
+// Забыли пароль: код в Telegram мастеру
+if ($type === 'pass_reset_req') {
+    $admins = (int)store_init()->query('SELECT COUNT(*) FROM admins')->fetchColumn();
+    if (!$admins) json_out(['ok' => false, 'error' => 'Telegram-бот ещё не подключён. Обратитесь к разработчику.']);
+    if ((int)kv_get('reset_sent') > time() - 120) json_out(['ok' => true, 'again' => true]);
+    $code = (string)random_int(100000, 999999);
+    kv_put('reset_hash', password_hash($code, PASSWORD_DEFAULT)); kv_put('reset_until', time() + 900); kv_put('reset_tries', 0); kv_put('reset_sent', time());
+    notify_admins("🔐 <b>Код для смены пароля кабинета: " . $code . "</b>\nДействует 15 минут. Никому его не сообщайте.\nЕсли вы не запрашивали код — просто проигнорируйте.");
+    json_out(['ok' => true]);
+}
+
+if ($type === 'pass_reset') {
+    $h = kv_get('reset_hash'); $tries = (int)kv_get('reset_tries');
+    if (!$h || (int)kv_get('reset_until') < time() || $tries >= 5) json_out(['ok' => false, 'error' => 'Код устарел. Запросите новый.']);
+    kv_put('reset_tries', $tries + 1);
+    if (!password_verify(preg_replace('/\D/', '', (string)($in['code'] ?? '')), $h)) { sleep(1); json_out(['ok' => false, 'error' => 'Неверный код. Осталось попыток: ' . (4 - $tries)]); }
+    if ($e = pass_weak($in['new'] ?? '')) json_out(['ok' => false, 'error' => $e]);
+    pass_set($in['new']); kv_del('reset_hash');
+    store_init()->exec('DELETE FROM sessions');  // все старые входы закрываются
+    notify_admins("🔐 Пароль кабинета изменён через код из Telegram.");
     json_out(['ok' => true, 'token' => session_new()]);
 }
 
