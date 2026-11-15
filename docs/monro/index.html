@@ -1942,7 +1942,7 @@ div.f { display: grid; gap: 8px; }
   }
 
   // ---------- страницы: услуги, работы, курсы, вопросы ----------
-  function dur(m) { return m < 60 ? m + " мин" : (m / 60).toString().replace(".", ",") + " ч"; }
+  function dur(m) { m = Math.round(m); var h = Math.floor(m / 60), r = m % 60; return !h ? r + " мин" : !r ? h + " ч" : h + " ч " + r + " мин"; }
   function svcCard(s) {
     return '<article class="svc-i"><div class="top"><h3>' + s.name + '</h3><span class="pr num">' + priceText(s) + '</span></div><p>' + s.text + '</p>' +
       '<div class="meta"><span>' + dur(s.min) + '</span><span>оплата на месте</span></div>' +
