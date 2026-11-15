@@ -52,7 +52,7 @@ jobs:
           DIR: ${{ inputs.dir || 'public_html' }}
         run: |
           sudo apt-get install -y -qq lftp >/dev/null
-          lftp -u "$FTP_USER,$FTP_PASSWORD" "$FTP_HOST" -e "set ftp:ssl-allow yes; set ssl:verify-certificate no; set net:max-retries 3; cls -l $DIR/; rm -f $DIR/index.htm $DIR/index.php $DIR/index.shtml $DIR/default.htm; mirror -R --verbose=1 --exclude-glob server/data/ out/ $DIR/; cls -l $DIR/; bye"
+          lftp -u "$FTP_USER,$FTP_PASSWORD" "$FTP_HOST" -e "set ftp:ssl-allow yes; set ssl:verify-certificate no; set net:max-retries 2; set net:reconnect-interval-base 5; cls -l $DIR/; rm -f $DIR/index.htm $DIR/index.php $DIR/index.shtml $DIR/default.htm; mirror -R --verbose=1 --exclude-glob server/data/ out/ $DIR/; cls -l $DIR/; bye"
       - name: Проверить
         if: steps.chk.outputs.ok == 'true'
         env:
