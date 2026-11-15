@@ -738,6 +738,13 @@ div.f { display: grid; gap: 8px; }
 .seg2 { display: grid; grid-template-columns: 1fr 1fr; background: var(--bg); border: 1.5px solid var(--line); border-radius: 14px; padding: 4px; gap: 4px; }
 .seg2 button { border: 0; background: none; border-radius: 10px; padding: 10px; font-weight: 700; color: var(--mute); transition: background .25s, color .25s; }
 .seg2 button[aria-pressed="true"] { background: var(--lac); color: var(--lac-ink); }
+.way-card { display: flex; align-items: center; gap: 14px; width: 100%; max-width: 420px; margin: 4px auto 0; padding: 10px 14px 10px 10px; border-radius: 18px; border: 1.5px solid var(--line); background: var(--bg); color: var(--ink); text-align: left; transition: border-color .2s, transform .2s; }
+.way-card:hover { border-color: var(--lac); transform: translateY(-1px); }
+.wc-ph { position: relative; flex: none; width: 54px; height: 72px; border-radius: 12px; overflow: hidden; background: var(--line); }
+.wc-ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.wc-ph i { position: absolute; inset: 0; display: grid; place-content: center; color: #fff; background: rgba(0,0,0,.28); }
+.wc-t b { display: block; font-size: 16px; }
+.wc-t small { display: block; color: var(--mute); font-size: 13px; line-height: 1.4; margin-top: 2px; }
 .rem-done { display: grid; gap: 10px; justify-items: center; }
 .remcard { display: grid; gap: 10px; padding: 16px; border-radius: 18px; background: color-mix(in srgb, var(--lac) 7%, var(--paper)); border: 1.5px solid color-mix(in srgb, var(--lac) 28%, var(--line)); }
 .rem-h { display: flex; align-items: center; gap: 12px; }
@@ -1684,6 +1691,10 @@ div.f { display: grid; gap: 8px; }
         <h3>Вы записаны</h3>
         <p class="lead" id="bDone"></p>
         <div class="rem-done" id="bRemDone"></div>
+        <button type="button" class="way-card" data-way>
+          <span class="wc-ph"><img src="video/way-poster.webp" alt="" width="72" height="128" loading="lazy"><i aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg></i></span>
+          <span class="wc-t"><b>Как пройти к студии</b><small>Видео 48 секунд: от Wildberries через калитку «Вход» до двери студии</small></span>
+        </button>
       </div>
       <div class="tg" aria-label="Пример уведомления мастеру" hidden>
         <div class="h"><i>М</i>Бот студии «М.А» → Марине</div>
@@ -2491,12 +2502,15 @@ div.f { display: grid; gap: 8px; }
   });
   // видео «как пройти»: впишите путь к файлу, когда видео будет готово (например "video/way.mp4")
   var WAY_VIDEO = "video/way3.mp4", WAY_POSTER = "video/way-poster.webp";
-  $("wayVideo").addEventListener("click", function () {
+  // открыть видео с любой кнопки [data-way] и по ссылке …#kak-proiti (из бота)
+  document.addEventListener("click", function (e) { if (e.target.closest("[data-way]")) openWay(); });
+  $("wayVideo").addEventListener("click", openWay);
+  function openWay() {
     $("vBody").innerHTML = WAY_VIDEO
       ? '<video controls playsinline autoplay muted preload="metadata"' + (WAY_POSTER ? ' poster="' + WAY_POSTER + '"' : '') + ' src="' + WAY_VIDEO + '"></video>'
       : '<div class="vempty"><b>Видео скоро появится</b><p>Пока Марина подскажет дорогу в мессенджере или по телефону — студия на улице Обороны, 41.</p><button type="button" class="btn sm glow" data-chat="Здравствуйте! Подскажите, пожалуйста, как к вам пройти?" data-chat-title="Спросить дорогу">Написать или позвонить</button></div>';
-    $("vDlg").showModal();
-  });
+    if (!$("vDlg").open) $("vDlg").showModal();
+  }
   function closeVideo() { var v = $("vBody").querySelector("video"); if (v) v.pause(); $("vDlg").close(); }
   $("vClose").addEventListener("click", closeVideo);
   $("vDlg").addEventListener("click", function (e) { if (e.target === this) closeVideo(); });
@@ -3707,6 +3721,7 @@ div.f { display: grid; gap: 8px; }
     var h = location.hash.slice(1), v = "home";
     var certHash = h.indexOf("cert-") === 0 ? h.slice(5) : null;
     if (certHash) v = "podarok"; else if (VIEWS.indexOf(h) > 0) v = h;
+    var wayHash = h === "kak-proiti"; if (wayHash) v = "kontakty";
     var changed = v !== curView; curView = v;
     document.title = TITLES[v] || TITLES.home;
     if (changed && !$("eSheet").hidden) closeEditor();
@@ -3724,6 +3739,7 @@ div.f { display: grid; gap: 8px; }
     if (!SYNC) lockAdmin();
     if (SYNC && changed) fetchState();
     if (certHash) showCertFromHash(certHash);
+    if (wayHash) setTimeout(openWay, 300);
     if (pendingTo) { var el = $(pendingTo); pendingTo = null; if (el) { jumpTop(); setTimeout(function () { el.scrollIntoView({ behavior: "smooth", block: "center" }); }, 80); return; } }
     if (changed || !h || h === "top") jumpTop();
   }

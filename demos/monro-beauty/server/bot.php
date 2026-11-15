@@ -31,7 +31,7 @@ function handle_update($u) {
             $db->prepare('UPDATE bookings SET chat_id = ?, updated = ? WHERE id = ?')->execute([$chat, time(), $b['id']]);
             $soon = booking_ts($b) - time() < 48 * 3600;
             send($chat, "Здравствуйте" . ($b['name'] ? ', ' . h($b['name']) : '') . "! 💅\n\nВы записаны в студию «М.А»:\n<b>" . h($b['svc']) . "</b>\n" . when_text($b['date'], $b['start'])
-                . "\nМихайловка, ул. Обороны, 41\n\nНапомним " . ($soon ? '' : 'за 2 дня и ') . "за 2 часа до визита. Если планы изменятся — нажмите «Перенести».", booking_buttons($b));
+                . "\nМихайловка, ул. Обороны, 41\n" . way_link() . "\n\nНапомним " . ($soon ? '' : 'за 2 дня и ') . "за 2 часа до визита. Если планы изменятся — нажмите «Перенести».", booking_buttons($b));
             return;
         }
 

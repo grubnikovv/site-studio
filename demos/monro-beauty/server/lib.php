@@ -75,6 +75,9 @@ function notify_admins($text) {
     foreach (db()->query('SELECT chat_id FROM admins') as $a) send($a['chat_id'], $text);
 }
 
+// Ссылка на видео «как пройти» (страница сайта откроет его сама)
+function way_link() { return '<a href="' . h(rtrim((string)cfg('site_url'), '/') . '/#kak-proiti') . '">🎬 Как пройти — видео</a>'; }
+
 function h($s) { return htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'); }
 function hm($m) { return intdiv($m, 60) . ':' . str_pad($m % 60, 2, '0', STR_PAD_LEFT); }
 
