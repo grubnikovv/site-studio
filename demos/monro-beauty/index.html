@@ -679,6 +679,18 @@ div.f { display: grid; gap: 8px; }
 .a-acts { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 28px; }
 .a-acts .a-out { margin: 0; }
 #aResetStep2:not([hidden]) { display: grid; gap: 10px; }
+.r1-r { display: inline-flex; align-items: center; gap: 6px; }
+.bk[data-tcard] { position: relative; }
+.bk[data-tcard] .r1 { padding-right: 34px; }
+.bk[data-tcard] .trash { position: absolute; top: 6px; right: 6px; }
+.trash { width: 34px; height: 34px; border: 0; border-radius: 10px; background: none; color: var(--mute); display: grid; place-content: center; transition: background .2s, color .2s; }
+.trash:hover, .trash:focus-visible { background: var(--bg); color: #B3261E; }
+.sure { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 8px 0 4px; padding: 10px 12px; border-radius: 12px; background: #FBEDEC; color: #7A1F18; font-size: 14px; font-weight: 600; animation: pop .35s cubic-bezier(.2,1.3,.4,1); }
+.sure span { flex: 1 1 100%; }
+.sure button { border-radius: 10px; padding: 8px 14px; font-weight: 700; font-size: 14px; border: 1.5px solid currentColor; background: none; color: inherit; }
+.sure .sure-yes { background: #B3261E; border-color: #B3261E; color: #fff; }
+[data-theme="dark"] .sure { background: #3A1F1E; color: #F2B8B5; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .sure { background: #3A1F1E; color: #F2B8B5; } }
 .a-link { border: 0; background: none; color: var(--lac); font-weight: 700; font-size: 14px; padding: 8px 0; justify-self: center; }
 #v-admin.locked .a-acts, #v-admin.pwd .atabs, #v-admin.pwd .atab, #v-admin.pwd .a-acts { display: none !important; }
 .seg3 { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--bg); border: 1.5px solid var(--line); border-radius: 14px; padding: 4px; gap: 4px; }
@@ -2841,7 +2853,10 @@ div.f { display: grid; gap: 8px; }
       var c = course(t.course || (t.dir === "ped" ? "ped" : "man")), tdays = t.days || [t.date];
       if (t.status === "wait" && !(t.hold > Date.now())) t.status = "nopay";
       var stt = t.status === "wait" ? (t.claimed ? ["Ученица оплатила — проверьте", "bad"] : ["Бронь, ждёт оплату · до " + new Date(t.hold).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }), "bad"]) : t.status === "nopay" ? ["Не оплачена · даты свободны", ""] : t.status === "paid" ? ["Предоплата получена", "ok"] : t.status === "refund" ? ["Отменена · предоплата возвращена", ""] : ["Отменена поздно · предоплата ваша", "bad"];
-      return '<div class="bk"><div class="r1"><b>' + rangeText(tdays) + ', ' + hm(TRAIN.from) + '–' + hm(TRAIN.to) + '</b><span class="pill ' + stt[1] + '">' + stt[0] + '</span></div><div><b style="font-weight:700">' + esc(t.name) + '</b> · ' + esc(t.phone) + (t.example ? ' <span class="pill">пример</span>' : '') + '</div><div class="info">' + c.short + ' · ' + daysWord(tdays.length) + ' · ' + rub(t.price) + ' · предоплата ' + rub(t.pre) + '</div>' +
+      var canDel = t.status !== "paid" && !(t.status === "wait" && t.hold > Date.now());
+      return '<div class="bk" data-tcard="' + t.id + '"><div class="r1"><b>' + rangeText(tdays) + ', ' + hm(TRAIN.from) + '–' + hm(TRAIN.to) + '</b><span class="r1-r"><span class="pill ' + stt[1] + '">' + stt[0] + '</span>' +
+        (canDel ? '<button type="button" class="trash" data-tdel="' + t.id + '" aria-label="Удалить заявку"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></button>' : '') + '</span></div>' +
+        (canDel ? '<div class="sure" data-tsure="' + t.id + '" hidden><span>Удалить заявку насовсем?</span><button type="button" class="sure-yes" data-tdelok="' + t.id + '">Удалить</button><button type="button" class="sure-no" data-tdelno>Отмена</button></div>' : '') + '<div><b style="font-weight:700">' + esc(t.name) + '</b> · ' + esc(t.phone) + (t.example ? ' <span class="pill">пример</span>' : '') + '</div><div class="info">' + c.short + ' · ' + daysWord(tdays.length) + ' · ' + rub(t.price) + ' · предоплата ' + rub(t.pre) + '</div>' +
         (t.status === "wait" ? '<div class="info">' + (t.claimed ? 'Ученица нажала «Я оплатил(а)». Проверьте поступление ' + rub(t.pre) + ' в СберБанк Онлайн. Даты держатся до ' + new Date(t.hold).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + '.' : 'Ученица ещё оплачивает. Если не нажмёт «Я оплатил(а)» за 30 минут — бронь отменится сама.') + '</div><div class="acts"><button data-tpay="' + t.id + '">Оплата пришла</button><button data-tno="' + t.id + '">Отменить заявку</button></div>' : '') +
         (t.status === "paid" ? (dkey(new Date()) <= refundTill(t)
           ? '<div class="keep">💰 <b>Не тратьте ' + rub(t.pre) + ' до ' + shortDate(refundTill(t)) + ' включительно.</b> Если ученица отменит до этой даты — предоплату нужно вернуть. С ' + shortDate(dkey(new Date(new Date(refundTill(t) + "T12:00").getTime() + 864e5))) + ' она ваша.</div>'
@@ -2918,6 +2933,10 @@ div.f { display: grid; gap: 8px; }
     toast(back ? "Отменено. Верните ученице предоплату " + rub(t.pre) + " переводом в Сбере" : "Отмена позже срока. Предоплата остаётся у вас");
   });
   $("aTrain").addEventListener("click", function (e) {
+    var dl = e.target.closest("[data-tdel]"), dOk = e.target.closest("[data-tdelok]"), dNo = e.target.closest("[data-tdelno]");
+    if (dl) { var box = document.querySelector('[data-tsure="' + dl.dataset.tdel + '"]'); box.hidden = !box.hidden; return; }
+    if (dNo) { dNo.parentNode.hidden = true; return; }
+    if (dOk) { st.training = (st.training || []).filter(function (x) { return x.id !== dOk.dataset.tdelok; }); save(); renderAdmin(); renderTrain(); renderTrainBand(); renderModels(); toast("Заявка удалена"); return; }
     var a = e.target.closest("[data-tpay]"), n = e.target.closest("[data-tno]"); if (!a && !n) return;
     var t = st.training.filter(function (x) { return x.id === (a || n).dataset[a ? "tpay" : "tno"]; })[0]; if (!t) return;
     t.status = a ? "paid" : "nopay"; save(); renderAdmin(); renderTrain(); renderTrainBand(); renderModels();
