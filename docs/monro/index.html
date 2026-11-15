@@ -775,6 +775,12 @@ div.f { display: grid; gap: 8px; }
 .keep-sum { display: grid; gap: 8px; margin-bottom: 10px; }
 .paybox { display: grid; gap: 10px; margin-top: 12px; padding: 16px; border-radius: 18px; background: var(--paper); border: 1.5px solid color-mix(in srgb, var(--lac) 30%, var(--line)); text-align: left; }
 .mc-wait { align-self: center; color: #F2C9D3; font-size: 13px; }
+.ptimer { justify-self: start; padding: 6px 12px; border-radius: 999px; font-size: 14px; background: color-mix(in srgb, var(--lac) 10%, var(--paper)); color: var(--ink); }
+.ptimer b { font-variant-numeric: tabular-nums; color: var(--lac); }
+.ptimer.soon { background: color-mix(in srgb, #C0392B 14%, var(--paper)); }
+.ptimer.ok { background: color-mix(in srgb, var(--ok) 14%, var(--paper)); color: var(--ok); font-weight: 700; }
+.ptimer.bad { background: color-mix(in srgb, #C0392B 12%, var(--paper)); color: #C0392B; font-weight: 700; }
+.tab-n { display: inline-grid; place-content: center; min-width: 20px; height: 20px; margin-left: 6px; padding: 0 6px; border-radius: 999px; background: #C0392B; color: #fff; font-size: 12px; font-weight: 800; vertical-align: 1px; }
 .paybox p { margin: 0; color: var(--mute); font-size: 14px; }
 .paybox .btn { width: 100%; }
 .pk { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 28px; align-items: start; }
@@ -1540,7 +1546,7 @@ div.f { display: grid; gap: 8px; }
       <button type="button" data-tab="day" aria-pressed="true">День</button>
       <button type="button" data-tab="clients" aria-pressed="false">Клиентки</button>
       <button type="button" data-tab="stats" aria-pressed="false">Статистика</button>
-      <button type="button" data-tab="req" aria-pressed="false">Заявки</button>
+      <button type="button" data-tab="req" aria-pressed="false">Заявки<span class="tab-n" id="aReqN" hidden></span></button>
     </div>
     <section class="atab" data-tab="day">
     <div class="days" id="aDays"></div>
@@ -1651,14 +1657,19 @@ div.f { display: grid; gap: 8px; }
   var MODEL_SVC = { man: "Маникюр с покрытием гель-лак", ped: "Педикюр с покрытием гель-лак", ext: "Наращивание или коррекция ногтей" };
   // Оплата напрямую: ссылка на оплату по СБП из «Своё дело» в СберБанк Онлайн (появится при запуске).
   // Сайт сам не видит оплату: Марина отмечает «Оплата пришла» в кабинете.
-  var PAY = { link: "", holdHours: 24 };
+  // payMin — сколько минут держим бронь до нажатия «Я оплатил(а)»; checkHours — сколько ждём, пока Марина проверит оплату
+  var PAY = { link: "", payMin: 30, checkHours: 24 };
+  function tgPreview(text) {
+    return '<div class="tg" style="margin-top:12px" aria-label="Пример уведомления Марине"><div class="h"><i>М</i>Бот студии «М.А» → Марине</div><div class="msg">' + esc(text) + '</div></div>';
+  }
   // после оплаты клиент пишет Марине в удобный мессенджер — текст уже готов
-  function payBox(sum, msg) {
-    return '<div class="paybox"><b>1. Оплатите ' + rub(sum) + ' по СБП</b>' +
+  function payBox(sum, msg, claim, deadline) {
+    return '<div class="paybox" data-box="' + claim + '"><div class="ptimer" data-until="' + deadline + '">Бронь держится <b>30:00</b></div>' +
+      '<b>1. Оплатите ' + rub(sum) + ' по СБП</b>' +
       '<p>Деньги придут Марине на счёт в СберБанке.</p>' +
       '<button type="button" class="btn glow" data-paynow="' + sum + '">Оплатить по СБП</button>' +
-      '<b>2. Напишите Марине</b><p>После оплаты сообщите, какой курс и даты вы выбрали. Сообщение уже готово — выберите WhatsApp, Telegram или MAX.</p>' +
-      '<button type="button" class="btn ghost" data-chat="' + esc(msg) + '" data-chat-title="Сообщить об оплате">Написать Марине</button></div>';
+      '<b>2. Нажмите «Я оплатил(а)» в течение 30 минут</b><p>Иначе бронь отменится. Затем отправьте Марине готовое сообщение в удобный мессенджер — какой курс и даты вы выбрали.</p>' +
+      '<button type="button" class="btn ghost" data-claim="' + claim + '" data-chat="' + esc(msg) + '" data-chat-title="Сообщить об оплате">Я оплатил(а)</button></div>';
   }
   function course(id) { return COURSES.filter(function (c) { return c.id === id; })[0] || COURSES[0]; }
   var FAQ = [
@@ -2103,6 +2114,30 @@ div.f { display: grid; gap: 8px; }
     var p = e.target.closest("[data-paynow]");
     if (p) { if (PAY.link) window.open(PAY.link, "_blank", "noopener"); else toast("В рабочей версии откроется оплата по СБП в приложении вашего банка"); return; }
   });
+  function findClaim(key) {
+    var id = key.slice(2);
+    return key[0] === "t" ? (st.training || []).filter(function (x) { return x.id === id; })[0] : (st.certs || []).filter(function (x) { return x.id === id; })[0];
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-claim]"); if (!b) return;
+    var r = findClaim(b.dataset.claim); if (!r || r.status !== "wait") return;
+    r.claimed = Date.now(); if (b.dataset.claim[0] === "t") r.hold = Date.now() + PAY.checkHours * 36e5;
+    save();
+    var box = b.closest(".paybox"); box.querySelector(".ptimer").outerHTML = '<div class="ptimer ok">✓ Спасибо! Марина проверит оплату и подтвердит' + (b.dataset.claim[0] === "t" ? ' — даты держим за вами' : '') + '</div>';
+    b.textContent = "Написать Марине ещё раз";
+    var tg = box.parentNode.querySelector(".tg .msg");
+    if (tg) tg.textContent = (b.dataset.claim[0] === "t" ? "💳 Ученица нажала «Я оплатил(а)»\n" + r.name + ", " + r.phone + "\nПроверьте поступление " + rub(r.pre) + " в Сбере и нажмите «Оплата пришла» в кабинете." : "💳 Покупатель нажал «Я оплатил(а)»\nСертификат № " + r.code + " на " + rub(r.sum) + "\n" + r.name + ", " + r.phone + "\nПроверьте поступление в Сбере.");
+  });
+  setInterval(function () {
+    document.querySelectorAll(".ptimer[data-until]").forEach(function (t) {
+      var left = Number(t.dataset.until) - Date.now(), box = t.closest(".paybox");
+      if (left > 0) { var m = Math.floor(left / 6e4), sec = Math.floor(left % 6e4 / 1e3); t.innerHTML = 'Бронь держится <b>' + (m < 10 ? "0" : "") + m + ":" + (sec < 10 ? "0" : "") + sec + '</b>'; t.classList.toggle("soon", left < 5 * 6e4); return; }
+      var r = findClaim(box.dataset.box);
+      if (r && r.status === "wait" && !r.claimed) { r.status = box.dataset.box[0] === "t" ? "nopay" : "nopay"; save(); }
+      box.innerHTML = '<div class="ptimer bad">Время вышло — бронь отменена.</div><p>' + (box.dataset.box[0] === "t" ? 'Даты снова свободны. Если вы уже оплатили — напишите Марине, она всё проверит.' : 'Если вы уже оплатили — напишите Марине, она всё проверит.') + '</p><button type="button" class="btn ghost" data-chat="Здравствуйте, Марина! Бронь на сайте отменилась, но я уже оплатил(а). Проверьте, пожалуйста." data-chat-title="Бронь отменилась">Написать Марине</button>';
+      if (box.dataset.box[0] === "t") { renderTrain(); renderTrainBand(); }
+    });
+  }, 1000);
   // ---------- клиентка: мои записи и отмена ----------
   function digits(p) { return String(p || "").replace(/\D/g, "").replace(/^8/, "7"); }
   function myBookings(phone) {
@@ -2205,9 +2240,12 @@ div.f { display: grid; gap: 8px; }
       // пока ученица заполняла форму, на эти дни могли записаться клиентки
       if (!days.every(dayFreeForTrain)) { btn.disabled = false; renderTrain(); $("tErr").textContent = "Эти даты только что заняли. Выберите другие."; $("tErr").hidden = false; return; }
       st.training = st.training || [];
-      st.training.push({ id: "t" + Date.now().toString(36), course: c.id, date: days[0], days: days, name: name, phone: phone, price: c.price, pre: c.pre, status: "wait", hold: Date.now() + PAY.holdHours * 36e5 });
+      st.training.push({ id: "t" + Date.now().toString(36), course: c.id, date: days[0], days: days, name: name, phone: phone, price: c.price, pre: c.pre, status: "wait", hold: Date.now() + PAY.payMin * 6e4 });
+      var tid = st.training[st.training.length - 1];
       save(); btn.disabled = false; btn.textContent = "Забронировать и оплатить " + rub(c.pre);
-      $("tDone").innerHTML = '<b>Даты держим за вами 24 часа.</b> Курс «' + c.short + '»: ' + rangeText(days) + ', с 10:00 до 17:00. Оплатите предоплату — после подтверждения Марины даты закрепятся окончательно.' + payBox(c.pre, "Здравствуйте, Марина! Я оплатила предоплату " + rub(c.pre) + " за курс «" + c.name + "». Даты: " + rangeText(days) + ", с 10:00 до 17:00. Меня зовут " + name + ", телефон " + phone + ".");
+      $("tDone").innerHTML = '<b>Даты забронированы на 30 минут.</b> Курс «' + c.short + '»: ' + rangeText(days) + ', с 10:00 до 17:00. Оплатите предоплату и нажмите «Я оплатил(а)» — после проверки Марины даты закрепятся окончательно.' +
+        payBox(c.pre, "Здравствуйте, Марина! Я оплатила предоплату " + rub(c.pre) + " за курс «" + c.name + "». Даты: " + rangeText(days) + ", с 10:00 до 17:00. Меня зовут " + name + ", телефон " + phone + ".", "t:" + tid.id, tid.hold) +
+        tgPreview("🎓 Новая бронь курса\n«" + c.short + "», " + rangeText(days) + "\n" + name + ", " + phone + "\nЖдёт оплату " + rub(c.pre) + " — 30 минут на оплату.");
       $("tDone").hidden = false; ["tName", "tPhone"].forEach(function (id) { $(id).value = ""; }); $("tRules").checked = false; $("tPd").checked = false;
       tr.date = null; renderTrain(); renderTrainBand(); renderModels(); toast("Заявка принята — оплатите предоплату по СБП");
     }, 900);
@@ -2406,9 +2444,9 @@ div.f { display: grid; gap: 8px; }
     $("aTrain").innerHTML = trl.length ? trl.map(function (t) {
       var c = course(t.course || (t.dir === "ped" ? "ped" : "man")), tdays = t.days || [t.date];
       if (t.status === "wait" && !(t.hold > Date.now())) t.status = "nopay";
-      var stt = t.status === "wait" ? ["Ждёт оплату до " + new Date(t.hold).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }), "bad"] : t.status === "nopay" ? ["Не оплачена · даты свободны", ""] : t.status === "paid" ? ["Предоплата получена", "ok"] : t.status === "refund" ? ["Отменена · предоплата возвращена", ""] : ["Отменена поздно · предоплата ваша", "bad"];
+      var stt = t.status === "wait" ? (t.claimed ? ["Ученица оплатила — проверьте", "bad"] : ["Бронь, ждёт оплату · до " + new Date(t.hold).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }), "bad"]) : t.status === "nopay" ? ["Не оплачена · даты свободны", ""] : t.status === "paid" ? ["Предоплата получена", "ok"] : t.status === "refund" ? ["Отменена · предоплата возвращена", ""] : ["Отменена поздно · предоплата ваша", "bad"];
       return '<div class="bk"><div class="r1"><b>' + rangeText(tdays) + ', ' + hm(TRAIN.from) + '–' + hm(TRAIN.to) + '</b><span class="pill ' + stt[1] + '">' + stt[0] + '</span></div><div><b style="font-weight:700">' + esc(t.name) + '</b> · ' + esc(t.phone) + (t.example ? ' <span class="pill">пример</span>' : '') + '</div><div class="info">' + c.short + ' · ' + daysWord(tdays.length) + ' · ' + rub(t.price) + ' · предоплата ' + rub(t.pre) + '</div>' +
-        (t.status === "wait" ? '<div class="info">Проверьте поступление ' + rub(t.pre) + ' в СберБанк Онлайн. Даты держатся 24 часа, потом освободятся сами.</div><div class="acts"><button data-tpay="' + t.id + '">Оплата пришла</button><button data-tno="' + t.id + '">Отменить заявку</button></div>' : '') +
+        (t.status === "wait" ? '<div class="info">' + (t.claimed ? 'Ученица нажала «Я оплатил(а)». Проверьте поступление ' + rub(t.pre) + ' в СберБанк Онлайн. Даты держатся до ' + new Date(t.hold).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + '.' : 'Ученица ещё оплачивает. Если не нажмёт «Я оплатил(а)» за 30 минут — бронь отменится сама.') + '</div><div class="acts"><button data-tpay="' + t.id + '">Оплата пришла</button><button data-tno="' + t.id + '">Отменить заявку</button></div>' : '') +
         (t.status === "paid" ? (dkey(new Date()) <= refundTill(t)
           ? '<div class="keep">💰 <b>Не тратьте ' + rub(t.pre) + ' до ' + shortDate(refundTill(t)) + ' включительно.</b> Если ученица отменит до этой даты — предоплату нужно вернуть. С ' + shortDate(dkey(new Date(new Date(refundTill(t) + "T12:00").getTime() + 864e5))) + ' она ваша.</div>'
           : '<div class="keep ok">✅ <b>Предоплата ' + rub(t.pre) + ' ваша.</b> До начала меньше 7 дней — при отмене она не возвращается.</div>') : '') +
@@ -2418,6 +2456,8 @@ div.f { display: grid; gap: 8px; }
     $("aKeep").innerHTML = '<p class="note" style="margin:0">Правило возврата: если ученица отменяет <b>раньше чем за 7 дней</b> до начала — предоплату возвращаете переводом в Сбере. Если за 6 дней и меньше — предоплата ваша.</p>' +
       (hold.length ? '<div class="keep">💰 Пока не тратьте: <b>' + rub(hold.reduce(function (a, t) { return a + t.pre; }, 0)) + '</b> — ' + hold.map(function (t) { return esc(t.name) + ' до ' + shortDate(refundTill(t)); }).join(", ") + '</div>' : '');
     renderModelBase();
+    var need = (st.training || []).filter(function (t) { return t.status === "wait" && t.hold > Date.now(); }).length + (st.certs || []).filter(function (c) { return c.status === "wait"; }).length;
+    $("aReqN").hidden = !need; $("aReqN").textContent = need;
   }
   // модель на день обучения: мама сама записывает имя, телефон и время
   var mEdit = null;
@@ -2928,9 +2968,11 @@ div.f { display: grid; gap: 8px; }
       st.certs = st.certs || [];
       var code = newCertCode();
       st.certs.push({ id: "c" + Date.now().toString(36), code: code, sum: cSum, balance: cSum, to: $("cTo").value.trim(), name: name, phone: phone, status: "wait", created: dkey(new Date()), till: dkey(certTill()), spent: [] });
+      var cid = st.certs[st.certs.length - 1], until = Date.now() + PAY.payMin * 6e4;
       $("mcPhone").value = phone;
       save(); renderGift(code); btn.disabled = false; btn.textContent = "Оплатить " + rub(cSum);
-      $("cDone").innerHTML = "<b>Сертификат № " + code + "</b> на " + rub(cSum) + " создан и ждёт оплаты. Оплатите по СБП — как только Марина подтвердит поступление, он станет активным и его можно будет подарить." + payBox(cSum, "Здравствуйте, Марина! Я оплатил(а) подарочный сертификат № " + code + " на " + rub(cSum) + ". Меня зовут " + name + ", телефон " + phone + ".");
+      $("cDone").innerHTML = "<b>Сертификат № " + code + "</b> на " + rub(cSum) + " создан и ждёт оплаты. Оплатите по СБП — как только Марина подтвердит поступление, он станет активным и его можно будет подарить." + payBox(cSum, "Здравствуйте, Марина! Я оплатил(а) подарочный сертификат № " + code + " на " + rub(cSum) + ". Меня зовут " + name + ", телефон " + phone + ".", "c:" + cid.id, until) +
+        tgPreview("🎁 Новый сертификат № " + code + " на " + rub(cSum) + "\n" + name + ", " + phone + "\nЖдёт оплату по СБП.");
       $("cDone").hidden = false; $("cName").value = ""; $("cPhone").value = ""; $("cPd").checked = false; $("cTerm").checked = false;
       lastCode = code; $("cShare").hidden = true;
       renderMyCerts(true);
@@ -3024,7 +3066,7 @@ div.f { display: grid; gap: 8px; }
         '<div class="info">Номинал ' + rub(c.sum) + ' · <b style="color:var(--ink)">остаток ' + rub(bal) + '</b> · до ' + shortDate(c.till || c.created) + '</div>' +
         '<div><b style="font-weight:700">' + esc(c.name) + '</b> · ' + esc(c.phone) + (c.to ? ' · для: ' + esc(c.to) : '') + '</div>' +
         ((c.spent || []).length ? '<div class="info">Списано: ' + c.spent.map(function (x) { return shortDate(x.d) + ' — ' + rub(x.sum) + (x.who ? ' (' + esc(x.who) + ', запись ' + shortDate(x.date) + ')' : ''); }).join(", ") + '</div>' : '') +
-        (c.status === "wait" ? '<div class="info">Проверьте поступление ' + rub(c.sum) + ' в СберБанк Онлайн.</div><div class="acts"><button data-cpay="' + c.id + '">Оплата пришла</button><button data-cno="' + c.id + '">Удалить — не оплачен</button></div>' : '') +
+        (c.status === "wait" ? '<div class="info">' + (c.claimed ? 'Покупатель нажал «Я оплатил(а)». ' : 'Покупатель ещё оплачивает. ') + 'Проверьте поступление ' + rub(c.sum) + ' в СберБанк Онлайн.</div><div class="acts"><button data-cpay="' + c.id + '">Оплата пришла</button><button data-cno="' + c.id + '">Удалить — не оплачен</button></div>' : '') +
         (open ? '<div class="spend"><input type="number" inputmode="numeric" min="1" max="' + bal + '" placeholder="Сумма, ₽" data-amt="' + c.id + '" aria-label="Сколько списать с сертификата"><button type="button" data-cert="' + c.id + '" data-st="part">Списать</button><button type="button" data-cert="' + c.id + '" data-st="used">Закрыть полностью</button></div>' : '') + '</div>';
     }).join("") : '<p class="note">Покупок пока нет. Они появятся, когда кто-то оплатит сертификат на странице «Подарочный сертификат».</p>';
   }
