@@ -1709,7 +1709,7 @@ div.f { display: grid; gap: 8px; }
   // Оплата напрямую: ссылка на оплату по СБП из «Своё дело» в СберБанк Онлайн (появится при запуске).
   // Сайт сам не видит оплату: Марина отмечает «Оплата пришла» в кабинете.
   // payMin — сколько минут держим бронь до нажатия «Я оплатил(а)»; checkHours — сколько ждём, пока Марина проверит оплату
-  var PAY = { link: "", payMin: 30, checkHours: 24 };
+  var PAY = { link: "https://www.sberbank.ru/ru/choise_bank?requisiteNumber=79950305079&bankCode=100000000111", payMin: 30, checkHours: 24 };  // ТЕСТ: ссылка Влада, заменить на мамину
   function tgPreview(text) {
     return '<div class="tg" style="margin-top:12px" aria-label="Пример уведомления Марине"><div class="h"><i>М</i>Бот студии «М.А» → Марине</div><div class="msg">' + esc(text) + '</div></div>';
   }
@@ -1717,7 +1717,7 @@ div.f { display: grid; gap: 8px; }
   function payBox(sum, msg, claim, deadline) {
     return '<div class="paybox" data-box="' + claim + '"><div class="ptimer" data-until="' + deadline + '">Бронь держится <b>30:00</b></div>' +
       '<b>1. Оплатите ' + rub(sum) + ' по СБП</b>' +
-      '<p>Деньги придут Марине на счёт в СберБанке.</p>' +
+      '<p>Откроется перевод по СБП — выберите свой банк и <b>введите сумму ' + rub(sum) + '</b>. Деньги придут Марине на счёт в СберБанке.</p>' +
       '<button type="button" class="btn glow" data-paynow="' + sum + '">Оплатить по СБП</button>' +
       '<b>2. Нажмите «Я оплатил(а)» в течение 30 минут</b><p>Иначе бронь отменится. Затем отправьте Марине готовое сообщение в удобный мессенджер — какой курс и даты вы выбрали.</p>' +
       '<button type="button" class="btn ghost" data-claim="' + claim + '" data-chat="' + esc(msg) + '" data-chat-title="Сообщить об оплате">Я оплатил(а)</button></div>';
