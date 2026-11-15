@@ -1917,6 +1917,12 @@ div.f { display: grid; gap: 8px; }
     if (!token) mergeMine();
     rerender();
   }
+  // ответ на действие посетителя. Если в этом браузере открыт кабинет — гостевую базу не берём, перечитываем полную
+  function pubDoc(r, kind) {
+    if (!token) { applyDoc(r.v, r.doc); return; }
+    if (kind && r.rec) [st, synced].forEach(function (d) { if (!d) return; d[kind] = (d[kind] || []).filter(function (x) { return x.id !== r.rec.id; }); d[kind].push(clone(r.rec)); });
+    fetchState(true);
+  }
   // свои записи посетителя: сервер отдаёт их без имени и телефона, дополняем из памяти телефона
   function mergeMine() {
     ["bookings", "training"].forEach(function (kind) {
@@ -2367,7 +2373,7 @@ div.f { display: grid; gap: 8px; }
       var botLink = apiSend({ type: "booking", rec: Object.assign({ dur: bmin(b), coat: CORR[s.id] ? 1 : 0 }, b), svcName: s.name + (b.remove ? " + снятие" : "") });
       if (SYNC) {  // с сервером: запись считается сделанной, только когда сервер её принял
         botLink.then(function (r) {
-          if (r && r.ok) { addMine("bookings", b); applyDoc(r.v, r.doc); booked(); return; }
+          if (r && r.ok) { addMine("bookings", b); pubDoc(r); booked(); return; }
           btn.disabled = false; btn.textContent = "Записаться";
           $("bErr").textContent = (r && r.error) || "Нет связи с сервером. Проверьте интернет и попробуйте ещё раз."; $("bErr").hidden = false;
           if (r && /заняли/.test(r.error || "")) { renderDays(); stepTo(2); }
@@ -2533,7 +2539,7 @@ div.f { display: grid; gap: 8px; }
     if (b.dataset.sure !== "1") { b.dataset.sure = "1"; b.textContent = "Точно отменить? Нажмите ещё раз"; return; }
     var rec = st.bookings.filter(function (x) { return x.id === b.dataset.my; })[0]; if (!rec) return;
     rec.status = "cancelled"; rec.by = "client"; rec.cancelledAt = Date.now(); certUndo(rec, true); save(); renderMy();
-    apiSend({ type: "cancel", id: rec.id, phone: rec.phone }).then(function (r) { if (r && r.ok) applyDoc(r.v, r.doc); });
+    apiSend({ type: "cancel", id: rec.id, phone: rec.phone }).then(function (r) { if (r && r.ok) pubDoc(r); });
     note("❌", "Клиентка отменила запись", rec.name + " · " + svc(rec.svc).name + " · " + whenText(rec.date, rec.start) + " — время освободилось", { tab: "day", date: rec.date });
     toast("Запись отменена. Марина получит уведомление");
   });
@@ -2625,7 +2631,7 @@ div.f { display: grid; gap: 8px; }
       var trec = { id: "t" + Date.now().toString(36), course: c.id, date: days[0], days: days, name: name, phone: phone, price: c.price, pre: c.pre, status: "wait", hold: Date.now() + PAY.payMin * 6e4 };
       if (SYNC) {
         apiSend({ type: "train", rec: trec, title: c.short, when: rangeText(days) }).then(function (r) {
-          if (r && r.ok) { addMine("training", r.rec); applyDoc(r.v, r.doc); trained(st.training.filter(function (x) { return x.id === r.rec.id; })[0] || r.rec); return; }
+          if (r && r.ok) { addMine("training", r.rec); pubDoc(r, "training"); trained(st.training.filter(function (x) { return x.id === r.rec.id; })[0] || r.rec); return; }
           btn.disabled = false; btn.textContent = "Забронировать и оплатить " + rub(c.pre); renderTrain();
           $("tErr").textContent = (r && r.error) || "Нет связи с сервером. Проверьте интернет и попробуйте ещё раз."; $("tErr").hidden = false;
         });
@@ -3433,7 +3439,7 @@ div.f { display: grid; gap: 8px; }
       var crec = { id: "c" + Date.now().toString(36), code: code, sum: cSum, balance: cSum, to: $("cTo").value.trim().replace(/https?:\S+|www\.\S+/g, "").slice(0, 30), name: name, phone: phone, status: "wait", created: dkey(new Date()), till: dkey(certTill()), spent: [] };
       if (SYNC) {
         apiSend({ type: "cert", rec: crec }).then(function (r) {
-          if (r && r.ok) { addMine("certs", r.rec); applyDoc(r.v, r.doc); made(st.certs.filter(function (x) { return x.id === r.rec.id; })[0] || r.rec); return; }
+          if (r && r.ok) { addMine("certs", r.rec); pubDoc(r, "certs"); made(st.certs.filter(function (x) { return x.id === r.rec.id; })[0] || r.rec); return; }
           btn.disabled = false; btn.textContent = "Оплатить " + rub(cSum);
           $("cErr").textContent = (r && r.error) || "Нет связи с сервером. Проверьте интернет и попробуйте ещё раз."; $("cErr").hidden = false;
         });
