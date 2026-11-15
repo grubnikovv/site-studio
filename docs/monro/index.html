@@ -172,6 +172,8 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 .aw-ph img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s ease; }
 .aw-ph:hover img { transform: scale(1.04); }
 .aw-place { position: absolute; left: 10px; top: 10px; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 800; color: #3A2600; background: linear-gradient(135deg, #F6DFA4, #E0B65C); box-shadow: 0 6px 16px rgba(0,0,0,.18); }
+.aw-place.p2 { color: #2E3338; background: linear-gradient(135deg, #F2F4F6, #B9C0C7); }
+.aw-place.p3 { color: #3B1E08; background: linear-gradient(135deg, #F0C9A0, #C88A55); }
 .award figcaption { display: grid; gap: 4px; padding: 0 4px 4px; }
 .award figcaption b { font-size: 15px; line-height: 1.35; }
 .award figcaption span { color: var(--mute); font-size: 13.5px; }
@@ -1849,10 +1851,11 @@ div.f { display: grid; gap: 8px; }
   var cupIcon = '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 4h10v5a5 5 0 0 1-10 0z"></path><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4M12 14v4M8 21h8"></path></svg>';
   // награды: фото, место, конкурс, номинация, город и год
   var AWARDS = [
-    { f: "01", w: 640, h: 853, place: "1 место", title: "Международный чемпионат «White Lotus» — Magic New Year", nom: "Маникюр крупным планом · категория «Премиум-преподаватель»", where: "Волгоград, 2022" }
+    { f: "01", w: 640, h: 853, place: "1 место", title: "Международный чемпионат «White Lotus» — Magic New Year", nom: "Маникюр крупным планом · категория «Премиум-преподаватель»", where: "Волгоград, 2022" },
+    { f: "02", w: 640, h: 853, place: "2 место", title: "Международный чемпионат «Premium Nail Star VIII» — New Year Carnaval", nom: "Постер: покрытие гель-лак VOGUE, маникюр · категория «Инструктор»", where: "Самара, 2022" }
   ];
   $("awards").innerHTML = AWARDS.map(function (a, i) {
-    return '<figure class="award"><button type="button" class="aw-ph" data-aw="' + i + '" aria-label="Открыть фото: ' + a.title + '"><img src="img/awards/' + a.f + '.webp" width="' + a.w + '" height="' + a.h + '" alt="Кубок и диплом: ' + a.title + ', ' + a.place + '" loading="lazy" decoding="async"><span class="aw-place">🏆 ' + a.place + '</span></button>' +
+    return '<figure class="award"><button type="button" class="aw-ph" data-aw="' + i + '" aria-label="Открыть фото: ' + a.title + '"><img src="img/awards/' + a.f + '.webp" width="' + a.w + '" height="' + a.h + '" alt="Кубок и диплом: ' + a.title + ', ' + a.place + '" loading="lazy" decoding="async"><span class="aw-place p' + parseInt(a.place, 10) + '">🏆 ' + a.place + '</span></button>' +
       '<figcaption><b>' + a.title + '</b><span>' + a.nom + '</span><small>' + a.where + '</small></figcaption></figure>';
   }).join("");
   $("awards").addEventListener("click", function (e) {
