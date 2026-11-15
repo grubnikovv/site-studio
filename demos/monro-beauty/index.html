@@ -680,7 +680,9 @@ div.f { display: grid; gap: 8px; }
 .a-acts .a-out { margin: 0; }
 #aResetStep2:not([hidden]) { display: grid; gap: 10px; }
 .r1-r { display: inline-flex; align-items: center; gap: 6px; }
-.bk[data-tcard] { position: relative; }
+.bk[data-tcard], .bk[data-mcard] { position: relative; }
+.bk[data-mcard] .r1 { padding-right: 34px; }
+.bk[data-mcard] .trash { position: absolute; top: 6px; right: 6px; }
 .bk[data-tcard] .r1 { padding-right: 34px; }
 .bk[data-tcard] .trash { position: absolute; top: 6px; right: 6px; }
 .trash { width: 34px; height: 34px; border: 0; border-radius: 10px; background: none; color: var(--mute); display: grid; place-content: center; transition: background .2s, color .2s; }
@@ -2891,11 +2893,29 @@ div.f { display: grid; gap: 8px; }
     var base = modelBase(), need = modelNeeds()[0];
     $("aModels").innerHTML = base.length ? base.map(function (m) {
       var ph = digits(m.phone), offer = need ? "Здравствуйте, " + m.name.replace(/ \(пример\)$/, "") + "! " + new Date(need.k + "T12:00").toLocaleDateString("ru-RU", { day: "numeric", month: "long" }) + " на обучении нужна модель: " + (MODEL_SVC[need.t.course] || "").toLowerCase() + ", бесплатно, около 5 часов" + ((st.modelTimes || {})[need.k] ? ", прийти к " + hm(st.modelTimes[need.k]) : "") + ". Сможете прийти?" : "";
-      return '<div class="bk"><div class="r1"><b>' + esc(m.name) + '</b><span class="pill">' + (m.days.length ? "была " + m.days.length + " " + (m.days.length === 1 ? "раз" : m.days.length < 5 ? "раза" : "раз") : "ещё не была") + '</span></div>' +
-        '<div class="info">' + esc(m.phone) + (m.days.length ? ' · ' + m.days.map(function (k) { return new Date(k + "T12:00").toLocaleDateString("ru-RU", { day: "numeric", month: "short" }); }).join(", ") : '') + '</div>' +
+      // день модели: была (обучение прошло), записана (впереди) или обучение отменено
+      var today = dkey(new Date()), st3 = m.days.map(function (k) { var on = trainOn(k), paid = on && on.status === "paid"; return { k: k, s: paid ? (k < today ? "was" : "next") : "off" }; });
+      var was = st3.filter(function (x) { return x.s === "was"; }).length, next = st3.filter(function (x) { return x.s === "next"; }).length;
+      var pill = was ? "была " + was + " " + (was === 1 ? "раз" : was < 5 ? "раза" : "раз") : next ? "записана" : "ещё не была";
+      var dayTxt = st3.map(function (x) { return new Date(x.k + "T12:00").toLocaleDateString("ru-RU", { day: "numeric", month: "short" }) + (x.s === "off" ? " — обучение отменено" : x.s === "next" ? " — записана" : ""); }).join(", ");
+      var key = digits(m.phone) || m.name;
+      return '<div class="bk" data-mcard><div class="r1"><b>' + esc(m.name) + '</b><span class="pill' + (next && !was ? ' ok' : '') + '">' + pill + '</span></div>' +
+        '<button type="button" class="trash" data-mdel="' + esc(key) + '" aria-label="Удалить модель из списка"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></button>' +
+        '<div class="sure" data-msure="' + esc(key) + '" hidden>' + (next ? '<span>Модель записана на ближайшее обучение. Сначала снимите её с этого дня, потом удалите.</span><button type="button" class="sure-no" data-mdelno>Понятно</button>' : '<span>Удалить модель из списка насовсем?</span><button type="button" class="sure-yes" data-mdelok="' + esc(key) + '">Удалить</button><button type="button" class="sure-no" data-mdelno>Отмена</button>') + '</div>' +
+        '<div class="info">' + esc(m.phone) + (dayTxt ? ' · ' + dayTxt : '') + '</div>' +
         (ph.length === 11 ? '<div class="acts"><a class="btn sm ghost" href="tel:+' + ph + '">Позвонить</a>' + (offer ? '<a class="btn sm ghost" target="_blank" rel="noopener" href="https://wa.me/' + ph + '?text=' + encodeURIComponent(offer) + '">Предложить ' + new Date(need.k + "T12:00").toLocaleDateString("ru-RU", { day: "numeric", month: "short" }) + '</a>' : '') + '</div>' : '') + '</div>';
     }).join("") : '<p class="note">Здесь появятся модели, которых вы записали на обучение. Их можно будет снова позвать.</p>';
   }
+  $("aModels").addEventListener("click", function (e) {
+    var dl = e.target.closest("[data-mdel]"), ok = e.target.closest("[data-mdelok]"), no = e.target.closest("[data-mdelno]");
+    if (dl) { var box = document.querySelector('[data-msure="' + CSS.escape(dl.dataset.mdel) + '"]'); box.hidden = !box.hidden; return; }
+    if (no) { no.parentNode.hidden = true; return; }
+    if (!ok) return;
+    var key = ok.dataset.mdelok, same = function (x) { return x && (digits(x.phone) || x.name) === key; }, today = dkey(new Date());
+    st.modelBase = (st.modelBase || []).filter(function (x) { return !same(x); });
+    Object.keys(st.models || {}).forEach(function (k) { if (same(st.models[k]) && (k < today || !trainOn(k))) delete st.models[k]; });
+    save(); renderModelBase(); renderModels(); toast("Модель удалена из списка");
+  });
   $("aDays").addEventListener("click", function (e) { var b = e.target.closest("[data-d]"); if (b) { aDate = b.dataset.d; quickOff(); renderAdmin(); } });
   $("aList").addEventListener("click", function (e) {
     var b = e.target.closest("[data-a]"); if (!b) return;
