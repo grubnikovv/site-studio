@@ -163,9 +163,17 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 .ph svg { margin: 0 auto 6px; color: var(--lac); opacity: .6; }
 .gal .ph:nth-child(1) { grid-column: span 2; grid-row: span 2; aspect-ratio: auto; }
 @media (max-width: 700px) { .gal { grid-template-columns: repeat(2, 1fr); } .gal .ph:nth-child(1) { grid-column: auto; grid-row: auto; aspect-ratio: 4 / 5; } }
-.awards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
-.award { background: var(--paper); border: 1px solid var(--line); border-radius: 20px; padding: 16px; display: grid; gap: 10px; text-align: center; }
-.award .ph { aspect-ratio: 1; border-color: color-mix(in srgb, var(--gold) 45%, var(--line)); }
+.awards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 14px; }
+.award { margin: 0; background: var(--paper); border: 1px solid var(--line); border-radius: 22px; padding: 12px; display: grid; gap: 12px; align-content: start; }
+.aw-ph { position: relative; display: block; padding: 0; border: 0; border-radius: 16px; overflow: hidden; aspect-ratio: 3 / 4; background: var(--blush); cursor: zoom-in; }
+.aw-ph img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s ease; }
+.aw-ph:hover img { transform: scale(1.04); }
+.aw-place { position: absolute; left: 10px; top: 10px; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 800; color: #3A2600; background: linear-gradient(135deg, #F6DFA4, #E0B65C); box-shadow: 0 6px 16px rgba(0,0,0,.18); }
+.award figcaption { display: grid; gap: 4px; padding: 0 4px 4px; }
+.award figcaption b { font-size: 15px; line-height: 1.35; }
+.award figcaption span { color: var(--mute); font-size: 13.5px; }
+.award figcaption small { color: var(--lac); font-size: 12.5px; font-weight: 700; }
+.pdlg.single .pnav { display: none; }
 .award .ph svg { color: var(--gold); }
 .award b { font-size: 14px; }
 
@@ -1814,6 +1822,7 @@ div.f { display: grid; gap: 8px; }
     $("pCap").textContent = w[2]; $("pNum").textContent = (pIdx + 1) + " / " + pList.length;
   }
   function openPhoto(k, scope) {
+    $("pDlg").classList.remove("single");
     pList = [].map.call(scope.querySelectorAll(".work:not([hidden])"), function (x) { return Number(x.dataset.k); });
     pIdx = Math.max(0, pList.indexOf(k)); showPhoto(); $("pDlg").showModal();
   }
@@ -1834,7 +1843,19 @@ div.f { display: grid; gap: 8px; }
     document.querySelectorAll("#gal .ph").forEach(function (p) { p.hidden = b.dataset.f !== "all" && p.dataset.c !== b.dataset.f; });
   });
   var cupIcon = '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 4h10v5a5 5 0 0 1-10 0z"></path><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4M12 14v4M8 21h8"></path></svg>';
-  $("awards").innerHTML = Array.apply(null, Array(4)).map(function () { return '<div class="award"><div class="ph" role="img" aria-label="Место для фото награды">' + cupIcon + 'Фото награды</div><b>Название конкурса, год</b></div>'; }).join("");
+  // награды: фото, место, конкурс, номинация, город и год
+  var AWARDS = [
+    { f: "01", w: 640, h: 853, place: "1 место", title: "Международный чемпионат «White Lotus» — Magic New Year", nom: "Маникюр крупным планом · категория «Премиум-преподаватель»", where: "Волгоград, 2022" }
+  ];
+  $("awards").innerHTML = AWARDS.map(function (a, i) {
+    return '<figure class="award"><button type="button" class="aw-ph" data-aw="' + i + '" aria-label="Открыть фото: ' + a.title + '"><img src="img/awards/' + a.f + '.webp" width="' + a.w + '" height="' + a.h + '" alt="Кубок и диплом: ' + a.title + ', ' + a.place + '" loading="lazy" decoding="async"><span class="aw-place">🏆 ' + a.place + '</span></button>' +
+      '<figcaption><b>' + a.title + '</b><span>' + a.nom + '</span><small>' + a.where + '</small></figcaption></figure>';
+  }).join("");
+  $("awards").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-aw]"); if (!b) return; var a = AWARDS[Number(b.dataset.aw)];
+    pList = []; $("pImg").src = "img/awards/" + a.f + "-l.webp"; $("pImg").alt = a.title; $("pCap").textContent = a.place + " · " + a.title; $("pNum").textContent = a.where;
+    $("pDlg").classList.add("single"); $("pDlg").showModal();
+  });
   function faqHtml(list) { return list.map(function (q) { return '<details><summary>' + q[0] + '</summary><p>' + q[1] + '</p></details>'; }).join(""); }
   $("faqAll").innerHTML = FAQ.map(function (g) { return '<h3 class="grp">' + g[0] + '</h3><div class="faq">' + faqHtml(g[1]) + '</div>'; }).join("");
 
