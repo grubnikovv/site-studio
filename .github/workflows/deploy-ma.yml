@@ -1,5 +1,5 @@
 # Выкладка сайта «М.А» с ботом на хостинг (Timeweb). Запускается сама при изменениях сайта в ветке.
-# Нужны секреты репозитория: BOT_TOKEN, ADMIN_KEY, FTP_PASSWORD. В логах они не печатаются.
+# Нужны секреты репозитория: BOT_TOKEN, ADMIN_KEY, FTP_PASSWORD, CABINET_PASS (пароль кабинета). В логах они не печатаются.
 name: Выложить сайт М.А
 on:
   push:
@@ -32,6 +32,7 @@ jobs:
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           ADMIN_KEY: ${{ secrets.ADMIN_KEY }}
+          CABINET_PASS: ${{ secrets.CABINET_PASS }}
         run: |
           test -n "$BOT_TOKEN" && test ${#ADMIN_KEY} -ge 16 || { echo "Нет секретов BOT_TOKEN или ADMIN_KEY (не короче 16 символов)"; exit 1; }
           mkdir out && cp -r docs/monro/. out/
@@ -39,7 +40,7 @@ jobs:
           grep -q 'var API = "/server/api.php"' out/index.html
           mkdir out/server && cp demos/monro-beauty/server/*.php demos/monro-beauty/server/.htaccess out/server/ && rm -f out/server/config.php
           php -r 'file_put_contents("out/server/config.php", "<?php return " . var_export([
-            "bot_token" => getenv("BOT_TOKEN"), "bot_name" => "ma_mihaylovka_bot", "admin_key" => getenv("ADMIN_KEY"),
+            "bot_token" => getenv("BOT_TOKEN"), "bot_name" => "ma_mihaylovka_bot", "admin_key" => getenv("ADMIN_KEY"), "cabinet_pass" => getenv("CABINET_PASS") ?: "",
             "site_url" => getenv("SITE") . "/", "allow_origin" => getenv("SITE"),
             "db_path" => "__DB__", "tz" => "Europe/Volgograd", "tg_api" => "https://api.telegram.org"], true) . ";\n");'
           sed -i "s#'__DB__'#__DIR__ . '/data/bot.sqlite'#" out/server/config.php

@@ -328,7 +328,7 @@ footer a { color: var(--mute); }
 .erange { font-size: 14px; color: var(--lac); min-height: 1em; }
 .slot:disabled { text-decoration: line-through; opacity: .35; cursor: default; }
 label.f { display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--mute); }
-input[type="text"], input[type="tel"], input[type="search"], textarea, select { width: 100%; border: 1.5px solid var(--line); background: var(--bg); border-radius: 14px; padding: 13px 14px; font-size: 16px; }
+input[type="text"], input[type="tel"], input[type="search"], input[type="password"], textarea, select { width: 100%; border: 1.5px solid var(--line); background: var(--bg); border-radius: 14px; padding: 13px 14px; font-size: 16px; }
 input, textarea, select { font-weight: 500; color: var(--ink); }
 ::placeholder { color: var(--mute); opacity: .7; font-weight: 400; }
 .check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; }
@@ -668,6 +668,13 @@ footer .fnav a:hover { color: var(--ink); }
 .day em.tr, .gap-row.train span b { color: var(--lac); }
 .lbl { font-size: 13px; font-weight: 700; color: var(--mute); }
 div.f { display: grid; gap: 8px; }
+.a-login { max-width: 420px; margin: 8px auto 24px; display: grid; gap: 10px; }
+.a-login h3 { margin: 0; }
+.a-login input { width: 100%; }
+#v-admin.locked .atabs, #v-admin.locked .atab, #v-admin.locked .bellwrap, #v-admin.locked .a-out { display: none !important; }
+.a-save { margin: -6px 0 12px; font-size: 13px; color: var(--mute); }
+.a-save.bad { color: #B3261E; font-weight: 700; }
+.a-out { margin: 28px auto 0; display: block; }
 .seg3 { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--bg); border: 1.5px solid var(--line); border-radius: 14px; padding: 4px; gap: 4px; }
 .seg3 button { border: 0; background: none; border-radius: 10px; padding: 10px 4px; font-weight: 700; font-size: 14px; color: var(--mute); transition: background .25s, color .25s; }
 .seg3 button[aria-pressed="true"] { background: var(--lac); color: var(--lac-ink); }
@@ -1613,7 +1620,7 @@ div.f { display: grid; gap: 8px; }
       <div class="row2"><label class="f">Телефон<input type="tel" id="myPhone" inputmode="tel" placeholder="+7"></label><button class="btn ghost" type="submit" style="align-self:end">Найти мои записи</button></div>
       <div class="opts" id="myList"></div>
     </form>
-    <p class="demo">Демо-версия: записи хранятся только на этом телефоне. Их видно в разделе «<a href="#admin">Вход для мастера</a>».</p>
+    <p class="demo" data-demo>Демо-версия: записи хранятся только на этом телефоне. Их видно в разделе «<a href="#admin">Вход для мастера</a>».</p>
   </div>
 </main>
 
@@ -1625,7 +1632,16 @@ div.f { display: grid; gap: 8px; }
         <div class="npanel" id="nPanel" hidden><div class="np-h"><b>Уведомления</b><span>за 2 недели</span></div><div class="np-list" id="nList"></div></div>
       </div>
     </div>
-    <p class="demo">Тестовая версия: записи хранятся только на этом телефоне. В рабочей версии — вход по паролю и общая база для всех устройств.</p>
+    <p class="demo" data-demo>Тестовая версия: записи хранятся только на этом телефоне. В рабочей версии — вход по паролю и общая база для всех устройств.</p>
+    <form class="card a-login" id="aLogin" hidden>
+      <h3>Вход для мастера</h3>
+      <p class="note">Введите пароль кабинета. Вход запомнится на этом телефоне на полгода.</p>
+      <label for="aPass">Пароль</label>
+      <input type="password" id="aPass" autocomplete="current-password" required>
+      <p class="err" id="aPassErr" hidden></p>
+      <button class="btn" type="submit" id="aPassGo">Войти</button>
+    </form>
+    <p class="a-save" id="aSave" hidden></p>
     <div class="atabs" id="aTabs" role="tablist">
       <button type="button" data-tab="day" aria-pressed="true">День</button>
       <button type="button" data-tab="clients" aria-pressed="false">Клиентки</button>
@@ -1789,10 +1805,118 @@ div.f { display: grid; gap: 8px; }
   var EARLY = 7 * 60, LATE = 22 * 60;
 
   // ---------- хранилище демо ----------
+  // Сервер (на хостинге "/server/api.php"). Пусто — демо: всё хранится только на этом телефоне.
+  var API = "", BOT = "ma_mihaylovka_bot", SYNC = !!API;
   var KEY = "ma-site-v1";
   var st = { bookings: [], blocks: {}, dayoff: {}, bought: {} };
-  try { st = Object.assign(st, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+  function lsGet(k, def) { try { var v = JSON.parse(localStorage.getItem(k) || "null"); return v == null ? def : v; } catch (e) { return def; } }
+  function lsSet(k, v) { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  if (!SYNC) st = Object.assign(st, lsGet(KEY, {})); else st.sent = lsGet("ma-sent", []);
+  // ---------- общая база (если есть сервер) ----------
+  // Кабинет мастера входит по паролю и видит всё; посетитель видит только занятость, а свои записи и сертификаты — из памяти телефона.
+  var token = SYNC ? lsGet("ma-token", "") : "", docV = -1, synced = null, inflight = false, syncT = null;
+  var mine = SYNC ? lsGet("ma-mine", { bookings: {}, training: {}, certs: {} }) : null;
+  var LISTS = ["bookings", "training", "certs", "notes", "modelBase"];
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function save() {
+    if (!SYNC) { lsSet(KEY, st); return; }
+    lsSet("ma-sent", st.sent || []);
+    if (token) { clearTimeout(syncT); syncT = setTimeout(pushSync, 300); }
+  }
+  function addMine(kind, rec) { mine[kind][rec.id] = clone(rec); lsSet("ma-mine", mine); }
+  // разница между тем, что прислал сервер, и тем, что поменяли в кабинете
+  function diffOps(a, b) {
+    var ops = [], keys = {};
+    Object.keys(a || {}).concat(Object.keys(b || {})).forEach(function (k) { if (k !== "sent") keys[k] = 1; });
+    Object.keys(keys).forEach(function (k) {
+      var x = a ? a[k] : undefined, y = b[k];
+      if (JSON.stringify(x) === JSON.stringify(y)) return;
+      if (y === undefined) { ops.push({ p: [k], d: 1 }); return; }
+      if (LISTS.indexOf(k) >= 0 && Array.isArray(y)) {
+        var ax = {}, by = {};
+        (Array.isArray(x) ? x : []).forEach(function (r) { if (r && r.id) ax[r.id] = r; });
+        y.forEach(function (r) { if (r && r.id) by[r.id] = r; });
+        Object.keys(by).forEach(function (id) { if (JSON.stringify(ax[id]) !== JSON.stringify(by[id])) ops.push({ p: [k, id], v: by[id] }); });
+        Object.keys(ax).forEach(function (id) { if (!by[id]) ops.push({ p: [k, id], d: 1 }); });
+        return;
+      }
+      if (x && y && typeof x === "object" && typeof y === "object" && !Array.isArray(y)) {
+        Object.keys(Object.assign({}, x, y)).forEach(function (id) {
+          if (JSON.stringify(x[id]) === JSON.stringify(y[id])) return;
+          ops.push(y[id] === undefined ? { p: [k, id], d: 1 } : { p: [k, id], v: y[id] });
+        });
+        return;
+      }
+      ops.push({ p: [k], v: y });
+    });
+    return ops;
+  }
+  function applyOps(doc, ops) {
+    ops.forEach(function (op) {
+      var k = op.p[0];
+      if (op.p.length === 1) { if (op.d) delete doc[k]; else doc[k] = op.v; return; }
+      var id = op.p[1];
+      if (LISTS.indexOf(k) >= 0) {
+        doc[k] = doc[k] || []; var i = -1; doc[k].forEach(function (r, j) { if (r.id === id) i = j; });
+        if (op.d) { if (i >= 0) doc[k].splice(i, 1); } else if (i >= 0) doc[k][i] = op.v; else if (k === "notes") doc[k].unshift(op.v); else doc[k].push(op.v);
+      } else { doc[k] = doc[k] || {}; if (op.d) delete doc[k][id]; else doc[k][id] = op.v; }
+    });
+  }
+  // записать пришедшую с сервера базу в st (не меняя сам объект st)
+  function applyDoc(v, doc, keepOps) {
+    if (!doc) return;
+    docV = v; synced = clone(doc);
+    var sent = st.sent; Object.keys(st).forEach(function (k) { delete st[k]; });
+    Object.assign(st, { bookings: [], blocks: {}, dayoff: {}, bought: {} }, clone(doc)); st.sent = sent;
+    if (keepOps && keepOps.length) applyOps(st, keepOps);
+    if (!token) mergeMine();
+    rerender();
+  }
+  // свои записи посетителя: сервер отдаёт их без имени и телефона, дополняем из памяти телефона
+  function mergeMine() {
+    ["bookings", "training"].forEach(function (kind) {
+      Object.keys(mine[kind]).forEach(function (id) {
+        var r = (st[kind] || []).filter(function (x) { return x.id === id; })[0], m = mine[kind][id];
+        if (!r) { if (m.date < dkey(addDays(-400))) { delete mine[kind][id]; lsSet("ma-mine", mine); } return; }
+        ["name", "phone", "note", "remind", "price", "pre", "certPay"].forEach(function (f) { if (m[f] !== undefined && r[f] === undefined) r[f] = m[f]; });
+      });
+    });
+    st.certs = Object.keys(mine.certs).map(function (id) { return clone(mine.certs[id]); });
+  }
+  function pushSync() {
+    if (!token || inflight || !synced) return;
+    var ops = diffOps(synced, st); if (!ops.length) return;
+    var base = clone(st); inflight = true;
+    apiSend({ type: "sync", token: token, ops: ops }).then(function (r) {
+      inflight = false;
+      if (r && r.relogin) { logout(); toast("Войдите в кабинет заново"); return; }
+      if (!r || !r.ok) { setSaved(false); setTimeout(pushSync, 5000); return; }
+      setSaved(true);
+      applyDoc(r.v, r.doc, diffOps(base, st));  // изменения, сделанные пока шло сохранение, не теряем
+      if (diffOps(synced, st).length) save();
+    });
+  }
+  function setSaved(ok) { var el = document.getElementById("aSave"); if (el) { el.textContent = ok ? "✓ Сохранено" : "Нет связи — сохраню, когда появится интернет"; el.className = "a-save " + (ok ? "ok" : "bad"); } }
+  function fetchState(force) {
+    if (!SYNC || inflight) return Promise.resolve();
+    return apiSend({ type: "state", v: force ? -1 : docV, token: token || undefined }).then(function (r) {
+      if (!r || !r.ok) return;
+      if (token && !r.admin) { logout(); return; }
+      if (r.same || inflight) return;
+      if (token && synced && diffOps(synced, st).length) { pushSync(); return; }  // сначала сохраним свои изменения — ответ принесёт свежую базу
+      applyDoc(r.v, r.doc);
+      if (token && !purgedOnce) { purgedOnce = true; purgeOld(); }
+    });
+  }
+  var purgedOnce = false;
+  function logout() { if (token) apiSend({ type: "logout", token: token }); token = ""; lsSet("ma-token", null); synced = null; docV = -1; lockAdmin(); fetchState(true); }
+  function rerender() {
+    if (typeof renderBell === "function") renderBell();
+    if (curView === "admin" && token && $("eSheet").hidden) renderTab();
+    if (curView === "zapis" && bk && bk.date && !$("b2").hidden) renderDays();
+    if (curView === "obuchenie") { renderTrain(); renderTrainBand(); renderModels(); }
+    if (curView === "home" || curView === "obuchenie") { try { renderTrainBand(); renderModels(); } catch (e) {} }
+  }
   // Срок хранения по политике: данные клиентки удаляются через 3 года после её последнего визита.
   // Прошедшие визиты остаются без имени и телефона (для статистики выручки), отменённые удаляются целиком.
   function purgeOld() {
@@ -1822,15 +1946,13 @@ div.f { display: grid; gap: 8px; }
   purgeOld();
   // Уведомления для мастера: храним 2 недели, потом удаляем
   (function () { var n0 = (st.notes || []).length; st.notes = (st.notes || []).filter(function (n) { return Date.now() - n.t < 14 * 864e5; }); if (st.notes.length !== n0) save(); })();
-  // Сервер бота (заполнить при запуске на хостинге, например "/server/api.php"). Пусто — работаем без сервера.
-  var API = "", BOT = "ma_mihaylovka_bot";
   function apiSend(data) {
     if (!API) return Promise.resolve(null);
     return fetch(API, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) })
       .then(function (r) { return r.json(); }).catch(function () { return null; });
   }
   function note(icon, title, text, go) {
-    if (go && go.tab === "req") apiSend({ type: "note", icon: icon, title: title, text: text });  // брони и сертификаты — Марине в Telegram
+    if (SYNC) { if (typeof renderBell === "function") renderBell(); return; }  // с сервером уведомления создаёт сервер
     st.notes = st.notes || [];
     st.notes.unshift({ id: "n" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), t: Date.now(), icon: icon, title: title, text: text, go: go || null, read: false });
     st.notes = st.notes.slice(0, 200); save();
@@ -2197,8 +2319,18 @@ div.f { display: grid; gap: 8px; }
     var btn = $("bPay"); btn.disabled = true; btn.textContent = "Записываю…";
     setTimeout(function () {
       var s = svc(bk.svc), b = { id: "b" + Date.now().toString(36), date: bk.date, start: bk.start, svc: s.id, name: name, phone: phoneNice(ph), note: $("bNote").value.trim().slice(0, 200), price: bk.price, remove: bk.remove, remind: bk.remind, status: "booked", created: Date.now() };
-      st.bookings.push(b); save();
-      var botLink = apiSend({ type: "booking", id: b.id, date: b.date, start: b.start, dur: bmin(b), svc: s.name + (b.remove ? " + снятие" : ""), coat: CORR[s.id] ? 1 : 0, name: b.name, phone: b.phone, remind: b.remind });
+      var botLink = apiSend({ type: "booking", rec: Object.assign({ dur: bmin(b), coat: CORR[s.id] ? 1 : 0 }, b), svcName: s.name + (b.remove ? " + снятие" : "") });
+      if (SYNC) {  // с сервером: запись считается сделанной, только когда сервер её принял
+        botLink.then(function (r) {
+          if (r && r.ok) { addMine("bookings", b); applyDoc(r.v, r.doc); booked(); return; }
+          btn.disabled = false; btn.textContent = "Записаться";
+          $("bErr").textContent = (r && r.error) || "Нет связи с сервером. Проверьте интернет и попробуйте ещё раз."; $("bErr").hidden = false;
+          if (r && /заняли/.test(r.error || "")) { renderDays(); stepTo(2); }
+        });
+        return;
+      }
+      st.bookings.push(b); save(); booked();
+      function booked() {
       note("📅", "Новая запись", b.name + " · " + s.name + " · " + whenText(b.date, b.start), { tab: "day", date: b.date });
       $("myPhone").value = b.phone; $("myList").innerHTML = "";
       $("bDone").textContent = whenText(b.date, b.start) + ". " + s.name + (b.remove ? " и снятие чужой работы" : "") + ". Адрес: ул. Обороны, 41.";
@@ -2214,6 +2346,7 @@ div.f { display: grid; gap: 8px; }
       });
       $("bTg").textContent = "🆕 Новая запись\n" + s.name + (b.remove ? "\n+ снятие чужой работы" : "") + "\n" + whenText(b.date, b.start) + "\n" + name + ", " + b.phone + (b.note ? "\nКомментарий: " + b.note : "") + "\nНапоминания: " + (b.remind === "none" ? "не нужны" : (REM_NAME[b.remind] || "Telegram") + ", " + remindPlan(b.date).join(", "));
       btn.disabled = false; btn.textContent = "Записаться"; stepTo(4); window.scrollTo({ top: 0, behavior: "smooth" });
+      }
     }, 900);
   });
   // Напоминания: за 2 дня (если запись не раньше), за 2 часа; о коррекции — через 3 недели после визита
@@ -2295,6 +2428,10 @@ div.f { display: grid; gap: 8px; }
     var b = e.target.closest("[data-claim]"); if (!b) return;
     var r = findClaim(b.dataset.claim); if (!r || r.status !== "wait") return;
     r.claimed = Date.now(); if (b.dataset.claim[0] === "t") r.hold = Date.now() + PAY.checkHours * 36e5;
+    if (SYNC) {
+      var kind = b.dataset.claim[0] === "t" ? "training" : "certs"; if (mine[kind][r.id]) addMine(kind, r);
+      apiSend({ type: "claim", kind: b.dataset.claim[0], id: r.id, phone: r.phone });
+    }
     if (b.dataset.claim[0] === "t") note("💳", "Ученица оплатила — проверьте", r.name + " · предоплата " + rub(r.pre) + " · проверьте поступление в Сбере", { tab: "req" });
     else note("💳", "Сертификат оплачен — проверьте", "№ " + r.code + " на " + rub(r.sum) + " · " + r.name + " · проверьте поступление в Сбере", { tab: "req" });
     save();
@@ -2351,7 +2488,7 @@ div.f { display: grid; gap: 8px; }
     if (b.dataset.sure !== "1") { b.dataset.sure = "1"; b.textContent = "Точно отменить? Нажмите ещё раз"; return; }
     var rec = st.bookings.filter(function (x) { return x.id === b.dataset.my; })[0]; if (!rec) return;
     rec.status = "cancelled"; rec.by = "client"; rec.cancelledAt = Date.now(); certUndo(rec, true); save(); renderMy();
-    apiSend({ type: "cancel", id: rec.id, phone: rec.phone });
+    apiSend({ type: "cancel", id: rec.id, phone: rec.phone }).then(function (r) { if (r && r.ok) applyDoc(r.v, r.doc); });
     note("❌", "Клиентка отменила запись", rec.name + " · " + svc(rec.svc).name + " · " + whenText(rec.date, rec.start) + " — время освободилось", { tab: "day", date: rec.date });
     toast("Запись отменена. Марина получит уведомление");
   });
@@ -2440,16 +2577,26 @@ div.f { display: grid; gap: 8px; }
       var days = trainDaysFrom(tr.date, c.days);
       // пока ученица заполняла форму, на эти дни могли записаться клиентки
       if (!days.every(dayFreeForTrain)) { btn.disabled = false; renderTrain(); $("tErr").textContent = "Эти даты только что заняли. Выберите другие."; $("tErr").hidden = false; return; }
-      st.training = st.training || [];
-      st.training.push({ id: "t" + Date.now().toString(36), course: c.id, date: days[0], days: days, name: name, phone: phone, price: c.price, pre: c.pre, status: "wait", hold: Date.now() + PAY.payMin * 6e4 });
-      var tid = st.training[st.training.length - 1];
+      var trec = { id: "t" + Date.now().toString(36), course: c.id, date: days[0], days: days, name: name, phone: phone, price: c.price, pre: c.pre, status: "wait", hold: Date.now() + PAY.payMin * 6e4 };
+      if (SYNC) {
+        apiSend({ type: "train", rec: trec, title: c.short, when: rangeText(days) }).then(function (r) {
+          if (r && r.ok) { addMine("training", r.rec); applyDoc(r.v, r.doc); trained(st.training.filter(function (x) { return x.id === r.rec.id; })[0] || r.rec); return; }
+          btn.disabled = false; btn.textContent = "Забронировать и оплатить " + rub(c.pre); renderTrain();
+          $("tErr").textContent = (r && r.error) || "Нет связи с сервером. Проверьте интернет и попробуйте ещё раз."; $("tErr").hidden = false;
+        });
+        return;
+      }
+      st.training = st.training || []; st.training.push(trec);
       note("🎓", "Бронь обучения — ждёт оплату", name + " · «" + c.short + "» · " + rangeText(days) + " · предоплата " + rub(c.pre), { tab: "req" });
-      save(); btn.disabled = false; btn.textContent = "Забронировать и оплатить " + rub(c.pre);
-      $("tDone").innerHTML = '<b>Даты забронированы на 30 минут.</b> Курс «' + c.short + '»: ' + rangeText(days) + ', с 10:00 до 17:00. Оплатите предоплату и нажмите «Я оплатил(а)» — после проверки Марины даты закрепятся окончательно.' +
-        payBox(c.pre, "Здравствуйте, Марина! Я оплатила предоплату " + rub(c.pre) + " за курс «" + c.name + "». Даты: " + rangeText(days) + ", с 10:00 до 17:00. Меня зовут " + name + ", телефон " + phone + ".", "t:" + tid.id, tid.hold) +
-        tgPreview("🎓 Новая бронь курса\n«" + c.short + "», " + rangeText(days) + "\n" + name + ", " + phone + "\nЖдёт оплату " + rub(c.pre) + " — 30 минут на оплату.");
-      $("tDone").hidden = false; ["tName", "tPhone"].forEach(function (id) { $(id).value = ""; }); $("tRules").checked = false; $("tPd").checked = false;
-      tr.date = null; renderTrain(); renderTrainBand(); renderModels(); toast("Заявка принята — оплатите предоплату по СБП");
+      trained(trec);
+      function trained(tid) {
+        save(); btn.disabled = false; btn.textContent = "Забронировать и оплатить " + rub(c.pre);
+        $("tDone").innerHTML = '<b>Даты забронированы на 30 минут.</b> Курс «' + c.short + '»: ' + rangeText(days) + ', с 10:00 до 17:00. Оплатите предоплату и нажмите «Я оплатил(а)» — после проверки Марины даты закрепятся окончательно.' +
+          payBox(c.pre, "Здравствуйте, Марина! Я оплатила предоплату " + rub(c.pre) + " за курс «" + c.name + "». Даты: " + rangeText(days) + ", с 10:00 до 17:00. Меня зовут " + name + ", телефон " + phone + ".", "t:" + tid.id, tid.hold) +
+          tgPreview("🎓 Новая бронь курса\n«" + c.short + "», " + rangeText(days) + "\n" + name + ", " + phone + "\nЖдёт оплату " + rub(c.pre) + " — 30 минут на оплату.");
+        $("tDone").hidden = false; ["tName", "tPhone"].forEach(function (id) { $(id).value = ""; }); $("tRules").checked = false; $("tPd").checked = false;
+        tr.date = null; renderTrain(); renderTrainBand(); renderModels(); toast("Заявка принята — оплатите предоплату по СБП");
+      }
     }, 900);
   });
   // тестовые записи на обучение (для демо): три курса в ближайшие недели
@@ -3155,8 +3302,12 @@ div.f { display: grid; gap: 8px; }
     shareCert(b.dataset.share, c);
   });
   // открыть сертификат по ссылке #cert-НОМЕР
-  function showCertFromHash(code) {
+  function showCertFromHash(code, tried) {
     var key = decodeURIComponent(code), c = findCert(key);
+    if (!c && SYNC && !tried) {  // сертификат могли купить с другого телефона — спрашиваем сервер
+      apiSend({ type: "cert_get", code: key }).then(function (r) { if (r && r.ok && !findCert(key)) (st.certs = st.certs || []).push(r.cert); showCertFromHash(code, true); });
+      return;
+    }
     if (!c) {
       $("pkH").textContent = "Сертификат не найден"; $("pkLead").textContent = "";
       $("pkBody").innerHTML = '<div class="card pk-side"><p class="note" style="margin:0">Сертификат № ' + esc(key) + ' не найден. В демо-версии сертификаты видны только на телефоне, где их купили; в рабочей версии он откроется на любом телефоне.</p><button type="button" class="btn glow" data-chat="Здравствуйте! Мне подарили сертификат № ' + esc(key) + ', не могу его открыть." data-chat-title="Сертификат не открывается">Написать Марине</button></div>';
@@ -3225,18 +3376,30 @@ div.f { display: grid; gap: 8px; }
       // номер сертификата: МА- и 6 случайных знаков без похожих букв и цифр
       st.certs = st.certs || [];
       var code = newCertCode();
-      st.certs.push({ id: "c" + Date.now().toString(36), code: code, sum: cSum, balance: cSum, to: $("cTo").value.trim().replace(/https?:\S+|www\.\S+/g, "").slice(0, 30), name: name, phone: phone, status: "wait", created: dkey(new Date()), till: dkey(certTill()), spent: [] });
-      var cid = st.certs[st.certs.length - 1], until = Date.now() + PAY.payMin * 6e4;
+      var crec = { id: "c" + Date.now().toString(36), code: code, sum: cSum, balance: cSum, to: $("cTo").value.trim().replace(/https?:\S+|www\.\S+/g, "").slice(0, 30), name: name, phone: phone, status: "wait", created: dkey(new Date()), till: dkey(certTill()), spent: [] };
+      if (SYNC) {
+        apiSend({ type: "cert", rec: crec }).then(function (r) {
+          if (r && r.ok) { addMine("certs", r.rec); applyDoc(r.v, r.doc); made(st.certs.filter(function (x) { return x.id === r.rec.id; })[0] || r.rec); return; }
+          btn.disabled = false; btn.textContent = "Оплатить " + rub(cSum);
+          $("cErr").textContent = (r && r.error) || "Нет связи с сервером. Проверьте интернет и попробуйте ещё раз."; $("cErr").hidden = false;
+        });
+        return;
+      }
+      st.certs.push(crec);
       note("🎁", "Новый сертификат — ждёт оплату", "№ " + code + " на " + rub(cSum) + " · " + name, { tab: "req" });
-      $("mcPhone").value = phone;
-      save(); renderGift(code); btn.disabled = false; btn.textContent = "Оплатить " + rub(cSum);
-      $("cDone").innerHTML = "<b>Сертификат № " + code + "</b> на " + rub(cSum) + " создан и ждёт оплаты. Оплатите по СБП — как только Марина подтвердит поступление, он станет активным и его можно будет подарить." + payBox(cSum, "Здравствуйте, Марина! Я оплатил(а) подарочный сертификат № " + code + " на " + rub(cSum) + ". Меня зовут " + name + ", телефон " + phone + ".", "c:" + cid.id, until) +
-        tgPreview("🎁 Новый сертификат № " + code + " на " + rub(cSum) + "\n" + name + ", " + phone + "\nЖдёт оплату по СБП.");
-      $("cDone").hidden = false; $("cName").value = ""; $("cPhone").value = ""; $("cPd").checked = false; $("cTerm").checked = false;
-      lastCode = code; $("cShare").hidden = true;
-      renderMyCerts(true);
-      $("cDone").scrollIntoView({ behavior: "smooth", block: "center" });
-      toast("Сертификат создан — оплатите его по СБП");
+      made(crec);
+      function made(cid) {
+        var until = cid.hold || Date.now() + PAY.payMin * 6e4;
+        $("mcPhone").value = phone;
+        save(); renderGift(code); btn.disabled = false; btn.textContent = "Оплатить " + rub(cSum);
+        $("cDone").innerHTML = "<b>Сертификат № " + code + "</b> на " + rub(cSum) + " создан и ждёт оплаты. Оплатите по СБП — как только Марина подтвердит поступление, он станет активным и его можно будет подарить." + payBox(cSum, "Здравствуйте, Марина! Я оплатил(а) подарочный сертификат № " + code + " на " + rub(cSum) + ". Меня зовут " + name + ", телефон " + phone + ".", "c:" + cid.id, until) +
+          tgPreview("🎁 Новый сертификат № " + code + " на " + rub(cSum) + "\n" + name + ", " + phone + "\nЖдёт оплату по СБП.");
+        $("cDone").hidden = false; $("cName").value = ""; $("cPhone").value = ""; $("cPd").checked = false; $("cTerm").checked = false;
+        lastCode = code; $("cShare").hidden = true;
+        renderMyCerts(true);
+        $("cDone").scrollIntoView({ behavior: "smooth", block: "center" });
+        toast("Сертификат создан — оплатите его по СБП");
+      }
     }, 900);
   });
   renderGift();
@@ -3400,6 +3563,7 @@ div.f { display: grid; gap: 8px; }
     if (nx) $("nextPage").innerHTML = '<div class="wrap"><a href="#' + (nx[0] === "home" ? "top" : nx[0]) + '"><span><small>Следующий раздел</small><b>' + nx[1] + '</b></span><span class="arr"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a></div>';
     if (v === "zapis") { resetBooking(pendingPick); pendingPick = null; }
     if (v === "admin") renderTab();
+    if (SYNC && changed && (v === "zapis" || v === "obuchenie" || v === "admin")) fetchState();
     if (certHash) showCertFromHash(certHash);
     if (pendingTo) { var el = $(pendingTo); pendingTo = null; if (el) { jumpTop(); setTimeout(function () { el.scrollIntoView({ behavior: "smooth", block: "center" }); }, 80); return; } }
     if (changed || !h || h === "top") jumpTop();
@@ -3408,6 +3572,42 @@ div.f { display: grid; gap: 8px; }
     var a = e.target.closest('a[href="#zapis"]');
     if (a && location.hash === "#zapis") { e.preventDefault(); setTimeout(function () { resetBooking(pendingPick); pendingPick = null; jumpTop(); }, 0); }
   });
+  // ---------- вход в кабинет и загрузка общей базы ----------
+  var outBtn = document.createElement("button");
+  outBtn.type = "button"; outBtn.className = "btn sm ghost a-out"; outBtn.textContent = "Выйти из кабинета";
+  outBtn.onclick = function () { if (outBtn.dataset.sure !== "1") { outBtn.dataset.sure = "1"; outBtn.textContent = "Точно выйти? Нажмите ещё раз"; return; } outBtn.dataset.sure = ""; outBtn.textContent = "Выйти из кабинета"; logout(); };
+  $("v-admin").querySelector(".wrap").appendChild(outBtn);
+  function lockAdmin() {
+    var locked = SYNC && !token;
+    $("v-admin").classList.toggle("locked", locked); $("aLogin").hidden = !locked;
+    $("aSave").hidden = !SYNC || locked; outBtn.hidden = !SYNC || locked;
+    document.querySelectorAll("[data-demo]").forEach(function (el) { el.hidden = SYNC; });
+  }
+  $("aLogin").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var btn = $("aPassGo"); btn.disabled = true; $("aPassErr").hidden = true;
+    apiSend({ type: "login", pass: $("aPass").value }).then(function (r) {
+      btn.disabled = false;
+      if (!r || !r.ok) { $("aPassErr").textContent = (r && r.error) || "Нет связи с сервером"; $("aPassErr").hidden = false; return; }
+      token = r.token; lsSet("ma-token", token); $("aPass").value = "";
+      lockAdmin(); setSaved(true); fetchState(true).then(function () { renderTab(); });
+    });
+  });
+  if (SYNC) {
+    lockAdmin();
+    fetchState(true).then(function () {
+      // статусы своих сертификатов (Марина могла подтвердить оплату)
+      Object.keys(mine.certs).forEach(function (id) {
+        apiSend({ type: "cert_get", code: mine.certs[id].code }).then(function (r) {
+          if (!r || !r.ok) return;
+          ["status", "balance", "spent", "till"].forEach(function (f) { if (r.cert[f] !== undefined) mine.certs[id][f] = r.cert[f]; });
+          lsSet("ma-mine", mine); if (!token) mergeMine();
+        });
+      });
+    });
+    setInterval(function () { if (document.visibilityState === "visible" && (token ? curView === "admin" : curView === "zapis" || curView === "obuchenie")) fetchState(); }, 20000);
+    document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") fetchState(); });
+  }
   addEventListener("hashchange", route); route();
 
   var toastT;
