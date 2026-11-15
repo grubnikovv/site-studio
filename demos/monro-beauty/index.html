@@ -752,6 +752,25 @@ div.f { display: grid; gap: 8px; }
 .cert-link { text-decoration: none; display: grid; gap: 4px; transition: transform .2s; }
 .cert-link:hover { transform: translateY(-2px); }
 .cert-link b { font-family: var(--display); font-weight: 400; font-size: 22px; }
+.pk { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 28px; align-items: start; }
+@media (max-width: 900px) { .pk { grid-template-columns: minmax(0, 1fr); } }
+.pk .gcard { animation: pkin .8s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes pkin { from { opacity: 0; transform: translateY(18px) scale(.97) rotate(-1.5deg); } }
+@media (prefers-reduced-motion: reduce) { .pk .gcard { animation: none; } }
+.pk-side { display: grid; gap: 16px; }
+.pk-stat { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.pk-stat div { background: var(--bg); border-radius: 16px; padding: 12px; min-width: 0; }
+.pk-stat small { display: block; color: var(--mute); font-size: 12px; }
+.pk-stat b { font-size: 16px; white-space: nowrap; }
+@media (max-width: 480px) { .pk-stat { gap: 6px; } .pk-stat div { padding: 10px 9px; } .pk-stat b { font-size: 14px; white-space: normal; } .pk-stat small { font-size: 11.5px; } }
+.pk-stat .ok { color: var(--ok); } .pk-stat .bad { color: #C0392B; }
+.pk-steps { margin: 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 10px; }
+.pk-steps li { counter-increment: s; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; font-size: 14.5px; color: var(--mute); }
+.pk-steps li::before { content: counter(s); width: 26px; height: 26px; border-radius: 50%; display: grid; place-content: center; font-size: 13px; font-weight: 800; color: var(--lac); background: color-mix(in srgb, var(--lac) 12%, var(--paper)); }
+.pk-steps b { color: var(--ink); font-weight: 700; }
+.pk-acts { display: grid; gap: 8px; }
+.pk-acts .btn { width: 100%; }
+.pk-more { justify-self: center; color: var(--mute); font-size: 14px; }
 .gift { display: grid; grid-template-columns: 1fr 420px; gap: 32px; align-items: start; }
 @media (max-width: 900px) { .gift { grid-template-columns: 1fr; } }
 .gcard { position: relative; aspect-ratio: 1.6; max-width: 100%; border-radius: 24px; padding: clamp(18px, 4vw, 30px); color: #F6ECEF; overflow: hidden; display: grid; grid-template-rows: auto 1fr auto auto; gap: 6px;
@@ -1234,6 +1253,10 @@ div.f { display: grid; gap: 8px; }
 </main>
 
 <!-- ===== СЕРТИФИКАТ ===== -->
+<main id="v-podarok" class="page" hidden>
+  <section class="phero"><div class="wrap"><span class="eyebrow">Мой сертификат</span><h1 id="pkH">Вам подарок</h1><p class="lead" id="pkLead"></p></div></section>
+  <section class="block tight"><div class="wrap pk" id="pkBody"></div></section>
+</main>
 <main id="v-sertifikat" class="page" hidden>
   <section class="phero"><div class="wrap"><span class="eyebrow">Подарок</span><h1>Подарочный сертификат</h1><p class="lead">Электронный сертификат на любую процедуру студии «М.А». Оплачивается полностью, появляется сразу после оплаты — его можно переслать в мессенджере и показать с телефона. Действует 3 месяца с дня покупки.</p></div></section>
   <section class="block tight"><div class="wrap gift">
@@ -2750,11 +2773,26 @@ div.f { display: grid; gap: 8px; }
   });
   // открыть сертификат по ссылке #cert-НОМЕР
   function showCertFromHash(code) {
-    var c = findCert(decodeURIComponent(code));
-    if (!c) { $("cDone").innerHTML = "Сертификат № " + esc(decodeURIComponent(code)) + " не найден. В демо-версии сертификаты видны только на телефоне, где их купили; в рабочей версии ссылка будет открываться у всех."; $("cDone").hidden = false; return; }
-    cSum = c.sum; $("cTo").value = c.to || ""; renderGift(c.code); lastCode = c.code; $("cShare").hidden = false;
-    $("cDone").innerHTML = "<b>Сертификат № " + esc(c.code) + "</b> · остаток " + rub(certBalance(c)) + " · " + certState(c)[0].toLowerCase() + "."; $("cDone").hidden = false;
-    setTimeout(function () { $("gCard").scrollIntoView({ block: "center" }); }, 50);
+    var key = decodeURIComponent(code), c = findCert(key);
+    if (!c) {
+      $("pkH").textContent = "Сертификат не найден"; $("pkLead").textContent = "";
+      $("pkBody").innerHTML = '<div class="card pk-side"><p class="note" style="margin:0">Сертификат № ' + esc(key) + ' не найден. В демо-версии сертификаты видны только на телефоне, где их купили; в рабочей версии он откроется на любом телефоне.</p><button type="button" class="btn glow" data-chat="Здравствуйте! Мне подарили сертификат № ' + esc(key) + ', не могу его открыть." data-chat-title="Сертификат не открывается">Написать Марине</button></div>';
+      return;
+    }
+    var stt = certState(c), bal = certBalance(c), active = stt[1] === "ok", till = new Date(c.till + "T12:00");
+    $("pkH").textContent = "Вам подарок";
+    $("pkLead").textContent = active ? "Подарочный сертификат на любую процедуру студии «М.А» в Михайловке. Выберите процедуру и время — оплатите сертификатом." : "Подарочный сертификат студии «М.А».";
+    $("pkBody").innerHTML =
+      '<div class="gcard"><div class="g-top"><span class="g-brand"><svg class="g-mark" aria-hidden="true"><use href="#lgm"></use></svg><span class="g-bt">Академия маникюра и&nbsp;педикюра</span></span><span class="g-k">подарочный сертификат</span></div>' +
+      '<b class="g-sum num">' + rub(c.sum) + '</b><div class="g-to"><span>' + (c.to ? "для: " + esc(c.to) : "на любую процедуру студии") + '</span>' + (c.to ? HEART : '') + '</div>' +
+      '<div class="g-bot"><span>№ ' + esc(c.code) + '</span><span>до ' + longDate(till) + ' вкл.</span></div></div>' +
+      '<div class="card pk-side">' +
+      '<div class="pk-stat"><div><small>Статус</small><b class="' + stt[1] + '">' + stt[0] + '</b></div><div><small>Остаток</small><b class="num">' + rub(bal) + '</b></div><div><small>Действует до</small><b>' + shortDate(c.till) + '</b></div></div>' +
+      (active ? '<h3 style="margin:0">Как воспользоваться</h3><ol class="pk-steps"><li><span><b>Запишитесь</b> онлайн или напишите Марине</span></li><li><span>Скажите, что оплатите <b>сертификатом № ' + esc(c.code) + '</b></span></li><li><span>После процедуры Марина спишет сумму, <b>остаток сохранится</b> до ' + shortDate(c.till) + '</span></li></ol>' +
+        '<div class="pk-acts"><a class="btn glow" href="#zapis">Выбрать процедуру и время</a><button type="button" class="btn ghost" data-chat="Здравствуйте! У меня подарочный сертификат № ' + esc(c.code) + '. Хочу записаться." data-chat-title="Записаться по сертификату">Написать Марине</button><button type="button" class="btn ghost" data-share="save" data-code="' + esc(c.code) + '">Сохранить картинку</button></div>'
+        : '<p class="note" style="margin:0">' + (stt[0] === "Использован" ? "Сертификат уже использован. Спасибо, что были у нас!" : "Срок действия сертификата закончился. Если есть вопрос — напишите Марине.") + '</p><button type="button" class="btn ghost" data-chat="Здравствуйте! Вопрос по сертификату № ' + esc(c.code) + '." data-chat-title="Вопрос по сертификату">Написать Марине</button>') +
+      '<a class="pk-more" href="#sertifikat" data-to="mcForm">Мои сертификаты и подарок другу →</a></div>';
+    lastCode = c.code;
   }
   function renderMyCerts() {
     var d = $("mcPhone").value.replace(/\D/g, "").replace(/^8/, "7");
@@ -2935,7 +2973,7 @@ div.f { display: grid; gap: 8px; }
 
   // ---------- маршруты ----------
   var ORDER = [["home", "Главная"], ["uslugi", "Услуги и цены"], ["zapis", "Онлайн-запись"], ["raboty", "Портфолио"], ["obuchenie", "Обучение"], ["o-mastere", "О мастере и награды"], ["voprosy", "Вопросы и ответы"], ["sertifikat", "Подарочный сертификат"], ["kontakty", "Контакты"]];
-  var VIEWS = ["home", "uslugi", "raboty", "obuchenie", "o-mastere", "voprosy", "sertifikat", "kontakty", "zapis", "admin", "politika", "soglasie"];
+  var VIEWS = ["home", "uslugi", "raboty", "obuchenie", "o-mastere", "voprosy", "sertifikat", "kontakty", "zapis", "admin", "politika", "soglasie", "podarok"];
   var pendingPick = null, pendingTo = null, curView = null;
   document.addEventListener("click", function (e) {
     var a = e.target.closest("[data-pick]"); if (a) pendingPick = a.dataset.pick;
@@ -2945,11 +2983,11 @@ div.f { display: grid; gap: 8px; }
   var TITLES = { home: "М.А — маникюр, педикюр и обучение в Михайловке", uslugi: "Цены на маникюр и педикюр в Михайловке — М.А", raboty: "Работы мастера маникюра — М.А, Михайловка",
     obuchenie: "Обучение маникюру и педикюру в Михайловке — М.А", "o-mastere": "Марина Шевченко, мастер маникюра — М.А", voprosy: "Вопросы и ответы — М.А, Михайловка",
     sertifikat: "Подарочный сертификат на маникюр в Михайловке — М.А",
-    kontakty: "Контакты — академия маникюра «М.А», Михайловка, ул. Обороны, 41", zapis: "Онлайн-запись на маникюр — М.А", admin: "Кабинет мастера — М.А", politika: "Политика обработки персональных данных — М.А", soglasie: "Согласие на обработку персональных данных — М.А" };
+    kontakty: "Контакты — академия маникюра «М.А», Михайловка, ул. Обороны, 41", zapis: "Онлайн-запись на маникюр — М.А", admin: "Кабинет мастера — М.А", politika: "Политика обработки персональных данных — М.А", soglasie: "Согласие на обработку персональных данных — М.А", podarok: "Ваш подарочный сертификат — М.А" };
   function route() {
     var h = location.hash.slice(1), v = "home";
     var certHash = h.indexOf("cert-") === 0 ? h.slice(5) : null;
-    if (certHash) v = "sertifikat"; else if (VIEWS.indexOf(h) > 0) v = h;
+    if (certHash) v = "podarok"; else if (VIEWS.indexOf(h) > 0) v = h;
     var changed = v !== curView; curView = v;
     document.title = TITLES[v] || TITLES.home;
     if (changed && !$("eSheet").hidden) closeEditor();
