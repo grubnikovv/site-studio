@@ -696,9 +696,9 @@ div.f { display: grid; gap: 8px; }
 .a-acts .a-out { margin: 0; }
 #aResetStep2:not([hidden]) { display: grid; gap: 10px; }
 .r1-r { display: inline-flex; align-items: center; gap: 6px; }
-.bk[data-tcard], .bk[data-mcard] { position: relative; }
-.bk[data-mcard] .r1 { padding-right: 34px; }
-.bk[data-mcard] .trash { position: absolute; top: 6px; right: 6px; }
+.bk[data-tcard], .bk[data-mcard], .bk[data-ccard] { position: relative; }
+.bk[data-mcard] .r1, .bk[data-ccard] .r1 { padding-right: 34px; }
+.bk[data-mcard] .trash, .bk[data-ccard] .trash { position: absolute; top: 6px; right: 6px; }
 .bk[data-tcard] .r1 { padding-right: 34px; }
 .bk[data-tcard] .trash { position: absolute; top: 6px; right: 6px; }
 .trash { width: 34px; height: 34px; border: 0; border-radius: 10px; background: none; color: var(--mute); display: grid; place-content: center; transition: background .2s, color .2s; }
@@ -3603,7 +3603,11 @@ div.f { display: grid; gap: 8px; }
     var list = (st.certs || []).slice().reverse();
     $("aCerts").innerHTML = list.length ? list.map(function (c) {
       var stt = certState(c), bal = certBalance(c), open = bal > 0 && c.status !== "used" && c.status !== "wait";
-      return '<div class="bk"><div class="r1"><b class="num">№ ' + esc(c.code || "—") + '</b><span class="pill ' + stt[1] + '">' + stt[0] + '</span></div>' +
+      // удалить можно использованный, просроченный или неоплаченный (действующий с остатком — нет)
+      var canDel = !open && c.status !== "wait";
+      return '<div class="bk" data-ccard><div class="r1"><b class="num">№ ' + esc(c.code || "—") + '</b><span class="pill ' + stt[1] + '">' + stt[0] + '</span></div>' +
+        (canDel ? '<button type="button" class="trash" data-cdel="' + c.id + '" aria-label="Удалить сертификат из списка"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></button>' +
+          '<div class="sure" data-csure="' + c.id + '" hidden><span>Удалить сертификат из списка насовсем?</span><button type="button" class="sure-yes" data-cdelok="' + c.id + '">Удалить</button><button type="button" class="sure-no" data-cdelno>Отмена</button></div>' : '') +
         '<div class="info">Номинал ' + rub(c.sum) + ' · <b style="color:var(--ink)">остаток ' + rub(bal) + '</b> · до ' + shortDate(c.till || c.created) + '</div>' +
         '<div><b style="font-weight:700">' + esc(c.name) + '</b> · ' + esc(c.phone) + (c.to ? ' · для: ' + esc(c.to) : '') + '</div>' +
         ((c.spent || []).length ? '<div class="info">Списано: ' + c.spent.map(function (x) { return shortDate(x.d) + ' — ' + rub(x.sum) + (x.who ? ' (' + esc(x.who) + ', запись ' + shortDate(x.date) + ')' : ''); }).join(", ") + '</div>' : '') +
@@ -3612,6 +3616,10 @@ div.f { display: grid; gap: 8px; }
     }).join("") : '<p class="note">Покупок пока нет. Они появятся, когда кто-то оплатит сертификат на странице «Подарочный сертификат».</p>';
   }
   $("aCerts").addEventListener("click", function (e) {
+    var dl = e.target.closest("[data-cdel]"), dOk = e.target.closest("[data-cdelok]"), dNo = e.target.closest("[data-cdelno]");
+    if (dl) { var box = document.querySelector('[data-csure="' + dl.dataset.cdel + '"]'); box.hidden = !box.hidden; return; }
+    if (dNo) { dNo.parentNode.hidden = true; return; }
+    if (dOk) { st.certs = (st.certs || []).filter(function (x) { return x.id !== dOk.dataset.cdelok; }); save(); renderCerts(); toast("Сертификат удалён из списка"); return; }
     var pa = e.target.closest("[data-cpay]"), no = e.target.closest("[data-cno]");
     if (pa) { var cp1 = st.certs.filter(function (x) { return x.id === pa.dataset.cpay; })[0]; cp1.status = "paid"; save(); renderCerts(); toast("Оплата отмечена — сертификат № " + cp1.code + " активен"); return; }
     if (no) { st.certs = st.certs.filter(function (x) { return x.id !== no.dataset.cno; }); save(); renderCerts(); toast("Неоплаченный сертификат удалён"); return; }
