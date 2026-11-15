@@ -1,7 +1,10 @@
-# Выкладка сайта «М.А» с ботом на хостинг (Timeweb). Запуск вручную: Actions → «Выложить сайт М.А» → Run workflow.
+# Выкладка сайта «М.А» с ботом на хостинг (Timeweb). Запускается сама при изменениях сайта в ветке.
 # Нужны секреты репозитория: BOT_TOKEN, ADMIN_KEY, FTP_PASSWORD. В логах они не печатаются.
 name: Выложить сайт М.А
 on:
+  push:
+    branches: [claude/low-code-business-ideas-0dr8l2]
+    paths: [docs/monro/**, demos/monro-beauty/server/**, .github/workflows/deploy-ma.yml, demos/monro-beauty/deploy.txt]
   workflow_dispatch:
     inputs:
       dir:
@@ -15,8 +18,17 @@ jobs:
       FTP_HOST: vh480.timeweb.ru
       FTP_USER: cm538897
     steps:
+      - name: Есть ли секреты
+        id: chk
+        env:
+          OK: ${{ secrets.BOT_TOKEN != '' && secrets.ADMIN_KEY != '' && secrets.FTP_PASSWORD != '' }}
+        run: |
+          echo "ok=$OK" >> "$GITHUB_OUTPUT"
+          [ "$OK" = true ] || echo "::notice::Секреты ещё не добавлены — выкладка пропущена"
       - uses: actions/checkout@v4
+        if: steps.chk.outputs.ok == 'true'
       - name: Собрать
+        if: steps.chk.outputs.ok == 'true'
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           ADMIN_KEY: ${{ secrets.ADMIN_KEY }}
@@ -33,13 +45,15 @@ jobs:
           sed -i "s#'__DB__'#__DIR__ . '/data/bot.sqlite'#" out/server/config.php
           php -l out/server/config.php
       - name: Загрузить по FTP
+        if: steps.chk.outputs.ok == 'true'
         env:
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          DIR: ${{ inputs.dir }}
+          DIR: ${{ inputs.dir || 'public_html' }}
         run: |
           sudo apt-get install -y -qq lftp >/dev/null
           lftp -u "$FTP_USER,$FTP_PASSWORD" "$FTP_HOST" -e "set ftp:ssl-allow yes; set ssl:verify-certificate no; set net:max-retries 3; mirror -R --verbose=1 --exclude-glob server/data/ out/ $DIR/; bye"
       - name: Проверить
+        if: steps.chk.outputs.ok == 'true'
         run: |
           code=$(curl -s -o /dev/null -w '%{http_code}' "$SITE/")
           echo "Сайт: $code"
