@@ -778,6 +778,7 @@ div.f { display: grid; gap: 8px; }
 .ptimer.ok { background: color-mix(in srgb, var(--ok) 14%, var(--paper)); color: var(--ok); font-weight: 700; }
 .ptimer.bad { background: color-mix(in srgb, #C0392B 12%, var(--paper)); color: #C0392B; font-weight: 700; }
 .tab-n { display: inline-grid; place-content: center; min-width: 20px; height: 20px; margin-left: 6px; padding: 0 6px; border-radius: 999px; background: #C0392B; color: #fff; font-size: 12px; font-weight: 800; vertical-align: 1px; }
+.paybox .btn.locked { opacity: .45; }
 .paybox p { margin: 0; color: var(--mute); font-size: 14px; }
 .paybox .btn { width: 100%; }
 .pk { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 28px; align-items: start; }
@@ -1716,7 +1717,7 @@ div.f { display: grid; gap: 8px; }
       '<p>Откроется перевод по СБП — выберите свой банк и <b>введите сумму ' + rub(sum) + '</b>. Деньги придут на счёт в СберБанке.</p>' +
       '<button type="button" class="btn glow" data-paynow="' + sum + '">Оплатить по СБП</button>' +
       '<b>2. Нажмите «Я оплатил(а)» в течение 30 минут</b><p>Иначе бронь отменится. Затем отправьте Марине готовое сообщение в удобный мессенджер — какой курс и даты вы выбрали.</p>' +
-      '<button type="button" class="btn ghost" data-claim="' + claim + '" data-chat="' + esc(msg) + '" data-chat-title="Сообщить об оплате">Я оплатил(а)</button></div>';
+      '<button type="button" class="btn ghost locked" aria-disabled="true" data-claim="' + claim + '" data-chat="' + esc(msg) + '" data-chat-title="Сообщить об оплате">Я оплатил(а)</button></div>';
   }
   function course(id) { return COURSES.filter(function (c) { return c.id === id; })[0] || COURSES[0]; }
   var FAQ = [
@@ -2159,8 +2160,15 @@ div.f { display: grid; gap: 8px; }
   $("chDlg").addEventListener("click", function (e) { if (e.target === this) this.close(); });
   document.addEventListener("click", function (e) {
     var p = e.target.closest("[data-paynow]");
-    if (p) { if (PAY.link) window.open(PAY.link, "_blank", "noopener"); else toast("В рабочей версии откроется оплата по СБП в приложении вашего банка"); return; }
+    if (p) { var lk = p.closest(".paybox").querySelector(".locked"); if (lk) { lk.classList.remove("locked"); lk.removeAttribute("aria-disabled"); } if (PAY.link) window.open(PAY.link, "_blank", "noopener"); else toast("В рабочей версии откроется оплата по СБП в приложении вашего банка"); return; }
   });
+  // «Я оплатил(а)» недоступна, пока человек не открыл оплату
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest(".locked[data-claim]"); if (!b) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    toast("Сначала оплатите по СБП — нажмите «Оплатить по СБП»");
+    var pay = b.closest(".paybox").querySelector("[data-paynow]"); pay.classList.remove("pop"); void pay.offsetWidth; pay.classList.add("pop");
+  }, true);
   function findClaim(key) {
     var id = key.slice(2);
     return key[0] === "t" ? (st.training || []).filter(function (x) { return x.id === id; })[0] : (st.certs || []).filter(function (x) { return x.id === id; })[0];
