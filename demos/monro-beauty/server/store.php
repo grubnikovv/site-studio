@@ -136,9 +136,25 @@ function day_taken_by_training($doc, $date) {
     return false;
 }
 
-function slot_free($doc, $date, $start, $dur, $exceptId = '') {
+// Те же правила, что на сайте: часы работы, выходные, обед, закрытые окна, обучение, другие записи
+const OPEN_M = 600, CLOSE_M = 1140, STEP_M = 30, LUNCH_M = [720, 750];
+function is_workday($doc, $date) {
     if (!empty($doc['dayoff'][$date])) return false;
-    if (day_taken_by_training($doc, $date)) return false;
+    $wd = (int)date('w', strtotime($date . ' 12:00'));
+    return ($wd === 0 || $wd === 6) ? !empty($doc['workday'][$date]) : true;
+}
+function day_free_for_training($doc, $date) {
+    if (!is_workday($doc, $date) || day_taken_by_training($doc, $date) || !empty($doc['blocks'][$date])) return false;
+    foreach ($doc['bookings'] as $b) if (($b['date'] ?? '') === $date && ($b['status'] ?? '') !== 'cancelled') return false;
+    return true;
+}
+function slot_free($doc, $date, $start, $dur, $exceptId = '') {
+    if (!is_workday($doc, $date) || day_taken_by_training($doc, $date)) return false;
+    $h = $doc['hours'][$date] ?? [OPEN_M, CLOSE_M];
+    if ($start < (int)$h[0] || $start + $dur > (int)$h[1] || ($start - OPEN_M) % STEP_M) return false;
+    if (overlaps($start, $start + $dur, LUNCH_M[0], LUNCH_M[1])) return false;
+    foreach (($doc['blocks'][$date] ?? []) as $m => $why) if (overlaps($start, $start + $dur, (int)$m, (int)$m + STEP_M)) return false;
+    if ($date === date('Y-m-d') && $start < (int)date('G') * 60 + (int)date('i') + 60) return false;
     foreach ($doc['bookings'] as $b) {
         if (($b['id'] ?? '') === $exceptId || ($b['status'] ?? '') === 'cancelled' || ($b['date'] ?? '') !== $date) continue;
         if (overlaps($start, $start + $dur, (int)$b['start'], (int)$b['start'] + (int)($b['dur'] ?? 60))) return false;

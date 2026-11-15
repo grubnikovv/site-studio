@@ -39,6 +39,10 @@ jobs:
           mkdir out && cp -r docs/monro/. out/
           sed -i 's#var API = ""#var API = "/server/api.php"#' out/index.html
           grep -q 'var API = "/server/api.php"' out/index.html
+          # сжать код страницы (пробелы, комментарии); имена в коде не трогаем
+          npx --yes html-minifier-terser@7.2.0 --collapse-whitespace --conservative-collapse --remove-comments --minify-css true --minify-js '{"mangle":false,"compress":false}' -o out/index.min.html out/index.html
+          grep -q 'API="/server/api.php"' out/index.min.html && mv out/index.min.html out/index.html
+          ls -l out/index.html
           mkdir out/server && cp demos/monro-beauty/server/*.php demos/monro-beauty/server/.htaccess out/server/ && rm -f out/server/config.php
           php -r 'file_put_contents("out/server/config.php", "<?php return " . var_export([
             "bot_token" => getenv("BOT_TOKEN"), "bot_name" => "ma_mihaylovka_bot", "admin_key" => getenv("ADMIN_KEY"), "cabinet_pass" => getenv("CABINET_PASS") ?: "",
@@ -46,17 +50,34 @@ jobs:
             "db_path" => "__DB__", "tz" => "Europe/Volgograd", "tg_api" => "https://api.telegram.org"], true) . ";\n");'
           sed -i "s#'__DB__'#__DIR__ . '/data/bot.sqlite'#" out/server/config.php
           php -l out/server/config.php
-          # Перенаправление на https://ma-nails.ru — включается файлом demos/monro-beauty/https-on (когда выпущен сертификат)
+          # .htaccess сайта: сжатие, кэш картинок и шрифтов, и (когда выпущен сертификат) переход на https://ma-nails.ru
+          cat > out/.htaccess <<'HT'
+          <IfModule mod_deflate.c>
+            AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
+          </IfModule>
+          <IfModule mod_expires.c>
+            ExpiresActive On
+            ExpiresByType image/webp "access plus 30 days"
+            ExpiresByType image/png "access plus 30 days"
+            ExpiresByType image/jpeg "access plus 30 days"
+            ExpiresByType font/woff2 "access plus 1 year"
+            ExpiresByType text/html "access plus 0 seconds"
+          </IfModule>
+          <IfModule mod_headers.c>
+            <FilesMatch "\.html$">
+              Header set Cache-Control "no-cache"
+            </FilesMatch>
+          </IfModule>
+          HT
+          sed -i 's/^          //' out/.htaccess
           if [ -f demos/monro-beauty/https-on ]; then
             printf '%s\n' 'RewriteEngine On' \
               'RewriteCond %{REQUEST_URI} !^/server/' \
               'RewriteCond %{HTTP:X-Forwarded-Proto} !https [OR]' \
               "RewriteCond %{HTTP_HOST} !^${DOMAIN}\$ [NC]" \
-              "RewriteRule ^ https://${DOMAIN}%{REQUEST_URI} [R=301,L]" > out/.htaccess
-            cat out/.htaccess
-          else
-            : > out/.htaccess
+              "RewriteRule ^ https://${DOMAIN}%{REQUEST_URI} [R=301,L]" >> out/.htaccess
           fi
+          cat out/.htaccess
       - name: Загрузить по FTP
         if: steps.chk.outputs.ok == 'true'
         env:
@@ -73,6 +94,8 @@ jobs:
           code=$(curl -s -o /dev/null -w '%{http_code}' "$SITE/")
           echo "Сайт: $code"
           curl -s "$SITE/" | grep -o '<title>[^<]*' || true
+          curl -s -o /dev/null -D - -H 'Accept-Encoding: gzip' "$SITE/" | grep -i 'content-encoding\|cache-control' || echo "сжатие: нет"
+          curl -s -o /dev/null -D - "$SITE/fonts/manrope-cyrillic.woff2" | grep -i 'HTTP/\|expires\|cache-control'
           curl -s -X POST "$SITE/server/api.php" -H 'Content-Type: application/json' -d '{"type":"x"}'; echo
           curl -s --max-time 60 "$SITE/server/poll.php?key=$ADMIN_KEY&diag=1"
           curl -s --max-time 60 "$SITE/server/poll.php?key=$ADMIN_KEY"

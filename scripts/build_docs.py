@@ -21,8 +21,8 @@ for k, src in PAIRS.items():
         head += '<link rel="icon" href="data:,">\n'
     os.makedirs('docs/' + k, exist_ok=True)
     open('docs/' + k + '/index.html', 'w').write(head + '</head><body>\n' + s.lstrip() + '\n</body></html>\n')
-    # картинки и видео демо (папки img/ и video/ рядом с index.html) копируем как есть
-    for sub in ('img', 'video'):
+    # картинки, видео и шрифты демо (папки img/, video/, fonts/ рядом с index.html) копируем как есть
+    for sub in ('img', 'video', 'fonts'):
         d = os.path.join(os.path.dirname(src), sub)
         if os.path.isdir(d):
             shutil.copytree(d, os.path.join('docs', k, sub), dirs_exist_ok=True)

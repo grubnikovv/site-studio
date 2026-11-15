@@ -22,13 +22,13 @@ if (!empty($in['website'])) json_out(['ok' => true]);  // ловушка для 
 $type = $in['type'] ?? '';
 $admin = session_ok($in['token'] ?? '');
 
-// Не больше 20 действий за 10 минут с одного адреса (чтение базы и работа кабинета — без ограничения)
+// Не больше 60 действий (у мобильных операторов много людей на одном адресе) за 10 минут с одного адреса (чтение базы и работа кабинета — без ограничения)
 if (!in_array($type, ['state', 'cert_get'], true) && !$admin) {
     $ip = $_SERVER['REMOTE_ADDR'] ?? '?';
     $db = store_init();
     $db->prepare('DELETE FROM hits WHERE t < ?')->execute([time() - 600]);
     $n = $db->prepare('SELECT COUNT(*) FROM hits WHERE ip = ?'); $n->execute([$ip]);
-    if ((int)$n->fetchColumn() >= 20) json_out(['ok' => false, 'error' => 'Слишком много запросов. Попробуйте через несколько минут.']);
+    if ((int)$n->fetchColumn() >= 60) json_out(['ok' => false, 'error' => 'Слишком много запросов. Попробуйте через несколько минут.']);
     $db->prepare('INSERT INTO hits (ip, t) VALUES (?, ?)')->execute([$ip, time()]);
 }
 
@@ -168,10 +168,7 @@ if ($type === 'train') {
     [$doc, $v] = doc_load(true); doc_expire($doc);
     foreach ($doc['training'] as $t) if (digits_phone($t['phone'] ?? '') === $phone && ($t['status'] ?? '') === 'wait' && ($t['hold'] ?? 0) > now_ms())
         fail('На этот номер уже есть неоплаченная бронь. Оплатите её или дождитесь, пока она отменится.');
-    foreach ($days as $d) {
-        if (!empty($doc['dayoff'][$d]) || day_taken_by_training($doc, $d)) fail('Эти даты только что заняли. Выберите другие.');
-        foreach ($doc['bookings'] as $b) if (($b['date'] ?? '') === $d && ($b['status'] ?? '') === 'booked') fail('Эти даты только что заняли. Выберите другие.');
-    }
+    foreach ($days as $d) if (!day_free_for_training($doc, $d)) fail('Эти даты только что заняли. Выберите другие.');
     $rec = ['id' => $id, 'course' => clean($r['course'] ?? '', 10), 'date' => $days[0], 'days' => $days, 'name' => $name, 'phone' => phone_nice($phone),
         'price' => (int)($r['price'] ?? 0), 'pre' => (int)($r['pre'] ?? 0), 'status' => 'wait', 'hold' => now_ms() + 30 * 60 * 1000];
     $doc['training'][] = $rec;
