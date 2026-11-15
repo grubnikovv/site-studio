@@ -65,3 +65,14 @@ jobs:
           curl -s --max-time 60 "$SITE/server/poll.php?key=$ADMIN_KEY&diag=1"
           curl -s --max-time 60 "$SITE/server/poll.php?key=$ADMIN_KEY"
           curl -s --max-time 60 "$SITE/server/poll.php?key=$ADMIN_KEY&diag=1" | tail -n +4
+      - name: Очистить уведомления кабинета
+        if: steps.chk.outputs.ok == 'true' && contains(github.event.head_commit.message, '[clear-notes]')
+        env:
+          CABINET_PASS: ${{ secrets.CABINET_PASS }}
+        run: |
+          A="$SITE/server/api.php"
+          T=$(php -r 'echo json_encode(["type" => "login", "pass" => getenv("CABINET_PASS")]);' | curl -s -X POST "$A" --data-binary @- | php -r '$r = json_decode(stream_get_contents(STDIN), true); echo $r["token"] ?? "";')
+          test -n "$T" || { echo "Не удалось войти в кабинет"; exit 1; }
+          echo "::add-mask::$T"
+          curl -s -X POST "$A" -d "{\"type\":\"sync\",\"token\":\"$T\",\"ops\":[{\"p\":[\"notes\"],\"v\":[]}]}" | php -r '$r = json_decode(stream_get_contents(STDIN), true); echo "Уведомлений осталось: " . count($r["doc"]["notes"] ?? []) . "\n";'
+          curl -s -X POST "$A" -d "{\"type\":\"logout\",\"token\":\"$T\"}"; echo

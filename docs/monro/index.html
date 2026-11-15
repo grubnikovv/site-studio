@@ -675,7 +675,7 @@ div.f { display: grid; gap: 8px; }
 .pass-w input { padding-right: 52px; }
 .pass-eye { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border: 0; background: none; color: var(--mute); display: grid; place-content: center; border-radius: 10px; }
 .pass-eye[aria-pressed="false"] .eye-x { display: none; }
-#v-admin.locked .atabs, #v-admin.locked .atab, #v-admin.locked .bellwrap, #v-admin.locked .a-out { display: none !important; }
+#v-admin.locked .atabs, #v-admin.locked .atab, #v-admin.locked .a-out { display: none !important; }
 .a-save { margin: -6px 0 12px; font-size: 13px; color: var(--mute); }
 .a-save.bad { color: #B3261E; font-weight: 700; }
 .a-out { margin: 28px auto 0; display: block; }
@@ -806,6 +806,11 @@ div.f { display: grid; gap: 8px; }
 .bell-btn { position: relative; width: 46px; height: 46px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); display: grid; place-content: center; }
 .hdr-m { display: flex; gap: 8px; }
 .hdr-m .bell-btn { width: 44px; height: 44px; }
+.hdr-m { position: relative; }
+.hdr-m .bellwrap { position: static; }
+.hdr-m .npanel { text-align: left; right: 0; top: 54px; }
+.np-clear { margin-left: auto; border: 0; background: none; color: var(--lac); font-weight: 700; font-size: 13px; padding: 4px 0 4px 12px; }
+.np-h { gap: 8px; }
 .bell-btn.ring svg { animation: bell 2.5s ease-in-out infinite; transform-origin: 50% 10%; }
 .bell-n { position: absolute; top: -6px; right: -6px; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: #C0392B; color: #fff; font-size: 12px; font-weight: 800; display: grid; place-content: center; box-shadow: 0 0 0 2px var(--bg); }
 .npanel { position: absolute; right: 0; top: 54px; z-index: 30; width: min(360px, calc(100vw - 32px)); max-height: 70vh; overflow: auto; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 18px 40px rgba(0,0,0,.18); }
@@ -1137,7 +1142,9 @@ div.f { display: grid; gap: 8px; }
     </div>
     <a class="btn glow sm" href="#zapis" id="hdrCta">Записаться</a>
     <div class="hdr-m" id="hdrM" hidden>
-      <a class="bell-btn" href="#admin" id="hBell" aria-label="Уведомления"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6.5 2 6.5H4S6 14 6 9z"></path><path d="M10 19a2 2 0 0 0 4 0"></path></svg><span class="bell-n" id="hBellN" hidden></span></a>
+      <div class="bellwrap"><button type="button" class="bell-btn" id="nBell" aria-label="Уведомления" aria-expanded="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6.5 2 6.5H4S6 14 6 9z"></path><path d="M10 19a2 2 0 0 0 4 0"></path></svg><span class="bell-n" id="nCount" hidden></span></button>
+<div class="npanel" id="nPanel" hidden><div class="np-h"><b>Уведомления</b><span>за 2 недели</span><button type="button" class="np-clear" id="nClear">Очистить</button></div><div class="np-list" id="nList"></div></div>
+</div>
       <a class="bell-btn" href="#admin" aria-label="Кабинет мастера"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"></path></svg></a>
     </div>
   </div>
@@ -1638,9 +1645,6 @@ div.f { display: grid; gap: 8px; }
 <main id="v-admin" class="page screen" hidden>
   <div class="wrap">
     <div class="adm-head"><h2>Кабинет мастера</h2>
-      <div class="bellwrap"><button type="button" class="bell-btn" id="nBell" aria-label="Уведомления" aria-expanded="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6.5 2 6.5H4S6 14 6 9z"></path><path d="M10 19a2 2 0 0 0 4 0"></path></svg><span class="bell-n" id="nCount" hidden></span></button>
-        <div class="npanel" id="nPanel" hidden><div class="np-h"><b>Уведомления</b><span>за 2 недели</span></div><div class="np-list" id="nList"></div></div>
-      </div>
     </div>
     <p class="demo" data-demo>Тестовая версия: записи хранятся только на этом телефоне. В рабочей версии — вход по паролю и общая база для всех устройств.</p>
     <form class="card a-login" id="aLogin" hidden>
@@ -3062,7 +3066,6 @@ div.f { display: grid; gap: 8px; }
   function renderBell() {
     var n = (st.notes || []).filter(function (x) { return !x.read; }).length;
     $("nCount").hidden = !n; $("nCount").textContent = n > 99 ? "99+" : n; $("nBell").classList.toggle("ring", n > 0);
-    $("hBellN").hidden = !n; $("hBellN").textContent = $("nCount").textContent; $("hBell").classList.toggle("ring", n > 0);
     if (!$("nPanel").hidden) renderNotes();
   }
   function ago(t) {
@@ -3104,11 +3107,20 @@ div.f { display: grid; gap: 8px; }
     var b = e.target.closest("[data-note]"); if (!b) return;
     var n = (st.notes || []).filter(function (x) { return x.id === b.dataset.note; })[0]; if (!n || !n.go) return;
     $("nPanel").hidden = true;
+    if (location.hash !== "#admin") { location.hash = "admin"; setTimeout(function () { openNote(n); }, 80); return; }
+    openNote(n);
+  });
+  $("nClear").addEventListener("click", function (e) {
+    e.stopPropagation();
+    if (this.dataset.sure !== "1") { this.dataset.sure = "1"; this.textContent = "Удалить все?"; return; }
+    this.dataset.sure = ""; this.textContent = "Очистить"; st.notes = []; save(); renderBell(); renderNotes();
+  });
+  function openNote(n) {
     var tabBtn = document.querySelector('#aTabs [data-tab="' + n.go.tab + '"]');
     if (n.go.date) aDate = n.go.date;
     if (tabBtn) tabBtn.click(); else renderTab();
     if (n.go.tab === "day") setTimeout(function () { var x = document.querySelector('#aDays [data-d="' + n.go.date + '"]'); if (x) x.scrollIntoView({ block: "nearest", inline: "center" }); }, 50);
-  });
+  }
   renderBell();
   function renderTab() { if (aTab === "clients") renderClients(); else if (aTab === "stats") renderStats(); else renderAdmin(); }
 
@@ -3574,6 +3586,7 @@ div.f { display: grid; gap: 8px; }
     if (nx) $("nextPage").innerHTML = '<div class="wrap"><a href="#' + (nx[0] === "home" ? "top" : nx[0]) + '"><span><small>Следующий раздел</small><b>' + nx[1] + '</b></span><span class="arr"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a></div>';
     if (v === "zapis") { resetBooking(pendingPick); pendingPick = null; }
     if (v === "admin" && (!SYNC || token)) renderTab();
+    if (!SYNC) lockAdmin();
     if (SYNC && changed && (v === "zapis" || v === "obuchenie" || v === "admin")) fetchState();
     if (certHash) showCertFromHash(certHash);
     if (pendingTo) { var el = $(pendingTo); pendingTo = null; if (el) { jumpTop(); setTimeout(function () { el.scrollIntoView({ behavior: "smooth", block: "center" }); }, 80); return; } }
@@ -3594,15 +3607,11 @@ div.f { display: grid; gap: 8px; }
     $("aSave").hidden = !SYNC || locked; outBtn.hidden = !SYNC || locked;
     document.querySelectorAll("[data-demo]").forEach(function (el) { el.hidden = SYNC; });
     // в браузере мастера вместо «Записаться» — колокольчик и кабинет
-    var master = SYNC && !!token;
+    var master = SYNC ? !!token : curView === "admin";  // в демо — пока открыт кабинет
     $("hdrCta").hidden = master; $("hdrM").hidden = !master;
     if (master) renderBell();
   }
-  // колокольчик в шапке: открыть кабинет и сразу уведомления
-  $("hBell").addEventListener("click", function (e) {
-    e.preventDefault(); if (location.hash !== "#admin") location.hash = "admin";
-    setTimeout(function () { if ($("nPanel").hidden) $("nBell").click(); }, 60);
-  });
+
   $("aEye").onclick = function () {
     var show = $("aPass").type === "password";
     $("aPass").type = show ? "text" : "password";
