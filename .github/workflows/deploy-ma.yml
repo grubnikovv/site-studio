@@ -51,7 +51,7 @@ jobs:
           DIR: ${{ inputs.dir || 'public_html' }}
         run: |
           sudo apt-get install -y -qq lftp >/dev/null
-          lftp -u "$FTP_USER,$FTP_PASSWORD" "$FTP_HOST" -e "set ftp:ssl-allow yes; set ssl:verify-certificate no; set net:max-retries 3; mirror -R --verbose=1 --exclude-glob server/data/ out/ $DIR/; bye"
+          lftp -u "$FTP_USER,$FTP_PASSWORD" "$FTP_HOST" -e "set ftp:ssl-allow yes; set ssl:verify-certificate no; set net:max-retries 3; cls -l $DIR/; rm -f $DIR/index.htm $DIR/index.php $DIR/index.shtml $DIR/default.htm; mirror -R --verbose=1 --exclude-glob server/data/ out/ $DIR/; cls -l $DIR/; bye"
       - name: Проверить
         if: steps.chk.outputs.ok == 'true'
         env:
@@ -59,6 +59,7 @@ jobs:
         run: |
           code=$(curl -s -o /dev/null -w '%{http_code}' "$SITE/")
           echo "Сайт: $code"
+          curl -s "$SITE/" | grep -o '<title>[^<]*' || true
           curl -s -X POST "$SITE/server/api.php" -H 'Content-Type: application/json' -d '{"type":"x"}'; echo
           curl -s --max-time 60 "$SITE/server/poll.php?key=$ADMIN_KEY&diag=1"
           curl -s --max-time 60 "$SITE/server/poll.php?key=$ADMIN_KEY"
