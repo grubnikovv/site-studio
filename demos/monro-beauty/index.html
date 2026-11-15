@@ -767,6 +767,10 @@ div.f { display: grid; gap: 8px; }
 .cert-link { text-decoration: none; display: grid; gap: 4px; transition: transform .2s; }
 .cert-link:hover { transform: translateY(-2px); }
 .cert-link b { font-family: var(--display); font-weight: 400; font-size: 22px; }
+.paybox { display: grid; gap: 10px; margin-top: 12px; padding: 16px; border-radius: 18px; background: var(--paper); border: 1.5px solid color-mix(in srgb, var(--lac) 30%, var(--line)); text-align: left; }
+.mc-wait { align-self: center; color: #F2C9D3; font-size: 13px; }
+.paybox p { margin: 0; color: var(--mute); font-size: 14px; }
+.paybox .btn { width: 100%; }
 .pk { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 28px; align-items: start; }
 @media (max-width: 900px) { .pk { grid-template-columns: minmax(0, 1fr); } }
 .pk .gcard { animation: pkin .8s cubic-bezier(.2,.8,.2,1) both; }
@@ -1261,7 +1265,7 @@ div.f { display: grid; gap: 8px; }
       <p class="err" id="tErr" hidden></p>
       <button class="btn glow" type="submit" id="tPay">Оплатить предоплату</button>
       <div class="tdone" id="tDone" hidden></div>
-      <p class="note">Демо: оплата не списывается.</p>
+      <p class="note">Оплата по СБП — напрямую на счёт Марины в СберБанке. Демо: деньги не списываются.</p>
       <button type="button" class="btn sm ghost chat-btn" data-chat="Здравствуйте! У меня вопрос по обучению." data-chat-title="Вопрос по обучению">Есть вопрос по курсу? Написать Марине</button>
     </form>
   </div></section>
@@ -1291,14 +1295,14 @@ div.f { display: grid; gap: 8px; }
       <label class="check"><input type="checkbox" id="cPd"><span>Согласен(на) на <a href="#soglasie" target="_blank">обработку персональных данных</a> и с <a href="#politika" target="_blank">политикой конфиденциальности</a>.</span></label>
       <p class="err" id="cErr" hidden></p>
       <button class="btn glow" type="submit" id="cGo">Оплатить 3 000 ₽</button>
-      <p class="note" style="margin:0">Оплата полностью, картой или по СБП. Сертификат сохранится за вашим номером телефона — его всегда можно найти ниже, в блоке «Мои сертификаты».</p>
+      <p class="note" style="margin:0">Оплата полностью по СБП, напрямую на счёт Марины в СберБанке. Сертификат сохранится за вашим номером телефона — его всегда можно найти ниже, в блоке «Мои сертификаты».</p>
       <div class="tdone" id="cDone" hidden></div>
       <div class="share" id="cShare" hidden>
         <button type="button" class="btn" data-share="img">Поделиться картинкой</button>
         <button type="button" class="btn ghost" data-share="link">Скопировать ссылку</button>
         <button type="button" class="btn ghost" data-share="save">Сохранить картинку</button>
       </div>
-      <p class="demo" style="margin:0">Демо: оплата не списывается.</p>
+      <p class="demo" style="margin:0">Оплата по СБП — напрямую на счёт Марины в СберБанке. Демо: деньги не списываются.</p>
     </form>
     <form class="card mycerts" id="mcForm" novalidate>
       <h3>Мои сертификаты</h3>
@@ -1638,6 +1642,15 @@ div.f { display: grid; gap: 8px; }
   // модели: в первый день с 10 до 12 теория, модель приходит к 12; в остальные дни — к началу занятия
   var MODEL = { first: 12 * 60, next: 10 * 60, hours: 5 };
   var MODEL_SVC = { man: "Маникюр с покрытием гель-лак", ped: "Педикюр с покрытием гель-лак", ext: "Наращивание или коррекция ногтей" };
+  // Оплата напрямую: ссылка на оплату по СБП из «Своё дело» в СберБанк Онлайн (появится при запуске).
+  // Сайт сам не видит оплату: Марина отмечает «Оплата пришла» в кабинете.
+  var PAY = { link: "", holdHours: 24 };
+  function payBox(sum, what) {
+    return '<div class="paybox"><b>Оплатите ' + rub(sum) + ' по СБП</b>' +
+      '<p>Деньги придут Марине на счёт в СберБанке. Чек «Мой налог» Марина пришлёт после оплаты.</p>' +
+      '<button type="button" class="btn glow" data-paynow="' + sum + '">Оплатить ' + rub(sum) + ' через СБП</button>' +
+      '<button type="button" class="btn ghost" data-paid="' + what + '">Я оплатил(а)</button></div>';
+  }
   function course(id) { return COURSES.filter(function (c) { return c.id === id; })[0] || COURSES[0]; }
   var FAQ = [
     ["Процедуры", [
@@ -1754,8 +1767,9 @@ div.f { display: grid; gap: 8px; }
     return iv;
   }
   // обучение, которое идёт в этот день (дни курса закрыты для записи целиком, в том числе после 17:00)
+  function trainActive(t) { return t.status === "paid" || (t.status === "wait" && t.hold > Date.now()); }
   function trainOn(k) {
-    return (st.training || []).filter(function (t) { return t.status === "paid" && (t.days || [t.date]).indexOf(k) >= 0; })[0] || null;
+    return (st.training || []).filter(function (t) { return trainActive(t) && (t.days || [t.date]).indexOf(k) >= 0; })[0] || null;
   }
   function freeSlots(k, minutes, ignore, master) {
     if (trainOn(k)) return [];
@@ -2075,6 +2089,12 @@ div.f { display: grid; gap: 8px; }
   $("chWa").addEventListener("click", function () { $("chDlg").close(); });
   $("chClose").onclick = function () { $("chDlg").close(); };
   $("chDlg").addEventListener("click", function (e) { if (e.target === this) this.close(); });
+  document.addEventListener("click", function (e) {
+    var p = e.target.closest("[data-paynow]");
+    if (p) { if (PAY.link) window.open(PAY.link, "_blank", "noopener"); else toast("В рабочей версии откроется оплата по СБП в приложении вашего банка"); return; }
+    var d = e.target.closest("[data-paid]");
+    if (d) { d.disabled = true; d.textContent = "Спасибо! Марина проверит поступление"; toast(d.dataset.paid === "cert" ? "Как только Марина подтвердит оплату, сертификат станет активным" : "Как только Марина подтвердит оплату, даты закрепятся за вами"); }
+  });
   // ---------- клиентка: мои записи и отмена ----------
   function digits(p) { return String(p || "").replace(/\D/g, "").replace(/^8/, "7"); }
   function myBookings(phone) {
@@ -2161,7 +2181,7 @@ div.f { display: grid; gap: 8px; }
     var days = tr.date ? trainDaysFrom(tr.date, c.days) : null;
     $("tSum").innerHTML = '<div><span>Курс</span><b>' + c.short + '</b></div><div><span>Даты</span><b>' + (days ? rangeText(days) + ", 10:00–17:00" : "—") + '</b></div><div><span>Стоимость</span><b class="num">' + rub(c.price) + '</b></div>' +
       '<div class="big"><span style="color:inherit">Предоплата сейчас</span><span class="num">' + rub(c.pre) + '</span></div><div><span>Остаток в первый день</span><b class="num">' + rub(c.price - c.pre) + '</b></div>';
-    $("tPay").textContent = "Оплатить " + rub(c.pre);
+    $("tPay").textContent = "Забронировать и оплатить " + rub(c.pre);
     $("tPay").disabled = !tr.date;
   }
   $("tDir").addEventListener("click", function (e) { var b = e.target.closest("[data-v]"); if (b) { tr.course = b.dataset.v; tr.date = null; renderTrain(); } });
@@ -2171,17 +2191,17 @@ div.f { display: grid; gap: 8px; }
     var c = course(tr.course), name = $("tName").value.trim(), phone = $("tPhone").value.trim();
     var err = !tr.date ? "Выберите даты курса." : !name ? "Укажите имя." : phone.replace(/\D/g, "").length < 10 ? "Укажите телефон полностью." : !$("tRules").checked ? "Отметьте согласие с правилами предоплаты." : !$("tPd").checked ? "Отметьте согласие на обработку данных." : "";
     $("tErr").textContent = err; $("tErr").hidden = !err; if (err) return;
-    var btn = $("tPay"); btn.disabled = true; btn.textContent = "Оплата…";
+    var btn = $("tPay"); btn.disabled = true; btn.textContent = "Бронирую…";
     setTimeout(function () {
       var days = trainDaysFrom(tr.date, c.days);
       // пока ученица заполняла форму, на эти дни могли записаться клиентки
       if (!days.every(dayFreeForTrain)) { btn.disabled = false; renderTrain(); $("tErr").textContent = "Эти даты только что заняли. Выберите другие."; $("tErr").hidden = false; return; }
       st.training = st.training || [];
-      st.training.push({ id: "t" + Date.now().toString(36), course: c.id, date: days[0], days: days, name: name, phone: phone, price: c.price, pre: c.pre, status: "paid" });
-      save(); btn.disabled = false;
-      $("tDone").innerHTML = '<b>Даты закреплены за вами.</b> Курс «' + c.short + '»: ' + rangeText(days) + ', с 10:00 до 17:00. Марина свяжется с вами накануне.';
+      st.training.push({ id: "t" + Date.now().toString(36), course: c.id, date: days[0], days: days, name: name, phone: phone, price: c.price, pre: c.pre, status: "wait", hold: Date.now() + PAY.holdHours * 36e5 });
+      save(); btn.disabled = false; btn.textContent = "Забронировать и оплатить " + rub(c.pre);
+      $("tDone").innerHTML = '<b>Даты держим за вами 24 часа.</b> Курс «' + c.short + '»: ' + rangeText(days) + ', с 10:00 до 17:00. Оплатите предоплату — после подтверждения Марины даты закрепятся окончательно.' + payBox(c.pre, "train");
       $("tDone").hidden = false; ["tName", "tPhone"].forEach(function (id) { $(id).value = ""; }); $("tRules").checked = false; $("tPd").checked = false;
-      tr.date = null; renderTrain(); renderTrainBand(); renderModels(); toast("Предоплата получена, даты закреплены за вами");
+      tr.date = null; renderTrain(); renderTrainBand(); renderModels(); toast("Заявка принята — оплатите предоплату по СБП");
     }, 900);
   });
   // тестовые записи на обучение (для демо): три курса в ближайшие недели
@@ -2377,8 +2397,10 @@ div.f { display: grid; gap: 8px; }
     var trl = (st.training || []).filter(function (t) { var d = t.days || [t.date]; return d[d.length - 1] >= today; }).sort(function (a, b) { return a.date < b.date ? -1 : 1; });
     $("aTrain").innerHTML = trl.length ? trl.map(function (t) {
       var c = course(t.course || (t.dir === "ped" ? "ped" : "man")), tdays = t.days || [t.date];
-      var stt = t.status === "paid" ? ["Предоплата получена", "ok"] : t.status === "refund" ? ["Отменена · предоплата возвращена", ""] : ["Отменена поздно · предоплата ваша", "bad"];
+      if (t.status === "wait" && !(t.hold > Date.now())) t.status = "nopay";
+      var stt = t.status === "wait" ? ["Ждёт оплату до " + new Date(t.hold).toLocaleString("ru-RU", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }), "bad"] : t.status === "nopay" ? ["Не оплачена · даты свободны", ""] : t.status === "paid" ? ["Предоплата получена", "ok"] : t.status === "refund" ? ["Отменена · предоплата возвращена", ""] : ["Отменена поздно · предоплата ваша", "bad"];
       return '<div class="bk"><div class="r1"><b>' + rangeText(tdays) + ', ' + hm(TRAIN.from) + '–' + hm(TRAIN.to) + '</b><span class="pill ' + stt[1] + '">' + stt[0] + '</span></div><div><b style="font-weight:700">' + esc(t.name) + '</b> · ' + esc(t.phone) + (t.example ? ' <span class="pill">пример</span>' : '') + '</div><div class="info">' + c.short + ' · ' + daysWord(tdays.length) + ' · ' + rub(t.price) + ' · предоплата ' + rub(t.pre) + '</div>' +
+        (t.status === "wait" ? '<div class="info">Проверьте поступление ' + rub(t.pre) + ' в СберБанк Онлайн. Даты держатся 24 часа, потом освободятся сами.</div><div class="acts"><button data-tpay="' + t.id + '">Оплата пришла</button><button data-tno="' + t.id + '">Отменить заявку</button></div>' : '') +
         (t.status === "paid" ? tdays.map(function (k, i) { return modelDay(k, i, c); }).join("") + '<div class="acts"><button data-t="' + t.id + '">Отменить обучение</button></div>' : '') + '</div>';
     }).join("") : '<p class="note">Заявок пока нет. Они появятся, когда ученица оплатит предоплату на странице «Обучение».</p>';
     renderModelBase();
@@ -2444,6 +2466,12 @@ div.f { display: grid; gap: 8px; }
     var days = (new Date(t.date + "T10:00").getTime() - Date.now()) / 864e5;
     t.status = days >= 7 ? "refund" : "late"; save(); renderAdmin(); renderTrain(); renderTrainBand(); renderModels();
     toast(days >= 7 ? "Отменено. Предоплата вернётся ученице" : "Поздняя отмена. Предоплата остаётся у вас");
+  });
+  $("aTrain").addEventListener("click", function (e) {
+    var a = e.target.closest("[data-tpay]"), n = e.target.closest("[data-tno]"); if (!a && !n) return;
+    var t = st.training.filter(function (x) { return x.id === (a || n).dataset[a ? "tpay" : "tno"]; })[0]; if (!t) return;
+    t.status = a ? "paid" : "nopay"; save(); renderAdmin(); renderTrain(); renderTrainBand(); renderModels();
+    toast(a ? "Предоплата отмечена — даты закреплены за ученицей" : "Заявка отменена, даты снова свободны");
   });
   $("aTrain").addEventListener("change", function (e) {
     var sel = e.target.closest("[data-mt]"); if (!sel) return;
@@ -2746,7 +2774,7 @@ div.f { display: grid; gap: 8px; }
     return code;
   }
   function certBalance(c) { return c.balance == null ? (c.status === "used" ? 0 : c.sum) : c.balance; }
-  function certState(c) { return certBalance(c) <= 0 || c.status === "used" ? ["Использован", ""] : c.till && c.till < dkey(new Date()) ? ["Истёк срок", "bad"] : certBalance(c) < c.sum ? ["Частично использован", "ok"] : ["Действует", "ok"]; }
+  function certState(c) { if (c.status === "wait") return ["Ждёт оплаты", "bad"]; return certBalance(c) <= 0 || c.status === "used" ? ["Использован", ""] : c.till && c.till < dkey(new Date()) ? ["Истёк срок", "bad"] : certBalance(c) < c.sum ? ["Частично использован", "ok"] : ["Действует", "ok"]; }
   // Мои сертификаты: покупатель вводит свой телефон и видит все сертификаты с остатком
   // ---------- поделиться сертификатом: картинка или ссылка ----------
   var lastCode = null;
@@ -2838,7 +2866,7 @@ div.f { display: grid; gap: 8px; }
       '<div class="pk-stat"><div><small>Статус</small><b class="' + stt[1] + '">' + stt[0] + '</b></div><div><small>Остаток</small><b class="num">' + rub(bal) + '</b></div><div><small>Действует до</small><b>' + shortDate(c.till) + '</b></div></div>' +
       (active ? '<h3 style="margin:0">Как воспользоваться</h3><ol class="pk-steps"><li><span><b>Запишитесь</b> онлайн или напишите Марине</span></li><li><span>Скажите, что оплатите <b>сертификатом № ' + esc(c.code) + '</b></span></li><li><span>После процедуры Марина спишет сумму, <b>остаток сохранится</b> до ' + shortDate(c.till) + '</span></li></ol>' +
         '<div class="pk-acts"><a class="btn glow" href="#zapis">Выбрать процедуру и время</a><button type="button" class="btn ghost" data-chat="Здравствуйте! У меня подарочный сертификат № ' + esc(c.code) + '. Хочу записаться." data-chat-title="Записаться по сертификату">Написать Марине</button><button type="button" class="btn ghost" data-share="save" data-code="' + esc(c.code) + '">Сохранить картинку</button></div>'
-        : '<p class="note" style="margin:0">' + (stt[0] === "Использован" ? "Сертификат уже использован. Спасибо, что были у нас!" : "Срок действия сертификата закончился. Если есть вопрос — напишите Марине.") + '</p><button type="button" class="btn ghost" data-chat="Здравствуйте! Вопрос по сертификату № ' + esc(c.code) + '." data-chat-title="Вопрос по сертификату">Написать Марине</button>') +
+        : '<p class="note" style="margin:0">' + (c.status === "wait" ? "Сертификат станет активным, как только Марина подтвердит оплату." : stt[0] === "Использован" ? "Сертификат уже использован. Спасибо, что были у нас!" : "Срок действия сертификата закончился. Если есть вопрос — напишите Марине.") + '</p><button type="button" class="btn ghost" data-chat="Здравствуйте! Вопрос по сертификату № ' + esc(c.code) + '." data-chat-title="Вопрос по сертификату">Написать Марине</button>') +
       '<a class="pk-more" href="#sertifikat" data-to="mcForm">Мои сертификаты и подарок другу →</a></div>';
     lastCode = c.code;
   }
@@ -2852,7 +2880,7 @@ div.f { display: grid; gap: 8px; }
       return '<div class="mc"><div class="g-top"><span class="g-brand"><svg class="g-mark" aria-hidden="true"><use href="#lgm"></use></svg><span class="g-bt">Академия маникюра и&nbsp;педикюра</span></span><span class="pill ' + stt[1] + '">' + stt[0] + '</span></div>' +
         '<b class="mc-sum num">' + rub(certBalance(c)) + (certBalance(c) < c.sum ? ' <small>из ' + rub(c.sum) + '</small>' : '') + '</b>' +
         '<div class="g-bot"><span>№ ' + esc(c.code) + (c.to ? ' · для: ' + esc(c.to) + ' ' + HEART : '') + '</span><span>до ' + shortDate(c.till) + ' вкл.</span></div>' +
-        '<div class="mc-acts"><a class="mc-open" href="#cert-' + certKey(c.code) + '">Открыть</a><button type="button" data-share="img" data-code="' + esc(c.code) + '">Поделиться</button><button type="button" data-share="link" data-code="' + esc(c.code) + '">Ссылка</button></div></div>';
+        '<div class="mc-acts"><a class="mc-open" href="#cert-' + certKey(c.code) + '">Открыть</a>' + (c.status === "wait" ? '<span class="mc-wait">ждёт подтверждения оплаты</span>' : '<button type="button" data-share="img" data-code="' + esc(c.code) + '">Поделиться</button><button type="button" data-share="link" data-code="' + esc(c.code) + '">Ссылка</button>') + '</div></div>';
     }).join("") : '<p class="note">На этот номер сертификатов не нашли. Проверьте номер или напишите Марине.</p><button type="button" class="btn sm ghost" data-chat="Здравствуйте! Не могу найти свой подарочный сертификат." data-chat-title="Найти сертификат">Написать Марине</button>';
   }
   $("mcForm").addEventListener("submit", function (e) { e.preventDefault(); if ($("mcPhone").value.replace(/\D/g, "").length < 11) { toast("Введите телефон полностью"); return; } renderMyCerts(); });
@@ -2880,20 +2908,20 @@ div.f { display: grid; gap: 8px; }
     var name = $("cName").value.trim(), phone = $("cPhone").value.trim();
     var err = !name ? "Укажите имя." : phone.replace(/\D/g, "").length < 10 ? "Укажите телефон полностью." : !$("cTerm").checked ? "Отметьте, что знаете срок действия сертификата." : !$("cPd").checked ? "Отметьте согласие на обработку данных." : "";
     $("cErr").textContent = err; $("cErr").hidden = !err; if (err) return;
-    var btn = $("cGo"); btn.disabled = true; btn.textContent = "Оплата…";
+    var btn = $("cGo"); btn.disabled = true; btn.textContent = "Создаю…";
     setTimeout(function () {
       // номер сертификата: МН- и 4 знака без похожих букв и цифр
       st.certs = st.certs || [];
       var code = newCertCode();
-      st.certs.push({ id: "c" + Date.now().toString(36), code: code, sum: cSum, balance: cSum, to: $("cTo").value.trim(), name: name, phone: phone, status: "paid", created: dkey(new Date()), till: dkey(certTill()), spent: [] });
+      st.certs.push({ id: "c" + Date.now().toString(36), code: code, sum: cSum, balance: cSum, to: $("cTo").value.trim(), name: name, phone: phone, status: "wait", created: dkey(new Date()), till: dkey(certTill()), spent: [] });
       $("mcPhone").value = phone;
       save(); renderGift(code); btn.disabled = false; btn.textContent = "Оплатить " + rub(cSum);
-      $("cDone").innerHTML = "<b>Оплачено. Сертификат № " + code + "</b> на " + rub(cSum) + " готов. Сохраните скриншот или перешлите получателю. Его всегда можно найти в блоке «Мои сертификаты» по вашему телефону и показать Марине с экрана.";
+      $("cDone").innerHTML = "<b>Сертификат № " + code + "</b> на " + rub(cSum) + " создан и ждёт оплаты. Оплатите по СБП — как только Марина подтвердит поступление, он станет активным и его можно будет подарить." + payBox(cSum, "cert");
       $("cDone").hidden = false; $("cName").value = ""; $("cPhone").value = ""; $("cPd").checked = false; $("cTerm").checked = false;
-      lastCode = code; $("cShare").hidden = false;
+      lastCode = code; $("cShare").hidden = true;
       renderMyCerts();
       $("gCard").scrollIntoView({ behavior: "smooth", block: "center" });
-      toast("Сертификат оплачен");
+      toast("Сертификат создан — оплатите его по СБП");
     }, 900);
   });
   renderGift();
@@ -2906,6 +2934,7 @@ div.f { display: grid; gap: 8px; }
   function findCert(code) { var k = certKey(code); return k ? (st.certs || []).filter(function (c) { return certKey(c.code) === k; })[0] : null; }
   function certProblem(c) {
     if (!c) return "Сертификат с таким номером не найден. Проверьте номер.";
+    if (c.status === "wait") return "Сертификат ещё не оплачен. Отметьте оплату во вкладке «Заявки».";
     if (c.till && c.till < dkey(new Date())) return "Срок сертификата закончился " + shortDate(c.till) + ".";
     if (certBalance(c) <= 0 || c.status === "used") return "Сертификат уже использован полностью.";
     return "";
@@ -2976,15 +3005,19 @@ div.f { display: grid; gap: 8px; }
   function renderCerts() {
     var list = (st.certs || []).slice().reverse();
     $("aCerts").innerHTML = list.length ? list.map(function (c) {
-      var stt = certState(c), bal = certBalance(c), open = bal > 0 && c.status !== "used";
+      var stt = certState(c), bal = certBalance(c), open = bal > 0 && c.status !== "used" && c.status !== "wait";
       return '<div class="bk"><div class="r1"><b class="num">№ ' + esc(c.code || "—") + '</b><span class="pill ' + stt[1] + '">' + stt[0] + '</span></div>' +
         '<div class="info">Номинал ' + rub(c.sum) + ' · <b style="color:var(--ink)">остаток ' + rub(bal) + '</b> · до ' + shortDate(c.till || c.created) + '</div>' +
         '<div><b style="font-weight:700">' + esc(c.name) + '</b> · ' + esc(c.phone) + (c.to ? ' · для: ' + esc(c.to) : '') + '</div>' +
         ((c.spent || []).length ? '<div class="info">Списано: ' + c.spent.map(function (x) { return shortDate(x.d) + ' — ' + rub(x.sum) + (x.who ? ' (' + esc(x.who) + ', запись ' + shortDate(x.date) + ')' : ''); }).join(", ") + '</div>' : '') +
+        (c.status === "wait" ? '<div class="info">Проверьте поступление ' + rub(c.sum) + ' в СберБанк Онлайн.</div><div class="acts"><button data-cpay="' + c.id + '">Оплата пришла</button><button data-cno="' + c.id + '">Удалить — не оплачен</button></div>' : '') +
         (open ? '<div class="spend"><input type="number" inputmode="numeric" min="1" max="' + bal + '" placeholder="Сумма, ₽" data-amt="' + c.id + '" aria-label="Сколько списать с сертификата"><button type="button" data-cert="' + c.id + '" data-st="part">Списать</button><button type="button" data-cert="' + c.id + '" data-st="used">Закрыть полностью</button></div>' : '') + '</div>';
     }).join("") : '<p class="note">Покупок пока нет. Они появятся, когда кто-то оплатит сертификат на странице «Подарочный сертификат».</p>';
   }
   $("aCerts").addEventListener("click", function (e) {
+    var pa = e.target.closest("[data-cpay]"), no = e.target.closest("[data-cno]");
+    if (pa) { var cp1 = st.certs.filter(function (x) { return x.id === pa.dataset.cpay; })[0]; cp1.status = "paid"; save(); renderCerts(); toast("Оплата отмечена — сертификат № " + cp1.code + " активен"); return; }
+    if (no) { st.certs = st.certs.filter(function (x) { return x.id !== no.dataset.cno; }); save(); renderCerts(); toast("Неоплаченный сертификат удалён"); return; }
     var b = e.target.closest("[data-cert]"); if (!b) return;
     var c = st.certs.filter(function (x) { return x.id === b.dataset.cert; })[0], bal = certBalance(c); c.spent = c.spent || [];
     if (b.dataset.st === "part") {
