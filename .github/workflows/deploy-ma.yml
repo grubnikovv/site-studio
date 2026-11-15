@@ -14,9 +14,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      SITE: http://cm538897.tw1.ru
-      FTP_HOST: vh480.timeweb.ru
-      FTP_USER: cm538897_deploy
+      SITE: http://cp858271.tw1.ru
+      FTP_HOST: cp858271.tw1.ru
+      FTP_USER: cp858271_deploy
     steps:
       - name: Есть ли секреты
         id: chk
