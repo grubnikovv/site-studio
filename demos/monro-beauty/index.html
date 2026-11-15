@@ -1716,7 +1716,7 @@ div.f { display: grid; gap: 8px; }
   function payBox(sum, msg, claim, deadline) {
     return '<div class="paybox" data-box="' + claim + '"><div class="ptimer" data-until="' + deadline + '">Бронь держится <b>30:00</b></div>' +
       '<b>1. Оплатите ' + rub(sum) + ' по СБП</b>' +
-      '<p>Откроется перевод по СБП — выберите свой банк и <b>введите сумму ' + rub(sum) + '</b>. Деньги придут на счёт в СберБанке.</p>' +
+      '<p>Откроется перевод по СБП — выберите свой банк и <b>вставьте сумму ' + rub(sum) + '</b>: она скопируется сама при нажатии. Деньги придут на счёт в СберБанке.</p>' +
       '<button type="button" class="btn glow" data-paynow="' + sum + '">Оплатить по СБП</button>' +
       '<b>2. Нажмите «Я оплатил(а)» в течение 30 минут</b><p>Иначе бронь отменится. Затем отправьте Марине готовое сообщение в удобный мессенджер — какой курс и даты вы выбрали.</p>' +
       '<button type="button" class="btn ghost locked" aria-disabled="true" data-claim="' + claim + '" data-chat="' + esc(msg) + '" data-chat-title="Сообщить об оплате">Я оплатил(а)</button></div>';
@@ -2162,7 +2162,10 @@ div.f { display: grid; gap: 8px; }
   $("chDlg").addEventListener("click", function (e) { if (e.target === this) this.close(); });
   document.addEventListener("click", function (e) {
     var p = e.target.closest("[data-paynow]");
-    if (p) { var lk = p.closest(".paybox").querySelector(".locked"); if (lk) { lk.classList.remove("locked"); lk.removeAttribute("aria-disabled"); } if (PAY.link) window.open(PAY.link, "_blank", "noopener"); else toast("В рабочей версии откроется оплата по СБП в приложении вашего банка"); return; }
+    if (p) { var lk = p.closest(".paybox").querySelector(".locked"); if (lk) { lk.classList.remove("locked"); lk.removeAttribute("aria-disabled"); } // ссылка без суммы — копируем сумму, чтобы её осталось только вставить
+      if (navigator.clipboard) navigator.clipboard.writeText(p.dataset.paynow).catch(function () {});
+      if (PAY.link) { window.open(PAY.link, "_blank", "noopener"); toast("Сумма " + rub(Number(p.dataset.paynow)) + " скопирована — вставьте её в поле «Сумма»"); }
+      else toast("В рабочей версии откроется оплата по СБП в приложении вашего банка"); return; }
   });
   // «Я оплатил(а)» недоступна, пока человек не открыл оплату
   document.addEventListener("click", function (e) {
