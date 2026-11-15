@@ -1277,7 +1277,7 @@ div.f { display: grid; gap: 8px; }
       <p class="err" id="tErr" hidden></p>
       <button class="btn glow" type="submit" id="tPay">Оплатить предоплату</button>
       <div class="tdone" id="tDone" hidden></div>
-      <p class="note">Оплата по СБП — напрямую на счёт в СберБанке. Демо: деньги не списываются.</p>
+      <p class="note">Оплата по СБП — напрямую на счёт в СберБанке.</p>
       <button type="button" class="btn sm ghost chat-btn" data-chat="Здравствуйте! У меня вопрос по обучению." data-chat-title="Вопрос по обучению">Есть вопрос по курсу? Написать Марине</button>
     </form>
   </div></section>
@@ -1314,7 +1314,7 @@ div.f { display: grid; gap: 8px; }
         <button type="button" class="btn ghost" data-share="link">Скопировать ссылку</button>
         <button type="button" class="btn ghost" data-share="save">Сохранить картинку</button>
       </div>
-      <p class="demo" style="margin:0">Оплата по СБП — напрямую на счёт в СберБанке. Демо: деньги не списываются.</p>
+      <p class="demo" style="margin:0">Оплата по СБП — напрямую на счёт в СберБанке.</p>
     </form>
     <form class="card mycerts" id="mcForm" novalidate>
       <h3>Мои сертификаты</h3>
@@ -1568,11 +1568,10 @@ div.f { display: grid; gap: 8px; }
         <p class="lead" id="bDone"></p>
         <div class="rem-done" id="bRemDone"></div>
       </div>
-      <div class="tg" aria-label="Пример уведомления мастеру">
+      <div class="tg" aria-label="Пример уведомления мастеру" hidden>
         <div class="h"><i>М</i>Бот студии «М.А» → Марине</div>
         <div class="msg" id="bTg"></div>
       </div>
-      <p class="note">Так выглядит уведомление, которое Марина сразу получает в Telegram.</p>
       <a class="btn ghost" href="#top">На главную</a>
     </div>
 
@@ -1591,7 +1590,7 @@ div.f { display: grid; gap: 8px; }
 <main id="v-admin" class="page screen" hidden>
   <div class="wrap">
     <h2>Кабинет мастера</h2>
-    <p class="demo">Демо: вход по паролю появится в рабочей версии. Записи с этого телефона и примеры клиенток для наглядности.</p>
+    <p class="demo">Тестовая версия: записи хранятся только на этом телефоне. В рабочей версии — вход по паролю и общая база для всех устройств.</p>
     <div class="atabs" id="aTabs" role="tablist">
       <button type="button" data-tab="day" aria-pressed="true">День</button>
       <button type="button" data-tab="clients" aria-pressed="false">Клиентки</button>
@@ -1684,7 +1683,7 @@ div.f { display: grid; gap: 8px; }
     { id: "pedh", name: "Педикюр со сложными стопами", price: 2500, from: true, min: 120, foot: true, text: "Трещины, мозоли, сильные огрубения. Итоговую цену Марина назовёт на месте, до 3 000 ₽." }
   ];
   var REMOVE = { price: 200, min: 30 };
-  var SHOW_EXAMPLES = true;  // несколько тестовых клиенток на ближайшую неделю, чтобы проверить перенос и отмену
+  var SHOW_EXAMPLES = false;  // несколько тестовых клиенток на ближайшую неделю, чтобы проверить перенос и отмену
   var DAYS = 62;  // на сколько дней вперёд открыта запись (~2 месяца)
   function bmin(b) { return svc(b.svc).min + (b.remove ? REMOVE.min : 0); }
   // курсы обучения: каждый идёт несколько дней подряд с 10 до 17, эти дни целиком закрываются для онлайн-записи
@@ -1710,6 +1709,7 @@ div.f { display: grid; gap: 8px; }
   // payMin — сколько минут держим бронь до нажатия «Я оплатил(а)»; checkHours — сколько ждём, пока Марина проверит оплату
   var PAY = { link: "https://www.sberbank.ru/ru/choise_bank?requisiteNumber=79950305079&bankCode=100000000111", payMin: 30, checkHours: 24 };  // ТЕСТ: ссылка Влада, заменить на мамину
   function tgPreview(text) {
+    return "";  // в рабочей версии уведомление Марине приходит ботом; клиентам его не показываем
     return '<div class="tg" style="margin-top:12px" aria-label="Пример уведомления Марине"><div class="h"><i>М</i>Бот студии «М.А» → Марине</div><div class="msg">' + esc(text) + '</div></div>';
   }
   // после оплаты клиент пишет Марине в удобный мессенджер — текст уже готов
@@ -1754,7 +1754,7 @@ div.f { display: grid; gap: 8px; }
   var EARLY = 7 * 60, LATE = 22 * 60;
 
   // ---------- хранилище демо ----------
-  var KEY = "monro-demo-v2";
+  var KEY = "ma-site-v1";
   var st = { bookings: [], blocks: {}, dayoff: {}, bought: {} };
   try { st = Object.assign(st, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
   function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
