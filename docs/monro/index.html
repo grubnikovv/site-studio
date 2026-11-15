@@ -2495,7 +2495,7 @@ div.f { display: grid; gap: 8px; }
     b.appendChild(sp); setTimeout(function () { sp.remove(); }, 650);
   });
   // видео «как пройти»: впишите путь к файлу, когда видео будет готово (например "video/way.mp4")
-  var WAY_VIDEO = "video/way2.mp4", WAY_POSTER = "video/way-poster.webp";
+  var WAY_VIDEO = "video/way3.mp4", WAY_POSTER = "video/way-poster.webp";
   $("wayVideo").addEventListener("click", function () {
     $("vBody").innerHTML = WAY_VIDEO
       ? '<video controls playsinline autoplay muted preload="metadata"' + (WAY_POSTER ? ' poster="' + WAY_POSTER + '"' : '') + ' src="' + WAY_VIDEO + '"></video>'
