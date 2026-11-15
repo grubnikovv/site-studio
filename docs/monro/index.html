@@ -1852,7 +1852,8 @@ div.f { display: grid; gap: 8px; }
   // награды: фото, место, конкурс, номинация, город и год
   var AWARDS = [
     { f: "01", w: 640, h: 853, place: "1 место", title: "Международный чемпионат «White Lotus» — Magic New Year", nom: "Маникюр крупным планом · категория «Премиум-преподаватель»", where: "Волгоград, 2022" },
-    { f: "02", w: 640, h: 853, place: "2 место", title: "Международный чемпионат «Premium Nail Star VIII» — New Year Carnaval", nom: "Постер: покрытие гель-лак VOGUE, маникюр · категория «Инструктор»", where: "Самара, 2022" }
+    { f: "02", w: 640, h: 853, place: "2 место", title: "Международный чемпионат «Premium Nail Star VIII» — New Year Carnaval", nom: "Постер: покрытие гель-лак VOGUE, маникюр · категория «Инструктор»", where: "Самара, 2022" },
+    { f: "03", w: 640, h: 853, place: "2 место", title: "Международный чемпионат «White Lotus»", nom: "Салонное моделирование с дизайном · категория «Премиум-преподаватель» · 57,2 балла", where: "Волгоград, 2023" }
   ];
   $("awards").innerHTML = AWARDS.map(function (a, i) {
     return '<figure class="award"><button type="button" class="aw-ph" data-aw="' + i + '" aria-label="Открыть фото: ' + a.title + '"><img src="img/awards/' + a.f + '.webp" width="' + a.w + '" height="' + a.h + '" alt="Кубок и диплом: ' + a.title + ', ' + a.place + '" loading="lazy" decoding="async"><span class="aw-place p' + parseInt(a.place, 10) + '">🏆 ' + a.place + '</span></button>' +
