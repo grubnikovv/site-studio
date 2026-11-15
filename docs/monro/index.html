@@ -1247,7 +1247,7 @@ div.f { display: grid; gap: 8px; }
         <div class="step"><b>Выберите услугу</b><p>Цена и время видны сразу.</p></div>
         <div class="step"><b>Свободное время</b><p>Занятые окна уже закрыты, без переписки.</p></div>
         <div class="step"><b>Имя и телефон</b><p>Без оплаты на сайте. Марина сразу получает вашу запись.</p></div>
-        <div class="step"><b>Напоминание</b><p>Напомним за 2 дня и за 2 часа — в Telegram или MAX.</p></div>
+        <div class="step"><b>Напоминание</b><p>Напомним за 2 дня и за 2 часа — в Telegram.</p></div>
       </div>
       <div class="cta" style="margin-top:24px"><a class="btn glow" href="#zapis">Записаться онлайн</a><a class="btn ghost" href="#voprosy">Вопросы и ответы</a></div>
     </div>
@@ -1583,7 +1583,7 @@ div.f { display: grid; gap: 8px; }
           <li>Подскажем, <b>когда пора на коррекцию</b>, чтобы ногти не отросли</li>
         </ul>
         <span class="lbl">Куда присылать</span>
-        <div class="seg3" id="bRem"><button type="button" data-v="tg" aria-pressed="true">Telegram</button><button type="button" data-v="max" aria-pressed="false">MAX</button><button type="button" data-v="none" aria-pressed="false">Не нужно</button></div>
+        <div class="seg3" id="bRem" style="grid-template-columns:1fr 1fr"><button type="button" data-v="tg" aria-pressed="true">Telegram</button><button type="button" data-v="none" aria-pressed="false">Не нужно</button></div>
         <span class="note" id="bRemNote"></span>
       </div>
       <label class="check"><input type="checkbox" id="bPd"><span>Согласен(на) на <a href="#soglasie" target="_blank">обработку персональных данных</a> и с <a href="#politika" target="_blank">политикой конфиденциальности</a>.</span></label>
@@ -1767,7 +1767,7 @@ div.f { display: grid; gap: 8px; }
     ["Запись и оплата", [
       ["Нужно ли платить заранее?", "Нет. Запись на процедуры без предоплаты. Оплата после работы — наличными, переводом по СБП или подарочным сертификатом."],
       ["Как отменить или перенести запись?", "Отменить можно прямо на сайте: в разделе «Онлайн-запись» → «Уже записаны?» введите свой телефон. Чтобы перенести — напишите или позвоните Марине, лучше за сутки."],
-      ["Будут ли напоминания?", "Да, если при записи выбрать Telegram или MAX: напомним за 2 дня и за 2 часа до визита, а через 3 недели — о коррекции. Это бесплатно."],
+      ["Будут ли напоминания?", "Да, если при записи выбрать Telegram: напомним за 2 дня и за 2 часа до визита, а через 3 недели — о коррекции. Это бесплатно."],
       ["Что если опоздаю?", "Предупредите, если опаздываете. При опоздании больше чем на 15 минут процедуру, возможно, придётся сократить или перенести."]]],
     ["Обучение", [
       ["Как проходит обучение?", "Очно в студии «М.А», один на один. Курс длится 2 или 3 дня подряд, с 10:00 до 17:00: теория и практика на моделях. Модели и материалы предоставляются, в конце выдаётся сертификат о прохождении курса."],
@@ -2203,7 +2203,7 @@ div.f { display: grid; gap: 8px; }
       $("myPhone").value = b.phone; $("myList").innerHTML = "";
       $("bDone").textContent = whenText(b.date, b.start) + ". " + s.name + (b.remove ? " и снятие чужой работы" : "") + ". Адрес: ул. Обороны, 41.";
       $("bRemDone").innerHTML = b.remind === "none"
-        ? '<div class="rem-cta"><b>🔔 Чтобы не забыть о записи</b><p>Подключите бесплатные напоминания: за 2 дня и за 2 часа до визита, перенос — одной кнопкой.</p><div class="rem-two"><button class="btn sm glow" type="button" data-bot="tg">Telegram</button><button class="btn sm glow" type="button" data-bot="max">MAX</button></div></div>'
+        ? '<div class="rem-cta"><b>🔔 Чтобы не забыть о записи</b><p>Подключите бесплатные напоминания: за 2 дня и за 2 часа до визита, перенос — одной кнопкой.</p><button class="btn glow" type="button" data-bot="tg">🔔 Подключить в Telegram</button></div>'
         : '<div class="rem-cta"><b>Остался один шаг</b><p>Нажмите кнопку и «Старт» в боте — без этого напоминания не придут. Это бесплатно.</p><button class="btn glow" type="button" data-bot="' + b.remind + '">🔔 Подключить в ' + (REM_NAME[b.remind] || "Telegram") + '</button></div>';
       $("bRemDone").querySelectorAll("[data-bot]").forEach(function (x) {
         x.onclick = function () {
