@@ -172,6 +172,7 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 .aw-ph img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s ease; }
 .aw-ph:hover img { transform: scale(1.04); }
 .aw-place { position: absolute; left: 10px; top: 10px; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 800; color: #3A2600; background: linear-gradient(135deg, #F6DFA4, #E0B65C); box-shadow: 0 6px 16px rgba(0,0,0,.18); }
+.aw-place.pe { color: #fff; background: linear-gradient(135deg, var(--lac), #5B1426); }
 .aw-place.p2 { color: #2E3338; background: linear-gradient(135deg, #F2F4F6, #B9C0C7); }
 .aw-place.p3 { color: #3B1E08; background: linear-gradient(135deg, #F0C9A0, #C88A55); }
 .award figcaption { display: grid; gap: 4px; padding: 0 4px 4px; }
@@ -1828,14 +1829,14 @@ div.f { display: grid; gap: 8px; }
     $("pCap").textContent = w[2]; $("pNum").textContent = (pIdx + 1) + " / " + pList.length;
   }
   function openPhoto(k, scope) {
-    $("pDlg").classList.remove("single");
+    $("pDlg").classList.remove("single", "aw");
     pList = [].map.call(scope.querySelectorAll(".work:not([hidden])"), function (x) { return Number(x.dataset.k); });
     pIdx = Math.max(0, pList.indexOf(k)); showPhoto(); $("pDlg").showModal();
   }
   ["homeGal", "gal"].forEach(function (id) {
     $(id).addEventListener("click", function (e) { var b = e.target.closest(".work"); if (b) openPhoto(Number(b.dataset.k), $(id)); });
   });
-  function stepPhoto(d) { pIdx = (pIdx + d + pList.length) % pList.length; showPhoto(); }
+  function stepPhoto(d) { if ($("pDlg").classList.contains("aw")) { awIdx = (awIdx + d + awList.length) % awList.length; showAw(); return; } pIdx = (pIdx + d + pList.length) % pList.length; showPhoto(); }
   $("pPrev").onclick = function () { stepPhoto(-1); }; $("pNext").onclick = function () { stepPhoto(1); };
   $("pClose").onclick = function () { $("pDlg").close(); };
   $("pDlg").addEventListener("click", function (e) { if (e.target === this) this.close(); });
@@ -1857,14 +1858,21 @@ div.f { display: grid; gap: 8px; }
     { f: "04", w: 640, h: 853, place: "3 место", title: "Чемпионат России «Premium Beauty Star» — «Райские птицы»", nom: "Салонное моделирование с дизайном, постер · категория «Инструктор»", where: "Самара, 2025" }
   ];
   AWARDS.reverse();
+  // обучение у бренда — отдельная карточка в конце, две фотографии
+  AWARDS.push({ f: "05", more: ["06"], w: 640, h: 853, place: "Инструктор", badge: "🎓", title: "Инструктор MS Professional (MS PRO)", nom: "Кубки и свидетельства за инструкторские курсы бренда · 2 фото", where: "2022–2023" });
   $("awards").innerHTML = AWARDS.map(function (a, i) {
-    return '<figure class="award"><button type="button" class="aw-ph" data-aw="' + i + '" aria-label="Открыть фото: ' + a.title + '"><img src="img/awards/' + a.f + '.webp" width="' + a.w + '" height="' + a.h + '" alt="Кубок и диплом: ' + a.title + ', ' + a.place + '" loading="lazy" decoding="async"><span class="aw-place p' + parseInt(a.place, 10) + '">🏆 ' + a.place + '</span></button>' +
+    return '<figure class="award"><button type="button" class="aw-ph" data-aw="' + i + '" aria-label="Открыть фото: ' + a.title + '"><img src="img/awards/' + a.f + '.webp" width="' + a.w + '" height="' + a.h + '" alt="Кубок и диплом: ' + a.title + ', ' + a.place + '" loading="lazy" decoding="async"><span class="aw-place ' + (a.badge ? 'pe' : 'p' + parseInt(a.place, 10)) + '">' + (a.badge || '🏆') + ' ' + a.place + '</span></button>' +
       '<figcaption><b>' + a.title + '</b><span>' + a.nom + '</span><small>' + a.where + '</small></figcaption></figure>';
   }).join("");
+  var awList = [], awIdx = 0, awCur = null;
+  function showAw() {
+    $("pImg").src = "img/awards/" + awList[awIdx] + "-l.webp"; $("pImg").alt = awCur.title;
+    $("pCap").textContent = awCur.place + " · " + awCur.title; $("pNum").textContent = awList.length > 1 ? (awIdx + 1) + " / " + awList.length : awCur.where;
+  }
   $("awards").addEventListener("click", function (e) {
     var b = e.target.closest("[data-aw]"); if (!b) return; var a = AWARDS[Number(b.dataset.aw)];
-    pList = []; $("pImg").src = "img/awards/" + a.f + "-l.webp"; $("pImg").alt = a.title; $("pCap").textContent = a.place + " · " + a.title; $("pNum").textContent = a.where;
-    $("pDlg").classList.add("single"); $("pDlg").showModal();
+    awList = [a.f].concat(a.more || []); awIdx = 0; awCur = a; showAw();
+    $("pDlg").classList.toggle("single", awList.length < 2); $("pDlg").classList.add("aw"); $("pDlg").showModal();
   });
   function faqHtml(list) { return list.map(function (q) { return '<details><summary>' + q[0] + '</summary><p>' + q[1] + '</p></details>'; }).join(""); }
   $("faqAll").innerHTML = FAQ.map(function (g) { return '<h3 class="grp">' + g[0] + '</h3><div class="faq">' + faqHtml(g[1]) + '</div>'; }).join("");
