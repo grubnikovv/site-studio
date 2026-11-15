@@ -168,7 +168,13 @@ function digits_phone($p) { $d = preg_replace('/\D/', '', (string)$p); $d = preg
 function mirror_bookings($ops, $doc) {
     $db = db();
     foreach ($ops as $op) {
-        $p = $op['p'] ?? []; if (($p[0] ?? '') !== 'bookings' || count($p) !== 2) continue;
+        $p = $op['p'] ?? [];
+        if ($p === ['bookings']) {  // весь список заменён (например, очистка тестовых данных) — убрать лишние записи и у бота
+            $ids = array_map(fn($b) => (string)($b['id'] ?? ''), is_array($op['v'] ?? null) ? $op['v'] : []);
+            foreach ($db->query('SELECT id FROM bookings')->fetchAll(PDO::FETCH_COLUMN) as $id) if (!in_array($id, $ids, true)) $db->prepare('DELETE FROM bookings WHERE id = ?')->execute([$id]);
+            continue;
+        }
+        if (($p[0] ?? '') !== 'bookings' || count($p) !== 2) continue;
         $id = (string)$p[1];
         $q = $db->prepare('SELECT date, start FROM bookings WHERE id = ?'); $q->execute([$id]); $old = $q->fetch();
         if (!$old) continue;

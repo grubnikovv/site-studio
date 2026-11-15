@@ -22,6 +22,7 @@ function db() {
         created INTEGER, updated INTEGER)');
     $pdo->exec('CREATE TABLE IF NOT EXISTS admins (chat_id INTEGER PRIMARY KEY, name TEXT, added INTEGER)');
     $pdo->exec('CREATE TABLE IF NOT EXISTS hits (ip TEXT, t INTEGER)');
+    $pdo->exec('CREATE TABLE IF NOT EXISTS outbox (id INTEGER PRIMARY KEY AUTOINCREMENT, payload TEXT, t INTEGER, tries INTEGER DEFAULT 0)');
     return $pdo;
 }
 
@@ -52,7 +53,21 @@ function logline($s) { @file_put_contents(dirname(cfg('db_path')) . '/bot.log', 
 function send($chat, $text, $buttons = null) {
     $p = ['chat_id' => $chat, 'text' => $text, 'parse_mode' => 'HTML', 'disable_web_page_preview' => true];
     if ($buttons) $p['reply_markup'] = ['inline_keyboard' => $buttons];
-    return tg('sendMessage', $p);
+    $r = tg('sendMessage', $p);
+    // нет связи с Telegram — сообщение в очередь, poll.php отправит его в следующую минуту
+    if ($r === null) db()->prepare('INSERT INTO outbox (payload, t) VALUES (?, ?)')->execute([json_encode($p, JSON_UNESCAPED_UNICODE), time()]);
+    return $r;
+}
+
+// Отправить то, что не ушло из-за сбоя связи (сообщения старше суток уже не нужны)
+function flush_outbox() {
+    $db = db();
+    $db->prepare('DELETE FROM outbox WHERE t < ? OR tries >= 30')->execute([time() - 86400]);
+    foreach ($db->query('SELECT * FROM outbox ORDER BY id LIMIT 20')->fetchAll() as $m) {
+        $r = tg('sendMessage', json_decode($m['payload'], true));
+        if ($r === null) { $db->prepare('UPDATE outbox SET tries = tries + 1 WHERE id = ?')->execute([$m['id']]); break; }
+        $db->prepare('DELETE FROM outbox WHERE id = ?')->execute([$m['id']]);
+    }
 }
 
 // Сообщение Марине (во все подключённые чаты мастера)

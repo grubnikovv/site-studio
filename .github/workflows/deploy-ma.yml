@@ -100,14 +100,19 @@ jobs:
           curl -s --max-time 60 "$SITE/server/poll.php?key=$ADMIN_KEY&diag=1"
           curl -s --max-time 60 "$SITE/server/poll.php?key=$ADMIN_KEY"
           curl -s --max-time 60 "$SITE/server/poll.php?key=$ADMIN_KEY&diag=1" | tail -n +4
-      - name: Очистить уведомления кабинета
-        if: steps.chk.outputs.ok == 'true' && contains(github.event.head_commit.message, '[clear-notes]')
+      - name: Очистить уведомления или тестовые данные кабинета
+        if: steps.chk.outputs.ok == 'true' && (contains(github.event.head_commit.message, '[clear-notes]') || contains(github.event.head_commit.message, '[clear-data]'))
         env:
           CABINET_PASS: ${{ secrets.CABINET_PASS }}
+          CLEAR_DATA: ${{ contains(github.event.head_commit.message, '[clear-data]') && '1' || '0' }}
         run: |
           A="$SITE/server/api.php"
           T=$(php -r 'echo json_encode(["type" => "login", "pass" => getenv("CABINET_PASS")]);' | curl -s -X POST "$A" --data-binary @- | php -r '$r = json_decode(stream_get_contents(STDIN), true); echo $r["token"] ?? "";')
           test -n "$T" || { echo "Не удалось войти в кабинет"; exit 1; }
           echo "::add-mask::$T"
           curl -s -X POST "$A" -d "{\"type\":\"sync\",\"token\":\"$T\",\"ops\":[{\"p\":[\"notes\"],\"v\":[]}]}" | php -r '$r = json_decode(stream_get_contents(STDIN), true); echo "Уведомлений осталось: " . count($r["doc"]["notes"] ?? []) . "\n";'
+          if [ "$CLEAR_DATA" = "1" ]; then
+            OPS='[{"p":["bookings"],"v":[]},{"p":["training"],"v":[]},{"p":["certs"],"v":[]},{"p":["notes"],"v":[]},{"p":["modelBase"],"v":[]},{"p":["models"],"v":{}},{"p":["modelTimes"],"v":{}},{"p":["deleted"],"v":{}}]'
+            curl -s -X POST "$A" -d "{\"type\":\"sync\",\"token\":\"$T\",\"ops\":$OPS}" | php -r '$r = json_decode(stream_get_contents(STDIN), true); $d = $r["doc"] ?? []; echo "Осталось: записей " . count($d["bookings"] ?? []) . ", обучений " . count($d["training"] ?? []) . ", сертификатов " . count($d["certs"] ?? []) . "\n";'
+          fi
           curl -s -X POST "$A" -d "{\"type\":\"logout\",\"token\":\"$T\"}"; echo

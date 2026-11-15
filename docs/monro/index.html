@@ -1812,6 +1812,7 @@ div.f { display: grid; gap: 8px; }
   var REMOVE = { price: 200, min: 30 };
   var SHOW_EXAMPLES = false;  // несколько тестовых клиенток на ближайшую неделю, чтобы проверить перенос и отмену
   var DAYS = 62;  // на сколько дней вперёд открыта запись (~2 месяца)
+  var PAST = 15;  // в кабинете мастер видит и может добавить записи за последние полмесяца (для статистики)
   function bmin(b) { return svc(b.svc).min + (b.remove ? REMOVE.min : 0); }
   // курсы обучения: каждый идёт несколько дней подряд с 10 до 17, эти дни целиком закрываются для онлайн-записи
   var TRAIN = { from: 10 * 60, to: 17 * 60 };
@@ -2141,7 +2142,7 @@ div.f { display: grid; gap: 8px; }
     var hr = master ? [EARLY, LATE] : dayHours(k), wh = dayHours(k), work = isWorkday(k);
     var iv = busyIntervals(k, ignore, master), out = [], now = new Date(), isToday = k === dkey(now), nowM = now.getHours() * 60 + now.getMinutes() + (master ? 0 : 60);
     for (var t = hr[0]; t + minutes <= hr[1]; t += STEP) {
-      if (isToday && t < nowM) continue;
+      if (isToday && t < nowM && !master) continue;  // мастер может внести и уже прошедший визит
       var clash = iv.some(function (x) { return t < x[1] && t + minutes > x[0]; });
       out.push({ t: t, free: !clash, out: !work || t < wh[0] || t + minutes > wh[1], lunch: work && t >= LUNCH[0] && t < LUNCH[1] });
     }
@@ -2348,7 +2349,7 @@ div.f { display: grid; gap: 8px; }
     var h = "";
     for (var i = from || 0; i < DAYS; i++) {
       var d = addDays(i), k = dkey(d), off = !isWorkday(k), trn = trainOn(k);
-      h += monthSep(d, i);
+      h += monthSep(d, i - (from || 0));
       var cnt = withFree && !off && !trn ? freeSlots(k, bmin(bk)).filter(function (s) { return s.free; }).length : null;
       var dis = withFree && (off || trn || cnt === 0);
       h += '<button class="day" data-d="' + k + '" aria-pressed="' + (sel === k) + '"' + (dis ? " disabled" : "") + '><small>' + (i === 0 ? "сег" : WD[d.getDay()]) + '</small><b class="num">' + d.getDate() + '</b>' + (trn ? '<em class="tr">обучение</em>' : '<em>' + (off ? "выходной" : withFree ? (cnt ? cnt + " окон" : "занято") : d.toLocaleDateString("ru-RU", { month: "short" })) + '</em>') + '</button>';
@@ -2814,8 +2815,8 @@ div.f { display: grid; gap: 8px; }
   }
   function renderAdmin() {
     // прошедшие дни не показываем: лента начинается с сегодня
-    if (aDate < dkey(addDays(0))) aDate = dkey(addDays(0));
-    var sl = $("aDays").scrollLeft; $("aDays").innerHTML = dayBtns(aDate, false, 0);
+    if (aDate < dkey(addDays(-PAST))) aDate = dkey(addDays(0));
+    var sl = $("aDays").scrollLeft; $("aDays").innerHTML = dayBtns(aDate, false, -PAST);
     if (!aScrolled) { aScrolled = true; requestAnimationFrame(function () { var t = $("aDays").querySelector('[data-d="' + dkey(addDays(0)) + '"]'); if (t) $("aDays").scrollLeft = t.offsetLeft - $("aDays").offsetLeft - 8; }); }
     else $("aDays").scrollLeft = sl;
     var list = dayBookings(aDate), active = list.filter(function (b) { return b.status !== "cancelled"; });
@@ -3065,14 +3066,15 @@ div.f { display: grid; gap: 8px; }
   $("eSvc").innerHTML = SERVICES.map(function (s) { return '<option value="' + s.id + '">' + s.name + ' · ' + priceText(s) + ' · ' + dur(s.min) + '</option>'; }).join("");
   function edSlots() { return freeSlots(ed.date, bmin(ed), ed.id, true); }
   function renderEditor() {
-    var sl = $("eDays").scrollLeft, h = "";
-    for (var i = 0; i < DAYS; i++) {
+    var sl = $("eDays").scrollLeft, h = "", first = !$("eDays").children.length;
+    for (var i = ed.id ? 0 : -PAST; i < DAYS; i++) {  // новую запись можно добавить и задним числом
       var d = addDays(i), k = dkey(d), off = !isWorkday(k);
-      h += monthSep(d, i);
+      h += monthSep(d, i + (ed.id ? 0 : PAST));
       var cnt = freeSlots(k, bmin(ed), ed.id, true).filter(function (x) { return x.free; }).length;
       h += '<button class="day" data-d="' + k + '" aria-pressed="' + (k === ed.date) + '"' + (!cnt ? " disabled" : "") + '><small>' + (i === 0 ? "сег" : WD[d.getDay()]) + '</small><b class="num">' + d.getDate() + '</b><em>' + (off ? "выходной" : cnt ? cnt + " окон" : "занято") + '</em></button>';
     }
     $("eDays").innerHTML = h; $("eDays").scrollLeft = sl;
+    if (first) { var sel = $("eDays").querySelector('[aria-pressed="true"]'); if (sel) $("eDays").scrollLeft = sel.offsetLeft - 8; }
     // показываем, какое время займёт процедура целиком, чтобы было видно, что она поместится
     $("eRange").textContent = ed.start != null ? "Займёт: " + hm(ed.start) + "–" + hm(ed.start + bmin(ed)) + " (" + dur(bmin(ed)) + ")" : "";
     $("eCtx").innerHTML = ed.start != null ? neighbours(ed.date, ed.start, ed.start + bmin(ed), ed.id) : "";
@@ -3129,6 +3131,9 @@ div.f { display: grid; gap: 8px; }
       toast("Перенесено на " + whenText(ed.date, ed.start));
     } else {
       var nb = { id: "b" + Date.now().toString(36), date: ed.date, start: ed.start, svc: ed.svc, remove: ed.remove, name: $("eName").value.trim(), phone: $("ePhone").value.trim() || "—", price: svc(ed.svc).price + (ed.remove ? REMOVE.price : 0), status: "booked", manual: true };
+      // прошедшая дата (или уже закончилось сегодня) — клиентка пришла
+      var nowD = new Date(), nowM = nowD.getHours() * 60 + nowD.getMinutes();
+      if (nb.date < dkey(nowD) || (nb.date === dkey(nowD) && nb.start + bmin(nb) <= nowM)) nb.status = "came";
       st.bookings.push(nb); flashId = nb.id; toast("Запись добавлена");
     }
     save(); aDate = ed.date; closeEditor(); renderTab();

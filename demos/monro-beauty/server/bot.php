@@ -75,6 +75,7 @@ function poll_run($secs) {
     $get = function ($k) use ($db) { $q = $db->prepare('SELECT v FROM kv WHERE k = ?'); $q->execute([$k]); return $q->fetchColumn(); };
     $put = function ($k, $v) use ($db) { $db->prepare('INSERT OR REPLACE INTO kv (k, v) VALUES (?, ?)')->execute([$k, (string)$v]); };
     if (!$get('polling')) { tg('deleteWebhook', ['drop_pending_updates' => false]); $put('polling', 1); }
+    flush_outbox();
     $offset = (int)$get('offset');
     $until = time() + $secs;
     while (time() < $until) {
