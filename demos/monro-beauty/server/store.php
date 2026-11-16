@@ -320,6 +320,25 @@ function cnotes_diff($before, $doc) {
     }
 }
 
+// Клиентка привязала номер к кабинету — её записи у Марины обновляются: полное имя из кабинета, почта, отметка «есть кабинет»
+function acc_merge($accId, $phone) {
+    $a = acc_get((int)$accId); if (!$a || !$phone) return;
+    $full = trim((string)$a['name']); $words = count(preg_split('/\s+/u', $full));
+    [$doc, $v] = doc_load(true); $n = 0; $old = '';
+    foreach (['bookings', 'certs', 'training'] as $k) foreach ($doc[$k] as &$x) {
+        if (digits_phone($x['phone'] ?? '') !== $phone || !empty($x['anon'])) continue;
+        if (empty($x['owner'])) $x['owner'] = (int)$a['id'];
+        $x['accMail'] = $a['email'];
+        $cur = trim((string)($x['name'] ?? ''));
+        if ($k === 'bookings' && $words >= 2 && $cur !== $full && count(preg_split('/\s+/u', $cur)) < $words) { $old = $old ?: $cur; $x['name'] = $full; }
+        $n++;
+    }
+    unset($x);
+    if (!$n) { doc_abort(); return; }
+    doc_note($doc, '🙋', 'Клиентка зарегистрировалась на сайте', ($old ? $old . ' → ' : '') . ($full ?: $a['email']) . ' · ' . phone_nice($phone) . ' · ' . $a['email'] . '. Её записи в базе обновлены.', ['tab' => 'clients']);
+    doc_save($doc, $v);
+}
+
 function mail_ok($m) { $m = mb_strtolower(trim((string)$m)); return filter_var($m, FILTER_VALIDATE_EMAIL) && strlen($m) <= 80 ? $m : ''; }
 function client_phone($token) {
     if (!is_string($token) || strlen($token) < 32) return '';

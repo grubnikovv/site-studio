@@ -153,7 +153,7 @@ if ($type === 'booking') {
     $svcName = clean($in['svcName'] ?? ($r['svcName'] ?? ''), 80);
     $rec = ['id' => $id, 'date' => $date, 'start' => $start, 'dur' => $dur, 'svc' => clean($r['svc'] ?? '', 30), 'name' => $name, 'phone' => phone_nice($phone),
         'note' => clean($r['note'] ?? '', 200), 'price' => max(0, (int)($r['price'] ?? 0)), 'remove' => !empty($r['remove']), 'french' => !empty($r['french']), 'remind' => $remind, 'status' => 'booked', 'created' => now_ms()] + ($email ? ['email' => $email] : []) + (!empty($r['other']) ? ['other' => true] : []);
-    if (($cw = client_who($in['ctoken'] ?? '')) && $cw['acc']) $rec['owner'] = (int)$cw['acc']['id'];  // запись из кабинета — видна в нём
+    if (($cw = client_who($in['ctoken'] ?? '')) && $cw['acc']) { $rec['owner'] = (int)$cw['acc']['id']; $rec['accMail'] = $cw['acc']['email']; }  // запись из кабинета — видна в нём
     if (!empty($rec['owner'])) cnote($rec['owner'], '📅', 'Вы записаны', $svcName . ' · ' . when_text($date, $start) . '. Перенести или отменить — в кабинете, не позже чем за 2 дня.', '#kabinet');
     $doc['bookings'] = array_values(array_filter($doc['bookings'], fn($b) => ($b['id'] ?? '') !== $id));
     $doc['bookings'][] = $rec;
@@ -347,6 +347,7 @@ if ($type === 'acc_phone') {
     if (!password_verify(preg_replace('/\D/', '', (string)$in['code']), $c['hash'])) { sleep(1); fail('Неверный код. Осталось попыток: ' . (4 - (int)$c['tries'])); }
     $db->prepare('DELETE FROM client_codes WHERE phone = ?')->execute([$phone]);
     $db->prepare('UPDATE accounts SET phone = ? WHERE id = ?')->execute([$phone, $w['acc']['id']]);
+    acc_merge($w['acc']['id'], $phone);
     json_out(['ok' => true, 'phone' => phone_nice($phone)]);
 }
 
@@ -496,6 +497,7 @@ if ($type === 'link_ok') {
     $db->prepare('DELETE FROM link_reqs WHERE id = ?')->execute([$r['id']]);
     if (!empty($in['yes'])) {
         $db->prepare('UPDATE accounts SET phone = ? WHERE id = ?')->execute([$r['phone'], $r['acc']]);
+        acc_merge($r['acc'], $r['phone']);
         cnote($r['acc'], '📱', 'Номер привязан', 'Марина подтвердила номер ' . phone_nice($r['phone']) . ' — записи по нему теперь в кабинете.', '#kabinet');
     } else cnote($r['acc'], '📱', 'Номер не привязан', 'Марина не подтвердила номер ' . phone_nice($r['phone']) . '. Если это ошибка — напишите ей.', '#kabinet');
     json_out(['ok' => true]);
