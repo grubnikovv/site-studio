@@ -2180,9 +2180,10 @@ a.ni { text-decoration: none; color: inherit; }
     { id: "man", name: "Маникюр без покрытия", price: 1000, min: 40, text: "Аппаратная или комбинированная обработка, форма, уход за кутикулой." },
     { id: "gel", name: "Маникюр с покрытием гель-лак", price: 1700, min: 90, text: "Маникюр, выравнивание и покрытие гель-лаком в один тон." },
     { id: "str", name: "Маникюр, укрепление гелем и гель-лак", price: 2000, min: 120, text: "Укрепление натуральных ногтей гелем и покрытие гель-лаком." },
-    { id: "cor", name: "Коррекция ногтей", price: 2000, min: 120, text: "Опил отросшей длины, ремонт, новое покрытие." },
+    { id: "cor", name: "Коррекция, длина до\u00a03-й", price: 2000, min: 120, text: "Опил отросшей длины, ремонт, новое покрытие. Короткая и средняя длина." },
+    { id: "cor4", name: "Коррекция, длина от\u00a03-й", price: 2200, from: true, min: 150, text: "Опил отросшей длины, ремонт, новое покрытие. Длинные ногти." },
     { id: "ext", name: "Наращивание, длина до\u00a03-й", price: 2600, min: 120, text: "Наращивание гелем с покрытием, короткая и средняя длина." },
-    { id: "ext4", name: "Наращивание, длина от\u00a04-й", price: 3000, min: 150, text: "Наращивание гелем с покрытием, длинные ногти." },
+    { id: "ext4", name: "Наращивание, длина от\u00a03-й", price: 2800, from: true, min: 150, text: "Наращивание гелем с покрытием, длинные ногти." },
     { id: "off", name: "Снятие покрытия", price: 300, min: 30, noRemove: true, text: "Только снятие гель-лака или наращивания, без новой работы." },
     { id: "nit", name: "Титановая нить (вросший ноготь)", price: 2500, min: 30, noRemove: true, text: "Коррекция вросшего ногтя на ноге: нить приподнимает край ногтя и снимает давление. Цена за один палец." },
     { id: "ped", name: "Педикюр: только пальчики", price: 1200, min: 60, foot: true, text: "Обработка пальчиков без покрытия." },
@@ -2194,7 +2195,7 @@ a.ni { text-decoration: none; color: inherit; }
   var REMOVE = { price: 200, min: 30 };
   var FRENCH = { price: 200, min: 0 };  // френч время не добавляет
   // френч бывает только к услугам с покрытием
-  var FRENCH_OK = { gel: 1, str: 1, cor: 1, ext: 1, ext4: 1, pedg: 1, pedp: 1, pedh: 1 };
+  var FRENCH_OK = { gel: 1, str: 1, cor: 1, cor4: 1, ext: 1, ext4: 1, pedg: 1, pedp: 1, pedh: 1 };
   var SHOW_EXAMPLES = false;  // несколько тестовых клиенток на ближайшую неделю, чтобы проверить перенос и отмену
   var DAYS = 62;  // на сколько дней вперёд открыта запись (~2 месяца)
   var PAST = 15;  // в кабинете мастер видит и может добавить записи за последние полмесяца (для статистики)
@@ -2550,14 +2551,14 @@ a.ni { text-decoration: none; color: inherit; }
     return '<div class="prow"><div><b>' + s.name + '</b><small>' + s.text + ' ' + dur(s.min) + '.</small></div><div class="pr-r"><span class="num">' + priceText(s) + '</span><a class="btn sm ghost" href="#zapis" data-pick="' + s.id + '">Записаться</a></div></div>';
   }
   $("homeSvc").innerHTML = ["gel", "ext", "pedp"].map(function (id) { return svcCard(svc(id)); }).join("");
-  $("pHands").innerHTML = ["man", "gel", "str", "cor", "ext", "ext4", "off"].map(function (id) { return priceRow(svc(id)); }).join("");
+  $("pHands").innerHTML = ["man", "gel", "str", "cor", "cor4", "ext", "ext4", "off"].map(function (id) { return priceRow(svc(id)); }).join("");
   document.querySelectorAll(".pgrp-b").forEach(function (b) {
     b.addEventListener("click", function () {
       var acc = b.closest(".pacc"), on = !acc.classList.contains("open");
       acc.classList.toggle("open", on); b.setAttribute("aria-expanded", String(on));
     });
   });
-  $("nHands").textContent = "7 услуг"; $("nFeet").textContent = "6 услуг";
+  $("nHands").textContent = "8 услуг"; $("nFeet").textContent = "6 услуг";
   $("pFeet").innerHTML = ["ped", "pedg", "pedf", "pedp", "pedh", "nit"].map(function (id) { return priceRow(svc(id)); }).join("");
   document.querySelectorAll(".pacc .prow").forEach(function (r) { r.style.setProperty("--i", [].indexOf.call(r.parentNode.children, r)); });
 
@@ -2729,7 +2730,7 @@ a.ni { text-decoration: none; color: inherit; }
   function renderSvcOpts() {
     // тот же порядок и группы, что в прайсе: руки, ноги
     var opt = function (id) { var s = svc(id); return '<button class="opt" data-s="' + s.id + '" aria-pressed="' + (bk.svc === s.id) + '"><span><b style="font-weight:700">' + s.name + '</b><small>' + dur(s.min) + '</small></span><b class="num">' + priceText(s) + '</b></button>'; };
-    $("bSvc").innerHTML = '<span class="bgrp">Руки</span>' + ["man", "gel", "str", "cor", "ext", "ext4", "off"].map(opt).join("") +
+    $("bSvc").innerHTML = '<span class="bgrp">Руки</span>' + ["man", "gel", "str", "cor", "cor4", "ext", "ext4", "off"].map(opt).join("") +
       '<span class="bgrp">Ноги</span>' + ["ped", "pedg", "pedf", "pedp", "pedh", "nit"].map(opt).join("");
   }
   $("bSvc").addEventListener("click", function (e) {
@@ -4142,7 +4143,7 @@ a.ni { text-decoration: none; color: inherit; }
     return out;
   }
   // База клиенток собирается из записей по номеру телефона
-  var CORR = { gel: 21, str: 21, cor: 21, ext: 21, ext4: 21, pedg: 28, pedp: 28 };
+  var CORR = { gel: 21, str: 21, cor: 21, cor4: 21, ext: 21, ext4: 21, pedg: 28, pedp: 28 };
   function clientsDb() {
     var map = {}, today = dkey(new Date());
     allBookings().forEach(function (b) {
