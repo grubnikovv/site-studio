@@ -226,7 +226,8 @@ if ($type === 'cert_get') {
     $key = cert_key($in['code'] ?? '');
     [$doc] = doc_load();
     foreach ($doc['certs'] as $c) if (strlen($key) >= 6 && cert_key($c['code'] ?? '') === $key)
-        json_out(['ok' => true, 'cert' => array_intersect_key($c, array_flip(['id', 'code', 'sum', 'balance', 'to', 'status', 'created', 'till', 'spent']))]);
+        json_out(['ok' => true, 'cert' => array_intersect_key($c, array_flip(['id', 'code', 'sum', 'balance', 'to', 'status', 'created', 'till']))
+            + ['spent' => array_map(fn($x) => ['d' => $x['d'] ?? '', 'sum' => (int)($x['sum'] ?? 0)], $c['spent'] ?? [])]]);  // списания без имён
     json_out(['ok' => false]);
 }
 
