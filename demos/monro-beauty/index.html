@@ -325,6 +325,7 @@ footer a { color: var(--mute); }
 .day.today small { color: var(--lac); font-weight: 800; font-size: 9.5px; letter-spacing: .02em; }
 .day.today::before { content: ""; position: absolute; bottom: 7px; right: 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--lac); animation: tdot 1.8s ease-in-out infinite; }
 .day.today::after { content: ""; position: absolute; inset: 0 auto 0 0; width: 60%; pointer-events: none; background: linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent); transform: translateX(-120%) skewX(-15deg); animation: tshine 3.6s ease-in-out 1s infinite; }
+.day.today[aria-pressed="true"] { background: var(--lac); color: var(--lac-ink); }
 .day.today[aria-pressed="true"] small { color: inherit; }
 .day.today[aria-pressed="true"]::before { background: var(--lac-ink); }
 .day.today[aria-pressed="true"]::after { background: linear-gradient(100deg, transparent, rgba(255,255,255,.3), transparent); }
