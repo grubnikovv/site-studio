@@ -642,7 +642,7 @@ if ($type === 'push_unsub') {
 if ($type === 'push_peek') {
     require_once __DIR__ . '/push.php';
     $q = push_db()->prepare('SELECT seen, acc FROM push_subs WHERE endpoint = ?'); $q->execute([(string)($in['endpoint'] ?? '')]);
-    $row = $q->fetch(); if (!$row) json_out(['ok' => false]);
+    $row = $q->fetch(); if (!$row) { logline('push_peek: подписка не найдена (' . substr(md5((string)($in['endpoint'] ?? '')), 0, 6) . ')'); json_out(['ok' => false]); }
     $seen = (int)$row['seen'];
     if ((int)$row['acc'] > 0) {  // телефон клиентки — её уведомления и новости студии
         $a = acc_get((int)$row['acc']); if (!$a) json_out(['ok' => false]);

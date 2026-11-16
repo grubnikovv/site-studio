@@ -24,9 +24,13 @@ if (isset($_GET['testpush'])) {  // проверочное уведомлени�
     doc_note($doc, '🔔', 'Проверка уведомлений', 'Всё работает! Так будут приходить новые записи, отмены и заявки.');
     doc_save($doc, $v);
     $subs = push_db()->query('SELECT endpoint FROM push_subs WHERE acc = 0')->fetchAll(PDO::FETCH_COLUMN);
-    $v2 = vapid();
-    foreach ($subs as $e) echo 'Телефон мастера (' . parse_url($e, PHP_URL_HOST) . '): ответ ' . push_send_one($e, $v2) . " (201 = доставлено)\n";
+    $v2 = vapid(); $t0 = now_ms();
+    foreach ($subs as $e) echo 'Телефон мастера (' . parse_url($e, PHP_URL_HOST) . '): ответ ' . push_send_one($e, $v2) . " (201 = принято)\n";
     if (!$subs) echo "Нет подписок мастера\n";
+    sleep(25);  // успел ли браузер «проснуться» и спросить, что показать (push_peek обновляет seen)
+    foreach (push_db()->query('SELECT endpoint, created, seen, ua FROM push_subs WHERE acc = 0') as $r)
+        echo 'Подписка от ' . date('d.m H:i', (int)$r['created']) . ' (' . (preg_match('/YaBrowser|Android|Windows|Mac|iPhone|Chrome/', $r['ua'], $m) ? $m[0] : '?') . ', ' . substr(md5($r['endpoint']), 0, 6) . '): ' . ((int)$r['seen'] >= $t0 ? 'браузер проснулся и забрал уведомление' : 'браузер НЕ обратился к сайту') . "\n";
+    $log = @file(dirname(cfg('db_path')) . '/bot.log') ?: []; echo implode('', array_slice(preg_grep('/push/', $log), -5));
     exit;
 }
 poll_run(PHP_SAPI === 'cli' ? (int)(getenv('POLL_SECS') ?: 50) : 20);
