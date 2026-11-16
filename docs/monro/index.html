@@ -278,6 +278,13 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 .cbox .vclose { top: 12px; right: 12px; background: color-mix(in srgb, var(--ink) 10%, transparent); color: var(--ink); }
 .cbox > b { font-family: var(--display); font-weight: 400; font-size: 22px; padding-right: 44px; }
 .cbox > p { margin: -4px 0 0; color: var(--mute); font-size: 14px; }
+.ch-msg { display: grid; gap: 10px; background: var(--bg); border: 1.5px dashed color-mix(in srgb, var(--lac) 40%, var(--line)); border-radius: 16px; padding: 12px 14px 14px; }
+.ch-k { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--lac); }
+.ch-msg p { margin: 0; font-size: 14.5px; line-height: 1.45; color: var(--ink); white-space: pre-line; max-height: 9.5em; overflow: auto; }
+.ch-msg small { color: var(--mute); font-size: 12.5px; line-height: 1.4; }
+.btn.ch-copy { display: flex; flex-direction: row; flex-wrap: nowrap; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+.ch-copy svg { flex: none; } .ch-copy.done svg { display: none; }
+.ch-copy.done { background: #2E7D4F; border-color: #2E7D4F; }
 .ch-call { text-align: center; color: var(--mute); font-size: 14px; text-decoration: none; padding: 4px; }
 .ch-call b { color: var(--ink); }
 /* маленькие круглые иконки мессенджеров (меню, подвал) */
@@ -1762,7 +1769,14 @@ div.f { display: grid; gap: 8px; }
 
 <dialog class="pdlg" id="pDlg" aria-label="Фото работы"><figure class="pbox"><img id="pImg" alt=""><figcaption><span id="pCap"></span><span id="pNum"></span></figcaption><button type="button" class="pnav prev" id="pPrev" aria-label="Предыдущее фото"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5.5 8.5 12 15 18.5"></path></svg></button><button type="button" class="pnav next" id="pNext" aria-label="Следующее фото"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5.5 15.5 12 9 18.5"></path></svg></button><button type="button" class="vclose" id="pClose" aria-label="Закрыть фото"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></button></figure></dialog>
 <dialog class="cdlg" id="chDlg" aria-labelledby="chT"><div class="cbox"><button type="button" class="vclose" id="chClose" aria-label="Закрыть"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
-  <b id="chT">Написать Марине</b><p id="chP">Выберите, где вам удобнее:</p>
+  <b id="chT">Написать Марине</b>
+  <div class="ch-msg" id="chMsg" hidden>
+    <span class="ch-k">Готовое сообщение</span>
+    <p id="chText"></p>
+    <button type="button" class="btn glow ch-copy" id="chCopy"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Скопировать сообщение</span></button>
+    <small>В WhatsApp текст подставится сам. В Telegram и MAX — скопируйте, откройте чат, нажмите на поле ввода и выберите «Вставить».</small>
+  </div>
+  <p id="chP">Выберите, где вам удобнее:</p>
   <div class="msgs one">
     <a class="msg m-wa" id="chWa" href="https://wa.me/message/22ORQIZQY6J2E1" target="_blank" rel="noopener"><span class="msg-ico" aria-hidden="true"><svg class="ic-g" aria-hidden="true"><use href="#sm-wa"></use></svg></span><span class="msg-t"><b>WhatsApp</b><small id="chWaS">Написать Марине</small></span><span class="msg-go" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6.5 18.5 12 13 17.5"></path></svg></span></a>
     <a class="msg m-tg" id="chTg" href="https://t.me/monrobeauty" target="_blank" rel="noopener"><span class="msg-ico" aria-hidden="true"><svg class="ic-g" aria-hidden="true"><use href="#sm-tg"></use></svg></span><span class="msg-t"><b>Telegram</b><small>Написать Марине</small></span><span class="msg-go" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6.5 18.5 12 13 17.5"></path></svg></span></a>
@@ -2695,7 +2709,7 @@ div.f { display: grid; gap: 8px; }
       '<button type="button" class="btn ghost" data-copy>' + (navigator.share ? "Другой мессенджер" : "Скопировать ссылку") + '</button></div>';
     box.querySelector("[data-copy]").onclick = function () {
       if (navigator.share) { navigator.share({ text: txt }).catch(function () {}); return; }
-      try { navigator.clipboard.writeText(txt).then(function () { toast("Скопировано — вставьте в сообщение"); }); } catch (e) { toast(link); }
+      copyText(txt).then(function () { toast("Скопировано — вставьте в сообщение"); }, function () { toast(link); });
     };
   }
   // волна от пальца по кнопке (лёгкая: один span, удаляется после анимации)
@@ -2729,20 +2743,25 @@ div.f { display: grid; gap: 8px; }
     e.preventDefault(); chText = b.dataset.chat || "";
     var dd = b.closest("dialog"); if (dd) dd.close();
     $("chT").textContent = b.dataset.chatTitle || "Написать Марине";
-    $("chP").textContent = chText ? "Выберите, где вам удобнее. Текст сообщения уже готов:" : "Выберите, где вам удобнее:";
-    if (chText) $("chP").textContent += " «" + chText + "»";
+    $("chMsg").hidden = !chText; $("chText").textContent = chText; chCopied(false);
+    $("chP").textContent = chText ? "Где удобнее написать Марине:" : "Выберите, где вам удобнее:";
     $("chWa").href = chText ? "https://wa.me/79954284788?text=" + encodeURIComponent(chText) : "https://wa.me/message/22ORQIZQY6J2E1";
-    if (chText && navigator.clipboard) navigator.clipboard.writeText(chText).catch(function () {});
     $("chDlg").showModal();
+    if (chText) copyText(chText).then(function () { chCopied(true); }, function () {});  // сразу копируем — если браузер разрешит
   });
-  ["chTg", "chMx"].forEach(function (id) { $(id).addEventListener("click", function () { if (chText) toast("Текст скопирован — вставьте его в чат"); $("chDlg").close(); }); });
+  function chCopied(on) { var b = $("chCopy"); b.classList.toggle("done", on); b.querySelector("span").textContent = on ? "✓ Сообщение скопировано" : "Скопировать сообщение"; }
+  $("chCopy").addEventListener("click", function () {
+    copyText(chText).then(function () { chCopied(true); toast("Сообщение скопировано — вставьте его в чат"); },
+      function () { var r = document.createRange(); r.selectNodeContents($("chText")); var sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast("Выделите текст и нажмите «Копировать»"); });
+  });
+  ["chTg", "chMx"].forEach(function (id) { $(id).addEventListener("click", function () { if (chText) copyText(chText).then(function () { toast("Сообщение скопировано — вставьте его в чат"); }, function () {}); $("chDlg").close(); }); });
   $("chWa").addEventListener("click", function () { $("chDlg").close(); });
   $("chClose").onclick = function () { $("chDlg").close(); };
   $("chDlg").addEventListener("click", function (e) { if (e.target === this) this.close(); });
   document.addEventListener("click", function (e) {
     var p = e.target.closest("[data-paynow]");
     if (p) { var lk = p.closest(".paybox").querySelector(".locked"); if (lk) { lk.classList.remove("locked"); lk.removeAttribute("aria-disabled"); } // ссылка без суммы — копируем сумму, чтобы её осталось только вставить
-      if (navigator.clipboard) navigator.clipboard.writeText(p.dataset.paynow).catch(function () {});
+      copyText(p.dataset.paynow).catch(function () {});
       if (PAY.link) { window.open(PAY.link, "_blank", "noopener"); toast("Сумма " + rub(Number(p.dataset.paynow)) + " скопирована — вставьте её в поле «Сумма»"); }
       else toast("В рабочей версии откроется оплата по СБП в приложении вашего банка"); return; }
   });
@@ -3819,11 +3838,17 @@ div.f { display: grid; gap: 8px; }
       return new Promise(function (ok) { cv.toBlob(function (b) { ok(b); }, "image/png"); });
     });
   }
+  // Копирование текста. На http (пока нет сертификата) современный способ браузер не даёт — копируем через скрытое поле
+  function copyOld(t) {
+    var ta = document.createElement("textarea"); ta.value = t; ta.setAttribute("readonly", "");
+    ta.style.cssText = "position:fixed;top:0;left:0;opacity:0;font-size:16px";
+    (document.querySelector("dialog[open]") || document.body).appendChild(ta); ta.focus();  // при открытом окне всё вне его недоступно ta.select(); ta.setSelectionRange(0, t.length);
+    var ok = false; try { ok = document.execCommand("copy"); } catch (e) {} ta.remove();
+    return ok;
+  }
   function copyText(t) {
-    return (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).catch(function () {
-      var ta = document.createElement("textarea"); ta.value = t; ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select();
-      try { document.execCommand("copy"); } catch (e) {} ta.remove();
-    });
+    if (!window.isSecureContext || !navigator.clipboard) return copyOld(t) ? Promise.resolve() : Promise.reject();
+    return navigator.clipboard.writeText(t).catch(function () { if (!copyOld(t)) throw new Error("copy"); });
   }
   function saveBlob(blob, name) {
     var a = document.createElement("a"), u = URL.createObjectURL(blob); a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove();
