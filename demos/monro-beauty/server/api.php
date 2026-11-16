@@ -136,7 +136,7 @@ if ($type === 'booking') {
     if ($remind === 'mail') {  // подтверждение записи письмом
         $site = rtrim((string)cfg('site_url'), '/');
         send_mail($email, 'Вы записаны в студию «М.А» — ' . when_text($date, $start), 'Здравствуйте, ' . h($name) . "! 💅\n\nВы записаны в студию «М.А»:\n<b>" . h($svcName) . "</b>\n<b>" . when_text($date, $start)
-            . "</b>\nМихайловка, ул. Обороны, 41\n" . way_link() . "\n\nНапомним за 2 дня и за 2 часа до визита.\nЕсли планы изменятся — отмените запись на сайте в разделе <a href=\"" . h($site) . "/#zapis\">«Мои записи»</a> или напишите Марине: +7 995 428-47-88.");
+            . "</b>\nМихайловка, ул. Обороны, 41\n" . way_link() . "\n\nНапомним за 2 дня и за 2 часа до визита.\nЕсли планы изменятся — отмените запись на сайте в разделе <a href=\"" . h($site) . "/#zapis\">«Мои записи»</a> или напишите Марине: +7 995 428‑47‑88.");
     }
     json_out(['ok' => true, 'v' => $v, 'doc' => doc_public($doc), 'tg' => 'https://t.me/' . cfg('bot_name') . '?start=b_' . $id . '_' . link_key($id)]);
 }
@@ -148,7 +148,7 @@ if ($type === 'cancel') {
     foreach ($doc['bookings'] as $i => $b) if (($b['id'] ?? '') === $id && digits_phone($b['phone'] ?? '') === $phone && $phone) $hit = $i;
     if ($hit === null) fail('Запись не найдена.');
     $b = &$doc['bookings'][$hit];
-    if (($b['status'] ?? '') === 'booked' && booking_ts($b) - time() < 48 * 3600) { unset($b); fail('До визита меньше 2 дней — отменить можно только через Марину: +7 995 428-47-88.'); }
+    if (($b['status'] ?? '') === 'booked' && booking_ts($b) - time() < 48 * 3600) { unset($b); fail('До визита меньше 2 дней — отменить можно только через Марину: +7 995 428‑47‑88.'); }
     if (($b['status'] ?? '') === 'booked') {
         $b['status'] = 'cancelled'; $b['by'] = 'client'; $b['cancelledAt'] = now_ms();
         if (!empty($b['certPay']['certId'])) {  // оплата сертификатом возвращается на сертификат
@@ -177,7 +177,7 @@ if ($type === 'move') {
     if ($hit === null) fail('Запись не найдена.');
     $b = $doc['bookings'][$hit];
     if (($b['status'] ?? '') !== 'booked') fail('Эта запись уже отменена.');
-    if (booking_ts($b) - time() < 48 * 3600) fail('До визита меньше 2 дней — перенести можно только через Марину: +7 995 428-47-88.');
+    if (booking_ts($b) - time() < 48 * 3600) fail('До визита меньше 2 дней — перенести можно только через Марину: +7 995 428‑47‑88.');
     $dur = (int)($b['dur'] ?? 0) ?: max(15, min(600, (int)($in['dur'] ?? 60)));
     foreach ($doc['bookings'] as $o) if (($o['id'] ?? '') !== $id && ($o['status'] ?? '') === 'booked' && digits_phone($o['phone'] ?? '') === $phone && ($o['date'] ?? '') === $date)
         fail('На этот день у вас уже есть другая запись.');
@@ -202,7 +202,7 @@ if ($type === 'client_code') {
     $q = $db->prepare('SELECT sent FROM client_codes WHERE phone = ?'); $q->execute([$phone]);
     if ((int)$q->fetchColumn() > time() - 60) fail('Код уже отправлен. Новый можно запросить через минуту.');
     $ch = client_channel($phone);
-    if (!$ch) fail('Не нашли, куда прислать код: на этот номер нет записей с напоминаниями в Telegram или на почту. Подключите напоминания при следующей записи или напишите Марине: +7 995 428-47-88.');
+    if (!$ch) fail('Не нашли, куда прислать код: на этот номер нет записей с напоминаниями в Telegram или на почту. Подключите напоминания при следующей записи или напишите Марине: +7 995 428‑47‑88.');
     $code = (string)random_int(100000, 999999);
     $db->prepare('INSERT OR REPLACE INTO client_codes (phone, hash, until, tries, sent) VALUES (?, ?, ?, 0, ?)')->execute([$phone, password_hash($code, PASSWORD_DEFAULT), time() + 600, time()]);
     $text = "🔐 Код для входа в личный кабинет студии «М.А»: <b>" . $code . "</b>\nДействует 10 минут. Никому его не сообщайте.";

@@ -2805,7 +2805,7 @@ div.f { display: grid; gap: 8px; }
     var b = e.target.closest("[data-my]"); if (!b) return;
     if (b.dataset.sure !== "1") { b.dataset.sure = "1"; b.textContent = "Точно отменить? Нажмите ещё раз"; return; }
     var rec = findMyRec(b.dataset.my); if (!rec) return;
-    if (!canMove(rec)) { toast("До визита меньше 2 дней — отменить можно только через Марину: +7 995 428-47-88", true); rerenderMy(); return; }
+    if (!canMove(rec)) { toast("До визита меньше 2 дней — отменить можно только через Марину: +7 995 428‑47‑88", true); rerenderMy(); return; }
     if (SYNC) {
       b.disabled = true;
       apiSend({ type: "cancel", id: rec.id, phone: rec.phone }).then(function (r) {
