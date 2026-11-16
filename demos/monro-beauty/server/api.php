@@ -79,6 +79,14 @@ if ($type === 'mail_admin') {
     json_out(['ok' => true, 'mail' => $m, 'sent' => (bool)$sent]);
 }
 
+// Полная копия базы для мастера (файл JSON): всё, что есть в кабинете
+if ($type === 'backup') {
+    if (!$admin) json_out(['ok' => false, 'error' => 'Войдите в кабинет заново', 'relogin' => true]);
+    require_once __DIR__ . '/backup.php';
+    $bk = glob(backup_dir() . '/ma-*.sqlite') ?: [];
+    json_out(['ok' => true, 'json' => empty($in['info']) ? backup_json() : '', 'last' => $bk ? substr(basename(end($bk)), 3, 10) : '', 'count' => count($bk)]);
+}
+
 // Забыли пароль: код в Telegram мастеру
 if ($type === 'pass_reset_req') {
     $admins = (int)store_init()->query('SELECT COUNT(*) FROM admins')->fetchColumn();

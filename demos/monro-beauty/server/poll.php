@@ -12,6 +12,7 @@ if (isset($_GET['diag'])) {  // проверка связи: poll.php?key=...&di
     $w = tg('getWebhookInfo'); echo 'Вебхук: ' . json_encode($w['result'] ?? null, JSON_UNESCAPED_UNICODE) . "\n";
     echo 'PHP ' . PHP_VERSION . ', curl ' . (curl_version()['version'] ?? '?') . "\n";
     $q = db()->query('SELECT COUNT(*) FROM admins'); echo 'Подключено админов: ' . $q->fetchColumn() . "\n";
+    $bk = glob(dirname(cfg('db_path')) . '/backups/ma-*.sqlite') ?: []; echo 'Резервных копий: ' . count($bk) . ($bk ? ', последняя ' . basename(end($bk)) . ' (' . round(filesize(end($bk)) / 1024) . ' КБ)' : '') . "\n";
     $log = @file(dirname(cfg('db_path')) . '/bot.log') ?: [];
     echo "Журнал (последнее):\n" . preg_replace('/bot\d+:[\w-]+/', 'bot***', implode('', array_slice($log, -8)));
     exit;
@@ -22,4 +23,5 @@ require_once __DIR__ . '/store.php';
 [$doc, $v] = doc_load(true);
 if (doc_expire($doc)) doc_save($doc, $v); else doc_abort();
 include __DIR__ . '/cron.php';
+require_once __DIR__ . '/backup.php'; backup_run();  // ночная резервная копия базы
 if (PHP_SAPI !== 'cli') echo "Готово: сообщения боту обработаны.\n";

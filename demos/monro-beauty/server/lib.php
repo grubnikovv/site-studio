@@ -104,6 +104,21 @@ function send_mail($to, $subject, $text) {
     return $ok;
 }
 
+// Письмо с файлом (резервная копия базы)
+function send_mail_file($to, $subject, $text, $fname, $data) {
+    $from = (string)cfg('mail_from');
+    if (!$from || !filter_var($to, FILTER_VALIDATE_EMAIL)) return false;
+    $b = 'ma' . bin2hex(random_bytes(8));
+    $headers = "MIME-Version: 1.0\r\nContent-Type: multipart/mixed; boundary=\"$b\"\r\n"
+        . 'From: =?UTF-8?B?' . base64_encode('Студия «М.А»') . "?= <$from>\r\n";
+    $body = "--$b\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($text))
+        . "--$b\r\nContent-Type: application/gzip; name=\"$fname\"\r\nContent-Transfer-Encoding: base64\r\nContent-Disposition: attachment; filename=\"$fname\"\r\n\r\n" . chunk_split(base64_encode($data))
+        . "--$b--\r\n";
+    $ok = @mail($to, '=?UTF-8?B?' . base64_encode($subject) . '?=', $body, $headers, '-f' . $from);
+    if (!$ok) logline('mail file to ' . $to . ' failed');
+    return $ok;
+}
+
 // Сообщение клиентке о её записи: в Telegram, если бот подключён, иначе на почту, если выбрана почта
 function notify_client($b, $subject, $text, $buttons = null) {
     if (!empty($b['chat_id'])) return send($b['chat_id'], $text, $buttons);

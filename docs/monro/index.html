@@ -282,9 +282,12 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 .ch-k { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--lac); }
 .ch-msg p { margin: 0; font-size: 14.5px; line-height: 1.45; color: var(--ink); white-space: pre-line; max-height: 9.5em; overflow: auto; }
 .ch-msg small { color: var(--mute); font-size: 12.5px; line-height: 1.4; }
-.btn.ch-copy { display: flex; flex-direction: row; flex-wrap: nowrap; align-items: center; justify-content: center; gap: 8px; width: 100%; }
-.ch-copy svg { flex: none; } .ch-copy.done svg { display: none; }
-.ch-copy.done { background: #2E7D4F; border-color: #2E7D4F; }
+.ch-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ch-copy { display: inline-flex; align-items: center; gap: 6px; flex: none; border: 0; border-radius: 999px; padding: 7px 12px 7px 10px; font: inherit; font-size: 13px; font-weight: 700; background: var(--lac); color: var(--lac-ink); cursor: pointer; box-shadow: 0 4px 12px color-mix(in srgb, var(--lac) 30%, transparent); transition: background .25s, transform .15s; }
+.ch-copy:active { transform: scale(.96); }
+.ch-copy svg { width: 15px; height: 15px; flex: none; }
+.ch-copy.done { background: #2E7D4F; box-shadow: none; }
+.ch-copy.done svg { display: none; }
 .ch-call { text-align: center; color: var(--mute); font-size: 14px; text-decoration: none; padding: 4px; }
 .ch-call b { color: var(--ink); }
 /* маленькие круглые иконки мессенджеров (меню, подвал) */
@@ -1771,9 +1774,9 @@ div.f { display: grid; gap: 8px; }
 <dialog class="cdlg" id="chDlg" aria-labelledby="chT"><div class="cbox"><button type="button" class="vclose" id="chClose" aria-label="Закрыть"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
   <b id="chT">Написать Марине</b>
   <div class="ch-msg" id="chMsg" hidden>
-    <span class="ch-k">Готовое сообщение</span>
+    <div class="ch-top"><span class="ch-k">Готовое сообщение</span>
+    <button type="button" class="ch-copy" id="chCopy"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Копировать</span></button></div>
     <p id="chText"></p>
-    <button type="button" class="btn glow ch-copy" id="chCopy"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><span>Скопировать сообщение</span></button>
     <small>В WhatsApp текст подставится сам. В Telegram и MAX — скопируйте, откройте чат, нажмите на поле ввода и выберите «Вставить».</small>
   </div>
   <p id="chP">Выберите, где вам удобнее:</p>
@@ -1942,6 +1945,12 @@ div.f { display: grid; gap: 8px; }
     </section>
     <section class="atab" data-tab="clients" hidden>
       <div class="card"><h3>Пора на коррекцию</h3><p class="note" style="margin:0">Клиентки, у которых прошло 3–4 недели после маникюра или педикюра, а новой записи нет. Напишите им — так постоянные клиентки возвращаются без рекламы.</p><div class="opts" id="aDue"></div></div>
+      <div class="card exp"><h3>База и резервные копии</h3>
+        <p class="note" style="margin:0">Всё хранится в базе на хостинге сайта. Каждую ночь сайт сам делает резервную копию (хранится 30 дней), а по понедельникам присылает копию на вашу почту из «Почта для уведомлений».</p>
+        <p class="note" id="aBkInfo" style="margin:0"></p>
+        <span class="lbl">Таблицы для Excel или Google Таблиц</span>
+        <div class="acts" id="aExport"><button type="button" class="btn sm ghost" data-exp="clients">Клиентки</button><button type="button" class="btn sm ghost" data-exp="bookings">Все записи</button><button type="button" class="btn sm ghost" data-exp="certs">Сертификаты</button><button type="button" class="btn sm ghost" data-exp="training">Обучение</button></div>
+        <button type="button" class="btn sm" id="aBackup">Скачать полную копию базы</button></div>
       <div class="card"><h3>Клиентки</h3><input type="search" id="aSearch" placeholder="Имя или телефон" aria-label="Поиск клиентки"><div class="opts" id="aClients"></div></div>
     </section>
     <section class="atab" data-tab="stats" hidden>
@@ -2749,7 +2758,7 @@ div.f { display: grid; gap: 8px; }
     $("chDlg").showModal();
     if (chText) copyText(chText).then(function () { chCopied(true); }, function () {});  // сразу копируем — если браузер разрешит
   });
-  function chCopied(on) { var b = $("chCopy"); b.classList.toggle("done", on); b.querySelector("span").textContent = on ? "✓ Сообщение скопировано" : "Скопировать сообщение"; }
+  function chCopied(on) { var b = $("chCopy"); b.classList.toggle("done", on); b.querySelector("span").textContent = on ? "✓ Скопировано" : "Копировать"; }
   $("chCopy").addEventListener("click", function () {
     copyText(chText).then(function () { chCopied(true); toast("Сообщение скопировано — вставьте его в чат"); },
       function () { var r = document.createRange(); r.selectNodeContents($("chText")); var sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); toast("Выделите текст и нажмите «Копировать»"); });
@@ -3591,6 +3600,7 @@ div.f { display: grid; gap: 8px; }
   $("aTabs").addEventListener("click", function (e) {
     var b = e.target.closest("[data-tab]"); if (!b) return;
     aTab = b.dataset.tab;
+    if (aTab === "clients" && SYNC) apiSend({ type: "backup", token: token, info: 1 }).then(bkInfo);
     document.querySelectorAll("#aTabs button").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
     document.querySelectorAll(".atab").forEach(function (x) { x.hidden = x.dataset.tab !== aTab; });
     renderTab();
@@ -3685,6 +3695,59 @@ div.f { display: grid; gap: 8px; }
       return c;
     });
   }
+  // ---------- выгрузка базы в таблицу (CSV: открывается в Excel и Google Таблицах) ----------
+  var ST_NAME = { booked: "записана", came: "пришла", noshow: "не пришла", cancelled: "отменена", wait: "ждёт оплаты", paid: "оплачено", used: "использован", nopay: "не оплачено" };
+  function csv(rows) {
+    return "\ufeff" + rows.map(function (r) { return r.map(function (v) { v = v == null ? "" : String(v); return '"' + v.replace(/"/g, '""') + '"'; }).join(";"); }).join("\r\n");
+  }
+  function dmy(k) { return k ? k.split("-").reverse().join(".") : ""; }
+  function exportRows(kind) {
+    var bks = (st.bookings || []).filter(function (b) { return !b.example; }).slice().sort(function (a, b) { return (a.date + hm(a.start).padStart(5, "0")).localeCompare(b.date + hm(b.start).padStart(5, "0")); });
+    if (kind === "bookings") return [["Дата", "Время", "Длительность, мин", "Клиентка", "Телефон", "Услуга", "Сумма, ₽", "Статус", "Кто отменил", "Комментарий", "Напоминания", "Как записалась"]].concat(bks.map(function (b) {
+      return [dmy(b.date), hm(b.start), bmin(b), b.anon ? "(удалена)" : b.name, b.anon ? "" : b.phone, svcLabel(b), b.price || bprice(b), ST_NAME[b.status] || b.status,
+        b.status === "cancelled" ? (b.by === "client" ? "клиентка" : b.by === "master" ? "мастер" : "") : "", b.note || "", { tg: "Telegram", mail: "почта", none: "не нужны" }[b.remind] || "", b.manual ? "вручную" : "онлайн" + (b.other ? " (записал другой человек)" : "")];
+    }));
+    if (kind === "clients") {
+      var map = {}, today = dkey(new Date());
+      bks.forEach(function (b) {
+        if (b.anon) return;
+        var k = digits(b.phone) || b.name, c = map[k] || (map[k] = { name: b.name, phone: b.phone, came: 0, noshow: 0, cc: 0, cm: 0, first: b.date, last: "", next: "", sum: 0 });
+        c.name = b.name;
+        if (b.status === "came") { c.came++; c.last = b.date; c.sum += b.price || bprice(b); }
+        if (b.status === "noshow") c.noshow++;
+        if (b.status === "cancelled") { if (b.by === "client") c.cc++; else c.cm++; }
+        if (b.status === "booked" && b.date >= today && !c.next) c.next = b.date + " " + hm(b.start);
+      });
+      return [["Имя", "Телефон", "Пришла, раз", "Не пришла", "Отменила сама", "Отменили вы", "Первая запись", "Последний визит", "Следующая запись", "Потратила, ₽"]].concat(Object.keys(map).map(function (k) {
+        var c = map[k]; return [c.name, c.phone, c.came, c.noshow, c.cc, c.cm, dmy(c.first), dmy(c.last), c.next ? dmy(c.next.slice(0, 10)) + c.next.slice(10) : "", c.sum];
+      }).sort(function (a, b) { return String(a[0]).localeCompare(String(b[0]), "ru"); }));
+    }
+    if (kind === "certs") return [["Номер", "Номинал, ₽", "Остаток, ₽", "Статус", "Покупатель", "Телефон", "Для кого", "Создан", "Действует до", "Списания"]].concat((st.certs || []).filter(function (c) { return !c.example; }).map(function (c) {
+      return [c.code, c.sum, certBalance(c), ST_NAME[c.status] || c.status, c.name, c.phone, c.to || "", dmy(c.created), dmy(c.till), (c.spent || []).map(function (x) { return dmy(x.d) + " — " + x.sum + " ₽"; }).join(", ")];
+    }));
+    return [["Курс", "Даты", "Ученица", "Телефон", "Стоимость, ₽", "Предоплата, ₽", "Статус"]].concat((st.training || []).filter(function (t) { return !t.example; }).map(function (t) {
+      return [course(t.course).short, (t.days || [t.date]).map(dmy).join(", "), t.name, t.phone, t.price, t.pre, ST_NAME[t.status] || t.status];
+    }));
+  }
+  // полная копия базы с сервера одним файлом; заодно — когда была последняя ночная копия
+  function bkInfo(r) { $("aBkInfo").textContent = r && r.ok ? (r.last ? "Последняя автокопия: " + dmy(r.last) + ", всего копий: " + r.count + "." : "Первая автокопия появится сегодня ночью.") : ""; }
+  $("aBackup").onclick = function () {
+    var btn = this; btn.disabled = true;
+    apiSend({ type: "backup", token: token }).then(function (r) {
+      btn.disabled = false;
+      if (r && r.relogin) { logout(); return; }
+      if (!r || !r.ok) { toast("Нет связи с сервером. Попробуйте ещё раз"); return; }
+      bkInfo(r);
+      saveBlob(new Blob([r.json], { type: "application/json" }), "MA-backup-" + dkey(new Date()) + ".json");
+      toast("Полная копия базы скачана — сохраните файл в надёжном месте");
+    });
+  };
+  $("aExport").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-exp]"); if (!b) return;
+    var rows = exportRows(b.dataset.exp), name = { clients: "клиентки", bookings: "записи", certs: "сертификаты", training: "обучение" }[b.dataset.exp];
+    saveBlob(new Blob([csv(rows)], { type: "text/csv;charset=utf-8" }), "MA-" + b.dataset.exp + "-" + dkey(new Date()) + ".csv");
+    toast("Скачано: " + name + " — " + (rows.length - 1) + " строк. Откройте файл из «Загрузок»");
+  });
   function times(n) { return n + (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? " раза" : " раз"); }
   function shortDate(k) { return new Date(k + "T12:00").toLocaleDateString("ru-RU", { day: "numeric", month: "short" }); }
   function waLink(c, text) { var d = c.phone.replace(/\D/g, "").replace(/^8/, "7"); return d.length === 11 ? "https://wa.me/" + d + "?text=" + encodeURIComponent(text) : ""; }
