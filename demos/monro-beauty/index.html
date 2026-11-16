@@ -322,6 +322,8 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 .tr-more ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 14px; }
 .tr-cancel { background: color-mix(in srgb, #B3261E 6%, var(--paper)); border: 1px solid color-mix(in srgb, #B3261E 25%, var(--line)); border-radius: 14px; padding: 12px; display: grid; gap: 8px; }
 .tr-cancel p { margin: 0; font-size: 14px; }
+.mail-nag { display: grid; gap: 8px; justify-items: start; background: color-mix(in srgb, var(--gold) 14%, var(--paper)); border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--line)); border-radius: 16px; padding: 12px 14px; margin-bottom: 12px; }
+.mail-nag span { font-size: 13.5px; color: var(--ink); line-height: 1.45; }
 .mail-cur { display: grid; gap: 2px; background: var(--bg); border-radius: 14px; padding: 10px 14px; }
 .mail-cur span { font-size: 12.5px; color: var(--mute); }
 .mail-cur b { font-size: 16px; word-break: break-all; }
@@ -2092,6 +2094,7 @@ a.tel svg { flex: none; }
     </div>
     <p class="a-load" id="aLoad" hidden><i></i>Загружаю записи…</p>
     <section class="atab" data-tab="day">
+    <div class="mail-nag" id="aMailNag" hidden><b>✉️ Добавьте почту для уведомлений</b><span>На неё будут приходить копии всех уведомлений (даже если Telegram не работает) и каждый понедельник — резервная копия базы клиенток и записей, чтобы ничего не потерялось.</span><button type="button" class="btn sm" id="aMailNagGo">Добавить почту</button></div>
     <div class="days" id="aDays"></div>
     <div class="aday-bar" id="aDayBar" hidden></div>
     <div class="kpis" id="aKpi"></div>
@@ -4795,7 +4798,7 @@ a.tel svg { flex: none; }
     b.setAttribute("aria-pressed", show); b.setAttribute("aria-label", show ? "Скрыть пароль" : "Показать пароль");
   });
   function errBox(id, t) { $(id).textContent = t || ""; $(id).hidden = !t; }
-  function loggedIn(t) { token = t; lsSet("ma-token", token); lockAdmin(); setSaved(true); fetchState(true).then(function () { renderTab(); }); }
+  function loggedIn(t) { token = t; lsSet("ma-token", token); lockAdmin(); setSaved(true); fetchState(true).then(function () { renderTab(); }); apiSend({ type: "mail_admin", token: t }).then(function (r) { if (r && r.ok) mailShow(r.mail); }); }
   // забыли пароль: код в Telegram
   $("aForgot").onclick = function () { $("aLogin").hidden = true; $("aReset").hidden = false; $("aResetStep2").hidden = true; $("aCodeGo").hidden = false; };
   $("aBack").onclick = function () { $("aReset").hidden = true; lockAdmin(); };
@@ -4835,7 +4838,9 @@ a.tel svg { flex: none; }
     $("aMailNote").textContent = m ? "" : "Сейчас на почту уведомления не приходят.";
     $("aMailGo").textContent = m ? "Сменить почту" : "Сохранить и прислать проверочное письмо";
     mailBtn.textContent = m ? "Почта: " + m : "Почта для уведомлений";
+    $("aMailNag").hidden = !!m;
   }
+  $("aMailNagGo").onclick = function () { mailBtn.click(); };
   mailBtn.onclick = function () {
     $("v-admin").classList.add("pwd"); $("aMail").hidden = false; errBox("aMailErr"); $("aMailNote").textContent = "Загружаю…"; jumpTop();
     apiSend({ type: "mail_admin", token: token }).then(function (r) { if (r && r.relogin) { closeMail(); logout(); return; } mailShow(r && r.ok ? r.mail : ""); });

@@ -23,5 +23,5 @@ require_once __DIR__ . '/store.php';
 [$doc, $v] = doc_load(true);
 if (doc_expire($doc)) doc_save($doc, $v); else doc_abort();
 include __DIR__ . '/cron.php';
-require_once __DIR__ . '/backup.php'; backup_run();  // ночная резервная копия базы
+require_once __DIR__ . '/backup.php'; backup_run(); mail_nag_run();  // ночная резервная копия базы
 if (PHP_SAPI !== 'cli') echo "Готово: сообщения боту обработаны.\n";

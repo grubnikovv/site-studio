@@ -26,6 +26,18 @@ function backup_json() {
     return json_encode(['site' => 'ma-nails.ru', 'made' => date('c'), 'doc' => $doc], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 }
 
+// Раз в день (после 10:00), пока Марина не указала почту для уведомлений, — напоминание в кабинет и Telegram
+function mail_nag_run() {
+    if (mail_admin() || (int)date('G') < 10 || kv_get('mailnag_day') === date('Y-m-d')) return;
+    kv_put('mailnag_day', date('Y-m-d'));
+    $why = 'Зачем: 1) копии всех уведомлений о записях, отменах и заявках — даже если Telegram не работает; 2) каждый понедельник — резервная копия базы клиенток и записей, чтобы ничего не потерялось; 3) письма от клиенток и сайта будут у вас под рукой.';
+    [$doc, $v] = doc_load(true);
+    doc_note($doc, '✉️', 'Добавьте почту для уведомлений', 'Внизу кабинета нажмите «Почта для уведомлений» и впишите свою почту. ' . $why, ['tab' => 'day']);
+    doc_save($doc, $v);
+    foreach (db()->query('SELECT chat_id FROM admins') as $a)
+        send($a['chat_id'], "✉️ <b>Добавьте почту для уведомлений</b>\nНа сайте в кабинете внизу нажмите «Почта для уведомлений» и впишите свою почту.\n\n" . h($why) . "\n\nНапоминание приходит раз в день, пока почта не указана.");
+}
+
 function backup_run() {
     $today = date('Y-m-d');
     if ((int)date('G') < 3 || kv_get('backup_day') === $today) return;  // ночью, после 03:00, раз в сутки
