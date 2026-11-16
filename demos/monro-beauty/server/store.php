@@ -310,7 +310,14 @@ function cnotes_diff($before, $doc) {
         elseif ($bal < $obal) cnote(acc_of($c), '🎁', 'Списание с сертификата', '№ ' . ($c['code'] ?? '') . ': списано ' . number_format($obal - $bal, 0, ',', ' ') . ' ₽, остаток ' . number_format($bal, 0, ',', ' ') . ' ₽.', '#kabinet');
     }
     $ot = []; foreach ($before['training'] as $t) $ot[$t['id'] ?? ''] = $t;
-    foreach ($doc['training'] as $t) { $o = $ot[$t['id'] ?? ''] ?? null; if ($o && ($o['status'] ?? '') === 'wait' && ($t['status'] ?? '') === 'paid') cnote(acc_of($t), '🎓', 'Предоплата за обучение получена', 'Даты закреплены за вами. До встречи на курсе!', '#kabinet'); }
+    foreach ($doc['training'] as $t) {
+        $o = $ot[$t['id'] ?? ''] ?? null; if (!$o) continue;
+        if (($o['status'] ?? '') === 'wait' && ($t['status'] ?? '') === 'paid') cnote(acc_of($t), '🎓', 'Марина подтвердила обучение', 'Предоплата получена, даты закреплены за вами. Подробности — в личном кабинете.', '#kabinet');
+        elseif (($o['status'] ?? '') === 'paid' && in_array($t['status'] ?? '', ['refund', 'late'], true) && ($t['by'] ?? '') !== 'student')
+            cnote(acc_of($t), '🎓', 'Марина отменила обучение', ($t['status'] === 'refund' ? 'Предоплата вернётся переводом.' : 'Подробности уточните у Марины.'), '#kabinet');
+        if (trim((string)($t['mnote'] ?? '')) !== '' && ($t['mnote'] ?? '') !== ($o['mnote'] ?? '')) cnote(acc_of($t), '📝', 'Марина оставила заметку к обучению', mb_substr((string)$t['mnote'], 0, 140), '#kabinet');
+        if (!empty($t['refunded']) && empty($o['refunded'])) cnote(acc_of($t), '💸', 'Предоплата возвращена', 'Марина вернула предоплату за обучение.', '#kabinet');
+    }
 }
 
 function mail_ok($m) { $m = mb_strtolower(trim((string)$m)); return filter_var($m, FILTER_VALIDATE_EMAIL) && strlen($m) <= 80 ? $m : ''; }

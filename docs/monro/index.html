@@ -298,6 +298,34 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 .k-item { display: grid; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
 .k-item:last-child { border-bottom: 0; padding-bottom: 0; }
 .k-item .k-row { border: 0; padding: 0; }
+.tr-item { gap: 12px; }
+.tr-item > .k-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+.tr-item > .k-row .pill { white-space: nowrap; }
+.tr-more summary { list-style: none; display: flex; justify-content: space-between; align-items: center; }
+.tr-more summary::-webkit-details-marker { display: none; }
+.tr-more summary::after { content: "+"; font-size: 20px; line-height: 1; color: var(--lac); transition: transform .25s; }
+.tr-more[open] summary::after { transform: rotate(45deg); }
+.tr-steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+.tr-steps li { display: grid; justify-items: center; gap: 4px; text-align: center; font-size: 11px; color: var(--mute); position: relative; }
+.tr-steps li::before { content: ""; position: absolute; top: 13px; left: -50%; right: 50%; height: 2px; background: var(--line); z-index: 0; }
+.tr-steps li:first-child::before { display: none; }
+.tr-steps li.ok::before, .tr-steps li.cur::before { background: var(--lac); }
+.tr-steps i { position: relative; z-index: 1; width: 26px; height: 26px; border-radius: 50%; display: grid; place-content: center; font-style: normal; font-weight: 800; font-size: 12px; background: var(--paper); border: 2px solid var(--line); }
+.tr-steps li.ok i { background: var(--lac); border-color: var(--lac); color: var(--lac-ink); }
+.tr-steps li.cur i { border-color: var(--lac); color: var(--lac); }
+.tr-steps li.ok span, .tr-steps li.cur span { color: var(--ink); font-weight: 600; }
+.tr-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tr-facts div { background: var(--bg); border-radius: 12px; padding: 8px 10px; display: grid; align-content: start; }
+.tr-facts small { font-size: 11.5px; color: var(--mute); }
+.tr-facts b { font-size: 15px; }
+.tr-mnote { background: color-mix(in srgb, var(--gold) 12%, var(--paper)); border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--line)); border-radius: 14px; padding: 10px 12px; }
+.tr-mnote p { margin: 4px 0 0; font-size: 14px; white-space: pre-line; }
+.tr-more { border: 1px solid var(--line); border-radius: 14px; padding: 0 12px; }
+.tr-more summary { cursor: pointer; padding: 11px 0; font-weight: 700; font-size: 14.5px; }
+.tr-more[open] { padding-bottom: 12px; display: grid; gap: 8px; }
+.tr-more ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 14px; }
+.tr-cancel { background: color-mix(in srgb, #B3261E 6%, var(--paper)); border: 1px solid color-mix(in srgb, #B3261E 25%, var(--line)); border-radius: 14px; padding: 12px; display: grid; gap: 8px; }
+.tr-cancel p { margin: 0; font-size: 14px; }
 .mail-cur { display: grid; gap: 2px; background: var(--bg); border-radius: 14px; padding: 10px 14px; }
 .mail-cur span { font-size: 12.5px; color: var(--mute); }
 .mail-cur b { font-size: 16px; word-break: break-all; }
@@ -3053,7 +3081,7 @@ a.ni { text-decoration: none; color: inherit; }
   function kPrefill() {
     if (!kData) return;
     var nm = kData.acc ? kData.acc.name : "", ph = kData.phone, em = kData.acc ? kData.acc.email : "";
-    [["bName", nm], ["bPhone", ph], ["cName", nm], ["cPhone", ph], ["cEmail", em], ["bMail", em]].forEach(function (x) { var el = $(x[0]); if (el && x[1] && !el.value && !(x[0][0] === "b" && $("bOther").checked)) el.value = x[1]; });
+    [["bName", nm], ["bPhone", ph], ["tName", nm], ["tPhone", ph], ["cName", nm], ["cPhone", ph], ["cEmail", em], ["bMail", em]].forEach(function (x) { var el = $(x[0]); if (el && x[1] && !el.value && !(x[0][0] === "b" && $("bOther").checked)) el.value = x[1]; });
   }
   function renderK() {
     var today = dkey(new Date()), d = kData;
@@ -3078,13 +3106,7 @@ a.ni { text-decoration: none; color: inherit; }
       return '<div class="k-row"><span>' + whenText(b.date, b.start) + '<small>' + svcLabel(b) + '</small></span><span class="pill ' + t[1] + '">' + t[0] + '</span></div>';
     }).join("");
     $("kTrainBox").hidden = !d.training.length;
-    $("kTrain").innerHTML = d.training.slice().reverse().map(function (t) {
-      var c = course(t.course), wait = t.status === "wait" && t.hold > Date.now();
-      var lab = t.status === "paid" ? ["Предоплата получена", "ok"] : wait ? [t.claimed ? "Марина проверяет оплату" : "Ждёт оплату", "bad"] : ["Бронь отменена", ""];
-      return '<div class="k-item"><div class="k-row"><span>' + esc(c.short) + '<small>' + rangeText(t.days || [t.date]) + ', 10:00–17:00</small></span><span class="pill ' + lab[1] + '">' + lab[0] + '</span></div>' +
-        (wait ? '<div class="acts">' + (t.claimed ? '' : '<button type="button" class="btn sm" data-kpay="t:' + t.id + '">Оплатить предоплату</button>') + '<button type="button" class="btn sm ghost" data-ktc="' + t.id + '">Отменить бронь</button></div><div data-kpaybox="t:' + t.id + '"></div>'
-          : t.status === "paid" ? '<div class="acts"><button type="button" class="btn sm ghost" data-chat="Здравствуйте, Марина! Я записана на курс «' + esc(c.short) + '», ' + esc(rangeText(t.days || [t.date])) + '. Хочу уточнить по обучению." data-chat-title="Вопрос по обучению">Написать Марине</button></div>' : '') + '</div>';
-    }).join("");
+    $("kTrain").innerHTML = d.training.slice().reverse().map(trainCard).join("");
     $("kCertBox").hidden = !d.certs.length;
     $("kCerts").innerHTML = d.certs.slice().reverse().map(function (c) {
       var st0 = certState(c);
@@ -3093,9 +3115,49 @@ a.ni { text-decoration: none; color: inherit; }
         (c.status === "wait" && !c.claimed ? '<button type="button" class="btn sm" data-kpay="c:' + c.id + '">Оплатить</button>' : '') + '</div><div data-kpaybox="c:' + c.id + '"></div></div>';
     }).join("");
   }
+  // Карточка обучения в кабинете ученицы: этапы, даты, деньги, программа, заметки, отмена по правилам оферты
+  function trainCard(t) {
+    var c = course(t.course), days = t.days || [t.date], today = dkey(new Date()), last = days[days.length - 1];
+    var wait = t.status === "wait" && t.hold > Date.now(), paid = t.status === "paid", done = paid && last < today, cancelled = t.status === "refund" || t.status === "late";
+    var lab = done ? ["Курс пройден", "ok"] : paid ? ["Подтверждено Мариной", "ok"] : wait ? [t.claimed ? "Марина проверяет оплату" : "Ждёт оплату", "bad"] : t.status === "refund" ? [t.refunded ? "Отменено · предоплата возвращена" : "Отменено · предоплата вернётся", ""] : t.status === "late" ? ["Отменено", ""] : ["Бронь отменена", ""];
+    var h = '<div class="k-item tr-item"><div class="k-row"><span>' + esc(c.short) + '<small>' + rangeText(days) + ', ' + hm(TRAIN.from) + '–' + hm(TRAIN.to) + '</small></span><span class="pill ' + lab[1] + '">' + lab[0] + '</span></div>';
+    if (!cancelled && (wait || paid)) {
+      var steps = [["Бронь", true], ["Оплата", !!t.claimed || paid], ["Принято", paid], ["Курс", done], ["Диплом", done]];
+      var cur = steps.findIndex(function (x) { return !x[1]; });
+      h += '<ol class="tr-steps">' + steps.map(function (x, i) { return '<li class="' + (x[1] ? "ok" : i === cur ? "cur" : "") + '"><i>' + (x[1] ? "✓" : i + 1) + '</i><span>' + x[0] + '</span></li>'; }).join("") + '</ol>';
+    }
+    if (paid && !done) {
+      var left = Math.round((new Date(t.date + "T12:00") - new Date(today + "T12:00")) / 864e5);
+      h += '<div class="tr-facts"><div><small>До начала</small><b>' + (left <= 0 ? "идёт сейчас" : left + " " + plural(left, "день", "дня", "дней")) + '</b></div><div><small>Время</small><b>' + hm(TRAIN.from) + '–' + hm(TRAIN.to) + '</b></div>' +
+        '<div><small>Внесено</small><b class="num">' + rub(t.pre) + '</b></div><div><small>Доплата в первый день</small><b class="num">' + rub(Math.max(0, t.price - t.pre)) + '</b></div></div>' +
+        '<p class="note" style="margin:0">Михайловка, ул. Обороны, 41 · <a href="#kak-proiti">как пройти — видео</a></p>';
+    }
+    if (t.mnote && !cancelled) h += '<div class="tr-mnote"><b>📝 Заметка от Марины</b><p>' + esc(t.mnote) + '</p></div>';
+    if (paid || done) h += '<details class="tr-more"><summary>Программа курса</summary><ul>' + c.prog.map(function (x) { return '<li>' + x + '</li>'; }).join("") + '</ul><p class="note">' + c.inc + '</p></details>' +
+      '<details class="tr-more"' + (t.snote ? " open" : "") + '><summary>Мои заметки</summary><textarea rows="4" maxlength="3000" data-snote="' + t.id + '" placeholder="Вопросы к Марине, что купить, что повторить после курса — видите только вы">' + esc(t.snote || "") + '</textarea><button type="button" class="btn sm ghost" data-snotesave="' + t.id + '">Сохранить</button></details>';
+    if (wait) h += '<div class="acts">' + (t.claimed ? '' : '<button type="button" class="btn sm" data-kpay="t:' + t.id + '">Оплатить предоплату</button>') + '<button type="button" class="btn sm ghost" data-ktc="' + t.id + '">Отменить бронь</button></div><div data-kpaybox="t:' + t.id + '"></div>';
+    if (paid && t.date > today) {
+      var back = today <= refundTill(t);
+      h += '<div class="acts"><button type="button" class="btn sm ghost" data-chat="Здравствуйте, Марина! Я записана на курс «' + esc(c.short) + '», ' + esc(rangeText(days)) + '. Хочу уточнить по обучению." data-chat-title="Вопрос по обучению">Написать Марине</button><button type="button" class="btn sm ghost" data-ktcopen="' + t.id + '">Отменить обучение</button></div>' +
+        '<div class="tr-cancel" data-ktcbox="' + t.id + '" hidden><p>' + (back ? 'Если отменить сейчас — <b>предоплата ' + rub(t.pre) + ' вернётся полностью</b>: отмена раньше чем за 7 дней до начала. Вернуть без потерь можно до ' + shortDate(refundTill(t)) + ' включительно.' : '<b>До начала меньше 7 дней — предоплата ' + rub(t.pre) + ' не возвращается</b> (п. 4.4 оферты): Марина уже закрыла запись и подготовила материалы. Перенести даты можно по договорённости — напишите Марине.') + '</p>' +
+        '<div class="acts"><button type="button" class="btn sm danger" data-ktc="' + t.id + '">Да, отменить обучение</button><button type="button" class="btn sm ghost" data-ktcopen="' + t.id + '">Не отменять</button></div></div>';
+    }
+    if (cancelled) h += '<p class="note" style="margin:0">' + (t.status === "refund" ? (t.refunded ? "Марина вернула предоплату." : "Марина вернёт предоплату " + rub(t.pre) + " переводом в течение нескольких дней.") : "Предоплата не возвращается: отмена позже чем за 7 дней до начала.") + '</p>';
+    return h + '</div>';
+  }
+  function plural(n, a, b, c) { var m = n % 10, h = n % 100; return m === 1 && h !== 11 ? a : m >= 2 && m <= 4 && (h < 10 || h >= 20) ? b : c; }
   // обучение и сертификаты из кабинета: оплатить, отменить бронь, прислать сертификат на почту
   $("kBody").addEventListener("click", function (e) {
-    var pay = e.target.closest("[data-kpay]"), tc = e.target.closest("[data-ktc]"), cm = e.target.closest("[data-kcm]");
+    var pay = e.target.closest("[data-kpay]"), tc = e.target.closest("[data-ktc]"), cm = e.target.closest("[data-kcm]"), tco = e.target.closest("[data-ktcopen]"), sn = e.target.closest("[data-snotesave]");
+    if (tco) { var bx = document.querySelector('[data-ktcbox="' + tco.dataset.ktcopen + '"]'); bx.hidden = !bx.hidden; return; }
+    if (sn) {
+      sn.disabled = true;
+      apiSend({ type: "client_train_note", ctoken: ctoken, id: sn.dataset.snotesave, note: document.querySelector('[data-snote="' + sn.dataset.snotesave + '"]').value }).then(function (r) {
+        sn.disabled = false; toast(r && r.ok ? "Заметки сохранены" : (r && r.error) || "Нет связи с сервером", !(r && r.ok));
+        var t = kData && kData.training.filter(function (x) { return x.id === sn.dataset.snotesave; })[0]; if (t && r && r.ok) t.snote = document.querySelector('[data-snote="' + t.id + '"]').value;
+      });
+      return;
+    }
     if (pay) {
       var key = pay.dataset.kpay, r = findClaim(key), box = document.querySelector('[data-kpaybox="' + key + '"]'); if (!r || !box) return;
       var t = key[0] === "t", sum = t ? r.pre : r.sum;
@@ -3105,11 +3167,11 @@ a.ni { text-decoration: none; color: inherit; }
       return;
     }
     if (tc) {
-      if (tc.dataset.sure !== "1") { tc.dataset.sure = "1"; tc.textContent = "Точно отменить? Нажмите ещё раз"; return; }
+      if (tc.dataset.sure !== "1" && !tc.closest(".tr-cancel")) { tc.dataset.sure = "1"; tc.textContent = "Точно отменить? Нажмите ещё раз"; return; }
       tc.disabled = true;
       apiSend({ type: "client_train_cancel", ctoken: ctoken, id: tc.dataset.ktc }).then(function (r) {
         if (!r || !r.ok) { tc.disabled = false; toast((r && r.error) || "Нет связи с сервером", true); return; }
-        pubDoc(r); loadK(); toast("Бронь отменена. Марина получит уведомление");
+        pubDoc(r); loadK(); toast(r.refund === true ? "Обучение отменено. Марина вернёт предоплату переводом" : r.refund === false ? "Обучение отменено. Марина получит уведомление" : "Бронь отменена. Марина получит уведомление");
       });
       return;
     }
@@ -3474,7 +3536,7 @@ a.ni { text-decoration: none; color: inherit; }
       if (!days.every(dayFreeForTrain)) { btn.disabled = false; renderTrain(); $("tErr").textContent = "Эти даты только что заняли. Выберите другие."; $("tErr").hidden = false; return; }
       var trec = { id: "t" + Date.now().toString(36), course: c.id, date: days[0], days: days, name: name, phone: phone, price: c.price, pre: c.pre, status: "wait", hold: Date.now() + PAY.payMin * 6e4 };
       if (SYNC) {
-        apiSend({ type: "train", rec: trec, title: c.short, when: rangeText(days) }).then(function (r) {
+        apiSend({ type: "train", ctoken: ctoken || undefined, rec: trec, title: c.short, when: rangeText(days) }).then(function (r) {
           if (r && r.ok) { addMine("training", r.rec); pubDoc(r, "training"); trained(st.training.filter(function (x) { return x.id === r.rec.id; })[0] || r.rec); return; }
           btn.disabled = false; btn.textContent = "Забронировать и оплатить " + rub(c.pre); renderTrain();
           $("tErr").textContent = (r && r.error) || "Нет связи с сервером. Проверьте интернет и попробуйте ещё раз."; $("tErr").hidden = false;
@@ -3691,10 +3753,11 @@ a.ni { text-decoration: none; color: inherit; }
     renderCerts();
     var today = dkey(addDays(0));
     var trl = (st.training || []).filter(function (t) { var d = t.days || [t.date]; return d[d.length - 1] >= today; }).sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+    var tDraft = {}; document.querySelectorAll("[data-tnote]").forEach(function (x) { if (x.value !== x.defaultValue) tDraft[x.dataset.tnote] = x.value; });  // недописанная заметка не теряется при обновлении
     $("aTrain").innerHTML = trl.length ? trl.map(function (t) {
       var c = course(t.course || (t.dir === "ped" ? "ped" : "man")), tdays = t.days || [t.date];
       if (t.status === "wait" && !(t.hold > Date.now())) t.status = "nopay";
-      var stt = t.status === "wait" ? (t.claimed ? ["Оплатила — подтвердите до " + new Date(t.hold).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }), "bad"] : ["Бронь, ждёт оплату · до " + new Date(t.hold).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }), "bad"]) : t.status === "nopay" ? ["Не оплачена · даты свободны", ""] : t.status === "paid" ? ["Предоплата получена", "ok"] : t.status === "refund" ? ["Отменена · предоплата возвращена", ""] : ["Отменена поздно · предоплата ваша", "bad"];
+      var stt = t.status === "wait" ? (t.claimed ? ["Оплатила — подтвердите до " + new Date(t.hold).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }), "bad"] : ["Бронь, ждёт оплату · до " + new Date(t.hold).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }), "bad"]) : t.status === "nopay" ? ["Не оплачена · даты свободны", ""] : t.status === "paid" ? ["Предоплата получена", "ok"] : t.status === "refund" ? (t.refunded ? ["Отменена · предоплата возвращена", ""] : ["Отменена · верните " + rub(t.pre), "bad"]) : ["Отменена поздно · предоплата ваша", ""];
       var canDel = t.status !== "paid" && !(t.status === "wait" && t.hold > Date.now());
       return '<div class="bk" data-tcard="' + t.id + '"><div class="r1"><b>' + rangeText(tdays) + ', ' + hm(TRAIN.from) + '–' + hm(TRAIN.to) + '</b><span class="r1-r"><span class="pill ' + stt[1] + '">' + stt[0] + '</span>' +
         (canDel ? '<button type="button" class="trash" data-tdel="' + t.id + '" aria-label="Удалить заявку"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></button>' : '') + '</span></div>' +
@@ -3703,8 +3766,12 @@ a.ni { text-decoration: none; color: inherit; }
         (t.status === "paid" ? (dkey(new Date()) <= refundTill(t)
           ? '<div class="keep">💰 <b>Не тратьте ' + rub(t.pre) + ' до ' + shortDate(refundTill(t)) + ' включительно.</b> Если ученица отменит до этой даты — предоплату нужно вернуть. С ' + shortDate(dkey(new Date(new Date(refundTill(t) + "T12:00").getTime() + 864e5))) + ' она ваша.</div>'
           : '<div class="keep ok">✅ <b>Предоплата ' + rub(t.pre) + ' ваша.</b> До начала меньше 7 дней — при отмене она не возвращается.</div>') : '') +
+        (t.status === "refund" || t.status === "late" ? '<div class="info">' + (t.by === "student" ? "Отменила ученица в личном кабинете. " : "") + (t.status === "refund" ? (t.refunded ? "Предоплата возвращена." : "Верните предоплату " + rub(t.pre) + " переводом в Сбере и отметьте:") : "Отмена позже чем за 7 дней — предоплата остаётся у вас.") + '</div>' +
+          (t.status === "refund" && !t.refunded ? '<div class="acts"><button type="button" class="btn sm" data-trefund="' + t.id + '">Предоплату вернула</button></div>' : '') : '') +
+        (t.status === "paid" ? '<label class="f tnote">Заметка для ученицы — она увидит её в личном кабинете<textarea rows="3" maxlength="1000" data-tnote="' + t.id + '" placeholder="Например: возьмите с собой тетрадь и сменную обувь. Модели на оба дня найдены.">' + esc(t.mnote || "") + '</textarea></label><div class="acts"><button type="button" class="btn sm ghost" data-tnotesave="' + t.id + '">Сохранить заметку</button></div>' : '') +
         (t.status === "paid" ? tdays.map(function (k, i) { return modelDay(k, i, c); }).join("") + '<div class="acts"><button data-t="' + t.id + '">Отменить обучение</button></div>' : '') + '</div>';
     }).join("") : '<p class="note">Заявок пока нет. Они появятся, когда ученица оплатит предоплату на странице «Обучение».</p>';
+    Object.keys(tDraft).forEach(function (id) { var x = document.querySelector('[data-tnote="' + id + '"]'); if (x) x.value = tDraft[id]; });
     var hold = trl.filter(function (t) { return t.status === "paid" && dkey(new Date()) <= refundTill(t); });
     $("aKeep").innerHTML = '<p class="note" style="margin:0">Правило возврата: если ученица отменяет <b>раньше чем за 7 дней</b> до начала — предоплату возвращаете переводом в Сбере. Если за 6 дней и меньше — предоплата ваша.</p>' +
       (hold.length ? '<div class="keep">💰 Пока не тратьте: <b>' + rub(hold.reduce(function (a, t) { return a + t.pre; }, 0)) + '</b> — ' + hold.map(function (t) { return esc(t.name) + ' до ' + shortDate(refundTill(t)); }).join(", ") + '</div>' : '');
@@ -3796,6 +3863,9 @@ a.ni { text-decoration: none; color: inherit; }
     toast(back ? "Отменено. Верните ученице предоплату " + rub(t.pre) + " переводом в Сбере" : "Отмена позже срока. Предоплата остаётся у вас");
   });
   $("aTrain").addEventListener("click", function (e) {
+    var rf = e.target.closest("[data-trefund]"), ns = e.target.closest("[data-tnotesave]");
+    if (rf) { var tr = st.training.filter(function (x) { return x.id === rf.dataset.trefund; })[0]; tr.refunded = true; save(); renderAdmin(); toast("Отмечено: предоплата возвращена. Ученица получит уведомление"); return; }
+    if (ns) { var tn = st.training.filter(function (x) { return x.id === ns.dataset.tnotesave; })[0]; tn.mnote = document.querySelector('[data-tnote="' + tn.id + '"]').value.trim().slice(0, 1000); save(); toast("Заметка сохранена — ученица увидит её в кабинете"); return; }
     var dl = e.target.closest("[data-tdel]"), dOk = e.target.closest("[data-tdelok]"), dNo = e.target.closest("[data-tdelno]");
     if (dl) { var box = document.querySelector('[data-tsure="' + dl.dataset.tdel + '"]'); box.hidden = !box.hidden; return; }
     if (dNo) { dNo.parentNode.hidden = true; return; }

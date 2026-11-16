@@ -357,12 +357,35 @@ if ($type === 'client_train_cancel') {
     foreach ($doc['training'] as $i => $t) if (($t['id'] ?? '') === $id && $own($t)) $hit = $i;
     if ($hit === null) fail('Заявка не найдена.');
     $t = $doc['training'][$hit];
-    if (($t['status'] ?? '') === 'paid') fail('Предоплата уже внесена. Чтобы отменить обучение или вернуть предоплату, напишите Марине.');
+    if (($t['status'] ?? '') === 'paid') {
+        // оферта п. 4.4: раньше чем за 7 дней до начала — предоплата возвращается, позже — остаётся у Марины
+        if (($t['date'] ?? '') <= date('Y-m-d')) fail('Обучение уже началось. Напишите Марине.');
+        $back = date('Y-m-d') <= date('Y-m-d', strtotime($t['date'] . ' -7 days'));
+        $doc['training'][$hit]['status'] = $back ? 'refund' : 'late'; $doc['training'][$hit]['by'] = 'student'; $doc['training'][$hit]['cancelledAt'] = now_ms();
+        $pre = number_format((int)($t['pre'] ?? 0), 0, ',', ' ') . ' ₽';
+        $txt = ($t['name'] ?? '') . ', ' . ($t['phone'] ?? '') . ' — даты снова свободны. ' . ($back ? 'Верните предоплату ' . $pre . ' переводом в Сбере.' : 'Отмена позже чем за 7 дней — предоплата ' . $pre . ' остаётся у вас.');
+        doc_note($doc, '🎓', 'Ученица отменила обучение', $txt, ['tab' => 'req']);
+        $v = doc_save($doc, $v);
+        notify_admins("🎓 <b>Ученица отменила обучение</b>\n" . h($txt));
+        if ($w['acc']) cnote($w['acc']['id'], '🎓', 'Обучение отменено', $back ? 'Марина вернёт предоплату ' . $pre . ' переводом в течение нескольких дней.' : 'Отмена позже чем за 7 дней до начала — предоплата не возвращается (п. 4.4 оферты).', '#kabinet');
+        json_out(['ok' => true, 'v' => $v, 'doc' => doc_public($doc), 'refund' => $back]);
+    }
     array_splice($doc['training'], $hit, 1);
     doc_note($doc, '🎓', 'Ученица отменила бронь', ($t['name'] ?? '') . ', ' . ($t['phone'] ?? '') . ' — даты снова свободны', ['tab' => 'req']);
     $v = doc_save($doc, $v);
     notify_admins("🎓 <b>Ученица отменила бронь обучения</b>\n" . h($t['name'] ?? '') . ', ' . h($t['phone'] ?? '') . "\nДаты снова свободны.");
     json_out(['ok' => true, 'v' => $v, 'doc' => doc_public($doc)]);
+}
+// Личные заметки ученицы к обучению (видит только она)
+if ($type === 'client_train_note') {
+    $w = client_who($in['ctoken'] ?? ''); if (!$w) json_out(['ok' => false, 'relogin' => true]);
+    $own = client_mine($w); $id = (string)($in['id'] ?? '');
+    [$doc, $v] = doc_load(true); $hit = null;
+    foreach ($doc['training'] as $i => $t) if (($t['id'] ?? '') === $id && $own($t)) $hit = $i;
+    if ($hit === null) fail('Заявка не найдена.');
+    $doc['training'][$hit]['snote'] = mb_substr(trim(strip_tags((string)($in['note'] ?? ''))), 0, 3000);
+    $v = doc_save($doc, $v);
+    json_out(['ok' => true]);
 }
 // Прислать сертификат на почту ещё раз
 if ($type === 'client_cert_mail') {
@@ -496,7 +519,7 @@ if ($type === 'client_data') {
     [$doc, $v] = doc_load(true); if (doc_expire($doc)) $v = doc_save($doc, $v); else doc_abort();
     $mine = client_mine($w);
     $bk = array_values(array_map(fn($b) => array_intersect_key($b, array_flip(['id', 'date', 'start', 'dur', 'svc', 'remove', 'french', 'status', 'price', 'phone', 'name', 'remind', 'email', 'by', 'movedBy'])), array_filter($doc['bookings'], $mine)));
-    $tr = array_values(array_map(fn($t) => array_intersect_key($t, array_flip(['id', 'course', 'date', 'days', 'status', 'price', 'pre', 'hold', 'claimed', 'phone', 'name'])), array_filter($doc['training'], $mine)));
+    $tr = array_values(array_map(fn($t) => array_intersect_key($t, array_flip(['id', 'course', 'date', 'days', 'status', 'price', 'pre', 'hold', 'claimed', 'phone', 'name', 'snote', 'mnote', 'by', 'refunded', 'paidAt'])), array_filter($doc['training'], $mine)));
     $ce = array_values(array_map(fn($c) => array_intersect_key($c, array_flip(['id', 'code', 'sum', 'balance', 'to', 'status', 'created', 'till', 'phone', 'email', 'name', 'claimed', 'hold'])) + ['spent' => array_map(fn($x) => ['d' => $x['d'] ?? '', 'sum' => (int)($x['sum'] ?? 0)], $c['spent'] ?? [])], array_filter($doc['certs'], $mine)));
     json_out(['ok' => true, 'phone' => $phone ? phone_nice($phone) : '', 'acc' => $acc ? ['email' => $acc['email'], 'name' => $acc['name']] : null, 'bookings' => $bk, 'training' => $tr, 'certs' => $ce, 'v' => $v, 'doc' => doc_public($doc)]);
 }
@@ -535,6 +558,7 @@ if ($type === 'train') {
     foreach ($days as $d) if (!day_free_for_training($doc, $d)) fail('Эти даты только что заняли. Выберите другие.');
     $rec = ['id' => $id, 'course' => clean($r['course'] ?? '', 10), 'date' => $days[0], 'days' => $days, 'name' => $name, 'phone' => phone_nice($phone),
         'price' => (int)($r['price'] ?? 0), 'pre' => (int)($r['pre'] ?? 0), 'status' => 'wait', 'hold' => now_ms() + 30 * 60 * 1000];
+    if (($cw = client_who($in['ctoken'] ?? '')) && $cw['acc']) $rec['owner'] = (int)$cw['acc']['id'];  // из кабинета — видна в нём
     $doc['training'][] = $rec;
     $title = clean($in['title'] ?? 'Курс', 80);
     doc_note($doc, '🎓', 'Бронь обучения — ждёт оплату', $name . ' · «' . $title . '» · ' . clean($in['when'] ?? '', 60) . ' · предоплата ' . number_format($rec['pre'], 0, ',', ' ') . ' ₽', ['tab' => 'req']);
