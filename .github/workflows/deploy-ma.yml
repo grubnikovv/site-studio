@@ -4,7 +4,7 @@ name: Выложить сайт М.А
 on:
   push:
     branches: [claude/low-code-business-ideas-0dr8l2]
-    paths: [docs/monro/**, demos/monro-beauty/server/**, .github/workflows/deploy-ma.yml, demos/monro-beauty/deploy.txt]
+    paths: [docs/monro/**, demos/monro-beauty/server/**, .github/workflows/deploy-ma.yml, demos/monro-beauty/deploy.txt, demos/monro-beauty/https-on, demos/monro-beauty/mail-on]
   workflow_dispatch:
     inputs:
       dir:
