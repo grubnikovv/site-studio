@@ -109,6 +109,11 @@ jobs:
           curl -s --max-time 60 "$SITE/server/poll.php?key=$ADMIN_KEY&diag=1"
           curl -s --max-time 60 "$SITE/server/poll.php?key=$ADMIN_KEY"
           curl -s --max-time 60 "$SITE/server/poll.php?key=$ADMIN_KEY&diag=1" | tail -n +4
+      - name: Проверочное уведомление мастеру
+        if: steps.chk.outputs.ok == 'true' && contains(github.event.head_commit.message, '[test-push]')
+        env:
+          ADMIN_KEY: ${{ secrets.ADMIN_KEY }}
+        run: curl -s --max-time 60 "$SITE/server/poll.php?key=$ADMIN_KEY&testpush=1"
       - name: Очистить уведомления или тестовые данные кабинета
         if: steps.chk.outputs.ok == 'true' && (contains(github.event.head_commit.message, '[clear-notes]') || contains(github.event.head_commit.message, '[clear-data]') || contains(github.event.head_commit.message, '[clear-cancelled]'))
         env:

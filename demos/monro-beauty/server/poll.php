@@ -17,6 +17,18 @@ if (isset($_GET['diag'])) {  // проверка связи: poll.php?key=...&di
     echo "Журнал (последнее):\n" . preg_replace('/bot\d+:[\w-]+/', 'bot***', implode('', array_slice($log, -8)));
     exit;
 }
+if (isset($_GET['testpush'])) {  // проверочное уведомление на телефоны мастера: poll.php?key=...&testpush=1
+    header('Content-Type: text/plain; charset=utf-8');
+    require_once __DIR__ . '/store.php'; require_once __DIR__ . '/push.php';
+    [$doc, $v] = doc_load(true);
+    doc_note($doc, '🔔', 'Проверка уведомлений', 'Всё работает! Так будут приходить новые записи, отмены и заявки.');
+    doc_save($doc, $v);
+    $subs = push_db()->query('SELECT endpoint FROM push_subs WHERE acc = 0')->fetchAll(PDO::FETCH_COLUMN);
+    $v2 = vapid();
+    foreach ($subs as $e) echo 'Телефон мастера (' . parse_url($e, PHP_URL_HOST) . '): ответ ' . push_send_one($e, $v2) . " (201 = доставлено)\n";
+    if (!$subs) echo "Нет подписок мастера\n";
+    exit;
+}
 poll_run(PHP_SAPI === 'cli' ? (int)(getenv('POLL_SECS') ?: 50) : 20);
 // просроченные брони обучения и сертификаты — удалить, даже если сайт никто не открывал
 require_once __DIR__ . '/store.php';
