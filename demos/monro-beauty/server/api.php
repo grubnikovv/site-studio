@@ -375,6 +375,50 @@ if ($type === 'client_cert_mail') {
     json_out(['ok' => true, 'to' => mask_mail($c['email'])]);
 }
 
+// Удалить аккаунт по просьбе клиентки (152-ФЗ). Сначала неиспользованные сертификаты уходят на указанную почту.
+// Будущие записи остаются у Марины (её ждут), прошедшие — без имени и телефона (для статистики), отменённые — насовсем.
+if ($type === 'client_delete') {
+    $w = client_who($in['ctoken'] ?? ''); if (!$w) json_out(['ok' => false, 'relogin' => true]);
+    $acc = $w['acc']; $m = mail_ok($in['email'] ?? '');
+    if ($acc) {
+        if ($m !== $acc['email']) fail('Введите почту, с которой вы зарегистрированы: ' . mask_mail($acc['email']));
+        if (!password_verify((string)($in['pass'] ?? ''), (string)$acc['pass'])) { sleep(1); fail('Неверный пароль.'); }
+    }
+    if (empty($in['sure'])) fail('Отметьте, что понимаете последствия удаления.');
+    $own = client_mine($w); $today = date('Y-m-d');
+    [$doc, $v] = doc_load(true);
+    $live = array_values(array_filter($doc['certs'], fn($c) => $own($c) && in_array($c['status'] ?? '', ['wait', 'paid'], true) && (int)($c['balance'] ?? $c['sum'] ?? 0) > 0 && ($c['till'] ?? '9999') >= $today));
+    if ($live && !$m) fail('У вас есть неиспользованный сертификат — укажите почту, чтобы мы прислали его перед удалением.');
+    foreach ($live as $c) { $c['email'] = $m; cert_mail($c, ($c['status'] ?? '') === 'paid'); }
+    $name = $acc['name'] ?? ''; $future = 0; $gone = [];
+    foreach ($doc['bookings'] as $i => &$b) {
+        if (!$own($b)) continue;
+        if ($name === '') $name = $b['name'] ?? '';
+        if (($b['status'] ?? '') === 'booked' && ($b['date'] ?? '') >= $today) { unset($b['owner']); $future++; continue; }
+        $gone[] = $b['id'] ?? '';
+        if (($b['status'] ?? '') === 'cancelled') { $b = null; continue; }
+        $b = ['id' => $b['id'], 'date' => $b['date'], 'start' => $b['start'], 'dur' => $b['dur'] ?? 60, 'svc' => $b['svc'] ?? '', 'price' => $b['price'] ?? 0, 'status' => $b['status'] ?? '', 'remove' => !empty($b['remove']), 'french' => !empty($b['french']),
+            'name' => 'Клиентка удалена', 'phone' => '', 'anon' => true];
+    }
+    unset($b);
+    $doc['bookings'] = array_values(array_filter($doc['bookings']));
+    $doc['training'] = array_values(array_filter($doc['training'], fn($t) => !($own($t) && ($t['status'] ?? '') !== 'paid')));
+    foreach ($doc['certs'] as &$c) if ($own($c)) unset($c['owner']);
+    unset($c);
+    doc_note($doc, '🗑', 'Клиентка удалила аккаунт', $name . ($future ? ' · будущих записей осталось: ' . $future : '') . ($live ? ' · сертификаты отправлены ей на почту' : ''), ['tab' => 'clients']);
+    $v = doc_save($doc, $v);
+    $db = client_db();
+    foreach ($gone as $id) $db->prepare('DELETE FROM bookings WHERE id = ?')->execute([$id]);  // из таблицы бота: телефон, чат, почта
+    if ($w['phone']) $db->prepare('DELETE FROM client_codes WHERE phone = ?')->execute([$w['phone']]);
+    if ($acc) {
+        $db->prepare('DELETE FROM client_sessions WHERE acc = ?')->execute([$acc['id']]);
+        $db->prepare('DELETE FROM acc_codes WHERE email = ?')->execute([$acc['email']]);
+        $db->prepare('DELETE FROM accounts WHERE id = ?')->execute([$acc['id']]);
+    } else $db->prepare('DELETE FROM client_sessions WHERE token = ?')->execute([hash('sha256', (string)$in['ctoken'])]);
+    notify_admins("🗑 <b>Клиентка удалила аккаунт</b>\n" . h($name) . ($future ? "\nБудущих записей осталось: " . $future . " — они остаются в кабинете." : '') . ($live ? "\nНеиспользованные сертификаты отправлены ей на почту." : ''));
+    json_out(['ok' => true, 'certs' => count($live), 'future' => $future]);
+}
+
 // Всё о клиентке: записи (будущие и история), обучение, сертификаты
 if ($type === 'client_data') {
     $w = client_who($in['ctoken'] ?? ''); if (!$w) json_out(['ok' => false, 'relogin' => true]);

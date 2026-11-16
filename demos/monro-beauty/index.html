@@ -284,6 +284,13 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 .k-spam { font-size: 13.5px; line-height: 1.45; color: var(--ink); background: color-mix(in srgb, var(--gold) 12%, var(--paper)); border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--line)); border-radius: 14px; padding: 10px 12px; }
 .k-alt { margin-top: 6px; }
 .k-hb { display: inline-flex; gap: 14px; }
+.k-delopen { justify-self: center; color: var(--mute); font-weight: 600; margin-top: 8px; }
+.k-del { border-color: color-mix(in srgb, #B3261E 35%, var(--line)); }
+.k-warn { margin: 0; padding: 0 0 0 4px; list-style: none; display: grid; gap: 8px; font-size: 14px; line-height: 1.45; }
+.k-warn li { display: grid; grid-template-columns: 22px 1fr; gap: 6px; }
+.k-warn li.bad { color: #9E1F1A; font-weight: 500; }
+.btn.danger, .a-login .btn.danger { background: #B3261E; border-color: #B3261E; color: #fff !important; box-shadow: none; }
+.btn.danger::after { display: none; }
 .k-item { display: grid; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
 .k-item:last-child { border-bottom: 0; padding-bottom: 0; }
 .k-item .k-row { border: 0; padding: 0; }
@@ -1623,6 +1630,17 @@ div.f { display: grid; gap: 8px; }
         <div class="acts"><button class="btn sm" type="submit" id="kMailGo">Сохранить почту</button><button type="button" class="btn sm ghost" id="kMailOff" hidden>Не присылать на почту</button></div>
       </form>
       <div class="card" id="kHistBox"><h3>История визитов</h3><div class="opts" id="kHist"></div></div>
+      <button type="button" class="a-link k-delopen" id="kDelOpen">Удалить аккаунт</button>
+      <form class="card a-login k-del" id="kDel" novalidate hidden>
+        <h3>Удалить аккаунт</h3>
+        <ul class="k-warn" id="kDelWarn"></ul>
+        <label for="kDelE" id="kDelEL">Ваша почта</label><input type="email" id="kDelE" autocomplete="email" inputmode="email" placeholder="name@mail.ru" maxlength="80">
+        <div id="kDelPW"><label for="kDelP">Пароль</label><div class="pass-w"><input type="password" id="kDelP" autocomplete="current-password"><button type="button" class="pass-eye" aria-label="Показать пароль" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="eye-x" d="M4 4l16 16"/></svg></button></div></div>
+        <label class="check"><input type="checkbox" id="kDelOk"><span>Понимаю: аккаунт и мои данные удалятся без возможности восстановления.</span></label>
+        <p class="err" id="kDelErr" hidden></p>
+        <button class="btn danger" type="submit" id="kDelGo">Удалить аккаунт навсегда</button>
+        <button type="button" class="a-link" id="kDelNo">Отмена — оставить аккаунт</button>
+      </form>
     </div>
   </div></section>
 </main>
@@ -3192,6 +3210,37 @@ div.f { display: grid; gap: 8px; }
       if (!r || !r.ok) { kErr("kPhErr", (r && r.error) || "Нет связи с сервером"); return; }
       if (!withCode) { $("kPhCL").hidden = false; $("kPhGo").textContent = "Привязать"; $("kPhNote").textContent = "Код отправлен " + (r.via === "tg" ? "в Telegram-бот студии" : "на почту " + r.to) + ". Он действует 10 минут."; $("kPhC").focus(); return; }
       $("kPhCL").hidden = true; $("kPhC").value = ""; $("kPhGo").textContent = "Получить код"; toast("Номер привязан — записи по нему теперь в кабинете"); loadK();
+    });
+  });
+  // ---------- удаление аккаунта ----------
+  function kDelWarn() {
+    var d = kData || { bookings: [], certs: [], training: [] }, today = dkey(new Date()), w = [];
+    var fut = d.bookings.filter(function (b) { return b.status === "booked" && b.date >= today; });
+    var live = d.certs.filter(function (c) { return (c.status === "paid" || c.status === "wait") && certBalance(c) > 0 && (!c.till || c.till >= today); });
+    var paidT = d.training.filter(function (t) { return t.status === "paid"; });
+    if (live.length) w.push(["🎁", "bad", "Неиспользованные сертификаты: " + live.map(function (c) { return "№ " + esc(c.code) + " (остаток " + rub(certBalance(c)) + ")"; }).join(", ") + ". Перед удалением пришлём их на почту, которую вы укажете ниже, — сохраните это письмо."]);
+    if (fut.length) w.push(["📅", "bad", "Будущие записи (" + fut.length + ") останутся у Марины — она будет вас ждать. Но перенести или отменить их на сайте вы больше не сможете — только через Марину. Если запись не нужна, отмените её до удаления."]);
+    if (paidT.length) w.push(["🎓", "", "Оплаченное обучение остаётся в силе. Вопросы по нему — через Марину."]);
+    w.push(["🗑", "", "Удалятся почта, пароль и имя, история визитов станет обезличенной. Из резервных копий сайта данные исчезнут в течение 30 дней."]);
+    $("kDelWarn").innerHTML = w.map(function (x) { return '<li class="' + x[1] + '"><span>' + x[0] + '</span><span>' + x[2] + '</span></li>'; }).join("");
+    var acc = d.acc;
+    $("kDelPW").hidden = !acc;
+    $("kDelEL").textContent = acc ? "Введите свою почту для подтверждения" : live.length ? "Почта — пришлём на неё сертификаты" : "Почта (по желанию)";
+  }
+  $("kDelOpen").onclick = function () { kDelWarn(); $("kDel").hidden = false; $("kDelOpen").hidden = true; $("kDel").scrollIntoView({ behavior: "smooth", block: "start" }); };
+  $("kDelNo").onclick = function () { $("kDel").hidden = true; $("kDelOpen").hidden = false; errBox("kDelErr"); };
+  $("kDel").addEventListener("submit", function (e) {
+    e.preventDefault(); var f = this, m = okMail($("kDelE").value), acc = kData && kData.acc;
+    var needMail = acc || /Почта — пришлём/.test($("kDelEL").textContent);
+    var err = needMail && !m ? (acc ? "Введите почту, с которой вы зарегистрированы." : "Укажите почту — пришлём на неё сертификаты.") : acc && m !== acc.email ? "Это не та почта, с которой вы зарегистрированы." : acc && !$("kDelP").value ? "Введите пароль." : !$("kDelOk").checked ? "Отметьте, что понимаете последствия удаления." : "";
+    errBox("kDelErr", err); if (err) return;
+    busy(f, true);
+    apiSend({ type: "client_delete", ctoken: ctoken, email: m, pass: $("kDelP").value, sure: 1 }).then(function (r) {
+      busy(f, false);
+      if (!r || !r.ok) { errBox("kDelErr", (r && r.error) || "Нет связи с сервером"); return; }
+      ctoken = ""; lsSet("ma-ctoken", null); lsSet("ma-myphone", null); kData = null;
+      $("kDel").hidden = true; $("kDelOpen").hidden = false; $("kDelP").value = ""; $("kDelE").value = ""; $("kDelOk").checked = false;
+      kShow("login"); toast("Аккаунт удалён." + (r.certs ? " Сертификаты отправили на " + m + " — проверьте и «Спам»." : ""));
     });
   });
   $("kOut").onclick = function () { apiSend({ type: "client_logout", ctoken: ctoken }); ctoken = ""; lsSet("ma-ctoken", null); kData = null; showK(); };
