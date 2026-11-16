@@ -119,8 +119,10 @@ if ($type === 'sync') {
     if (!$admin) json_out(['ok' => false, 'error' => 'Войдите в кабинет заново', 'relogin' => true]);
     [$doc, $v] = doc_load(true);
     $ops = is_array($in['ops'] ?? null) ? $in['ops'] : [];
+    $wasWait = []; foreach ($doc['certs'] as $c) if (($c['status'] ?? '') === 'wait') $wasWait[$c['id'] ?? ''] = true;
     doc_apply($doc, $ops);
     mirror_bookings($ops, $doc);
+    foreach ($doc['certs'] as $c) if (!empty($wasWait[$c['id'] ?? '']) && ($c['status'] ?? '') === 'paid') cert_mail($c, true);  // сертификат оплачен — письмо покупателю
     done($doc, $v, [], true);
 }
 
@@ -148,6 +150,7 @@ if ($type === 'booking') {
     $svcName = clean($in['svcName'] ?? ($r['svcName'] ?? ''), 80);
     $rec = ['id' => $id, 'date' => $date, 'start' => $start, 'dur' => $dur, 'svc' => clean($r['svc'] ?? '', 30), 'name' => $name, 'phone' => phone_nice($phone),
         'note' => clean($r['note'] ?? '', 200), 'price' => max(0, (int)($r['price'] ?? 0)), 'remove' => !empty($r['remove']), 'french' => !empty($r['french']), 'remind' => $remind, 'status' => 'booked', 'created' => now_ms()] + ($email ? ['email' => $email] : []) + (!empty($r['other']) ? ['other' => true] : []);
+    if (($cw = client_who($in['ctoken'] ?? '')) && $cw['acc']) $rec['owner'] = (int)$cw['acc']['id'];  // запись из кабинета — видна в нём
     $doc['bookings'] = array_values(array_filter($doc['bookings'], fn($b) => ($b['id'] ?? '') !== $id));
     $doc['bookings'][] = $rec;
     doc_note($doc, '📅', 'Новая запись', $name . ' · ' . $svcName . ' · ' . when_text($date, $start), ['tab' => 'day', 'date' => $date]);
@@ -167,10 +170,12 @@ if ($type === 'booking') {
 }
 
 if ($type === 'cancel') {
-    $id = preg_replace('/[^A-Za-z0-9]/', '', (string)($in['id'] ?? '')); $phone = phone_ok($in['phone'] ?? '');
+    // отменить и перенести можно только из личного кабинета (вход по почте или по коду)
+    $w = client_who($in['ctoken'] ?? ''); if (!$w) json_out(['ok' => false, 'relogin' => true, 'error' => 'Войдите в личный кабинет, чтобы отменить запись.']);
+    $id = preg_replace('/[^A-Za-z0-9]/', '', (string)($in['id'] ?? '')); $own = client_mine($w);
     [$doc, $v] = doc_load(true);
     $hit = null;
-    foreach ($doc['bookings'] as $i => $b) if (($b['id'] ?? '') === $id && digits_phone($b['phone'] ?? '') === $phone && $phone) $hit = $i;
+    foreach ($doc['bookings'] as $i => $b) if (($b['id'] ?? '') === $id && $own($b)) $hit = $i;
     if ($hit === null) fail('Запись не найдена.');
     $b = &$doc['bookings'][$hit];
     if (($b['status'] ?? '') === 'booked' && booking_ts($b) - time() < 48 * 3600) { unset($b); fail('До визита меньше 2 дней — отменить можно только через Марину: +7 995 428‑47‑88.'); }
@@ -194,18 +199,19 @@ if ($type === 'cancel') {
 
 // Клиентка переносит запись сама: не позже чем за 2 дня до визита, на свободное время
 if ($type === 'move') {
-    $id = preg_replace('/[^A-Za-z0-9]/', '', (string)($in['id'] ?? '')); $phone = phone_ok($in['phone'] ?? '');
+    $w = client_who($in['ctoken'] ?? ''); if (!$w) json_out(['ok' => false, 'relogin' => true, 'error' => 'Войдите в личный кабинет, чтобы перенести запись.']);
+    $id = preg_replace('/[^A-Za-z0-9]/', '', (string)($in['id'] ?? '')); $own = client_mine($w);
     $date = (string)($in['date'] ?? ''); $start = (int)($in['start'] ?? -1);
     if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || $start < 0 || $start > 1440 || strtotime($date) > strtotime('+70 days')) fail('Проверьте новую дату и время.');
     [$doc, $v] = doc_load(true);
-    $hit = null; foreach ($doc['bookings'] as $i => $b) if (($b['id'] ?? '') === $id && $phone && digits_phone($b['phone'] ?? '') === $phone) $hit = $i;
+    $hit = null; foreach ($doc['bookings'] as $i => $b) if (($b['id'] ?? '') === $id && $own($b)) $hit = $i;
     if ($hit === null) fail('Запись не найдена.');
     $b = $doc['bookings'][$hit];
     if (($b['status'] ?? '') !== 'booked') fail('Эта запись уже отменена.');
     if (booking_ts($b) - time() < 48 * 3600) fail('До визита меньше 2 дней — перенести можно только через Марину: +7 995 428‑47‑88.');
     $dur = (int)($b['dur'] ?? 0) ?: max(15, min(600, (int)($in['dur'] ?? 60)));
-    foreach ($doc['bookings'] as $o) if (($o['id'] ?? '') !== $id && ($o['status'] ?? '') === 'booked' && digits_phone($o['phone'] ?? '') === $phone && ($o['date'] ?? '') === $date)
-        fail('На этот день у вас уже есть другая запись.');
+    foreach ($doc['bookings'] as $o) if (($o['id'] ?? '') !== $id && ($o['status'] ?? '') === 'booked' && digits_phone($o['phone'] ?? '') === digits_phone($b['phone'] ?? '') && ($o['date'] ?? '') === $date && ($o['svc'] ?? '') === ($b['svc'] ?? ''))
+        fail('На этот день у вас уже есть запись на эту услугу. Выберите другой день.');
     if (!slot_free($doc, $date, $start, $dur, $id)) fail('Это время только что заняли. Выберите другое.');
     $from = when_text($b['date'], (int)$b['start']); $to = when_text($date, $start);
     $doc['bookings'][$hit]['date'] = $date; $doc['bookings'][$hit]['start'] = $start; $doc['bookings'][$hit]['dur'] = $dur;
@@ -249,26 +255,148 @@ if ($type === 'client_logout') {
     client_db()->prepare('DELETE FROM client_sessions WHERE token = ?')->execute([hash('sha256', (string)($in['ctoken'] ?? ''))]);
     json_out(['ok' => true]);
 }
+// ---------- личный кабинет по почте и паролю ----------
+if ($type === 'acc_register') {
+    $m = mail_ok($in['email'] ?? ''); $name = clean($in['name'] ?? '', 40); $pass = (string)($in['pass'] ?? '');
+    if (!$m) fail('Проверьте адрес почты.');
+    if (mb_strlen($name) < 2) fail('Укажите имя.');
+    if (mb_strlen($pass) < 6) fail('Пароль — не короче 6 символов.');
+    if (empty($in['consent'])) fail('Отметьте согласие на обработку персональных данных.');
+    if (!cfg('mail_from')) fail('Регистрация временно недоступна. Напишите Марине.');
+    $a = acc_by_mail($m);
+    if ($a && $a['verified']) fail('Эта почта уже зарегистрирована. Войдите или нажмите «Забыли пароль?».');
+    $h = password_hash($pass, PASSWORD_DEFAULT);
+    if ($a) client_db()->prepare('UPDATE accounts SET name = ?, pass = ? WHERE id = ?')->execute([$name, $h, $a['id']]);
+    else client_db()->prepare('INSERT INTO accounts (email, name, pass, created) VALUES (?, ?, ?, ?)')->execute([$m, $name, $h, time()]);
+    $r = acc_send_code($m, 'reg');
+    if ($r === 'fail') fail('Не получилось отправить письмо. Проверьте адрес или попробуйте позже.');
+    json_out(['ok' => true, 'email' => $m, 'again' => $r === 'wait']);
+}
+if ($type === 'acc_code') {  // прислать код ещё раз
+    $m = mail_ok($in['email'] ?? ''); $p = ($in['purpose'] ?? '') === 'reset' ? 'reset' : 'reg';
+    $a = $m ? acc_by_mail($m) : null;
+    if ($a && ($p === 'reset' ? $a['verified'] : !$a['verified'])) {
+        $r = acc_send_code($m, $p);
+        if ($r === 'wait') fail('Новый код можно запросить через минуту.');
+        if ($r === 'fail') fail('Не получилось отправить письмо. Попробуйте позже.');
+    }
+    json_out(['ok' => true]);
+}
+if ($type === 'acc_verify') {
+    $m = mail_ok($in['email'] ?? ''); $a = $m ? acc_by_mail($m) : null;
+    if (!$a) fail('Сначала зарегистрируйтесь.');
+    if ($e = acc_check_code($m, 'reg', $in['code'] ?? '')) fail($e);
+    client_db()->prepare('UPDATE accounts SET verified = 1 WHERE id = ?')->execute([$a['id']]);
+    json_out(['ok' => true, 'ctoken' => acc_session((int)$a['id'])]);
+}
+if ($type === 'acc_login') {
+    $m = mail_ok($in['email'] ?? ''); $a = $m ? acc_by_mail($m) : null;
+    if (!$a || !password_verify((string)($in['pass'] ?? ''), (string)$a['pass'])) { sleep(1); fail('Неверная почта или пароль.'); }
+    if (!$a['verified']) { acc_send_code($m, 'reg'); json_out(['ok' => false, 'verify' => true, 'email' => $m, 'error' => 'Почта ещё не подтверждена — отправили код ещё раз.']); }
+    json_out(['ok' => true, 'ctoken' => acc_session((int)$a['id'])]);
+}
+if ($type === 'acc_reset_req') {  // ответ одинаковый, есть такая почта или нет — чтобы нельзя было перебирать чужие адреса
+    $m = mail_ok($in['email'] ?? ''); if (!$m) fail('Проверьте адрес почты.');
+    $a = acc_by_mail($m);
+    if ($a && $a['verified'] && acc_send_code($m, 'reset') === 'wait') fail('Код уже отправлен. Новый можно запросить через минуту.');
+    json_out(['ok' => true, 'email' => $m]);
+}
+if ($type === 'acc_reset') {
+    $m = mail_ok($in['email'] ?? ''); $a = $m ? acc_by_mail($m) : null; $pass = (string)($in['pass'] ?? '');
+    if (mb_strlen($pass) < 6) fail('Новый пароль — не короче 6 символов.');
+    if (!$a || !$a['verified']) fail('Код устарел. Запросите новый.');
+    if ($e = acc_check_code($m, 'reset', $in['code'] ?? '')) fail($e);
+    $db = client_db();
+    $db->prepare('UPDATE accounts SET pass = ? WHERE id = ?')->execute([password_hash($pass, PASSWORD_DEFAULT), $a['id']]);
+    $db->prepare('DELETE FROM client_sessions WHERE acc = ?')->execute([$a['id']]);  // на других устройствах — войти заново
+    json_out(['ok' => true, 'ctoken' => acc_session((int)$a['id'])]);
+}
+if ($type === 'acc_pass') {  // смена пароля в кабинете
+    $w = client_who($in['ctoken'] ?? ''); if (!$w || !$w['acc']) json_out(['ok' => false, 'relogin' => true]);
+    if (!password_verify((string)($in['old'] ?? ''), (string)$w['acc']['pass'])) { sleep(1); fail('Текущий пароль введён неверно.'); }
+    if (mb_strlen((string)($in['pass'] ?? '')) < 6) fail('Новый пароль — не короче 6 символов.');
+    $db = client_db();
+    $db->prepare('UPDATE accounts SET pass = ? WHERE id = ?')->execute([password_hash((string)$in['pass'], PASSWORD_DEFAULT), $w['acc']['id']]);
+    $db->prepare('DELETE FROM client_sessions WHERE acc = ? AND token <> ?')->execute([$w['acc']['id'], hash('sha256', (string)$in['ctoken'])]);
+    json_out(['ok' => true]);
+}
+// Привязать телефон к кабинету: код приходит туда, куда приходят напоминания по этому номеру (Telegram или почта)
+if ($type === 'acc_phone') {
+    $w = client_who($in['ctoken'] ?? ''); if (!$w || !$w['acc']) json_out(['ok' => false, 'relogin' => true]);
+    $phone = phone_ok($in['phone'] ?? ''); if (!$phone) fail('Укажите телефон полностью.');
+    $db = client_db();
+    if (empty($in['code'])) {
+        $q = $db->prepare('SELECT sent FROM client_codes WHERE phone = ?'); $q->execute([$phone]);
+        if ((int)$q->fetchColumn() > time() - 60) fail('Код уже отправлен. Новый можно запросить через минуту.');
+        $ch = client_channel($phone);
+        if (!$ch) fail('По этому номеру ещё нет записей с напоминаниями, поэтому код прислать некуда. Ничего страшного: записи, которые вы сделаете, войдя в кабинет, появятся здесь сами.');
+        $code = (string)random_int(100000, 999999);
+        $db->prepare('INSERT OR REPLACE INTO client_codes (phone, hash, until, tries, sent) VALUES (?, ?, ?, 0, ?)')->execute([$phone, password_hash($code, PASSWORD_DEFAULT), time() + 600, time()]);
+        $text = "🔐 Код, чтобы привязать номер к личному кабинету студии «М.А»: <b>" . $code . "</b>\nДействует 10 минут. Никому его не сообщайте.";
+        if ($ch[0] === 'tg') send($ch[1], $text); else send_mail($ch[1], 'Код ' . $code . ' — привязка номера', $text);
+        json_out(['ok' => true, 'via' => $ch[0], 'to' => $ch[0] === 'mail' ? mask_mail($ch[1]) : 'Telegram']);
+    }
+    $q = $db->prepare('SELECT * FROM client_codes WHERE phone = ?'); $q->execute([$phone]); $c = $q->fetch();
+    if (!$c || $c['until'] < time() || $c['tries'] >= 5) fail('Код устарел. Запросите новый.');
+    $db->prepare('UPDATE client_codes SET tries = tries + 1 WHERE phone = ?')->execute([$phone]);
+    if (!password_verify(preg_replace('/\D/', '', (string)$in['code']), $c['hash'])) { sleep(1); fail('Неверный код. Осталось попыток: ' . (4 - (int)$c['tries'])); }
+    $db->prepare('DELETE FROM client_codes WHERE phone = ?')->execute([$phone]);
+    $db->prepare('UPDATE accounts SET phone = ? WHERE id = ?')->execute([$phone, $w['acc']['id']]);
+    json_out(['ok' => true, 'phone' => phone_nice($phone)]);
+}
+
+// Клиентка в кабинете отменяет неоплаченную бронь обучения
+if ($type === 'client_train_cancel') {
+    $w = client_who($in['ctoken'] ?? ''); if (!$w) json_out(['ok' => false, 'relogin' => true]);
+    $own = client_mine($w); $id = (string)($in['id'] ?? '');
+    [$doc, $v] = doc_load(true); $hit = null;
+    foreach ($doc['training'] as $i => $t) if (($t['id'] ?? '') === $id && $own($t)) $hit = $i;
+    if ($hit === null) fail('Заявка не найдена.');
+    $t = $doc['training'][$hit];
+    if (($t['status'] ?? '') === 'paid') fail('Предоплата уже внесена. Чтобы отменить обучение или вернуть предоплату, напишите Марине.');
+    array_splice($doc['training'], $hit, 1);
+    doc_note($doc, '🎓', 'Ученица отменила бронь', ($t['name'] ?? '') . ', ' . ($t['phone'] ?? '') . ' — даты снова свободны', ['tab' => 'req']);
+    $v = doc_save($doc, $v);
+    notify_admins("🎓 <b>Ученица отменила бронь обучения</b>\n" . h($t['name'] ?? '') . ', ' . h($t['phone'] ?? '') . "\nДаты снова свободны.");
+    json_out(['ok' => true, 'v' => $v, 'doc' => doc_public($doc)]);
+}
+// Прислать сертификат на почту ещё раз
+if ($type === 'client_cert_mail') {
+    $w = client_who($in['ctoken'] ?? ''); if (!$w) json_out(['ok' => false, 'relogin' => true]);
+    $own = client_mine($w); $id = (string)($in['id'] ?? '');
+    [$doc] = doc_load(false); $c = null;
+    foreach ($doc['certs'] as $x) if (($x['id'] ?? '') === $id && $own($x)) $c = $x;
+    if (!$c) fail('Сертификат не найден.');
+    if ((int)kv_get('certmail_' . $id) > time() - 60) fail('Письмо уже отправлено. Ещё раз — через минуту.');
+    $c['email'] = !empty($c['email']) ? $c['email'] : ($w['acc']['email'] ?? '');
+    if (!$c['email']) fail('Не указана почта. Войдите в кабинет по почте.');
+    kv_put('certmail_' . $id, time());
+    cert_mail($c, ($c['status'] ?? '') !== 'wait');
+    json_out(['ok' => true, 'to' => mask_mail($c['email'])]);
+}
+
 // Всё о клиентке: записи (будущие и история), обучение, сертификаты
 if ($type === 'client_data') {
-    $phone = client_phone($in['ctoken'] ?? ''); if (!$phone) json_out(['ok' => false, 'relogin' => true]);
+    $w = client_who($in['ctoken'] ?? ''); if (!$w) json_out(['ok' => false, 'relogin' => true]);
+    $phone = $w['phone']; $acc = $w['acc'];
     [$doc, $v] = doc_load(true); if (doc_expire($doc)) $v = doc_save($doc, $v); else doc_abort();
-    $mine = fn($x) => digits_phone($x['phone'] ?? '') === $phone;
+    $mine = client_mine($w);
     $bk = array_values(array_map(fn($b) => array_intersect_key($b, array_flip(['id', 'date', 'start', 'dur', 'svc', 'remove', 'french', 'status', 'price', 'phone', 'name', 'remind', 'email', 'by', 'movedBy'])), array_filter($doc['bookings'], $mine)));
     $tr = array_values(array_map(fn($t) => array_intersect_key($t, array_flip(['id', 'course', 'date', 'days', 'status', 'price', 'pre', 'hold', 'claimed', 'phone', 'name'])), array_filter($doc['training'], $mine)));
-    $ce = array_values(array_map(fn($c) => array_intersect_key($c, array_flip(['id', 'code', 'sum', 'balance', 'to', 'status', 'created', 'till', 'phone'])) + ['spent' => array_map(fn($x) => ['d' => $x['d'] ?? '', 'sum' => (int)($x['sum'] ?? 0)], $c['spent'] ?? [])], array_filter($doc['certs'], $mine)));
-    json_out(['ok' => true, 'phone' => phone_nice($phone), 'bookings' => $bk, 'training' => $tr, 'certs' => $ce, 'v' => $v, 'doc' => doc_public($doc)]);
+    $ce = array_values(array_map(fn($c) => array_intersect_key($c, array_flip(['id', 'code', 'sum', 'balance', 'to', 'status', 'created', 'till', 'phone', 'email', 'name', 'claimed', 'hold'])) + ['spent' => array_map(fn($x) => ['d' => $x['d'] ?? '', 'sum' => (int)($x['sum'] ?? 0)], $c['spent'] ?? [])], array_filter($doc['certs'], $mine)));
+    json_out(['ok' => true, 'phone' => $phone ? phone_nice($phone) : '', 'acc' => $acc ? ['email' => $acc['email'], 'name' => $acc['name']] : null, 'bookings' => $bk, 'training' => $tr, 'certs' => $ce, 'v' => $v, 'doc' => doc_public($doc)]);
 }
 
 // Клиентка в кабинете меняет почту для напоминаний (или отказывается от писем) — для всех будущих записей
 if ($type === 'client_mail') {
-    $phone = client_phone($in['ctoken'] ?? ''); if (!$phone) json_out(['ok' => false, 'relogin' => true]);
+    $w = client_who($in['ctoken'] ?? ''); if (!$w) json_out(['ok' => false, 'relogin' => true]);
+    $own = client_mine($w);
     $m = mb_strtolower(trim((string)($in['mail'] ?? '')));
     if ($m !== '' && (!filter_var($m, FILTER_VALIDATE_EMAIL) || strlen($m) > 80)) fail('Проверьте адрес почты.');
     if ($m !== '' && !cfg('mail_from')) fail('Напоминания на почту пока не работают. Подключите Telegram или напишите Марине.');
     [$doc, $v] = doc_load(true); $ids = [];
     foreach ($doc['bookings'] as &$b) {
-        if (digits_phone($b['phone'] ?? '') !== $phone || ($b['status'] ?? '') !== 'booked' || ($b['date'] ?? '') < date('Y-m-d')) continue;
+        if (!$own($b) || ($b['status'] ?? '') !== 'booked' || ($b['date'] ?? '') < date('Y-m-d')) continue;
         if ($m !== '') { $b['email'] = $m; $b['remind'] = 'mail'; } else { unset($b['email']); if (($b['remind'] ?? '') === 'mail') $b['remind'] = 'none'; }
         $ids[] = $b['id'];
     }
@@ -307,14 +435,17 @@ if ($type === 'cert') {
     $id = preg_replace('/[^A-Za-z0-9]/', '', (string)($r['id'] ?? '')); $phone = phone_ok($r['phone'] ?? ''); $name = clean($r['name'] ?? '', 40);
     $sum = (int)($r['sum'] ?? 0); $code = mb_strtoupper(clean($r['code'] ?? '', 12));
     if (!$id || !$phone || mb_strlen($name) < 2 || $sum < 500 || $sum > 100000 || strlen(cert_key($code)) < 6) json_out(['ok' => false, 'error' => 'Проверьте данные сертификата.']);
+    $email = mail_ok($r['email'] ?? ''); if (!$email) fail('Укажите почту — на неё придёт сертификат.');
     [$doc, $v] = doc_load(true);
     foreach ($doc['certs'] as $c) if (cert_key($c['code'] ?? '') === cert_key($code)) fail('Попробуйте ещё раз.');
-    $rec = ['id' => $id, 'code' => $code, 'sum' => $sum, 'balance' => $sum, 'to' => clean($r['to'] ?? '', 30), 'name' => $name, 'phone' => phone_nice($phone),
+    $rec = ['id' => $id, 'code' => $code, 'sum' => $sum, 'balance' => $sum, 'to' => clean($r['to'] ?? '', 30), 'name' => $name, 'phone' => phone_nice($phone), 'email' => $email,
         'status' => 'wait', 'created' => (string)($r['created'] ?? date('Y-m-d')), 'till' => (string)($r['till'] ?? date('Y-m-d', strtotime('+1 year'))), 'hold' => now_ms() + 2 * 3600 * 1000];  // с этого времени неоплаченный можно удалить
+    if (($cw = client_who($in['ctoken'] ?? '')) && $cw['acc']) $rec['owner'] = (int)$cw['acc']['id'];
     $doc['certs'][] = $rec;
     doc_note($doc, '🎁', 'Новый сертификат — ждёт оплату', '№ ' . $code . ' на ' . number_format($sum, 0, ',', ' ') . ' ₽ · ' . $name, ['tab' => 'req']);
     $v = doc_save($doc, $v);
-    notify_admins("🎁 <b>Новый сертификат № " . h($code) . "</b> на " . number_format($sum, 0, ',', ' ') . " ₽\n" . h($name) . ', ' . phone_nice($phone) . "\nЖдёт оплату по СБП.");
+    notify_admins("🎁 <b>Новый сертификат № " . h($code) . "</b> на " . number_format($sum, 0, ',', ' ') . " ₽\n" . h($name) . ', ' . phone_nice($phone) . ', ' . h($email) . "\nЖдёт оплату по СБП.");
+    cert_mail($rec, false);
     json_out(['ok' => true, 'v' => $v, 'doc' => doc_public($doc), 'rec' => $rec]);
 }
 

@@ -282,6 +282,15 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 .ch-k { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--lac); }
 .ch-msg p { margin: 0; font-size: 14.5px; line-height: 1.45; color: var(--ink); white-space: pre-line; max-height: 9.5em; overflow: auto; }
 .ch-msg small { color: var(--mute); font-size: 12.5px; line-height: 1.4; }
+.k-f { display: grid; gap: 10px; }
+.k-f h3 { margin: 4px 0 0; }
+#kSeg { margin-bottom: 4px; }
+.k-spam { font-size: 13.5px; line-height: 1.45; color: var(--ink); background: color-mix(in srgb, var(--gold) 12%, var(--paper)); border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--line)); border-radius: 14px; padding: 10px 12px; }
+.k-alt { margin-top: 6px; }
+.k-hb { display: inline-flex; gap: 14px; }
+.k-item { display: grid; gap: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.k-item:last-child { border-bottom: 0; padding-bottom: 0; }
+.k-item .k-row { border: 0; padding: 0; }
 .mail-cur { display: grid; gap: 2px; background: var(--bg); border-radius: 14px; padding: 10px 14px; }
 .mail-cur span { font-size: 12.5px; color: var(--mute); }
 .mail-cur b { font-size: 16px; word-break: break-all; }
@@ -750,6 +759,7 @@ div.f { display: grid; gap: 8px; }
 .a-login { max-width: 420px; margin: 8px auto 24px; display: grid; gap: 10px; }
 .a-login h3 { margin: 0; }
 .a-login input { width: 100%; }
+.a-login .check input { width: auto; flex: none; }
 .pass-w { position: relative; }
 .pass-w input { padding-right: 52px; }
 .pass-eye { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border: 0; background: none; color: var(--mute); display: grid; place-content: center; border-radius: 10px; }
@@ -1531,9 +1541,57 @@ div.f { display: grid; gap: 8px; }
 
 <!-- ===== СЕРТИФИКАТ ===== -->
 <main id="v-kabinet" class="page" hidden>
-  <section class="phero"><div class="wrap"><span class="eyebrow">Личный кабинет</span><h1>Мои записи</h1><p class="lead">Записи, перенос и отмена, обучение и сертификаты — на любом телефоне.</p></div></section>
+  <section class="phero"><div class="wrap"><span class="eyebrow">Личный кабинет</span><h1>Мои записи и сертификаты</h1><p class="lead">Перенос и отмена записей, обучение и сертификаты — с любого телефона. Записаться к Марине можно и без кабинета.</p></div></section>
   <section class="block tight"><div class="wrap kab">
-    <form class="card a-login" id="kLogin" novalidate>
+    <div class="card a-login" id="kAuth">
+      <div class="seg2" id="kSeg"><button type="button" data-m="login" aria-pressed="true">Вход</button><button type="button" data-m="reg" aria-pressed="false">Регистрация</button></div>
+      <form class="k-f" id="kfLogin" novalidate>
+        <h3>Вход в личный кабинет</h3>
+        <p class="note">Перенос и отмена записей, обучение и сертификаты — на любом телефоне.</p>
+        <label for="kEm">Почта</label><input type="email" id="kEm" autocomplete="email" inputmode="email" placeholder="name@mail.ru" maxlength="80">
+        <label for="kPw">Пароль</label><div class="pass-w"><input type="password" id="kPw" autocomplete="current-password" minlength="6"><button type="button" class="pass-eye" aria-label="Показать пароль" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="eye-x" d="M4 4l16 16"/></svg></button></div>
+        <p class="err" id="kfLoginErr" hidden></p>
+        <button class="btn" type="submit">Войти</button>
+        <button type="button" class="a-link" data-kgo="reset">Забыли пароль?</button>
+      </form>
+      <form class="k-f" id="kfReg" novalidate hidden>
+        <h3>Регистрация</h3>
+        <p class="note">Записаться к Марине можно и без кабинета. Кабинет нужен, чтобы переносить и отменять записи, следить за обучением и сертификатами.</p>
+        <label for="kRn">Имя</label><input type="text" id="kRn" autocomplete="given-name" maxlength="40">
+        <label for="kRe">Почта</label><input type="email" id="kRe" autocomplete="email" inputmode="email" placeholder="name@mail.ru" maxlength="80">
+        <label for="kRp">Пароль</label><div class="pass-w"><input type="password" id="kRp" autocomplete="new-password" minlength="6"><button type="button" class="pass-eye" aria-label="Показать пароль" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="eye-x" d="M4 4l16 16"/></svg></button></div>
+        <p class="note" style="margin:0">Не короче 6 символов. На почту придёт код, чтобы подтвердить, что она ваша.</p>
+        <label class="check"><input type="checkbox" id="kRpd"><span>Согласен(на) на <a href="#soglasie" target="_blank">обработку персональных данных</a> и с <a href="#politika" target="_blank">политикой конфиденциальности</a>.</span></label>
+        <p class="err" id="kfRegErr" hidden></p>
+        <button class="btn" type="submit">Зарегистрироваться</button>
+      </form>
+      <form class="k-f" id="kfCode" novalidate hidden>
+        <h3>Подтвердите почту</h3>
+        <p class="note">Отправили код из 6 цифр на <b id="kCodeTo"></b>.</p>
+        <div class="k-spam"><b>Письмо придёт в течение пары минут</b> от <span class="num">marina@ma-nails.ru</span>. Нет во «Входящих» — загляните в «Спам» и «Промоакции» и отметьте письмо «Не спам», чтобы следующие приходили как обычно.</div>
+        <label for="kCd">Код из письма</label><input type="text" id="kCd" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456">
+        <p class="err" id="kfCodeErr" hidden></p>
+        <button class="btn" type="submit">Подтвердить</button>
+        <button type="button" class="a-link" data-kagain="reg">Прислать код ещё раз</button>
+        <button type="button" class="a-link" data-kgo="reg">← Изменить почту</button>
+      </form>
+      <form class="k-f" id="kfReset" novalidate hidden>
+        <h3>Новый пароль</h3>
+        <p class="note" id="kRsNote">Укажите почту, с которой регистрировались, — пришлём код для смены пароля.</p>
+        <label for="kRsE">Почта</label><input type="email" id="kRsE" autocomplete="email" inputmode="email" placeholder="name@mail.ru" maxlength="80">
+        <div id="kRs2" hidden>
+          <div class="k-spam"><b>Письмо придёт в течение пары минут</b> от <span class="num">marina@ma-nails.ru</span>. Нет во «Входящих» — загляните в «Спам» и «Промоакции» и отметьте письмо «Не спам», чтобы следующие приходили как обычно.</div>
+          <label for="kRsC">Код из письма</label><input type="text" id="kRsC" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456">
+          <label for="kRsP">Новый пароль</label><div class="pass-w"><input type="password" id="kRsP" autocomplete="new-password" minlength="6"><button type="button" class="pass-eye" aria-label="Показать пароль" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="eye-x" d="M4 4l16 16"/></svg></button></div>
+        </div>
+        <p class="err" id="kfResetErr" hidden></p>
+        <button class="btn" type="submit" id="kRsGo">Прислать код</button>
+        <button type="button" class="a-link" data-kagain="reset" id="kRsAgain" hidden>Прислать код ещё раз</button>
+        <button type="button" class="a-link" data-kgo="login">← Ко входу</button>
+      </form>
+      <button type="button" class="a-link k-alt" data-kgo="phone">Нет почты? Войти по номеру телефона</button>
+    </div>
+    <form class="card a-login" id="kLogin" novalidate hidden>
       <h3>Вход по номеру телефона</h3>
       <p class="note" id="kLoginNote">Введите телефон, который указывали при записи. Пришлём код в Telegram-бот студии или на почту — туда, куда приходят напоминания.</p>
       <label for="kPhone">Телефон</label>
@@ -1541,10 +1599,24 @@ div.f { display: grid; gap: 8px; }
       <div id="kStep2" hidden><label for="kCode">Код из Telegram или письма</label><input type="text" id="kCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456"></div>
       <p class="err" id="kErr" hidden></p>
       <button class="btn" type="submit" id="kGo">Получить код</button>
-      <a class="a-link" href="#moi-zapisi">Без входа: записи, сделанные на этом телефоне</a>
+      <button type="button" class="a-link" data-kgo="login">← Войти по почте</button>
     </form>
     <div id="kBody" hidden>
-      <div class="k-head"><span>Вы вошли: <b id="kWho"></b></span><button type="button" class="a-link" id="kOut">Выйти</button></div>
+      <div class="k-head"><span>Вы вошли: <b id="kWho"></b></span><span class="k-hb"><button type="button" class="a-link" id="kPwOpen" hidden>Сменить пароль</button><button type="button" class="a-link" id="kOut">Выйти</button></span></div>
+      <form class="card a-login" id="kPwBox" novalidate hidden><h3>Сменить пароль</h3>
+        <label for="kPwO">Текущий пароль</label><div class="pass-w"><input type="password" id="kPwO" autocomplete="current-password" minlength="6"><button type="button" class="pass-eye" aria-label="Показать пароль" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="eye-x" d="M4 4l16 16"/></svg></button></div>
+        <label for="kPwN">Новый пароль</label><div class="pass-w"><input type="password" id="kPwN" autocomplete="new-password" minlength="6"><button type="button" class="pass-eye" aria-label="Показать пароль" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="eye-x" d="M4 4l16 16"/></svg></button></div>
+        <p class="err" id="kPwErr" hidden></p>
+        <button class="btn" type="submit">Сохранить пароль</button><button type="button" class="a-link" id="kPwClose">Отмена</button>
+        <button type="button" class="a-link" id="kPwForgot">Не помню текущий пароль</button>
+      </form>
+      <form class="card k-ph" id="kPhBox" novalidate hidden><h3>Привяжите номер телефона</h3>
+        <p class="note" style="margin:0" id="kPhNote">Чтобы здесь появились записи, которые вы делали раньше по этому номеру. Код придёт туда, куда приходят напоминания: в Telegram-бот студии или на почту.</p>
+        <label class="f">Телефон<input type="tel" id="kPhIn" inputmode="tel" autocomplete="tel" placeholder="+7"></label>
+        <label class="f" id="kPhCL" hidden>Код<input type="text" id="kPhC" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456"></label>
+        <p class="err" id="kPhErr" hidden></p>
+        <button class="btn sm" type="submit" id="kPhGo">Получить код</button>
+      </form>
       <div class="card"><h3>Предстоящие записи</h3><div class="opts" id="kNext"></div><a class="btn sm glow" href="#zapis" style="justify-self:start">Записаться ещё</a></div>
       <div class="card" id="kTrainBox"><h3>Обучение</h3><div class="opts" id="kTrain"></div></div>
       <div class="card" id="kCertBox"><h3>Сертификаты</h3><div class="opts" id="kCerts"></div></div>
@@ -1576,6 +1648,8 @@ div.f { display: grid; gap: 8px; }
       <div class="f"><span class="lbl">Номинал</span><div class="chips" id="cSum"><button type="button" class="chip" data-v="2000" aria-pressed="false">2 000 ₽</button><button type="button" class="chip" data-v="3000" aria-pressed="true">3 000 ₽</button><button type="button" class="chip" data-v="5000" aria-pressed="false">5 000 ₽</button></div></div>
       <label class="f">Кому, по желанию — напишем на сертификате<input type="text" id="cTo" maxlength="30" placeholder="Например: Любимой маме"></label>
       <div class="row2"><label class="f">Ваше имя<input type="text" id="cName" autocomplete="given-name"></label><label class="f">Телефон<input type="tel" id="cPhone" inputmode="tel" placeholder="+7"></label></div>
+      <label class="f">Почта — пришлём на неё сертификат<input type="email" id="cEmail" autocomplete="email" inputmode="email" placeholder="name@mail.ru" maxlength="80"></label>
+      <p class="note" style="margin:-4px 0 0">Сразу придёт письмо с номером сертификата, а после оплаты — что он активен. Так он точно не потеряется. Нет письма — проверьте «Спам».</p>
       <div class="till-warn" id="cTillWarn"></div>
       <label class="check"><input type="checkbox" id="cTerm"><span><span id="cTermText">Знаю, до какого числа действует сертификат.</span> Согласен(на) с <a href="#oferta" target="_blank">условиями оферты</a>.</span></label>
       <label class="check"><input type="checkbox" id="cPd"><span>Согласен(на) на <a href="#soglasie" target="_blank">обработку персональных данных</a> и с <a href="#politika" target="_blank">политикой конфиденциальности</a>.</span></label>
@@ -1693,7 +1767,8 @@ div.f { display: grid; gap: 8px; }
     <h2>2. Какие данные и зачем мы обрабатываем</h2>
     <div class="ltable">
       <div><b>Запись на процедуру</b><span>Имя, телефон, email (если выбраны напоминания на почту), выбранная услуга, дата и время, комментарий, способ напоминания. Чтобы записать вас, напомнить о визите, связаться при переносе и вести историю посещений.</span></div>
-      <div><b>Подарочный сертификат</b><span>Имя и телефон покупателя, имя получателя (по желанию), номер, номинал и остаток сертификата. Чтобы выпустить сертификат, найти его по телефону и списать оплату.</span></div>
+      <div><b>Личный кабинет</b><span>Имя, email и пароль (хранится только в зашифрованном виде — его не знает даже администратор), по желанию — подтверждённый номер телефона. Чтобы вы могли входить в кабинет, переносить и отменять записи, видеть обучение и сертификаты. Аккаунт можно удалить по запросу.</span></div>
+      <div><b>Подарочный сертификат</b><span>Имя, телефон и email покупателя (на него приходит сертификат), имя получателя (по желанию), номер, номинал и остаток сертификата. Чтобы выпустить сертификат, найти его по телефону и списать оплату.</span></div>
       <div><b>Обучение</b><span>Имя, телефон, выбранный курс и даты, сведения о предоплате. Чтобы закрепить даты, связаться перед обучением, выдать сертификат о прохождении курса.</span></div>
       <div><b>Модели на обучение</b><span>Имя, телефон, дата и время процедуры. Чтобы договориться о бесплатной процедуре и при необходимости пригласить снова.</span></div>
       <div><b>Работа сайта</b><span>Технические данные: файлы cookie и локальное хранилище браузера, а при подключении Яндекс Метрики — обезличенные сведения о посещениях (тип устройства, браузер, просмотренные страницы). Чтобы сайт работал и становился удобнее.</span></div>
@@ -1851,6 +1926,7 @@ div.f { display: grid; gap: 8px; }
         <div class="ok"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div>
         <h3 id="bDoneT">Вы записаны</h3>
         <p class="lead" id="bDone"></p>
+        <p class="note k-hint" id="bKab"></p>
         <div class="rem-done" id="bRemDone"></div>
         <button type="button" class="way-card" data-way>
           <span class="wc-ph"><img src="video/way-poster.webp" alt="" width="72" height="128" loading="lazy"><i aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg></i></span>
@@ -2650,7 +2726,7 @@ div.f { display: grid; gap: 8px; }
     setTimeout(function () {
       var s = svc(bk.svc), b = { id: "b" + Date.now().toString(36), date: bk.date, start: bk.start, svc: s.id, name: name, phone: phoneNice(ph), note: $("bNote").value.trim().slice(0, 200), price: bk.price, remove: bk.remove, french: !!bk.french, other: $("bOther").checked || undefined, remind: bk.remind, status: "booked", created: Date.now() };
       if (bk.remind === "mail") b.email = $("bMail").value.trim().slice(0, 80);
-      var botLink = apiSend({ type: "booking", token: SYNC && token ? token : undefined, rec: Object.assign({ dur: bmin(b), coat: CORR[s.id] ? 1 : 0 }, b), svcName: svcLabel(b) });
+      var botLink = apiSend({ type: "booking", token: SYNC && token ? token : undefined, ctoken: ctoken || undefined, rec: Object.assign({ dur: bmin(b), coat: CORR[s.id] ? 1 : 0 }, b), svcName: svcLabel(b) });
       if (SYNC) {  // с сервером: запись считается сделанной, только когда сервер её принял
         botLink.then(function (r) {
           if (r && r.ok) { addMine("bookings", b); pubDoc(r); booked(); return; }
@@ -2671,6 +2747,7 @@ div.f { display: grid; gap: 8px; }
         ? '<div class="rem-cta"><b>🔔 Чтобы не забыть о записи</b><p>Подключите бесплатные напоминания: за 2 дня и за 2 часа до визита, перенос — одной кнопкой.</p><button class="btn glow" type="button" data-bot="tg">🔔 Подключить в Telegram</button></div>'
         : '<div class="rem-cta"><b>Остался один шаг</b><p>Нажмите кнопку и «Старт» в боте — без этого напоминания не придут. Это бесплатно.</p><button class="btn glow" type="button" data-bot="' + b.remind + '">🔔 Подключить в ' + (REM_NAME[b.remind] || "Telegram") + '</button></div>';
       $("bDoneT").textContent = b.other ? "Запись оформлена: " + b.name : "Вы записаны";
+      $("bKab").innerHTML = ctoken ? 'Запись есть в <a href="#kabinet">личном кабинете</a> — там её можно перенести или отменить.' : 'Перенести или отменить запись можно в <a href="#kabinet">личном кабинете</a> — зарегистрируйтесь по почте, это минута.';
       if (b.other && b.remind !== "mail") {  // записали другого человека — ссылку на бота отправляем ему
         $("bRemDone").innerHTML = '<div class="rem-cta"><b>🔔 Готовлю ссылку на напоминания…</b></div>';
         botLink.then(function (r) { if (r && r.tg) shareRemind($("bRemDone"), b, r.tg); else $("bRemDone").innerHTML = '<div class="rem-cta"><b>🔔 Напоминания</b><p>Не удалось получить ссылку. Напишите Марине — она подключит напоминания.</p></div>'; });
@@ -2793,7 +2870,9 @@ div.f { display: grid; gap: 8px; }
   }, true);
   function findClaim(key) {
     var id = key.slice(2);
-    return key[0] === "t" ? (st.training || []).filter(function (x) { return x.id === id; })[0] : (st.certs || []).filter(function (x) { return x.id === id; })[0];
+    var list = key[0] === "t" ? (st.training || []) : (st.certs || []), r = list.filter(function (x) { return x.id === id; })[0];
+    if ((!r || !r.phone) && kData) r = (key[0] === "t" ? kData.training : kData.certs).filter(function (x) { return x.id === id; })[0] || r;  // сертификатов в общей базе посетителя нет
+    return r;
   }
   document.addEventListener("click", function (e) {
     var b = e.target.closest("[data-claim]"); if (!b) return;
@@ -2892,7 +2971,7 @@ div.f { display: grid; gap: 8px; }
   // ---------- личный кабинет клиентки ----------
   var ctoken = SYNC ? lsGet("ma-ctoken", "") : "", kData = null, kStep = 1;
   function showK() {
-    $("kLogin").hidden = !!ctoken; $("kBody").hidden = !ctoken;
+    $("kAuth").hidden = !!ctoken || kMode === "phone"; $("kLogin").hidden = !!ctoken || kMode !== "phone"; $("kBody").hidden = !ctoken;
     if (!ctoken) { var mp = lsGet("ma-myphone", ""); if (mp && !$("kPhone").value) $("kPhone").value = mp; return; }
     if (kData) renderK(); loadK();
   }
@@ -2902,11 +2981,19 @@ div.f { display: grid; gap: 8px; }
       if (!r || !r.ok) return;
       kData = r; if (!token && r.doc) applyDoc(r.v, r.doc);  // свежая занятость для переноса
       if (curView === "kabinet") renderK();
+      kPrefill();
     });
+  }
+  // вошли в кабинет — имя, телефон и почта в формах подставляются сами
+  function kPrefill() {
+    if (!kData) return;
+    var nm = kData.acc ? kData.acc.name : "", ph = kData.phone, em = kData.acc ? kData.acc.email : "";
+    [["bName", nm], ["bPhone", ph], ["cName", nm], ["cPhone", ph], ["cEmail", em], ["bMail", em]].forEach(function (x) { var el = $(x[0]); if (el && x[1] && !el.value && !(x[0][0] === "b" && $("bOther").checked)) el.value = x[1]; });
   }
   function renderK() {
     var today = dkey(new Date()), d = kData;
-    $("kWho").textContent = d.phone;
+    $("kWho").textContent = d.acc ? (d.acc.name ? d.acc.name + " · " : "") + d.acc.email : d.phone;
+    $("kPwOpen").hidden = !d.acc; $("kPhBox").hidden = !d.acc || !!d.phone;
     var sortT = function (a, b) { return (a.date + hm(a.start).padStart(5, "0")).localeCompare(b.date + hm(b.start).padStart(5, "0")); };
     var next = d.bookings.filter(function (b) { return b.status === "booked" && b.date >= today; }).sort(sortT);
     var hist = d.bookings.filter(function (b) { return !(b.status === "booked" && b.date >= today); }).sort(sortT).reverse();
@@ -2926,15 +3013,48 @@ div.f { display: grid; gap: 8px; }
     }).join("");
     $("kTrainBox").hidden = !d.training.length;
     $("kTrain").innerHTML = d.training.slice().reverse().map(function (t) {
-      var c = course(t.course), lab = t.status === "paid" ? ["Предоплата получена", "ok"] : t.status === "wait" ? [t.claimed ? "Марина проверяет оплату" : "Ждёт оплату", "bad"] : t.status === "refund" ? ["Отменено, предоплата возвращена", ""] : t.status === "late" ? ["Отменено", ""] : ["Не оплачено", ""];
-      return '<div class="k-row"><span>' + esc(c.short) + '<small>' + rangeText(t.days || [t.date]) + ', 10:00–17:00</small></span><span class="pill ' + lab[1] + '">' + lab[0] + '</span></div>';
+      var c = course(t.course), wait = t.status === "wait" && t.hold > Date.now();
+      var lab = t.status === "paid" ? ["Предоплата получена", "ok"] : wait ? [t.claimed ? "Марина проверяет оплату" : "Ждёт оплату", "bad"] : ["Бронь отменена", ""];
+      return '<div class="k-item"><div class="k-row"><span>' + esc(c.short) + '<small>' + rangeText(t.days || [t.date]) + ', 10:00–17:00</small></span><span class="pill ' + lab[1] + '">' + lab[0] + '</span></div>' +
+        (wait ? '<div class="acts">' + (t.claimed ? '' : '<button type="button" class="btn sm" data-kpay="t:' + t.id + '">Оплатить предоплату</button>') + '<button type="button" class="btn sm ghost" data-ktc="' + t.id + '">Отменить бронь</button></div><div data-kpaybox="t:' + t.id + '"></div>'
+          : t.status === "paid" ? '<div class="acts"><button type="button" class="btn sm ghost" data-chat="Здравствуйте, Марина! Я записана на курс «' + esc(c.short) + '», ' + esc(rangeText(t.days || [t.date])) + '. Хочу уточнить по обучению." data-chat-title="Вопрос по обучению">Написать Марине</button></div>' : '') + '</div>';
     }).join("");
     $("kCertBox").hidden = !d.certs.length;
     $("kCerts").innerHTML = d.certs.slice().reverse().map(function (c) {
       var st0 = certState(c);
-      return '<a class="k-row" style="text-decoration:none;color:inherit" href="#cert-' + certKey(c.code) + '"><span>№ ' + esc(c.code) + '<small>остаток ' + rub(certBalance(c)) + ' из ' + rub(c.sum) + ' · до ' + shortDate(c.till) + '</small></span><span class="pill ' + st0[1] + '">' + st0[0] + '</span></a>';
+      return '<div class="k-item"><a class="k-row" style="text-decoration:none;color:inherit" href="#cert-' + certKey(c.code) + '"><span>№ ' + esc(c.code) + '<small>остаток ' + rub(certBalance(c)) + ' из ' + rub(c.sum) + ' · до ' + shortDate(c.till) + (c.to ? ' · для: ' + esc(c.to) : '') + '</small></span><span class="pill ' + st0[1] + '">' + st0[0] + '</span></a>' +
+        '<div class="acts"><a class="btn sm ghost" href="#cert-' + certKey(c.code) + '">Открыть</a><button type="button" class="btn sm ghost" data-kcm="' + c.id + '">Прислать на почту</button>' +
+        (c.status === "wait" && !c.claimed ? '<button type="button" class="btn sm" data-kpay="c:' + c.id + '">Оплатить</button>' : '') + '</div><div data-kpaybox="c:' + c.id + '"></div></div>';
     }).join("");
   }
+  // обучение и сертификаты из кабинета: оплатить, отменить бронь, прислать сертификат на почту
+  $("kBody").addEventListener("click", function (e) {
+    var pay = e.target.closest("[data-kpay]"), tc = e.target.closest("[data-ktc]"), cm = e.target.closest("[data-kcm]");
+    if (pay) {
+      var key = pay.dataset.kpay, r = findClaim(key), box = document.querySelector('[data-kpaybox="' + key + '"]'); if (!r || !box) return;
+      var t = key[0] === "t", sum = t ? r.pre : r.sum;
+      var msg = t ? "Здравствуйте, Марина! Я оплатила предоплату " + rub(r.pre) + " за курс «" + course(r.course).name + "». Даты: " + rangeText(r.days || [r.date]) + ". Меня зовут " + r.name + ", телефон " + r.phone + "."
+        : "Здравствуйте, Марина! Я оплатил(а) подарочный сертификат № " + r.code + " на " + rub(r.sum) + ". Меня зовут " + (r.name || "") + ", телефон " + (r.phone || "") + ".";
+      box.innerHTML = box.innerHTML ? "" : payBox(sum, msg, key, r.hold || Date.now() + PAY.payMin * 6e4);
+      return;
+    }
+    if (tc) {
+      if (tc.dataset.sure !== "1") { tc.dataset.sure = "1"; tc.textContent = "Точно отменить? Нажмите ещё раз"; return; }
+      tc.disabled = true;
+      apiSend({ type: "client_train_cancel", ctoken: ctoken, id: tc.dataset.ktc }).then(function (r) {
+        if (!r || !r.ok) { tc.disabled = false; toast((r && r.error) || "Нет связи с сервером", true); return; }
+        pubDoc(r); loadK(); toast("Бронь отменена. Марина получит уведомление");
+      });
+      return;
+    }
+    if (cm) {
+      cm.disabled = true;
+      apiSend({ type: "client_cert_mail", ctoken: ctoken, id: cm.dataset.kcm }).then(function (r) {
+        cm.disabled = false;
+        toast(r && r.ok ? "Отправили на " + r.to + ". Нет во «Входящих» — проверьте «Спам»" : (r && r.error) || "Нет связи с сервером", !(r && r.ok));
+      });
+    }
+  });
   $("kNext").addEventListener("click", myClick);
   function kMailSave(m) {
     errBox("kMailErr"); $("kMailGo").disabled = true;
@@ -2973,6 +3093,111 @@ div.f { display: grid; gap: 8px; }
       showK(); toast("Вы вошли в личный кабинет");
     });
   });
+  // ---------- кабинет по почте: вход, регистрация, код, новый пароль ----------
+  var kMode = "login", kMail = "";
+  function kShow(m) {
+    kMode = m;
+    ["login", "reg", "code", "reset"].forEach(function (x) { $("kf" + x[0].toUpperCase() + x.slice(1)).hidden = x !== m; });
+    document.querySelectorAll("#kSeg button").forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.m === m)); });
+    $("kSeg").hidden = m === "code" || m === "reset";
+    showK();
+  }
+  function kErr(id, t) { errBox(id, t); }
+  function kIn(t) { ctoken = t; lsSet("ma-ctoken", ctoken); kMode = "login"; kShow("login"); toast("Вы вошли в личный кабинет"); }
+  function okMail(v) { v = String(v || "").trim().toLowerCase(); return /^[^\s@]+@[^\s@]+\.[a-zа-я]{2,}$/i.test(v) ? v : ""; }
+  function busy(form, on) { var b = form.querySelector('[type="submit"]'); if (b) b.disabled = on; }
+  $("kSeg").addEventListener("click", function (e) { var b = e.target.closest("[data-m]"); if (b) kShow(b.dataset.m); });
+  $("v-kabinet").addEventListener("click", function (e) {
+    var g = e.target.closest("[data-kgo]"), a = e.target.closest("[data-kagain]");
+    if (g) {
+      if (g.dataset.kgo === "phone") { kMode = "phone"; showK(); return; }
+      if (g.dataset.kgo === "reset") { $("kRsE").value = $("kEm").value || kMail; $("kRs2").hidden = true; $("kRsAgain").hidden = true; $("kRsGo").textContent = "Прислать код"; }
+      kShow(g.dataset.kgo); return;
+    }
+    if (a) {
+      a.disabled = true; setTimeout(function () { a.disabled = false; }, 60000);
+      apiSend({ type: "acc_code", email: kMail, purpose: a.dataset.kagain }).then(function (r) { toast(r && r.ok ? "Отправили новый код на " + kMail + ". Проверьте и «Спам»" : (r && r.error) || "Нет связи с сервером"); });
+    }
+  });
+  $("kfLogin").addEventListener("submit", function (e) {
+    e.preventDefault(); var f = this, m = okMail($("kEm").value);
+    if (!m) { kErr("kfLoginErr", "Проверьте адрес почты."); return; }
+    if ($("kPw").value.length < 6) { kErr("kfLoginErr", "Введите пароль."); return; }
+    kErr("kfLoginErr"); busy(f, true);
+    apiSend({ type: "acc_login", email: m, pass: $("kPw").value }).then(function (r) {
+      busy(f, false);
+      if (r && r.verify) { kMail = m; $("kCodeTo").textContent = m; kShow("code"); kErr("kfCodeErr", r.error); return; }
+      if (!r || !r.ok) { kErr("kfLoginErr", (r && r.error) || "Нет связи с сервером"); return; }
+      $("kPw").value = ""; kIn(r.ctoken);
+    });
+  });
+  $("kfReg").addEventListener("submit", function (e) {
+    e.preventDefault(); var f = this, m = okMail($("kRe").value), n = $("kRn").value.trim();
+    var err = n.length < 2 ? "Укажите имя." : !m ? "Проверьте адрес почты, например name@mail.ru" : $("kRp").value.length < 6 ? "Пароль — не короче 6 символов." : !$("kRpd").checked ? "Отметьте согласие на обработку данных." : "";
+    kErr("kfRegErr", err); if (err) return;
+    busy(f, true);
+    apiSend({ type: "acc_register", email: m, name: n, pass: $("kRp").value, consent: 1 }).then(function (r) {
+      busy(f, false);
+      if (!r || !r.ok) { kErr("kfRegErr", (r && r.error) || "Нет связи с сервером"); return; }
+      kMail = m; $("kCodeTo").textContent = m; $("kCd").value = ""; kErr("kfCodeErr"); kShow("code"); $("kCd").focus();
+    });
+  });
+  $("kfCode").addEventListener("submit", function (e) {
+    e.preventDefault(); var f = this;
+    if (!/^\d{6}$/.test($("kCd").value.trim())) { kErr("kfCodeErr", "Введите 6 цифр из письма."); return; }
+    busy(f, true);
+    apiSend({ type: "acc_verify", email: kMail, code: $("kCd").value.trim() }).then(function (r) {
+      busy(f, false);
+      if (!r || !r.ok) { kErr("kfCodeErr", (r && r.error) || "Нет связи с сервером"); return; }
+      $("kRp").value = ""; kIn(r.ctoken); toast("Почта подтверждена — добро пожаловать!");
+    });
+  });
+  $("kfReset").addEventListener("submit", function (e) {
+    e.preventDefault(); var f = this, m = okMail($("kRsE").value);
+    if (!m) { kErr("kfResetErr", "Проверьте адрес почты."); return; }
+    kErr("kfResetErr"); busy(f, true);
+    if ($("kRs2").hidden) {
+      apiSend({ type: "acc_reset_req", email: m }).then(function (r) {
+        busy(f, false);
+        if (!r || !r.ok) { kErr("kfResetErr", (r && r.error) || "Нет связи с сервером"); return; }
+        kMail = m; $("kRs2").hidden = false; $("kRsAgain").hidden = false; $("kRsGo").textContent = "Сохранить и войти";
+        $("kRsNote").innerHTML = "Если почта <b>" + esc(m) + "</b> зарегистрирована, на неё пришёл код. Введите его и новый пароль."; $("kRsC").focus();
+      });
+      return;
+    }
+    if (!/^\d{6}$/.test($("kRsC").value.trim()) || $("kRsP").value.length < 6) { busy(f, false); kErr("kfResetErr", "Введите 6 цифр из письма и новый пароль (не короче 6 символов)."); return; }
+    apiSend({ type: "acc_reset", email: m, code: $("kRsC").value.trim(), pass: $("kRsP").value }).then(function (r) {
+      busy(f, false);
+      if (!r || !r.ok) { kErr("kfResetErr", (r && r.error) || "Нет связи с сервером"); return; }
+      $("kRsC").value = ""; $("kRsP").value = ""; kIn(r.ctoken); toast("Пароль изменён, вы в кабинете");
+    });
+  });
+  // в кабинете: смена пароля и привязка телефона
+  $("kPwOpen").onclick = function () { $("kPwBox").hidden = false; $("kPwO").focus(); };
+  $("kPwClose").onclick = function () { $("kPwBox").hidden = true; kErr("kPwErr"); };
+  $("kPwForgot").onclick = function () { var m = kData && kData.acc ? kData.acc.email : ""; $("kOut").click(); $("kRsE").value = m; kShow("reset"); };
+  $("kPwBox").addEventListener("submit", function (e) {
+    e.preventDefault(); var f = this;
+    if ($("kPwN").value.length < 6) { kErr("kPwErr", "Новый пароль — не короче 6 символов."); return; }
+    busy(f, true);
+    apiSend({ type: "acc_pass", ctoken: ctoken, old: $("kPwO").value, pass: $("kPwN").value }).then(function (r) {
+      busy(f, false);
+      if (!r || !r.ok) { kErr("kPwErr", (r && r.error) || "Нет связи с сервером"); return; }
+      $("kPwO").value = ""; $("kPwN").value = ""; $("kPwBox").hidden = true; toast("Пароль изменён");
+    });
+  });
+  $("kPhBox").addEventListener("submit", function (e) {
+    e.preventDefault(); var f = this, ph = phoneOk($("kPhIn").value);
+    if (!ph) { kErr("kPhErr", "Укажите мобильный телефон полностью."); return; }
+    kErr("kPhErr"); busy(f, true);
+    var withCode = !$("kPhCL").hidden;
+    apiSend({ type: "acc_phone", ctoken: ctoken, phone: ph, code: withCode ? $("kPhC").value.trim() : "" }).then(function (r) {
+      busy(f, false);
+      if (!r || !r.ok) { kErr("kPhErr", (r && r.error) || "Нет связи с сервером"); return; }
+      if (!withCode) { $("kPhCL").hidden = false; $("kPhGo").textContent = "Привязать"; $("kPhNote").textContent = "Код отправлен " + (r.via === "tg" ? "в Telegram-бот студии" : "на почту " + r.to) + ". Он действует 10 минут."; $("kPhC").focus(); return; }
+      $("kPhCL").hidden = true; $("kPhC").value = ""; $("kPhGo").textContent = "Получить код"; toast("Номер привязан — записи по нему теперь в кабинете"); loadK();
+    });
+  });
   $("kOut").onclick = function () { apiSend({ type: "client_logout", ctoken: ctoken }); ctoken = ""; lsSet("ma-ctoken", null); kData = null; showK(); };
   function moveMine(btn) {
     var rec = findMyRec(btn.dataset.mvgo); if (!rec || !mv || mv.start == null) return;
@@ -2983,7 +3208,7 @@ div.f { display: grid; gap: 8px; }
       mv = null; rerenderMy(); if (kData) loadK(); toast("Запись перенесена на " + to + ". Марина получит уведомление");
     }
     if (SYNC) {
-      apiSend({ type: "move", id: rec.id, phone: rec.phone, date: nd, start: ns, dur: bmin(rec) }).then(function (r) {
+      apiSend({ type: "move", ctoken: ctoken, id: rec.id, phone: rec.phone, date: nd, start: ns, dur: bmin(rec) }).then(function (r) {
         if (!r || !r.ok) { btn.disabled = false; toast((r && r.error) || "Нет связи с сервером. Попробуйте ещё раз"); if (r && /заняли|2 дня/.test(r.error || "")) { mv.start = null; fetchState(true).then(rerenderMy); } return; }
         if (mine.bookings[rec.id]) { mine.bookings[rec.id].date = nd; mine.bookings[rec.id].start = ns; lsSet("ma-mine", mine); }
         pubDoc(r); done();
@@ -3009,7 +3234,7 @@ div.f { display: grid; gap: 8px; }
     if (!canMove(rec)) { toast("До визита меньше 2 дней — отменить можно только через Марину: +7 995 428‑47‑88", true); rerenderMy(); return; }
     if (SYNC) {
       b.disabled = true;
-      apiSend({ type: "cancel", id: rec.id, phone: rec.phone }).then(function (r) {
+      apiSend({ type: "cancel", ctoken: ctoken, id: rec.id, phone: rec.phone }).then(function (r) {
         if (!r || !r.ok) { b.disabled = false; toast((r && r.error) || "Нет связи с сервером. Попробуйте ещё раз", true); return; }
         pubDoc(r); if (kData) loadK(); rerenderMy(); toast("Запись отменена. Марина получит уведомление");
       });
@@ -4047,7 +4272,8 @@ div.f { display: grid; gap: 8px; }
     e.preventDefault();
     var name = $("cName").value.trim().replace(/\s+/g, " "), ph = phoneOk($("cPhone").value), phone = ph ? phoneNice(ph) : "";
     var waitC = ph ? (st.certs || []).filter(function (x) { return phoneOk(x.phone) === ph && x.status === "wait"; }).length : 0;
-    var err = nameErr(name) || (!ph ? "Укажите мобильный телефон полностью." : "") ||
+    var cEm = okMail($("cEmail").value);
+    var err = nameErr(name) || (!ph ? "Укажите мобильный телефон полностью." : "") || (!cEm ? "Укажите почту — на неё придёт сертификат, чтобы он не потерялся." : "") ||
       (waitC >= 2 ? "На этот номер уже 2 неоплаченных сертификата. Оплатите их или напишите Марине." : "") || (!$("cTerm").checked ? "Отметьте, что знаете срок действия сертификата." : !$("cPd").checked ? "Отметьте согласие на обработку данных." : "");
     if (!err && botLike(this)) return;
     if (!err && tooFast(this)) err = "Проверьте данные и нажмите кнопку ещё раз.";
@@ -4058,9 +4284,9 @@ div.f { display: grid; gap: 8px; }
       // номер сертификата: МА- и 6 случайных знаков без похожих букв и цифр
       st.certs = st.certs || [];
       var code = newCertCode();
-      var crec = { id: "c" + Date.now().toString(36), code: code, sum: cSum, balance: cSum, to: $("cTo").value.trim().replace(/https?:\S+|www\.\S+/g, "").slice(0, 30), name: name, phone: phone, status: "wait", created: dkey(new Date()), till: dkey(certTill()), spent: [] };
+      var crec = { id: "c" + Date.now().toString(36), code: code, sum: cSum, balance: cSum, to: $("cTo").value.trim().replace(/https?:\S+|www\.\S+/g, "").slice(0, 30), name: name, phone: phone, email: cEm, status: "wait", created: dkey(new Date()), till: dkey(certTill()), spent: [] };
       if (SYNC) {
-        apiSend({ type: "cert", rec: crec }).then(function (r) {
+        apiSend({ type: "cert", ctoken: ctoken || undefined, rec: crec }).then(function (r) {
           if (r && r.ok) { addMine("certs", r.rec); pubDoc(r, "certs"); made(st.certs.filter(function (x) { return x.id === r.rec.id; })[0] || r.rec); return; }
           btn.disabled = false; btn.textContent = "Оплатить " + rub(cSum);
           $("cErr").textContent = (r && r.error) || "Нет связи с сервером. Проверьте интернет и попробуйте ещё раз."; $("cErr").hidden = false;
@@ -4074,9 +4300,9 @@ div.f { display: grid; gap: 8px; }
         var until = cid.hold || Date.now() + PAY.payMin * 6e4;
         $("mcPhone").value = phone;
         save(); renderGift(code); btn.disabled = false; btn.textContent = "Оплатить " + rub(cSum);
-        $("cDone").innerHTML = "<b>Сертификат № " + code + "</b> на " + rub(cSum) + " создан и ждёт оплаты. Оплатите по СБП — как только Марина подтвердит поступление, он станет активным и его можно будет подарить." + payBox(cSum, "Здравствуйте, Марина! Я оплатил(а) подарочный сертификат № " + code + " на " + rub(cSum) + ". Меня зовут " + name + ", телефон " + phone + ".", "c:" + cid.id, until) +
+        $("cDone").innerHTML = "<b>Сертификат № " + code + "</b> на " + rub(cSum) + " создан и ждёт оплаты. Письмо с номером отправили на " + esc(cid.email || "") + " (нет во «Входящих» — проверьте «Спам»). Оплатите по СБП — как только Марина подтвердит поступление, он станет активным и его можно будет подарить." + payBox(cSum, "Здравствуйте, Марина! Я оплатил(а) подарочный сертификат № " + code + " на " + rub(cSum) + ". Меня зовут " + name + ", телефон " + phone + ".", "c:" + cid.id, until) +
           tgPreview("🎁 Новый сертификат № " + code + " на " + rub(cSum) + "\n" + name + ", " + phone + "\nЖдёт оплату по СБП.");
-        $("cDone").hidden = false; $("cName").value = ""; $("cPhone").value = ""; $("cPd").checked = false; $("cTerm").checked = false;
+        $("cDone").hidden = false; $("cName").value = ""; $("cPhone").value = ""; $("cEmail").value = ""; $("cPd").checked = false; $("cTerm").checked = false;
         lastCode = code; $("cShare").hidden = true;
         renderMyCerts(true);
         $("cDone").scrollIntoView({ behavior: "smooth", block: "center" });
@@ -4252,6 +4478,7 @@ div.f { display: grid; gap: 8px; }
     var certHash = h.indexOf("cert-") === 0 ? h.slice(5) : null;
     if (certHash) v = "podarok"; else if (VIEWS.indexOf(h) > 0) v = h;
     var wayHash = h === "kak-proiti"; if (wayHash) v = "kontakty";
+    if (SYNC && (h === "moi-zapisi" || h === "moi-sertifikaty")) { location.replace("#kabinet"); return; }  // всё своё — в личном кабинете
     if (h === "moi-zapisi") { v = "zapis"; pendingTo = "myForm"; }
     if (v === "kabinet" && !SYNC) { location.replace("#moi-zapisi"); return; }  // в демо без сервера — записи этого телефона
     if (h === "moi-sertifikaty") { v = "sertifikat"; pendingTo = "mcForm"; }
@@ -4470,6 +4697,7 @@ div.f { display: grid; gap: 8px; }
     document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") fetchState(); });
   }
   addEventListener("hashchange", route); route();
+  if (ctoken && curView !== "kabinet") loadK();  // вошли раньше — подставим имя и телефон в формы
 
   var toastT;
   // Короткие подтверждения исчезают сами; длинные и важные (с подсказкой, что делать) висят, пока не нажать «Понятно»

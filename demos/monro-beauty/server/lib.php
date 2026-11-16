@@ -104,6 +104,20 @@ function send_mail($to, $subject, $text) {
     return $ok;
 }
 
+// Письмо покупателю сертификата: при оформлении (ждёт оплату) и когда Марина подтвердит оплату (активен)
+function cert_mail($c, $paid) {
+    if (empty($c['email'])) return;
+    $key = preg_replace('/^(МН|MH|MN|МА|MA)/u', '', preg_replace('/[^A-ZА-Я0-9]/u', '', mb_strtoupper((string)$c['code'])));
+    $link = rtrim((string)cfg('site_url'), '/') . '/#cert-' . $key;
+    $sum = number_format((int)$c['sum'], 0, ',', ' ') . ' ₽';
+    $till = !empty($c['till']) ? date('d.m.Y', strtotime($c['till'])) : '';
+    $text = $paid
+        ? "Оплата получена — сертификат активен 🎁\n\n<b>№ " . h($c['code']) . "</b> на <b>" . $sum . "</b>" . (!empty($c['to']) ? "\nДля: " . h($c['to']) : '') . ($till ? "\nДействует до " . $till : '')
+          . "\n\nОткрыть, скачать картинкой или переслать: <a href=\"" . h($link) . "\">" . h($link) . "</a>\n\nСохраните это письмо — в нём номер сертификата. Записаться можно на сайте, номер сертификата назовите Марине."
+        : "Сертификат <b>№ " . h($c['code']) . "</b> на <b>" . $sum . "</b> оформлен и ждёт оплаты.\n\nКак только Марина увидит перевод, придёт письмо, что сертификат активен.\nСертификат: <a href=\"" . h($link) . "\">" . h($link) . "</a>";
+    send_mail($c['email'], ($paid ? 'Ваш подарочный сертификат № ' : 'Сертификат № ') . $c['code'] . ($paid ? ' активен' : ' — ждёт оплаты'), $text);
+}
+
 // Письмо с файлом (резервная копия базы)
 function send_mail_file($to, $subject, $text, $fname, $data) {
     $from = (string)cfg('mail_from');

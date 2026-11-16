@@ -220,8 +220,58 @@ function client_db() {
     $db = store_init();
     $db->exec('CREATE TABLE IF NOT EXISTS client_sessions (token TEXT PRIMARY KEY, phone TEXT, created INTEGER)');
     $db->exec('CREATE TABLE IF NOT EXISTS client_codes (phone TEXT PRIMARY KEY, hash TEXT, until INTEGER, tries INTEGER, sent INTEGER)');
+    // личные кабинеты клиенток по почте и паролю; телефон — только подтверждённый кодом
+    $db->exec('CREATE TABLE IF NOT EXISTS accounts (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE, name TEXT, pass TEXT, phone TEXT DEFAULT "", verified INTEGER DEFAULT 0, created INTEGER)');
+    $db->exec('CREATE TABLE IF NOT EXISTS acc_codes (email TEXT, purpose TEXT, hash TEXT, until INTEGER, tries INTEGER, sent INTEGER, PRIMARY KEY (email, purpose))');
+    try { $db->exec('ALTER TABLE client_sessions ADD COLUMN acc INTEGER'); } catch (Throwable $e) {}
     return $db;
 }
+// Кто вошёл: по номеру телефона (код из Telegram) или в кабинет по почте
+function client_who($token) {
+    if (!is_string($token) || strlen($token) < 32) return null;
+    $q = client_db()->prepare('SELECT phone, acc, created FROM client_sessions WHERE token = ?'); $q->execute([hash('sha256', $token)]);
+    $r = $q->fetch(); if (!$r || $r['created'] < time() - 180 * 86400) return null;
+    if (!$r['acc']) return ['phone' => $r['phone'], 'acc' => null];
+    $a = acc_get((int)$r['acc']); if (!$a || !$a['verified']) return null;
+    return ['phone' => $a['phone'], 'acc' => $a];
+}
+function acc_get($id) { $q = client_db()->prepare('SELECT * FROM accounts WHERE id = ?'); $q->execute([$id]); return $q->fetch() ?: null; }
+function acc_by_mail($m) { $q = client_db()->prepare('SELECT * FROM accounts WHERE email = ?'); $q->execute([$m]); return $q->fetch() ?: null; }
+function acc_session($accId) {
+    $t = bin2hex(random_bytes(24));
+    client_db()->prepare('INSERT INTO client_sessions (token, phone, acc, created) VALUES (?, "", ?, ?)')->execute([hash('sha256', $t), $accId, time()]);
+    return $t;
+}
+// Что принадлежит клиентке: её телефон (если подтверждён), записи и покупки из кабинета, почта покупателя сертификата
+function client_mine($who) {
+    $phone = $who['phone'] ?? ''; $acc = $who['acc'] ?? null;
+    return function ($x) use ($phone, $acc) {
+        if ($phone && digits_phone($x['phone'] ?? '') === $phone) return true;
+        if (!$acc) return false;
+        return (int)($x['owner'] ?? 0) === (int)$acc['id'] || (($x['email'] ?? '') !== '' && mb_strtolower($x['email']) === $acc['email']);
+    };
+}
+// Код на почту (регистрация, сброс пароля): 6 цифр, 15 минут, 5 попыток, новый — не чаще раза в минуту
+function acc_send_code($email, $purpose) {
+    $db = client_db();
+    $q = $db->prepare('SELECT sent FROM acc_codes WHERE email = ? AND purpose = ?'); $q->execute([$email, $purpose]);
+    if ((int)$q->fetchColumn() > time() - 60) return 'wait';
+    $code = (string)random_int(100000, 999999);
+    $db->prepare('INSERT OR REPLACE INTO acc_codes (email, purpose, hash, until, tries, sent) VALUES (?, ?, ?, ?, 0, ?)')->execute([$email, $purpose, password_hash($code, PASSWORD_DEFAULT), time() + 900, time()]);
+    $what = $purpose === 'reset' ? 'смены пароля' : 'подтверждения почты';
+    $ok = send_mail($email, 'Код ' . $code . ' — личный кабинет студии «М.А»', "Код для " . $what . " в личном кабинете студии «М.А»:\n\n<b style=\"font-size:28px;letter-spacing:4px\">" . $code . "</b>\n\nКод действует 15 минут. Никому его не сообщайте — Марина никогда не спрашивает коды.\nЕсли вы ничего не запрашивали, просто удалите это письмо.");
+    return $ok ? 'ok' : 'fail';
+}
+function acc_check_code($email, $purpose, $code) {
+    $db = client_db();
+    $q = $db->prepare('SELECT * FROM acc_codes WHERE email = ? AND purpose = ?'); $q->execute([$email, $purpose]); $c = $q->fetch();
+    if (!$c || $c['until'] < time() || $c['tries'] >= 5) return 'Код устарел. Нажмите «Прислать код ещё раз».';
+    $db->prepare('UPDATE acc_codes SET tries = tries + 1 WHERE email = ? AND purpose = ?')->execute([$email, $purpose]);
+    if (!password_verify(preg_replace('/\D/', '', (string)$code), $c['hash'])) { sleep(1); return 'Неверный код. Осталось попыток: ' . (4 - (int)$c['tries']); }
+    $db->prepare('DELETE FROM acc_codes WHERE email = ? AND purpose = ?')->execute([$email, $purpose]);
+    return '';
+}
+function mail_ok($m) { $m = mb_strtolower(trim((string)$m)); return filter_var($m, FILTER_VALIDATE_EMAIL) && strlen($m) <= 80 ? $m : ''; }
 function client_phone($token) {
     if (!is_string($token) || strlen($token) < 32) return '';
     $q = client_db()->prepare('SELECT phone, created FROM client_sessions WHERE token = ?'); $q->execute([hash('sha256', $token)]);
