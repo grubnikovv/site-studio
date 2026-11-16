@@ -118,19 +118,26 @@ if ($type === 'booking') {
     foreach ($mine as $b) if ($b['date'] === $date) fail('На этот день у вас уже есть запись в ' . hm((int)$b['start']) . '.');
     if (count($mine) >= 3) fail('На этот номер уже 3 будущие записи. Чтобы записаться ещё, напишите Марине.');
     if (!slot_free($doc, $date, $start, $dur, $id)) fail('Это время только что заняли. Выберите другое.');
-    $remind = in_array($r['remind'] ?? '', ['tg', 'max', 'none'], true) ? $r['remind'] : 'none';
+    $remind = in_array($r['remind'] ?? '', ['tg', 'max', 'mail', 'none'], true) ? $r['remind'] : 'none';
+    $email = $remind === 'mail' ? mb_strtolower(trim((string)($r['email'] ?? ''))) : '';
+    if ($remind === 'mail' && (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 80)) fail('Проверьте email для напоминаний.');
     $svcName = clean($in['svcName'] ?? ($r['svcName'] ?? ''), 80);
     $rec = ['id' => $id, 'date' => $date, 'start' => $start, 'dur' => $dur, 'svc' => clean($r['svc'] ?? '', 30), 'name' => $name, 'phone' => phone_nice($phone),
-        'note' => clean($r['note'] ?? '', 200), 'price' => max(0, (int)($r['price'] ?? 0)), 'remove' => !empty($r['remove']), 'remind' => $remind, 'status' => 'booked', 'created' => now_ms()];
+        'note' => clean($r['note'] ?? '', 200), 'price' => max(0, (int)($r['price'] ?? 0)), 'remove' => !empty($r['remove']), 'remind' => $remind, 'status' => 'booked', 'created' => now_ms()] + ($email ? ['email' => $email] : []);
     $doc['bookings'] = array_values(array_filter($doc['bookings'], fn($b) => ($b['id'] ?? '') !== $id));
     $doc['bookings'][] = $rec;
     doc_note($doc, '📅', 'Новая запись', $name . ' · ' . $svcName . ' · ' . when_text($date, $start), ['tab' => 'day', 'date' => $date]);
     // для бота и напоминаний
-    db()->prepare('INSERT OR REPLACE INTO bookings (id, date, start, dur, svc, coat, name, phone, status, remind, created, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, "booked", ?, ?, ?)')
-        ->execute([$id, $date, $start, $dur, $svcName, empty($r['coat']) ? 0 : 1, $name, $phone, $remind, time(), time()]);
+    db()->prepare('INSERT OR REPLACE INTO bookings (id, date, start, dur, svc, coat, name, phone, status, remind, email, created, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, "booked", ?, ?, ?, ?)')
+        ->execute([$id, $date, $start, $dur, $svcName, empty($r['coat']) ? 0 : 1, $name, $phone, $remind, $email, time(), time()]);
     $v = doc_save($doc, $v);
     notify_admins("📅 <b>Новая запись</b>\n" . h($name) . ', ' . phone_nice($phone) . "\n" . h($svcName) . "\n" . when_text($date, $start)
-        . "\nНапоминания: " . ['tg' => 'Telegram', 'max' => 'MAX', 'none' => 'не нужны'][$remind]);
+        . "\nНапоминания: " . ['tg' => 'Telegram', 'max' => 'MAX', 'mail' => 'почта ' . h($email), 'none' => 'не нужны'][$remind]);
+    if ($remind === 'mail') {  // подтверждение записи письмом
+        $site = rtrim((string)cfg('site_url'), '/');
+        send_mail($email, 'Вы записаны в студию «М.А» — ' . when_text($date, $start), 'Здравствуйте, ' . h($name) . "! 💅\n\nВы записаны в студию «М.А»:\n<b>" . h($svcName) . "</b>\n<b>" . when_text($date, $start)
+            . "</b>\nМихайловка, ул. Обороны, 41\n" . way_link() . "\n\nНапомним за 2 дня и за 2 часа до визита.\nЕсли планы изменятся — отмените запись на сайте в разделе <a href=\"" . h($site) . "/#zapis\">«Мои записи»</a> или напишите Марине: +7 995 428-47-88.");
+    }
     json_out(['ok' => true, 'v' => $v, 'doc' => doc_public($doc), 'tg' => 'https://t.me/' . cfg('bot_name') . '?start=b_' . $id . '_' . link_key($id)]);
 }
 

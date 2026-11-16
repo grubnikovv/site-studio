@@ -1546,7 +1546,7 @@ div.f { display: grid; gap: 8px; }
 
     <h2>2. Какие данные и зачем мы обрабатываем</h2>
     <div class="ltable">
-      <div><b>Запись на процедуру</b><span>Имя, телефон, выбранная услуга, дата и время, комментарий, способ напоминания. Чтобы записать вас, напомнить о визите, связаться при переносе и вести историю посещений.</span></div>
+      <div><b>Запись на процедуру</b><span>Имя, телефон, email (если выбраны напоминания на почту), выбранная услуга, дата и время, комментарий, способ напоминания. Чтобы записать вас, напомнить о визите, связаться при переносе и вести историю посещений.</span></div>
       <div><b>Подарочный сертификат</b><span>Имя и телефон покупателя, имя получателя (по желанию), номер, номинал и остаток сертификата. Чтобы выпустить сертификат, найти его по телефону и списать оплату.</span></div>
       <div><b>Обучение</b><span>Имя, телефон, выбранный курс и даты, сведения о предоплате. Чтобы закрепить даты, связаться перед обучением, выдать сертификат о прохождении курса.</span></div>
       <div><b>Модели на обучение</b><span>Имя, телефон, дата и время процедуры. Чтобы договориться о бесплатной процедуре и при необходимости пригласить снова.</span></div>
@@ -1597,7 +1597,7 @@ div.f { display: grid; gap: 8px; }
   <section class="block tight"><div class="wrap legal">
     <p>Отмечая галочку «Согласен(на) на обработку персональных данных» в форме на сайте, я свободно, своей волей и в своём интересе даю согласие Шевченко Марина Александровна, плательщик налога на профессиональный доход (самозанятая), ИНН 343703467221, адрес: Волгоградская область, г. Михайловка, ул. Обороны, 41 (далее — «Оператор»), на обработку моих персональных данных на следующих условиях.</p>
     <h2>Какие данные</h2>
-    <p>Имя, номер телефона, а также сведения, которые я указываю в форме: выбранная услуга или курс, дата и время, комментарий, способ напоминания, имя получателя подарочного сертификата.</p>
+    <p>Имя, номер телефона, email (если я выбираю напоминания на почту), а также сведения, которые я указываю в форме: выбранная услуга или курс, дата и время, комментарий, способ напоминания, имя получателя подарочного сертификата.</p>
     <h2>Цели</h2>
     <p>Запись на процедуру или обучение, напоминание о визите, связь со мной по поводу записи, выпуск и учёт подарочного сертификата, ведение истории посещений.</p>
     <h2>Действия</h2>
@@ -1681,7 +1681,8 @@ div.f { display: grid; gap: 8px; }
           <li>Подскажем, <b>когда пора на коррекцию</b>, чтобы ногти не отросли</li>
         </ul>
         <span class="lbl">Куда присылать</span>
-        <div class="seg3" id="bRem" style="grid-template-columns:1fr 1fr"><button type="button" data-v="tg" aria-pressed="true">Telegram</button><button type="button" data-v="none" aria-pressed="false">Не нужно</button></div>
+        <div class="seg3" id="bRem"><button type="button" data-v="tg" aria-pressed="true">Telegram</button><button type="button" data-v="mail" aria-pressed="false">Почта</button><button type="button" data-v="none" aria-pressed="false">Не нужно</button></div>
+        <label class="f" id="bMailL" hidden>Email для напоминаний<input type="email" id="bMail" autocomplete="email" inputmode="email" placeholder="name@mail.ru" maxlength="80"></label>
         <span class="note" id="bRemNote"></span>
       </div>
       <label class="check"><input type="checkbox" id="bPd"><span>Согласен(на) на <a href="#soglasie" target="_blank">обработку персональных данных</a> и с <a href="#politika" target="_blank">политикой конфиденциальности</a>.</span></label>
@@ -2006,7 +2007,7 @@ div.f { display: grid; gap: 8px; }
       Object.keys(mine[kind]).forEach(function (id) {
         var r = (st[kind] || []).filter(function (x) { return x.id === id; })[0], m = mine[kind][id];
         if (!r) { if (m.date < dkey(addDays(-400))) { delete mine[kind][id]; lsSet("ma-mine", mine); } return; }
-        ["name", "phone", "note", "remind", "price", "pre", "certPay"].forEach(function (f) { if (m[f] !== undefined && r[f] === undefined) r[f] = m[f]; });
+        ["name", "phone", "email", "note", "remind", "price", "pre", "certPay"].forEach(function (f) { if (m[f] !== undefined && r[f] === undefined) r[f] = m[f]; });
       });
     });
     st.certs = Object.keys(mine.certs).map(function (id) { return clone(mine.certs[id]); });
@@ -2437,6 +2438,7 @@ div.f { display: grid; gap: 8px; }
     var err = nameErr(name) || (!ph ? "Укажите мобильный телефон полностью, например +7 900 123-45-67." : "") ||
       (sameDay ? "На этот день у вас уже есть запись в " + hm(sameDay.start) + ". Чтобы изменить её, отмените старую запись или напишите Марине." : "") ||
       (mine.length >= 3 ? "На этот номер уже 3 будущие записи. Чтобы записаться ещё, напишите Марине." : "") ||
+      (bk.remind === "mail" && !/^[^\s@]+@[^\s@]+\.[a-zа-я]{2,}$/i.test($("bMail").value.trim()) ? "Укажите email для напоминаний или выберите другой способ." : "") ||
       (!$("bPd").checked ? "Отметьте согласие на обработку данных." : "");
     if (!err && botLike(this)) return;  // бот — молча игнорируем
     if (!err && tooFast(this)) err = "Проверьте данные и нажмите кнопку ещё раз.";
@@ -2447,6 +2449,7 @@ div.f { display: grid; gap: 8px; }
     var btn = $("bPay"); btn.disabled = true; btn.textContent = "Записываю…";
     setTimeout(function () {
       var s = svc(bk.svc), b = { id: "b" + Date.now().toString(36), date: bk.date, start: bk.start, svc: s.id, name: name, phone: phoneNice(ph), note: $("bNote").value.trim().slice(0, 200), price: bk.price, remove: bk.remove, remind: bk.remind, status: "booked", created: Date.now() };
+      if (bk.remind === "mail") b.email = $("bMail").value.trim().slice(0, 80);
       var botLink = apiSend({ type: "booking", rec: Object.assign({ dur: bmin(b), coat: CORR[s.id] ? 1 : 0 }, b), svcName: s.name + (b.remove ? " + снятие" : "") });
       if (SYNC) {  // с сервером: запись считается сделанной, только когда сервер её принял
         botLink.then(function (r) {
@@ -2462,7 +2465,9 @@ div.f { display: grid; gap: 8px; }
       note("📅", "Новая запись", b.name + " · " + s.name + " · " + whenText(b.date, b.start), { tab: "day", date: b.date });
       $("myPhone").value = b.phone; $("myList").innerHTML = "";
       $("bDone").textContent = whenText(b.date, b.start) + ". " + s.name + (b.remove ? " и снятие чужой работы" : "") + ". Адрес: ул. Обороны, 41.";
-      $("bRemDone").innerHTML = b.remind === "none"
+      $("bRemDone").innerHTML = b.remind === "mail"
+        ? '<div class="rem-cta"><b>📩 Письмо отправлено</b><p>Подтверждение записи придёт на ' + esc(b.email) + '. Если его нет через пару минут — проверьте папку «Спам» и отметьте «Не спам», чтобы напоминания приходили во «Входящие».</p></div>'
+        : b.remind === "none"
         ? '<div class="rem-cta"><b>🔔 Чтобы не забыть о записи</b><p>Подключите бесплатные напоминания: за 2 дня и за 2 часа до визита, перенос — одной кнопкой.</p><button class="btn glow" type="button" data-bot="tg">🔔 Подключить в Telegram</button></div>'
         : '<div class="rem-cta"><b>Остался один шаг</b><p>Нажмите кнопку и «Старт» в боте — без этого напоминания не придут. Это бесплатно.</p><button class="btn glow" type="button" data-bot="' + b.remind + '">🔔 Подключить в ' + (REM_NAME[b.remind] || "Telegram") + '</button></div>';
       $("bRemDone").querySelectorAll("[data-bot]").forEach(function (x) {
@@ -2478,7 +2483,10 @@ div.f { display: grid; gap: 8px; }
     }, 900);
   });
   // Напоминания: за 2 дня (если запись не раньше), за 2 часа; о коррекции — через 3 недели после визита
-  var REM_NAME = { tg: "Telegram", max: "MAX", sms: "SMS" };
+  var REM_NAME = { tg: "Telegram", max: "MAX", sms: "SMS", mail: "почте" };
+  // напоминания на почту: при выкладке выключаются, пока у домена не заработала почта (файл mail-on)
+  var MAIL_REMIND = true;
+  if (!MAIL_REMIND) { $("bRem").querySelector('[data-v="mail"]').remove(); $("bRem").style.gridTemplateColumns = "1fr 1fr"; }
   function remindPlan(k) {
     var days = Math.round((new Date(k + "T12:00") - new Date(dkey(new Date()) + "T12:00")) / 864e5), when = [];
     if (days >= 2) when.push("за 2 дня");
@@ -2489,11 +2497,13 @@ div.f { display: grid; gap: 8px; }
   function remindText(via, k) {
     if (via === "none") return "Без напоминаний легко забыть о записи. Если планы изменятся, напишите или позвоните Марине.";
     var w = remindPlan(k).join(", ");
+    if (via === "mail") return "Пришлём письмо с подтверждением, напомним " + w + " до визита и через 3 недели — о коррекции. Если письма нет — загляните в «Спам».";
     return "Напомним " + w + " до визита и через 3 недели — о коррекции. После записи останется нажать одну кнопку, чтобы подключить бота в " + (REM_NAME[via] || "Telegram") + ".";
   }
   function renderRem() {
     document.querySelectorAll("#bRem button").forEach(function (x) { x.setAttribute("aria-pressed", String(x.dataset.v === bk.remind)); });
     $("bRemNote").textContent = bk.date ? remindText(bk.remind, bk.date) : "";
+    $("bMailL").hidden = bk.remind !== "mail";
   }
   $("bRem").addEventListener("click", function (e) { var b = e.target.closest("[data-v]"); if (b) { bk.remind = b.dataset.v; renderRem(); } });
   // волна от пальца по кнопке (лёгкая: один span, удаляется после анимации)
@@ -2627,7 +2637,7 @@ div.f { display: grid; gap: 8px; }
     bk = { svc: pick || null, date: null, start: null, remove: false, remind: "tg" };
     renderRm();
     $("bRmBox").hidden = !!(bk.svc && svc(bk.svc).noRemove);
-    ["bName", "bPhone", "bNote"].forEach(function (id) { $(id).value = ""; }); $("bPd").checked = false; $("bErr").hidden = true;
+    ["bName", "bPhone", "bNote", "bMail"].forEach(function (id) { $(id).value = ""; }); $("bPd").checked = false; $("bErr").hidden = true; renderRem();
     renderSvcOpts(); if (bk.svc) { renderDays(); stepTo(2); } else stepTo(1);
   }
 
@@ -2885,7 +2895,7 @@ div.f { display: grid; gap: 8px; }
       return '<div class="bk' + (b.id === flashId ? " moved" : "") + '"><div class="r1"><b class="num">' + hm(b.start) + '–' + hm(b.start + bmin(b)) + '</b><span class="pill ' + t[1] + '">' + t[0] + '</span></div>' +
         '<div><b style="font-weight:700">' + esc(b.name) + '</b> · ' + esc(b.phone) + (b.example ? ' <span class="pill">пример</span>' : '') + '</div>' +
         '<div class="info">' + s.name + (b.remove ? ' + снятие чужой работы' : '') + ' · ' + rub(b.price || s.price) + (b.note ? ' · «' + esc(b.note) + '»' : '') + '</div>' +
-        (b.remind && b.remind !== "none" ? '<div class="info">🔔 ' + (REM_NAME[b.remind] || "Telegram") + ' · ' + remindPlan(b.date).join(", ") + '</div>' : '') +
+        (b.remind && b.remind !== "none" ? '<div class="info">🔔 ' + (b.remind === "mail" ? "Почта" + (b.email ? " " + esc(b.email) : "") : REM_NAME[b.remind] || "Telegram") + ' · ' + remindPlan(b.date).join(", ") + '</div>' : '') +
         overlapNote(b) +
         certBlock(b) +
         (b.status === "booked" ? '<div class="acts"><button data-a="move" data-id="' + b.id + '">Перенести</button><button data-a="came" data-id="' + b.id + '">Пришла</button><button data-a="noshow" data-id="' + b.id + '">Не пришла</button><button data-a="cancel" data-id="' + b.id + '">Отменить</button></div>'

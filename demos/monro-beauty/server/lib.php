@@ -22,6 +22,7 @@ function db() {
         created INTEGER, updated INTEGER)');
     $pdo->exec('CREATE TABLE IF NOT EXISTS admins (chat_id INTEGER PRIMARY KEY, name TEXT, added INTEGER)');
     $pdo->exec('CREATE TABLE IF NOT EXISTS hits (ip TEXT, t INTEGER)');
+    try { $pdo->exec('ALTER TABLE bookings ADD COLUMN email TEXT'); } catch (Throwable $e) {}  // для напоминаний на почту
     $pdo->exec('CREATE TABLE IF NOT EXISTS outbox (id INTEGER PRIMARY KEY AUTOINCREMENT, payload TEXT, t INTEGER, tries INTEGER DEFAULT 0)');
     return $pdo;
 }
@@ -70,9 +71,36 @@ function flush_outbox() {
     }
 }
 
-// Сообщение Марине (во все подключённые чаты мастера)
+// Сообщение Марине (во все подключённые чаты мастера) и копия на почту студии
 function notify_admins($text) {
     foreach (db()->query('SELECT chat_id FROM admins') as $a) send($a['chat_id'], $text);
+    if (cfg('mail_admin')) send_mail(cfg('mail_admin'), strip_tags(strtok($text, "\n")), $text);
+}
+
+// ---------- почта ----------
+// Письмо от студии. Текст — как в Telegram (<b>, <a>, переносы строк), оборачиваем в простой фирменный шаблон.
+function send_mail($to, $subject, $text) {
+    $from = (string)cfg('mail_from');
+    if (!$from || !filter_var($to, FILTER_VALIDATE_EMAIL)) return false;
+    $site = rtrim((string)cfg('site_url'), '/');
+    $body = '<!doctype html><html><body style="margin:0;background:#f6f1ef;font-family:Arial,sans-serif;color:#1c1416">'
+        . '<div style="max-width:520px;margin:0 auto;padding:24px 16px">'
+        . '<div style="font-family:Georgia,serif;font-size:22px;color:#9b1f45;margin-bottom:16px">М.А — академия маникюра и педикюра</div>'
+        . '<div style="background:#fff;border-radius:16px;padding:22px 20px;font-size:16px;line-height:1.55">' . str_replace('<a href=', '<a style="color:#9b1f45" href=', nl2br($text)) . '</div>'
+        . '<div style="font-size:13px;color:#7a6a6e;margin-top:14px;line-height:1.5">Михайловка, ул. Обороны, 41 · +7 995 428-47-88<br>'
+        . '<a href="' . h($site) . '/" style="color:#9b1f45">' . h(preg_replace('#^https?://#', '', $site)) . '</a></div></div></body></html>';
+    $headers = "MIME-Version: 1.0\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n"
+        . 'From: =?UTF-8?B?' . base64_encode('Студия «М.А»') . "?= <$from>\r\nReply-To: $from\r\n";
+    $ok = @mail($to, '=?UTF-8?B?' . base64_encode($subject) . '?=', chunk_split(base64_encode($body)), $headers, '-f' . $from);
+    if (!$ok) logline('mail to ' . $to . ' failed');
+    return $ok;
+}
+
+// Сообщение клиентке о её записи: в Telegram, если бот подключён, иначе на почту, если выбрана почта
+function notify_client($b, $subject, $text, $buttons = null) {
+    if (!empty($b['chat_id'])) return send($b['chat_id'], $text, $buttons);
+    if (($b['remind'] ?? '') === 'mail' && !empty($b['email'])) return send_mail($b['email'], $subject, $text);
+    return null;
 }
 
 // Ссылка на видео «как пройти» (страница сайта откроет его сама)

@@ -39,13 +39,15 @@ jobs:
           mkdir out && cp -r docs/monro/. out/
           sed -i 's#var API = ""#var API = "/server/api.php"#' out/index.html
           grep -q 'var API = "/server/api.php"' out/index.html
+          # письма клиенткам — только когда у домена работает почта (файл demos/monro-beauty/mail-on)
+          [ -f demos/monro-beauty/mail-on ] || sed -i 's#var MAIL_REMIND = true;#var MAIL_REMIND = false;#' out/index.html
           # сжать код страницы (пробелы, комментарии); имена в коде не трогаем
           npx --yes html-minifier-terser@7.2.0 --collapse-whitespace --conservative-collapse --remove-comments --minify-css true --minify-js '{"mangle":false,"compress":false}' -o out/index.min.html out/index.html
           grep -q 'API="/server/api.php"' out/index.min.html && mv out/index.min.html out/index.html
           ls -l out/index.html
           mkdir out/server && cp demos/monro-beauty/server/*.php demos/monro-beauty/server/.htaccess out/server/ && rm -f out/server/config.php
           php -r 'file_put_contents("out/server/config.php", "<?php return " . var_export([
-            "bot_token" => getenv("BOT_TOKEN"), "bot_name" => "ma_mihaylovka_bot", "admin_key" => getenv("ADMIN_KEY"), "cabinet_pass" => getenv("CABINET_PASS") ?: "",
+            "bot_token" => getenv("BOT_TOKEN"), "bot_name" => "ma_mihaylovka_bot", "admin_key" => getenv("ADMIN_KEY"), "cabinet_pass" => getenv("CABINET_PASS") ?: "", "mail_from" => file_exists("demos/monro-beauty/mail-on") ? "marina@" . getenv("DOMAIN") : "", "mail_admin" => file_exists("demos/monro-beauty/mail-on") ? "marina@" . getenv("DOMAIN") : "",
             "site_url" => (file_exists("demos/monro-beauty/https-on") ? "https://" . getenv("DOMAIN") : getenv("SITE")) . "/", "allow_origin" => "https://" . getenv("DOMAIN") . ",http://" . getenv("DOMAIN") . "," . getenv("SITE"),
             "db_path" => "__DB__", "tz" => "Europe/Volgograd", "tg_api" => "https://api.telegram.org"], true) . ";\n");'
           sed -i "s#'__DB__'#__DIR__ . '/data/bot.sqlite'#" out/server/config.php

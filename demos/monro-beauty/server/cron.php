@@ -6,7 +6,7 @@ if (PHP_SAPI !== 'cli' && ($_GET['key'] ?? '') !== cfg('admin_key')) { http_resp
 
 $db = db(); $now = time(); $sent = 0;
 $site = h(cfg('site_url'));
-$q = $db->query('SELECT * FROM bookings WHERE status = "booked" AND chat_id IS NOT NULL AND (sent_2d = 0 OR sent_2h = 0 OR sent_corr = 0)');
+$q = $db->query('SELECT * FROM bookings WHERE status = "booked" AND (chat_id IS NOT NULL OR (remind = "mail" AND email <> "")) AND (sent_2d = 0 OR sent_2h = 0 OR sent_corr = 0)');
 foreach ($q as $b) {
     $ts = booking_ts($b); $id = $b['id'];
     $btn = [[['text' => '✅ Подтверждаю', 'callback_data' => 'ok:' . $id], ['text' => '🔁 Перенести', 'callback_data' => 'mv:' . $id]]];
@@ -14,19 +14,19 @@ foreach ($q as $b) {
     // За 2 дня — только если записались заранее, больше чем за 2 дня
     if (!$b['sent_2d'] && $now >= $ts - 48 * 3600 && $now < $ts - 6 * 3600) {
         if ($b['created'] <= $ts - 48 * 3600 + 600)
-            send($b['chat_id'], "Напоминаем 💅\nЧерез 2 дня вы записаны в студию «М.А»:\n<b>" . h($b['svc']) . "</b>\n" . when_text($b['date'], $b['start']) . "\nМихайловка, ул. Обороны, 41\n" . way_link(), $b['confirmed'] ? null : $btn);
+            notify_client($b, 'Через 2 дня ждём вас в студии «М.А»', "Напоминаем 💅\nЧерез 2 дня вы записаны в студию «М.А»:\n<b>" . h($b['svc']) . "</b>\n" . when_text($b['date'], $b['start']) . "\nМихайловка, ул. Обороны, 41\n" . way_link(), $b['confirmed'] ? null : $btn);
         $db->prepare('UPDATE bookings SET sent_2d = 1 WHERE id = ?')->execute([$id]); $sent++;
     }
     // За 2 часа
     if (!$b['sent_2h'] && $now >= $ts - 2 * 3600 && $now < $ts) {
-        send($b['chat_id'], "Ждём вас сегодня в <b>" . hm((int)$b['start']) . "</b> 💗\n" . h($b['svc']) . "\nМихайловка, ул. Обороны, 41\n" . way_link() . "\n\nЕсли опаздываете — напишите Марине: +7 995 428-47-88.");
+        notify_client($b, 'Ждём вас сегодня в ' . hm((int)$b['start']), "Ждём вас сегодня в <b>" . hm((int)$b['start']) . "</b> 💗\n" . h($b['svc']) . "\nМихайловка, ул. Обороны, 41\n" . way_link() . "\n\nЕсли опаздываете — напишите Марине: +7 995 428-47-88.");
         $db->prepare('UPDATE bookings SET sent_2h = 1 WHERE id = ?')->execute([$id]); $sent++;
     }
     // О коррекции — через 3 недели после визита с покрытием, днём, если клиентка ещё не записалась снова
     if (!$b['sent_corr'] && $b['coat'] && $now >= $ts + 21 * 86400 && (int)date('G') >= 11 && (int)date('G') < 19) {
         $n = $db->prepare('SELECT COUNT(*) FROM bookings WHERE phone = ? AND date > ? AND status = "booked"'); $n->execute([$b['phone'], $b['date']]);
         if (!(int)$n->fetchColumn())
-            send($b['chat_id'], "Прошло 3 недели после вашего визита 💅\nСамое время обновить покрытие, пока ногти не отросли.\n\nЗаписаться онлайн: " . $site . "#zapis");
+            notify_client($b, 'Пора обновить покрытие 💅', "Прошло 3 недели после вашего визита 💅\nСамое время обновить покрытие, пока ногти не отросли.\n\nЗаписаться онлайн: " . $site . "#zapis");
         $db->prepare('UPDATE bookings SET sent_corr = 1 WHERE id = ?')->execute([$id]); $sent++;
     }
 }
