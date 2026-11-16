@@ -2157,6 +2157,7 @@ a.tel svg { flex: none; }
     <p class="a-load" id="aLoad" hidden><i></i>Загружаю записи…</p>
     <section class="atab" data-tab="day">
     <div class="tour-hint" id="aTourHint" hidden><b>🎓 Обучение по кабинету</b><span>Короткий тур с подсказками: что где нажимать. Займёт 5 минут, можно прервать и продолжить позже.</span><div class="acts"><button type="button" class="btn sm" id="aTourGo">Начать обучение</button><button type="button" class="btn sm ghost" id="aTourLater">Не сейчас</button></div></div>
+    <div class="mail-nag push-nag" id="aPushNag" hidden><b>🔔 Включите уведомления на этом телефоне</b><span id="aPushNagT">О новых записях, отменах и заявках телефон сообщит сразу — как сообщение в мессенджере, даже если сайт закрыт.</span><div class="acts"><button type="button" class="btn sm" id="aPushNagGo">Включить уведомления</button><button type="button" class="btn sm ghost" id="aPushNagNo">Не сейчас</button></div></div>
     <div class="mail-nag" id="aMailNag" hidden><b>✉️ Добавьте почту для уведомлений</b><span>На неё будут приходить копии всех уведомлений (даже если Telegram не работает) и каждый понедельник — резервная копия базы клиенток и записей, чтобы ничего не потерялось.</span><button type="button" class="btn sm" id="aMailNagGo">Добавить почту</button></div>
     <div class="days" id="aDays"></div>
     <div class="aday-bar" id="aDayBar" hidden></div>
@@ -5256,10 +5257,17 @@ a.tel svg { flex: none; }
   function renderPush() {
     pushState().then(function (st0) {
       pushBtn.dataset.st = st0; pushBtn.hidden = st0 === "no";
+      // предложение включить: пока не включены и мама не нажала «Не сейчас» (спросим снова через 3 дня)
+      var later = 0; try { later = +localStorage.getItem("ma-pushlater") || 0; } catch (e) {}
+      $("aPushNag").hidden = !(st0 === "off" || st0 === "ios-home" || st0 === "denied") || later > Date.now();
+      $("aPushNagT").textContent = st0 === "ios-home" ? "На iPhone: в Safari нажмите «Поделиться» → «На экран Домой», откройте сайт с новой иконки и включите уведомления здесь." : st0 === "denied" ? "Уведомления для сайта сейчас запрещены. Откройте настройки браузера → Настройки сайтов → Уведомления → разрешите для ma-nails.ru." : "О новых записях, отменах и заявках телефон сообщит сразу — как сообщение в мессенджере, даже если сайт закрыт.";
+      $("aPushNagGo").hidden = st0 !== "off";
       pushBtn.textContent = { on: "🔔 Уведомления на телефоне: включены", off: "🔔 Включить уведомления на телефоне", "ios-home": "🔔 Уведомления на iPhone", denied: "🔕 Уведомления запрещены" }[st0] || "";
     });
   }
   function b64key(b) { b = (b + "===".slice((b.length + 3) % 4)).replace(/-/g, "+").replace(/_/g, "/"); var r = atob(b), a = new Uint8Array(r.length); for (var i = 0; i < r.length; i++) a[i] = r.charCodeAt(i); return a; }
+  $("aPushNagGo").onclick = function () { pushBtn.click(); };
+  $("aPushNagNo").onclick = function () { try { localStorage.setItem("ma-pushlater", Date.now() + 3 * 864e5); } catch (e) {} $("aPushNag").hidden = true; toast("Включить можно в любой момент внизу кабинета: «🔔 Включить уведомления на телефоне»"); };
   pushBtn.onclick = function () {
     var st0 = pushBtn.dataset.st;
     if (st0 === "ios-home") { toast("На iPhone: в Safari нажмите «Поделиться» → «На экран Домой». Откройте сайт с новой иконки, войдите в кабинет и нажмите эту кнопку снова.", true); return; }
