@@ -3486,13 +3486,21 @@ div.f { display: grid; gap: 8px; }
   // открыть сертификат по ссылке #cert-НОМЕР
   function showCertFromHash(code, tried) {
     var key = decodeURIComponent(code), c = findCert(key);
-    if (!c && SYNC && !tried) {  // сертификат могли купить с другого телефона — спрашиваем сервер
-      apiSend({ type: "cert_get", code: key }).then(function (r) { if (r && r.ok && !findCert(key)) (st.certs = st.certs || []).push(r.cert); showCertFromHash(code, true); });
-      return;
+    if (SYNC && !tried) {  // главный — сервер: сертификат могли купить с другого телефона, оплатить, списать или удалить
+      if (!c) { $("pkH").textContent = "Загружаю сертификат…"; $("pkLead").textContent = ""; $("pkBody").innerHTML = ""; }
+      apiSend({ type: "cert_get", code: key }).then(function (r) {
+        st.certs = (st.certs || []).filter(function (x) { return certKey(x.code) !== certKey(key); });
+        Object.keys(mine.certs).forEach(function (id) { if (certKey(mine.certs[id].code) === certKey(key)) { if (r && r.ok) ["status", "balance", "spent", "till"].forEach(function (f) { if (r.cert[f] !== undefined) mine.certs[id][f] = r.cert[f]; }); else if (r && r.ok === false) delete mine.certs[id]; } });
+        lsSet("ma-mine", mine);
+        if (r && r.ok) st.certs.push(Object.assign({}, mine.certs[r.cert.id] || {}, r.cert));
+        else if (!r && c) st.certs.push(c);  // нет связи — показываем то, что есть на телефоне
+        if (location.hash.slice(1) === "cert-" + code) showCertFromHash(code, true);
+      });
+      if (!c) return;
     }
     if (!c) {
       $("pkH").textContent = "Сертификат не найден"; $("pkLead").textContent = "";
-      $("pkBody").innerHTML = '<div class="card pk-side"><p class="note" style="margin:0">Сертификат № ' + esc(key) + ' не найден. В демо-версии сертификаты видны только на телефоне, где их купили; в рабочей версии он откроется на любом телефоне.</p><button type="button" class="btn glow" data-chat="Здравствуйте! Мне подарили сертификат № ' + esc(key) + ', не могу его открыть." data-chat-title="Сертификат не открывается">Написать Марине</button></div>';
+      $("pkBody").innerHTML = '<div class="card pk-side"><p class="note" style="margin:0">Сертификат № ' + esc(key) + ' не найден' + (SYNC ? '. Проверьте номер в ссылке или напишите Марине — она подскажет.' : '. В демо-версии сертификаты видны только на телефоне, где их купили; в рабочей версии он откроется на любом телефоне.') + '</p><button type="button" class="btn glow" data-chat="Здравствуйте! Мне подарили сертификат № ' + esc(key) + ', не могу его открыть." data-chat-title="Сертификат не открывается">Написать Марине</button></div>';
       return;
     }
     var stt = certState(c), bal = certBalance(c), active = stt[1] === "ok", till = new Date(c.till + "T12:00");
@@ -3915,6 +3923,7 @@ div.f { display: grid; gap: 8px; }
       // статусы своих сертификатов (Марина могла подтвердить оплату)
       Object.keys(mine.certs).forEach(function (id) {
         apiSend({ type: "cert_get", code: mine.certs[id].code }).then(function (r) {
+          if (r && r.ok === false) { delete mine.certs[id]; lsSet("ma-mine", mine); if (!token) mergeMine(); return; }  // удалён в кабинете
           if (!r || !r.ok) return;
           ["status", "balance", "spent", "till"].forEach(function (f) { if (r.cert[f] !== undefined) mine.certs[id][f] = r.cert[f]; });
           lsSet("ma-mine", mine); if (!token) mergeMine();
