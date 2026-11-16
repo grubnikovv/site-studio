@@ -320,6 +320,22 @@ footer a { color: var(--mute); }
 .day[aria-pressed="true"] { border-color: var(--lac); background: var(--lac); color: var(--lac-ink); }
 .day[aria-pressed="true"] small, .day[aria-pressed="true"] em { color: inherit; opacity: .85; }
 .day:disabled { opacity: .4; cursor: default; }
+/* сегодняшний день: цветная рамка, подпись цветом сайта, пульсирующая точка и блик */
+.day.today { position: relative; overflow: hidden; border-color: var(--lac); background: color-mix(in srgb, var(--lac) 8%, var(--bg)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--lac) 16%, transparent); }
+.day.today small { color: var(--lac); font-weight: 800; font-size: 9.5px; letter-spacing: .02em; }
+.day.today::before { content: ""; position: absolute; bottom: 7px; right: 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--lac); animation: tdot 1.8s ease-in-out infinite; }
+.day.today::after { content: ""; position: absolute; inset: 0 auto 0 0; width: 60%; pointer-events: none; background: linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent); transform: translateX(-120%) skewX(-15deg); animation: tshine 3.6s ease-in-out 1s infinite; }
+.day.today[aria-pressed="true"] small { color: inherit; }
+.day.today[aria-pressed="true"]::before { background: var(--lac-ink); }
+.day.today[aria-pressed="true"]::after { background: linear-gradient(100deg, transparent, rgba(255,255,255,.3), transparent); }
+@keyframes tdot { 50% { transform: scale(.55); opacity: .45; } }
+@keyframes tshine { 45%, 100% { transform: translateX(260%) skewX(-15deg); } }
+@media (prefers-reduced-motion: reduce) { .day.today::before, .day.today::after { animation: none; } .day.today::after { display: none; } }
+/* мастер смотрит не сегодняшний день — плашка с кнопкой «к сегодня» */
+.aday-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; border-radius: 14px; padding: 10px 12px 10px 14px; font-size: 14px; background: color-mix(in srgb, var(--gold) 14%, var(--paper)); border: 1px solid color-mix(in srgb, var(--gold) 40%, var(--line)); }
+.aday-bar.fut { background: color-mix(in srgb, var(--lac) 6%, var(--paper)); border-color: color-mix(in srgb, var(--lac) 25%, var(--line)); }
+.aday-bar span { min-width: 0; }
+.aday-bar .btn { flex: none; }
 .slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 8px; }
 .slot { border: 1.5px solid var(--line); background: var(--bg); border-radius: 12px; padding: 10px 0; font-weight: 700; }
 .slot[aria-pressed="true"] { background: var(--lac); border-color: var(--lac); color: var(--lac-ink); }
@@ -1866,6 +1882,7 @@ div.f { display: grid; gap: 8px; }
     </div>
     <section class="atab" data-tab="day">
     <div class="days" id="aDays"></div>
+    <div class="aday-bar" id="aDayBar" hidden></div>
     <div class="kpis" id="aKpi"></div>
     <div class="card"><div class="adm-top"><h3>Записи</h3><button class="btn sm" id="aAdd">+ Добавить запись</button></div><div class="opts" id="aList"></div></div>
     <div class="card">
@@ -2507,7 +2524,7 @@ div.f { display: grid; gap: 8px; }
       h += monthSep(d, i - (from || 0));
       var cnt = withFree && !off && !trn ? freeSlots(k, bmin(bk)).filter(function (s) { return s.free; }).length : null;
       var dis = withFree && (off || trn || cnt === 0);
-      h += '<button class="day" data-d="' + k + '" aria-pressed="' + (sel === k) + '"' + (dis ? " disabled" : "") + '><small>' + (i === 0 ? "сег" : WD[d.getDay()]) + '</small><b class="num">' + d.getDate() + '</b>' + (trn ? '<em class="tr">обучение</em>' : '<em>' + (off ? "выходной" : withFree ? (cnt ? cnt + " окон" : "занято") : d.toLocaleDateString("ru-RU", { month: "short" })) + '</em>') + '</button>';
+      h += '<button class="day' + (i === 0 ? ' today' : '') + '" data-d="' + k + '" aria-pressed="' + (sel === k) + '"' + (dis ? " disabled" : "") + '><small>' + (i === 0 ? "сегодня" : WD[d.getDay()]) + '</small><b class="num">' + d.getDate() + '</b>' + (trn ? '<em class="tr">обучение</em>' : '<em>' + (off ? "выходной" : withFree ? (cnt ? cnt + " окон" : "занято") : d.toLocaleDateString("ru-RU", { month: "short" })) + '</em>') + '</button>';
     }
     return h;
   }
@@ -3129,6 +3146,9 @@ div.f { display: grid; gap: 8px; }
     var sl = $("aDays").scrollLeft; $("aDays").innerHTML = dayBtns(aDate, false, -PAST);
     if (!aScrolled) { aScrolled = true; requestAnimationFrame(function () { var t = $("aDays").querySelector('[data-d="' + aDate + '"]'); if (t) $("aDays").scrollLeft = t.offsetLeft - $("aDays").offsetLeft - 8; }); }
     else $("aDays").scrollLeft = sl;
+    var today = dkey(addDays(0)), bar = $("aDayBar");
+    bar.hidden = aDate === today; bar.classList.toggle("fut", aDate > today);
+    if (aDate !== today) bar.innerHTML = '<span>' + (aDate < today ? "⏪ Прошедший день" : "Вы смотрите") + ': <b>' + new Date(aDate + "T12:00").toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }) + '</b></span><button type="button" class="btn sm" id="aToToday">К сегодня</button>';
     var list = dayBookings(aDate), active = list.filter(function (b) { return b.status !== "cancelled"; });
     var sumDay = active.filter(function (b) { return b.status !== "noshow"; }).reduce(function (s, b) { return s + (b.price || svc(b.svc).price); }, 0);
     var plan = dayPlan(aDate), freeMin = plan.gaps.reduce(function (s, g) { return s + g[1] - g[0]; }, 0);
@@ -3385,7 +3405,7 @@ div.f { display: grid; gap: 8px; }
       var d = addDays(i), k = dkey(d), off = !isWorkday(k);
       h += monthSep(d, i + (ed.id ? 0 : PAST));
       var cnt = freeSlots(k, bmin(ed), ed.id, true).filter(function (x) { return x.free; }).length;
-      h += '<button class="day" data-d="' + k + '" aria-pressed="' + (k === ed.date) + '"' + (!cnt ? " disabled" : "") + '><small>' + (i === 0 ? "сег" : WD[d.getDay()]) + '</small><b class="num">' + d.getDate() + '</b><em>' + (off ? "выходной" : cnt ? cnt + " окон" : "занято") + '</em></button>';
+      h += '<button class="day' + (i === 0 ? ' today' : '') + '" data-d="' + k + '" aria-pressed="' + (k === ed.date) + '"' + (!cnt ? " disabled" : "") + '><small>' + (i === 0 ? "сегодня" : WD[d.getDay()]) + '</small><b class="num">' + d.getDate() + '</b><em>' + (off ? "выходной" : cnt ? cnt + " окон" : "занято") + '</em></button>';
     }
     $("eDays").innerHTML = h; $("eDays").scrollLeft = sl;
     if (first) { var sel = $("eDays").querySelector('[aria-pressed="true"]'); if (sel) $("eDays").scrollLeft = sel.offsetLeft - 8; }
@@ -3430,6 +3450,11 @@ div.f { display: grid; gap: 8px; }
     setTimeout(function () { $("eScrim").hidden = true; $("eSheet").hidden = true; }, 450);
   }
   $("aAdd").onclick = function () { openEditor(null); };
+  $("aDayBar").addEventListener("click", function (e) {
+    if (!e.target.closest("#aToToday")) return;
+    aDate = dkey(addDays(0)); renderAdmin();
+    var t = $("aDays").querySelector(".day.today"); if (t) $("aDays").scrollTo({ left: t.offsetLeft - $("aDays").offsetLeft - 8, behavior: "smooth" });
+  });
   window.__openEditor = openEditor;
   $("eClose").onclick = closeEditor; $("eScrim").onclick = closeEditor;
   // длительность изменилась — оставляем выбранное время, если процедура в него всё ещё помещается
