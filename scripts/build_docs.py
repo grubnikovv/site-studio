@@ -26,4 +26,9 @@ for k, src in PAIRS.items():
         d = os.path.join(os.path.dirname(src), sub)
         if os.path.isdir(d):
             shutil.copytree(d, os.path.join('docs', k, sub), dirs_exist_ok=True)
+    # файлы приложения: манифест для экрана «Домой» и service worker для уведомлений
+    for f in ('manifest.json', 'sw.js'):
+        fp = os.path.join(os.path.dirname(src), f)
+        if os.path.isfile(fp):
+            shutil.copy(fp, os.path.join('docs', k, f))
 print('docs built')

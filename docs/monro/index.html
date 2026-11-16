@@ -6,6 +6,7 @@
 
 <meta name="description" content="Маникюр, педикюр и обучение маникюру в Михайловке. Мастер Марина Шевченко, 10 лет опыта. Онлайн-запись, очное обучение.">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BeautySalon","name":"М.А — академия маникюра и педикюра","description":"Маникюр, педикюр, наращивание и обучение маникюру","telephone":"+7 995 428-47-88","priceRange":"от 300 ₽","address":{"@type":"PostalAddress","streetAddress":"ул. Обороны, 41","addressLocality":"Михайловка","addressRegion":"Волгоградская область","addressCountry":"RU"},"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday"],"opens":"10:00","closes":"19:00"}],"founder":{"@type":"Person","name":"Марина Шевченко"}}</script>
+<link rel="manifest" href="manifest.json"><link rel="icon" href="img/app-192.png"><link rel="apple-touch-icon" href="img/app-180.png"><meta name="theme-color" content="#2a0f16"><meta name="apple-mobile-web-app-title" content="М.А">
 <link rel="preload" href="fonts/manrope-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/tenorsans-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
 <style>/* шрифты Tenor Sans и Manrope лежат на своём хостинге (без Google) */
@@ -25,7 +26,6 @@
 @font-face { font-family: 'Tenor Sans'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/tenorsans-latin-ext.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 @font-face { font-family: 'Tenor Sans'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/tenorsans-latin.woff2) format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 </style>
-<link rel="icon" href="data:,">
 </head><body>
 <script>try { var t = localStorage.getItem("monro-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}</script>
 <style>
@@ -3784,6 +3784,7 @@ div.f { display: grid; gap: 8px; }
     var locked = SYNC && !token;
     $("v-admin").classList.toggle("locked", locked); $("aLogin").hidden = !locked;
     $("aSave").hidden = !SYNC || locked; outBtn.parentNode.hidden = !SYNC || locked;
+    if (!locked) renderPush();
     document.querySelectorAll("[data-demo]").forEach(function (el) { el.hidden = SYNC; });
     // в браузере мастера вместо «Записаться» — колокольчик и кабинет
     var master = SYNC ? !!token : curView === "admin";  // в демо — пока открыт кабинет
@@ -3825,7 +3826,57 @@ div.f { display: grid; gap: 8px; }
   var acts = document.createElement("div"); acts.className = "a-acts";
   var pwdBtn = document.createElement("button"); pwdBtn.type = "button"; pwdBtn.className = "btn sm ghost"; pwdBtn.textContent = "Сменить пароль";
   pwdBtn.onclick = function () { $("v-admin").classList.add("pwd"); $("aPwd").hidden = false; jumpTop(); };
-  outBtn.parentNode.insertBefore(acts, outBtn); acts.appendChild(pwdBtn); acts.appendChild(outBtn);
+  outBtn.parentNode.insertBefore(acts, outBtn);
+  // уведомления от браузера на этом телефоне (нужен https; на iPhone — сайт на экране «Домой»)
+  var pushBtn = document.createElement("button"); pushBtn.type = "button"; pushBtn.className = "btn sm ghost"; pushBtn.hidden = true;
+  acts.appendChild(pushBtn); acts.appendChild(pwdBtn); acts.appendChild(outBtn);
+  var IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  function standalone() { return matchMedia("(display-mode: standalone)").matches || navigator.standalone === true; }
+  function pushState() {
+    if (!SYNC || !window.isSecureContext) return Promise.resolve("no");
+    if (IOS && !standalone()) return Promise.resolve("ios-home");
+    if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) return Promise.resolve("no");
+    if (Notification.permission === "denied") return Promise.resolve("denied");
+    return navigator.serviceWorker.getRegistration().then(function (reg) { return reg ? reg.pushManager.getSubscription() : null; })
+      .then(function (sub) { return sub ? "on" : "off"; }).catch(function () { return "off"; });
+  }
+  function renderPush() {
+    pushState().then(function (st0) {
+      pushBtn.dataset.st = st0; pushBtn.hidden = st0 === "no";
+      pushBtn.textContent = { on: "🔔 Уведомления на телефоне: включены", off: "🔔 Включить уведомления на телефоне", "ios-home": "🔔 Уведомления на iPhone", denied: "🔕 Уведомления запрещены" }[st0] || "";
+    });
+  }
+  function b64key(b) { b = (b + "===".slice((b.length + 3) % 4)).replace(/-/g, "+").replace(/_/g, "/"); var r = atob(b), a = new Uint8Array(r.length); for (var i = 0; i < r.length; i++) a[i] = r.charCodeAt(i); return a; }
+  pushBtn.onclick = function () {
+    var st0 = pushBtn.dataset.st;
+    if (st0 === "ios-home") { toast("На iPhone: в Safari нажмите «Поделиться» → «На экран Домой». Откройте сайт с новой иконки, войдите в кабинет и нажмите эту кнопку снова.", true); return; }
+    if (st0 === "denied") { toast("Уведомления для сайта запрещены. Откройте настройки браузера → Настройки сайтов → Уведомления → разрешите для этого сайта и нажмите кнопку снова.", true); return; }
+    if (st0 === "on") {
+      if (pushBtn.dataset.sure !== "1") { pushBtn.dataset.sure = "1"; pushBtn.textContent = "Выключить уведомления? Нажмите ещё раз"; return; }
+      pushBtn.dataset.sure = "";
+      navigator.serviceWorker.getRegistration().then(function (reg) { return reg && reg.pushManager.getSubscription(); }).then(function (sub) {
+        if (!sub) return; apiSend({ type: "push_unsub", endpoint: sub.endpoint }); return sub.unsubscribe();
+      }).then(function () { toast("Уведомления на этом телефоне выключены"); renderPush(); });
+      return;
+    }
+    pushBtn.disabled = true;
+    Notification.requestPermission().then(function (perm) {
+      if (perm !== "granted") throw new Error("perm");
+      return navigator.serviceWorker.register("sw.js").then(function () { return navigator.serviceWorker.ready; });
+    }).then(function (reg) {
+      return apiSend({ type: "push_key" }).then(function (r) {
+        if (!r || !r.key) throw new Error("key");
+        return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64key(r.key) });
+      });
+    }).then(function (sub) {
+      return apiSend({ type: "push_sub", token: token, endpoint: sub.endpoint });
+    }).then(function (r) {
+      if (!r || !r.ok) throw new Error((r && r.error) || "sub");
+      toast("Готово! Уведомления о записях будут приходить на этот телефон");
+    }).catch(function (e) {
+      toast(e && e.message === "perm" ? "Без разрешения браузер не сможет показывать уведомления" : "Не получилось включить уведомления. Попробуйте ещё раз или напишите разработчику.");
+    }).then(function () { pushBtn.disabled = false; renderPush(); });
+  };
   function closePwd() { $("v-admin").classList.remove("pwd"); $("aPwd").hidden = true; $("aOld").value = ""; $("aNew2").value = ""; errBox("aPwdErr"); }
   $("aPwdBack").onclick = closePwd;
   $("aPwd").addEventListener("submit", function (e) {

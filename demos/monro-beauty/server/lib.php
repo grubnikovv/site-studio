@@ -75,6 +75,7 @@ function flush_outbox() {
 function notify_admins($text) {
     foreach (db()->query('SELECT chat_id FROM admins') as $a) send($a['chat_id'], $text);
     if (cfg('mail_admin')) send_mail(cfg('mail_admin'), strip_tags(strtok($text, "\n")), $text);
+    require_once __DIR__ . '/push.php'; push_all();  // уведомление в браузере на телефонах мастера
 }
 
 // ---------- почта ----------

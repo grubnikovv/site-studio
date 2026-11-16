@@ -23,7 +23,7 @@ $type = $in['type'] ?? '';
 $admin = session_ok($in['token'] ?? '');
 
 // Не больше 60 действий (у мобильных операторов много людей на одном адресе) за 10 минут с одного адреса (чтение базы и работа кабинета — без ограничения)
-if (!in_array($type, ['state', 'cert_get'], true) && !$admin) {
+if (!in_array($type, ['state', 'cert_get', 'push_key', 'push_peek'], true) && !$admin) {
     $ip = $_SERVER['REMOTE_ADDR'] ?? '?';
     $db = store_init();
     $db->prepare('DELETE FROM hits WHERE t < ?')->execute([time() - 600]);
@@ -228,6 +228,34 @@ if ($type === 'cert_get') {
     foreach ($doc['certs'] as $c) if (strlen($key) >= 6 && cert_key($c['code'] ?? '') === $key)
         json_out(['ok' => true, 'cert' => array_intersect_key($c, array_flip(['id', 'code', 'sum', 'balance', 'to', 'status', 'created', 'till', 'spent']))]);
     json_out(['ok' => false]);
+}
+
+// ---------- уведомления от браузера ----------
+if ($type === 'push_key') { require_once __DIR__ . '/push.php'; json_out(['ok' => true, 'key' => vapid()['pub']]); }
+if ($type === 'push_sub') {
+    if (!$admin) json_out(['ok' => false, 'error' => 'Войдите в кабинет заново', 'relogin' => true]);
+    require_once __DIR__ . '/push.php';
+    $e = (string)($in['endpoint'] ?? '');
+    if (!preg_match('#^https://[a-z0-9.-]+/#i', $e) || strlen($e) > 1000) json_out(['ok' => false, 'error' => 'Браузер не дал адрес для уведомлений']);
+    push_db()->prepare('INSERT OR REPLACE INTO push_subs (endpoint, created, seen, ua) VALUES (?, ?, ?, ?)')->execute([$e, time(), now_ms(), mb_substr((string)($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 200)]);
+    json_out(['ok' => true]);
+}
+if ($type === 'push_unsub') {
+    require_once __DIR__ . '/push.php';
+    push_db()->prepare('DELETE FROM push_subs WHERE endpoint = ?')->execute([(string)($in['endpoint'] ?? '')]);
+    json_out(['ok' => true]);
+}
+// Телефон получил пуш и спрашивает, что показать. Адрес подписки известен только этому телефону — он и есть пропуск.
+if ($type === 'push_peek') {
+    require_once __DIR__ . '/push.php';
+    $q = push_db()->prepare('SELECT seen FROM push_subs WHERE endpoint = ?'); $q->execute([(string)($in['endpoint'] ?? '')]);
+    $seen = $q->fetchColumn();
+    if ($seen === false) json_out(['ok' => false]);
+    [$doc] = doc_load();
+    $new = array_values(array_filter($doc['notes'], fn($n) => ($n['t'] ?? 0) > (int)$seen));
+    push_db()->prepare('UPDATE push_subs SET seen = ? WHERE endpoint = ?')->execute([now_ms(), (string)$in['endpoint']]);
+    $out = array_map(fn($n) => ['title' => trim(($n['icon'] ?? '') . ' ' . ($n['title'] ?? '')), 'body' => (string)($n['text'] ?? ''), 'tag' => (string)($n['id'] ?? '')], array_slice($new, 0, 3));
+    json_out(['ok' => true, 'notes' => $out]);
 }
 
 if ($type === 'poke') { reply_then_continue(['ok' => true]); poll_run(25); exit; }
