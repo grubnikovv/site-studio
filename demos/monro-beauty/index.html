@@ -470,9 +470,25 @@ section.block.tight { padding-block: 32px clamp(56px, 8vw, 96px); }
 .pgrp { display: flex; align-items: center; gap: 14px; margin: 56px 0 6px; font-family: var(--display); font-weight: 400; font-size: clamp(26px, 4vw, 34px); color: var(--ink); }
 .pgrp:first-child { margin-top: 0; }
 .pgrp::after { content: ""; flex: 1; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--lac), transparent); opacity: .7; order: 2; }
+/* раздвижные группы прайса: шапка — кнопка, список плавно раскрывается */
+.pacc .pgrp { margin: 0; }
+.pacc .pgrp::after { content: none; }
+.pacc + .pacc { margin-top: 10px; }
+.pgrp-b { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 0; background: none; border: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.pgrp-b::after { content: ""; flex: 1; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--lac), transparent); opacity: .7; order: 2; transform-origin: left; transform: scaleX(.45); transition: transform .6s cubic-bezier(.2,.8,.2,1), opacity .4s; }
+.pacc.open .pgrp-b::after { transform: none; opacity: 1; }
+.pgrp-b .chev { order: 4; flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-content: center; color: var(--lac); border: 1.5px solid color-mix(in srgb, var(--lac) 30%, var(--line)); transition: transform .45s cubic-bezier(.2,.8,.2,1), background .3s, color .3s; }
+.pacc.open .chev { transform: rotate(180deg); background: var(--lac); color: var(--lac-ink); border-color: var(--lac); }
+.pgrp-b:focus-visible { outline: 2px solid var(--lac); outline-offset: 4px; border-radius: 8px; }
+.pbody { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .5s cubic-bezier(.2,.8,.2,1); }
+.pacc.open .pbody { grid-template-rows: 1fr; }
+.pin { overflow: hidden; min-height: 0; }
+.pbody .prow { opacity: 0; transform: translateY(-10px); transition: opacity .35s, transform .45s cubic-bezier(.2,.8,.2,1); }
+.pacc.open .pbody .prow { opacity: 1; transform: none; transition-delay: calc(var(--i, 0) * 45ms + 80ms); }
+@media (prefers-reduced-motion: reduce) { .pbody, .pbody .prow, .pgrp-b::after, .pgrp-b .chev { transition: none; } }
 .pgrp small { order: 3; font-family: var(--body); font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--lac); white-space: nowrap; }
-@media (max-width: 380px) { .pgrp { font-size: 23px; gap: 10px; } .pgrp small { letter-spacing: .06em; } }
-.sum div > span { flex-shrink: 0; max-width: 45%; }
+@media (max-width: 380px) { .pgrp { font-size: 23px; gap: 10px; } .pgrp-b { gap: 10px; font-size: 21px; } .pgrp-b .chev { width: 30px; height: 30px; } .pgrp-b small { font-size: 11px; } .pgrp small { letter-spacing: .06em; } }
+.sum div > span { min-width: min-content; }
 .plist { display: grid; border-top: 1px solid var(--line); }
 .prow { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 2px; border-bottom: 1px solid var(--line); }
 .prow > div { display: grid; min-width: 0; }
@@ -812,6 +828,18 @@ div.f { display: grid; gap: 8px; }
 .rmq-h p { margin: 4px 0 0; font-size: 14px; color: var(--mute); }
 .rmq-i { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--gold); color: #fff; display: grid; place-content: center; font-weight: 800; font-size: 14px; }
 .rmq .seg2 { background: var(--paper); }
+.rmq-t { font-size: 15px; }
+.esum { font-size: 14px; color: var(--mute); font-weight: 600; }
+.addons { display: grid; gap: 8px; }
+.addon { display: flex; align-items: center; gap: 12px; text-align: left; width: 100%; background: var(--paper); border: 1.5px solid var(--line); border-radius: 14px; padding: 12px 14px; color: inherit; transition: border-color .25s, background .25s; }
+.addon > span { flex: 1; min-width: 0; display: grid; gap: 2px; }
+.addon small { color: var(--mute); font-size: 13px; line-height: 1.35; }
+.addon .num { flex: none; font-weight: 800; }
+.addon i { flex: none; width: 24px; height: 24px; border-radius: 8px; border: 1.5px solid var(--line); display: grid; place-content: center; transition: background .25s, border-color .25s; }
+.addon i svg { opacity: 0; transform: scale(.5); transition: opacity .2s, transform .25s; }
+.addon[aria-pressed="true"] { border-color: var(--lac); background: color-mix(in srgb, var(--lac) 7%, var(--paper)); }
+.addon[aria-pressed="true"] i { background: var(--lac); border-color: var(--lac); color: var(--lac-ink); }
+.addon[aria-pressed="true"] i svg { opacity: 1; transform: none; }
 .crange { display: grid; gap: 12px; margin-top: 6px; padding-top: 16px; border-top: 1px solid var(--line); }
 .qchip { position: relative; display: inline-flex; align-items: center; gap: 0; transition: background .3s, color .3s, border-color .3s, box-shadow .3s, padding .3s cubic-bezier(.3,1.5,.5,1); }
 .qchip::before { content: ""; width: 0; height: 14px; opacity: 0; transform: scale(.4) rotate(-20deg); background: currentColor;
@@ -1405,13 +1433,13 @@ div.f { display: grid; gap: 8px; }
   <section class="mdl" id="mdlBox" hidden><div class="wrap"><div class="mdl-card"><span class="mdl-k"><i></i>Ищем моделей</span><h2>Бесплатная процедура на обучении</h2><p>Ученица работает под контролем Марины. Процедура бесплатная, займёт около 5 часов. Нужна одна модель на каждый день. Обучение идёт с 10:00 до 17:00. Если время не указано, Марина скажет его по телефону после записи.</p><div class="mdl-list" id="mdlList"></div><button type="button" class="btn sm ghost" id="mdlMore" hidden>Показать ещё</button></div></div></section>
   <section class="phero"><div class="wrap"><span class="eyebrow">Услуги и цены</span><h1>Маникюр, педикюр и наращивание</h1><p class="lead">В стоимость входят обработка, форма и покрытие. Инструменты проходят дезинфекцию и стерилизацию в сухожаре.</p></div></section>
   <section class="block tight"><div class="wrap">
-    <h3 class="pgrp"><span>Руки</span><small id="nHands"></small></h3><div class="plist" id="pHands"></div>
-    <h3 class="pgrp"><span>Ноги</span><small id="nFeet"></small></h3><div class="plist" id="pFeet"></div>
-    <h3 class="pgrp"><span>Дополнительно</span><small>2 услуги</small></h3>
+    <div class="pacc open"><h3 class="pgrp"><button type="button" class="pgrp-b" aria-expanded="true" aria-controls="pHandsW"><span>Руки</span><small id="nHands"></small><i class="chev" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></i></button></h3><div class="pbody" id="pHandsW"><div class="pin"><div class="plist" id="pHands"></div></div></div></div>
+    <div class="pacc"><h3 class="pgrp"><button type="button" class="pgrp-b" aria-expanded="false" aria-controls="pFeetW"><span>Ноги</span><small id="nFeet"></small><i class="chev" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></i></button></h3><div class="pbody" id="pFeetW"><div class="pin"><div class="plist" id="pFeet"></div></div></div></div>
+    <div class="pacc"><h3 class="pgrp"><button type="button" class="pgrp-b" aria-expanded="false" aria-controls="pExtraW"><span>Дополнительно</span><small>2 услуги</small><i class="chev" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></i></button></h3><div class="pbody" id="pExtraW"><div class="pin">
     <div class="plist">
-      <div class="prow"><div><b>Френч</b><small>к любому покрытию</small></div><span class="num">+200 ₽</span></div>
-      <div class="prow"><div><b>Снятие чужой работы перед процедурой</b><small>Если вы от другого мастера и делаете у Марины новый маникюр, педикюр или наращивание · около 30 минут. Просто снятие без новой работы — 300 ₽</small></div><span class="num">+200 ₽</span></div>
-    </div>
+      <div class="prow"><div><b>Френч</b><small>К любому покрытию · около 15 минут. При онлайн-записи отметьте «Френч»</small></div><span class="num">+200 ₽</span></div>
+      <div class="prow"><div><b>Снятие покрытия перед процедурой</b><small>Если покрытие делали не у Марины, а сейчас — новый маникюр, педикюр или наращивание · около 30 минут. Своё покрытие Марина снимает бесплатно. Просто снятие без новой работы — 300 ₽</small></div><span class="num">+200 ₽</span></div>
+    </div></div></div></div>
     <a class="card cert cert-link" href="#sertifikat"><span class="eyebrow">Подарок</span><b>Подарочный сертификат на любую процедуру</b><span class="note">2 000, 3 000 или 5 000 ₽ · действует 3 месяца →</span></a>
     <div class="rules"><b>Оплата на месте</b><span>Наличными или переводом после процедуры. Если планы изменились, предупредите Марину заранее, лучше за сутки — она перенесёт запись на удобный день.</span></div>
   </div></section>
@@ -1729,8 +1757,8 @@ div.f { display: grid; gap: 8px; }
     <div class="card" id="b2" hidden>
       <h3>2. День и время</h3>
       <div class="rmq" id="bRmBox">
-        <div class="rmq-h"><span class="rmq-i" aria-hidden="true">!</span><div><b>У вас покрытие от другого мастера?</b><p>Перед процедурой Марина аккуратно снимет чужую работу: <b class="num">+200 ₽</b> и около 30 минут. Так новое покрытие ляжет ровно и продержится дольше.</p></div></div>
-        <div class="seg2" id="bRm"><button type="button" data-v="0" aria-pressed="true">Нет</button><button type="button" data-v="1" aria-pressed="false">Да, нужно снятие</button></div>
+        <b class="rmq-t">Добавить к услуге</b>
+        <div class="addons" id="bAdd"></div>
       </div>
       <div class="days" id="bDays"></div>
       <div class="slots" id="bSlots"></div>
@@ -1876,9 +1904,10 @@ div.f { display: grid; gap: 8px; }
     <div class="adm-top"><h3 id="eTitle">Новая запись</h3><button class="x" id="eClose" aria-label="Закрыть"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></div>
     <p class="note" id="eWho"></p>
     <label class="f" id="eSvcL">Услуга<select id="eSvc"></select></label>
+    <div class="addons" id="eAdd"></div>
+    <b class="esum" id="eSum"></b>
     <div class="f"><span class="lbl">День</span><div class="days" id="eDays"></div></div>
     <div class="f"><span class="lbl">Время</span><div class="slots" id="eSlots"></div><b class="erange" id="eRange"></b><div class="ectx" id="eCtx"></div><div class="ewarn" id="eWarn" role="status" hidden></div><span class="note">Зачёркнуто — процедура не поместится: залезет на другую клиентку. Пунктиром — время вне обычного графика. <span class="lg-lunch">Золотым — время обеда.</span> Вам записать можно, клиентки онлайн это время не видят.</span></div>
-    <label class="check" id="eRmL"><input type="checkbox" id="eRm"><span>Снятие чужой работы: +200 ₽, +30 минут</span></label>
     <div class="row2" id="eContact"><label class="f">Имя клиентки<input type="text" id="eName"></label><label class="f">Телефон<input type="tel" id="ePhone" inputmode="tel" placeholder="+7"></label></div>
     <p class="err" id="eErr" hidden></p>
     <button class="btn" id="eSave">Сохранить</button>
@@ -1922,10 +1951,16 @@ div.f { display: grid; gap: 8px; }
     { id: "pedh", name: "Педикюр со сложными стопами", price: 2500, from: true, min: 120, foot: true, text: "Трещины, мозоли, сильные огрубения. Итоговую цену Марина назовёт на месте, до 3 000 ₽." }
   ];
   var REMOVE = { price: 200, min: 30 };
+  var FRENCH = { price: 200, min: 15 };
+  // френч бывает только к услугам с покрытием
+  var FRENCH_OK = { gel: 1, str: 1, cor: 1, ext: 1, ext4: 1, pedg: 1, pedp: 1, pedh: 1 };
   var SHOW_EXAMPLES = false;  // несколько тестовых клиенток на ближайшую неделю, чтобы проверить перенос и отмену
   var DAYS = 62;  // на сколько дней вперёд открыта запись (~2 месяца)
   var PAST = 15;  // в кабинете мастер видит и может добавить записи за последние полмесяца (для статистики)
-  function bmin(b) { return svc(b.svc).min + (b.remove ? REMOVE.min : 0); }
+  function bmin(b) { return svc(b.svc).min + (b.remove ? REMOVE.min : 0) + (b.french ? FRENCH.min : 0); }
+  function bprice(b) { return svc(b.svc).price + (b.remove ? REMOVE.price : 0) + (b.french ? FRENCH.price : 0); }
+  // название услуги с добавками: «Маникюр с покрытием гель-лак + френч + снятие покрытия»
+  function svcLabel(b) { return svc(b.svc).name + (b.french ? " + френч" : "") + (b.remove ? " + снятие покрытия" : ""); }
   // курсы обучения: каждый идёт несколько дней подряд с 10 до 17, эти дни целиком закрываются для онлайн-записи
   var TRAIN = { from: 10 * 60, to: 17 * 60 };
   var COURSES = [
@@ -1967,7 +2002,7 @@ div.f { display: grid; gap: 8px; }
       ["Сколько держится покрытие?", "Обычно 3–4 недели. Срок зависит от того, как быстро растут ногти, и от домашних дел: бытовая химия без перчаток сокращает носку. Через 3 недели после визита пришлём напоминание о коррекции, если вы подключили напоминания."],
       ["Можно прийти со своим дизайном?", "Конечно. Пришлите фото дизайна Марине в WhatsApp, Telegram или MAX — она заранее скажет, сколько это займёт и сколько будет стоить."],
       ["Как обрабатываются инструменты?", "После каждой клиентки — мытьё, дезинфекция и стерилизация инструментов в сухожаре."],
-      ["Снимаете чужую работу?", "Да. Если вы приходите от другого мастера на новый маникюр, педикюр или наращивание, сначала Марина снимает чужое покрытие: +200 ₽ и около 30 минут. Просто снятие без новой работы — 300 ₽, это отдельная услуга в записи. При онлайн-записи просто отметьте «Да, нужно снятие» — время рассчитается само."],
+      ["Снимаете чужую работу?", "Да. Если вы приходите от другого мастера на новый маникюр, педикюр или наращивание, сначала Марина снимает чужое покрытие: +200 ₽ и около 30 минут. Просто снятие без новой работы — 300 ₽, это отдельная услуга в записи. При онлайн-записи отметьте «Снятие покрытия» — время и сумма рассчитаются сами. Своё покрытие Марина снимает бесплатно."],
       ["Что если появился скол или отслойка?", "Напишите Марине. Если скол или отслойка возникли по вине мастера, Марина бесплатно их исправит."]]],
     ["Запись и оплата", [
       ["Нужно ли платить заранее?", "Нет. Запись на процедуры без предоплаты. Оплата после работы — наличными, переводом по СБП или подарочным сертификатом."],
@@ -2273,8 +2308,15 @@ div.f { display: grid; gap: 8px; }
   }
   $("homeSvc").innerHTML = ["gel", "ext", "pedp"].map(function (id) { return svcCard(svc(id)); }).join("");
   $("pHands").innerHTML = ["man", "gel", "str", "cor", "ext", "ext4", "off"].map(function (id) { return priceRow(svc(id)); }).join("");
+  document.querySelectorAll(".pgrp-b").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var acc = b.closest(".pacc"), on = !acc.classList.contains("open");
+      acc.classList.toggle("open", on); b.setAttribute("aria-expanded", String(on));
+    });
+  });
   $("nHands").textContent = "7 услуг"; $("nFeet").textContent = "6 услуг";
   $("pFeet").innerHTML = ["ped", "pedg", "pedf", "pedp", "pedh", "nit"].map(function (id) { return priceRow(svc(id)); }).join("");
+  document.querySelectorAll(".pacc .prow").forEach(function (r) { r.style.setProperty("--i", [].indexOf.call(r.parentNode.children, r)); });
 
   var phIcon = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 21V9a4 4 0 0 1 8 0v12"></path><path d="M10 9.5a2 2 0 0 1 4 0"></path></svg>';
   // работы Марины: [номер файла, раздел (m — маникюр, p — педикюр, e — наращивание, d — дизайн), подпись, ширина, высота]
@@ -2450,9 +2492,10 @@ div.f { display: grid; gap: 8px; }
   $("bSvc").addEventListener("click", function (e) {
     var b = e.target.closest("[data-s]"); if (!b) return;
     bk.svc = b.dataset.s; bk.start = null;
-    // для услуги «Снятие покрытия» вопрос про чужую работу не нужен
+    // добавки, которые к этой услуге не подходят, снимаем
     if (svc(bk.svc).noRemove) bk.remove = false;
-    $("bRmBox").hidden = !!svc(bk.svc).noRemove; renderRm(); renderSvcOpts(); renderDays(); stepTo(2);
+    if (!FRENCH_OK[bk.svc]) bk.french = false;
+    renderRm(); renderSvcOpts(); renderDays(); stepTo(2);
     setTimeout(function () { $("b2").scrollIntoView({ behavior: "smooth", block: "start" }); }, 60);
   });
   // подпись месяца перед первым днём месяца в ленте, чтобы не путаться на двух месяцах вперёд
@@ -2484,20 +2527,28 @@ div.f { display: grid; gap: 8px; }
     setTimeout(function () { $("b3").scrollIntoView({ behavior: "smooth", block: "start" }); }, 60);
   });
   function whenText(k, t) { return new Date(k + "T12:00").toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" }) + ", " + hm(t); }
-  function renderRm() { document.querySelectorAll("#bRm button").forEach(function (x) { x.setAttribute("aria-pressed", String((x.dataset.v === "1") === !!bk.remove)); }); }
-  $("bRm").addEventListener("click", function (e) {
-    var b = e.target.closest("[data-v]"); if (!b) return;
-    var v = b.dataset.v === "1"; if (v === bk.remove) return;
-    bk.remove = v; bk.start = null; renderRm(); renderDays(); stepTo(2);
-    toast(v ? "Добавили снятие: +200 ₽, +30 минут" : "Без снятия");
+  var CHECK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  function addonBtn(x, on, title, hint, price) { return '<button type="button" class="addon" data-x="' + x + '" aria-pressed="' + !!on + '"><i>' + CHECK + '</i><span><b>' + title + '</b><small>' + hint + '</small></span><b class="num">+' + rub(price) + '</b></button>'; }
+  function addonsHtml(b, short) {
+    var s = svc(b.svc), h = "";
+    if (FRENCH_OK[s.id]) h += addonBtn("french", b.french, "Френч", (short ? "" : "Белая или цветная линия по краю ногтя · ") + "+" + dur(FRENCH.min), FRENCH.price);
+    if (!s.noRemove) h += addonBtn("remove", b.remove, "Снятие покрытия", short ? "Чужое покрытие · +" + dur(REMOVE.min) : "Если сейчас на ногтях покрытие, которое делали не у Марины · +" + dur(REMOVE.min) + ". Своё покрытие Марина снимает бесплатно", REMOVE.price);
+    return h;
+  }
+  function renderRm() { var h = addonsHtml(bk); $("bAdd").innerHTML = h; $("bRmBox").hidden = !h; }
+  $("bAdd").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-x]"); if (!b) return;
+    var x = b.dataset.x; bk[x] = !bk[x]; bk.start = null; renderRm(); renderDays(); stepTo(2);
+    toast(x === "french" ? (bk.french ? "Добавили френч: +" + rub(FRENCH.price) + ", +" + dur(FRENCH.min) : "Без френча") : (bk.remove ? "Добавили снятие: +" + rub(REMOVE.price) + ", +" + dur(REMOVE.min) : "Без снятия"));
   });
   function renderSum() {
-    var s = svc(bk.svc), price = s.price;
+    var s = svc(bk.svc), extra = bk.remove || bk.french;
     $("bSum").innerHTML = '<div><span>' + s.name + '</span><b>' + priceText(s) + '</b></div>' +
-      (bk.remove ? '<div><span>Снятие чужой работы</span><b class="num">' + rub(REMOVE.price) + '</b></div>' : '') +
+      (bk.french ? '<div><span>Френч</span><b class="num">' + rub(FRENCH.price) + '</b></div>' : '') +
+      (bk.remove ? '<div><span>Снятие покрытия</span><b class="num">' + rub(REMOVE.price) + '</b></div>' : '') +
       '<div><span>Когда</span><b>' + whenText(bk.date, bk.start) + '</b></div><div><span>Длительность</span><b>' + dur(bmin(bk)) + '</b></div>' +
-      (bk.remove ? '<div class="big"><span style="color:inherit">Итого</span><span class="num">' + rub(price + REMOVE.price) + '</span></div>' : '');
-    bk.price = price + (bk.remove ? REMOVE.price : 0);
+      (extra ? '<div class="big"><span style="color:inherit">Итого</span><span class="num">' + (s.from ? "от\u00a0" : "") + rub(bprice(bk)) + '</span></div>' : '');
+    bk.price = bprice(bk);
   }
   $("b3").addEventListener("submit", function (e) {
     e.preventDefault();
@@ -2517,9 +2568,9 @@ div.f { display: grid; gap: 8px; }
     if (!still) { $("bErr").textContent = "Это время только что заняли. Выберите другое."; $("bErr").hidden = false; renderDays(); stepTo(2); return; }
     var btn = $("bPay"); btn.disabled = true; btn.textContent = "Записываю…";
     setTimeout(function () {
-      var s = svc(bk.svc), b = { id: "b" + Date.now().toString(36), date: bk.date, start: bk.start, svc: s.id, name: name, phone: phoneNice(ph), note: $("bNote").value.trim().slice(0, 200), price: bk.price, remove: bk.remove, remind: bk.remind, status: "booked", created: Date.now() };
+      var s = svc(bk.svc), b = { id: "b" + Date.now().toString(36), date: bk.date, start: bk.start, svc: s.id, name: name, phone: phoneNice(ph), note: $("bNote").value.trim().slice(0, 200), price: bk.price, remove: bk.remove, french: !!bk.french, remind: bk.remind, status: "booked", created: Date.now() };
       if (bk.remind === "mail") b.email = $("bMail").value.trim().slice(0, 80);
-      var botLink = apiSend({ type: "booking", rec: Object.assign({ dur: bmin(b), coat: CORR[s.id] ? 1 : 0 }, b), svcName: s.name + (b.remove ? " + снятие" : "") });
+      var botLink = apiSend({ type: "booking", rec: Object.assign({ dur: bmin(b), coat: CORR[s.id] ? 1 : 0 }, b), svcName: svcLabel(b) });
       if (SYNC) {  // с сервером: запись считается сделанной, только когда сервер её принял
         botLink.then(function (r) {
           if (r && r.ok) { addMine("bookings", b); pubDoc(r); booked(); return; }
@@ -2533,7 +2584,7 @@ div.f { display: grid; gap: 8px; }
       function booked() {
       note("📅", "Новая запись", b.name + " · " + s.name + " · " + whenText(b.date, b.start), { tab: "day", date: b.date });
       $("myPhone").value = b.phone; lsSet("ma-myphone", b.phone); $("myList").innerHTML = "";
-      $("bDone").textContent = whenText(b.date, b.start) + ". " + s.name + (b.remove ? " и снятие чужой работы" : "") + ". Адрес: ул. Обороны, 41.";
+      $("bDone").textContent = whenText(b.date, b.start) + ". " + svcLabel(b) + ". Адрес: ул. Обороны, 41.";
       $("bRemDone").innerHTML = b.remind === "mail"
         ? '<div class="rem-cta"><b>📩 Письмо отправлено</b><p>Подтверждение записи придёт на ' + esc(b.email) + '. Если его нет через пару минут — проверьте папку «Спам» и отметьте «Не спам», чтобы напоминания приходили во «Входящие».</p></div>'
         : b.remind === "none"
@@ -2546,7 +2597,7 @@ div.f { display: grid; gap: 8px; }
           toast("В рабочей версии откроется бот студии в " + REM_NAME[x.dataset.bot] + " — нажмите в нём «Старт»");
         };
       });
-      $("bTg").textContent = "🆕 Новая запись\n" + s.name + (b.remove ? "\n+ снятие чужой работы" : "") + "\n" + whenText(b.date, b.start) + "\n" + name + ", " + b.phone + (b.note ? "\nКомментарий: " + b.note : "") + "\nНапоминания: " + (b.remind === "none" ? "не нужны" : (REM_NAME[b.remind] || "Telegram") + ", " + remindPlan(b.date).join(", "));
+      $("bTg").textContent = "🆕 Новая запись\n" + svcLabel(b) + "\n" + whenText(b.date, b.start) + "\n" + name + ", " + b.phone + (b.note ? "\nКомментарий: " + b.note : "") + "\nНапоминания: " + (b.remind === "none" ? "не нужны" : (REM_NAME[b.remind] || "Telegram") + ", " + remindPlan(b.date).join(", "));
       btn.disabled = false; btn.textContent = "Записаться"; stepTo(4); window.scrollTo({ top: 0, behavior: "smooth" });
       }
     }, 900);
@@ -2713,7 +2764,7 @@ div.f { display: grid; gap: 8px; }
   // карточка записи клиентки: перенести и отменить — не позже чем за 2 дня до визита, иначе через Марину
   function bookCard(b) {
     var s = svc(b.svc), t = statusOf(b), ok = canMove(b);
-    return '<div class="bk"><div class="r1"><b>' + whenText(b.date, b.start) + '</b><span class="pill ' + t[1] + '">' + (b.status === "cancelled" ? clientStatus(b) : t[0]) + '</span></div><div class="info">' + s.name + ' · ' + priceText(s) + '</div>' +
+    return '<div class="bk"><div class="r1"><b>' + whenText(b.date, b.start) + '</b><span class="pill ' + t[1] + '">' + (b.status === "cancelled" ? clientStatus(b) : t[0]) + '</span></div><div class="info">' + svcLabel(b) + ' · ' + (s.from ? "от\u00a0" : "") + rub(b.price || bprice(b)) + '</div>' +
       (b.status === "booked" ? (ok ? '<div class="acts"><button type="button" data-mvopen="' + b.id + '">Перенести</button><button type="button" data-my="' + b.id + '">Отменить запись</button></div>'
         : '<div class="mv-hint">До визита меньше 2 дней — перенести или отменить можно только через Марину: <a href="tel:+79954284788" style="white-space:nowrap">+7 995 428-47-88</a></div>') +
         (mv && mv.id === b.id ? mvBox(b) : '') : '') + '</div>';
@@ -2754,7 +2805,7 @@ div.f { display: grid; gap: 8px; }
     $("kHistBox").hidden = !hist.length;
     $("kHist").innerHTML = hist.slice(0, 30).map(function (b) {
       var t = b.status === "cancelled" ? [clientStatus(b), ""] : b.date < today && b.status === "booked" ? ["Была запись", ""] : statusOf(b);
-      return '<div class="k-row"><span>' + whenText(b.date, b.start) + '<small>' + svc(b.svc).name + '</small></span><span class="pill ' + t[1] + '">' + t[0] + '</span></div>';
+      return '<div class="k-row"><span>' + whenText(b.date, b.start) + '<small>' + svcLabel(b) + '</small></span><span class="pill ' + t[1] + '">' + t[0] + '</span></div>';
     }).join("");
     $("kTrainBox").hidden = !d.training.length;
     $("kTrain").innerHTML = d.training.slice().reverse().map(function (t) {
@@ -2836,7 +2887,7 @@ div.f { display: grid; gap: 8px; }
     toast("Запись отменена. Марина получит уведомление");
   }
   function resetBooking(pick) {
-    bk = { svc: pick || null, date: null, start: null, remove: false, remind: "tg" };
+    bk = { svc: pick || null, date: null, start: null, remove: false, french: false, remind: "tg" };
     renderRm();
     $("bRmBox").hidden = !!(bk.svc && svc(bk.svc).noRemove);
     ["bName", "bPhone", "bNote", "bMail"].forEach(function (id) { $(id).value = ""; }); $("bPd").checked = false; $("bErr").hidden = true; renderRem();
@@ -3098,11 +3149,11 @@ div.f { display: grid; gap: 8px; }
       var s = svc(b.svc), t = statusOf(b);
       return '<div class="bk' + (b.id === flashId ? " moved" : "") + '"><div class="r1"><b class="num">' + hm(b.start) + '–' + hm(b.start + bmin(b)) + '</b><span class="pill ' + t[1] + '">' + t[0] + '</span></div>' +
         '<div><b style="font-weight:700">' + esc(b.name) + '</b> · ' + esc(b.phone) + (b.example ? ' <span class="pill">пример</span>' : '') + '</div>' +
-        '<div class="info">' + s.name + (b.remove ? ' + снятие чужой работы' : '') + ' · ' + rub(b.price || s.price) + (b.note ? ' · «' + esc(b.note) + '»' : '') + '</div>' +
+        '<div class="info">' + svcLabel(b) + ' · ' + rub(b.price || s.price) + (b.note ? ' · «' + esc(b.note) + '»' : '') + '</div>' +
         (b.remind && b.remind !== "none" ? '<div class="info">🔔 ' + (b.remind === "mail" ? "Почта" + (b.email ? " " + esc(b.email) : "") : REM_NAME[b.remind] || "Telegram") + ' · ' + remindPlan(b.date).join(", ") + '</div>' : '') +
         overlapNote(b) +
         certBlock(b) +
-        (b.status === "booked" ? '<div class="acts"><button data-a="move" data-id="' + b.id + '">Перенести</button><button data-a="came" data-id="' + b.id + '">Пришла</button><button data-a="noshow" data-id="' + b.id + '">Не пришла</button><button data-a="cancelask" data-id="' + b.id + '">Отменить</button></div>' +
+        (b.status === "booked" ? '<div class="acts"><button data-a="move" data-id="' + b.id + '">Изменить</button><button data-a="came" data-id="' + b.id + '">Пришла</button><button data-a="noshow" data-id="' + b.id + '">Не пришла</button><button data-a="cancelask" data-id="' + b.id + '">Отменить</button></div>' +
             (cancelAsk === b.id ? '<div class="sure" style="background:var(--bg);color:var(--ink)"><span>Кто отменил запись?</span><button type="button" class="sure-yes" data-a="cancel-client" data-id="' + b.id + '">Клиентка</button><button type="button" class="sure-no" data-a="cancel-master" data-id="' + b.id + '">Я, по своим причинам</button><button type="button" class="sure-no" data-a="cancel-no" data-id="' + b.id + '">Не отменять</button></div>' : '')
           : b.status === "cancelled"
             ? '<div class="acts"><button data-a="move" data-id="' + b.id + '">Перенести</button>' + (canRestore(b) ? '<button data-a="restore" data-id="' + b.id + '">Вернуть на это время</button>' : '<button disabled>Время уже занято</button>') + '<button data-a="del" data-id="' + b.id + '" data-key="d' + b.id + '">Удалить</button></div>' +
@@ -3339,6 +3390,9 @@ div.f { display: grid; gap: 8px; }
     $("eDays").innerHTML = h; $("eDays").scrollLeft = sl;
     if (first) { var sel = $("eDays").querySelector('[aria-pressed="true"]'); if (sel) $("eDays").scrollLeft = sel.offsetLeft - 8; }
     // показываем, какое время займёт процедура целиком, чтобы было видно, что она поместится
+    $("eAdd").innerHTML = addonsHtml(ed, true);
+    var priceNow = bprice(ed);
+    $("eSum").innerHTML = "Итого: " + (svc(ed.svc).from ? "от " : "") + rub(priceNow) + " · " + dur(bmin(ed)) + (ed.orig && (ed.orig.price !== priceNow || ed.orig.min !== bmin(ed)) ? ' <span style="font-weight:400">(было ' + rub(ed.orig.price) + " · " + dur(ed.orig.min) + ")</span>" : "");
     $("eRange").textContent = ed.start != null ? "Займёт: " + hm(ed.start) + "–" + hm(ed.start + bmin(ed)) + " (" + dur(bmin(ed)) + ")" : "";
     $("eCtx").innerHTML = ed.start != null ? neighbours(ed.date, ed.start, ed.start + bmin(ed), ed.id) : "";
     // предупреждения: процедура попадает на обед или выходит за рабочие часы дня
@@ -3353,18 +3407,19 @@ div.f { display: grid; gap: 8px; }
     }
     $("eWarn").hidden = !warn.length;
     $("eWarn").textContent = warn.length ? "⚠ " + warn.join(" ") + " Сохранить можно, если вы так договорились с клиенткой." : "";
-    $("eSave").textContent = (ed.move ? "Перенести" : "Добавить запись") + (warn.length ? " всё равно" : "");
+    $("eSave").textContent = (ed.move ? "Сохранить" : "Добавить запись") + (warn.length ? " всё равно" : "");
     var list = edSlots();
     $("eSlots").innerHTML = list.length ? list.map(function (x) { return '<button class="slot num' + (x.out ? ' out' : '') + (x.lunch ? ' lunch' : '') + '" data-t="' + x.t + '"' + (x.free ? "" : " disabled") + ' aria-pressed="' + (ed.start === x.t) + '" title="' + (x.lunch ? 'время обеда' : x.out ? 'вне обычного графика' : '') + '">' + hm(x.t) + '</button>'; }).join("") : '<p class="note" style="grid-column:1/-1">В этот день свободных окон нет.</p>';
   }
   function openEditor(rec, pre) {
-    ed = rec ? { id: rec.id, svc: rec.svc, remove: !!rec.remove, date: rec.date, start: rec.start, move: true } : { id: null, svc: "gel", remove: false, date: aDate, start: null, move: false };
+    ed = rec ? { id: rec.id, svc: rec.svc, remove: !!rec.remove, french: !!rec.french, date: rec.date, start: rec.start, move: true } : { id: null, svc: "gel", remove: false, french: false, date: aDate, start: null, move: false };
+    if (rec) ed.orig = { price: rec.price || bprice(rec), min: bmin(rec) };
     // если выбранный день выходной или занят — открываем ближайший день со свободным временем
     if (!freeSlots(ed.date, bmin(ed), ed.id, true).some(function (x) { return x.free; }) && rec === null) { for (var i = 0; i < DAYS; i++) { var k = dkey(addDays(i)); if (freeSlots(k, bmin(ed), ed.id, true).some(function (x) { return x.free; })) { ed.date = k; break; } } }
-    $("eTitle").textContent = ed.move ? "Перенести запись" : "Новая запись";
-    $("eWho").textContent = ed.move ? rec.name + " · " + svc(rec.svc).name + " · сейчас: " + whenText(rec.date, rec.start) : "Для клиентки, которая записалась по телефону или в мессенджере.";
-    $("eSvcL").hidden = ed.move; $("eContact").hidden = ed.move; $("eRmL").hidden = ed.move; $("eRm").checked = false; $("eSvc").value = ed.svc; $("eName").value = ""; $("ePhone").value = ""; $("eErr").hidden = true;
-    $("eSave").textContent = ed.move ? "Перенести" : "Добавить запись";
+    $("eTitle").textContent = ed.move ? "Изменить запись" : "Новая запись";
+    $("eWho").textContent = ed.move ? rec.name + " · сейчас: " + whenText(rec.date, rec.start) + ". Можно поменять услугу, добавить френч или снятие, перенести время." : "Для клиентки, которая записалась по телефону или в мессенджере.";
+    $("eContact").hidden = ed.move; $("eSvc").value = ed.svc; $("eName").value = ""; $("ePhone").value = ""; $("eErr").hidden = true;
+    $("eSave").textContent = ed.move ? "Сохранить" : "Добавить запись";
     if (pre) { ed.svc = pre.svc || ed.svc; $("eSvc").value = ed.svc; $("eName").value = pre.name || ""; $("ePhone").value = pre.phone && /\d{10}/.test(pre.phone.replace(/\D/g, "")) ? pre.phone : ""; }
     renderEditor();
     $("eScrim").hidden = false; $("eSheet").hidden = false; document.body.classList.add("lock");
@@ -3377,8 +3432,10 @@ div.f { display: grid; gap: 8px; }
   $("aAdd").onclick = function () { openEditor(null); };
   window.__openEditor = openEditor;
   $("eClose").onclick = closeEditor; $("eScrim").onclick = closeEditor;
-  $("eRm").onchange = function () { ed.remove = this.checked; ed.start = null; renderEditor(); };
-  $("eSvc").onchange = function () { ed.svc = this.value; ed.start = null; if (svc(ed.svc).noRemove) { ed.remove = false; $("eRm").checked = false; } $("eRmL").hidden = !!svc(ed.svc).noRemove; renderEditor(); };
+  // длительность изменилась — оставляем выбранное время, если процедура в него всё ещё помещается
+  function edKeep() { if (ed.start != null && !edSlots().some(function (x) { return x.t === ed.start && x.free; })) ed.start = null; renderEditor(); }
+  $("eAdd").addEventListener("click", function (e) { var b = e.target.closest("[data-x]"); if (!b) return; ed[b.dataset.x] = !ed[b.dataset.x]; edKeep(); });
+  $("eSvc").onchange = function () { ed.svc = this.value; if (svc(ed.svc).noRemove) ed.remove = false; if (!FRENCH_OK[ed.svc]) ed.french = false; edKeep(); };
   $("eDays").addEventListener("click", function (e) { var b = e.target.closest("[data-d]"); if (b && !b.disabled) { ed.date = b.dataset.d; ed.start = null; renderEditor(); } });
   $("eSlots").addEventListener("click", function (e) { var b = e.target.closest("[data-t]"); if (b && !b.disabled) { ed.start = Number(b.dataset.t); renderEditor(); } });
   $("eSave").onclick = function () {
@@ -3389,11 +3446,14 @@ div.f { display: grid; gap: 8px; }
     $("eErr").textContent = err; $("eErr").hidden = !err; if (err) return;
     if (ed.move) {
       var own = ownCopy(findBooking(ed.id));
+      var movedT = own.date !== ed.date || own.start !== ed.start, changed = own.svc !== ed.svc || !!own.remove !== !!ed.remove || !!own.french !== !!ed.french;
       own.date = ed.date; own.start = ed.start; flashId = own.id;
+      if (changed) { own.svc = ed.svc; own.remove = !!ed.remove; own.french = !!ed.french; own.price = bprice(ed); own.svcName = svcLabel(ed); }
+      own.dur = bmin(own);
       if (own.status === "cancelled") { own.status = "booked"; delete own.by; }
-      toast("Перенесено на " + whenText(ed.date, ed.start));
+      toast(changed && movedT ? "Запись изменена и перенесена на " + whenText(ed.date, ed.start) : changed ? "Запись изменена: " + rub(own.price) + ", " + dur(own.dur) : "Перенесено на " + whenText(ed.date, ed.start));
     } else {
-      var nb = { id: "b" + Date.now().toString(36), date: ed.date, start: ed.start, svc: ed.svc, remove: ed.remove, name: $("eName").value.trim(), phone: $("ePhone").value.trim() || "—", price: svc(ed.svc).price + (ed.remove ? REMOVE.price : 0), status: "booked", manual: true };
+      var nb = { id: "b" + Date.now().toString(36), date: ed.date, start: ed.start, svc: ed.svc, remove: !!ed.remove, french: !!ed.french, name: $("eName").value.trim(), phone: $("ePhone").value.trim() || "—", price: bprice(ed), status: "booked", manual: true }; nb.dur = bmin(nb);
       // прошедшая дата (или уже закончилось сегодня) — клиентка пришла
       var nowD = new Date(), nowM = nowD.getHours() * 60 + nowD.getMinutes();
       if (nb.date < dkey(nowD) || (nb.date === dkey(nowD) && nb.start + bmin(nb) <= nowM)) nb.status = "came";

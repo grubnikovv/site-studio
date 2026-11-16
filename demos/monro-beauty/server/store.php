@@ -72,7 +72,7 @@ function doc_expire(&$doc) {
 // Что видит посетитель сайта: занятость без имён, телефонов и денег
 function doc_public($doc) {
     $out = $doc;
-    $out['bookings'] = array_values(array_map(fn($b) => array_intersect_key($b, array_flip(['id', 'date', 'start', 'svc', 'remove', 'status', 'dur', 'example'])), $doc['bookings']));
+    $out['bookings'] = array_values(array_map(fn($b) => array_intersect_key($b, array_flip(['id', 'date', 'start', 'svc', 'remove', 'french', 'status', 'dur', 'example'])), $doc['bookings']));
     $out['training'] = array_values(array_map(fn($t) => array_intersect_key($t, array_flip(['id', 'course', 'date', 'days', 'status', 'hold', 'claimed', 'example'])), $doc['training']));
     $models = [];
     foreach (($doc['models'] ?? []) as $k => $m) $models[$k] = is_array($m) ? array_intersect_key($m, array_flip(['time'])) + (!empty($m['name']) ? ['taken' => true] : []) : $m;
@@ -184,6 +184,8 @@ function mirror_bookings($ops, $doc) {
         $moved = $old['date'] !== ($b['date'] ?? '') || (int)$old['start'] !== (int)($b['start'] ?? 0);
         $db->prepare('UPDATE bookings SET date = ?, start = ?, dur = ?, status = ?, updated = ?' . ($moved ? ', sent_2d = 0, sent_2h = 0, confirmed = 0' : '') . ' WHERE id = ?')
            ->execute([$b['date'], (int)$b['start'], (int)($b['dur'] ?? 60), $status, time(), $id]);
+        // мастер поменяла услугу или добавки — в напоминаниях будет новое название
+        if (!empty($b['svcName'])) $db->prepare('UPDATE bookings SET svc = ? WHERE id = ?')->execute([mb_substr((string)$b['svcName'], 0, 80), $id]);
     }
 }
 

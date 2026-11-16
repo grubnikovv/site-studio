@@ -123,7 +123,7 @@ if ($type === 'booking') {
     if ($remind === 'mail' && (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 80)) fail('Проверьте email для напоминаний.');
     $svcName = clean($in['svcName'] ?? ($r['svcName'] ?? ''), 80);
     $rec = ['id' => $id, 'date' => $date, 'start' => $start, 'dur' => $dur, 'svc' => clean($r['svc'] ?? '', 30), 'name' => $name, 'phone' => phone_nice($phone),
-        'note' => clean($r['note'] ?? '', 200), 'price' => max(0, (int)($r['price'] ?? 0)), 'remove' => !empty($r['remove']), 'remind' => $remind, 'status' => 'booked', 'created' => now_ms()] + ($email ? ['email' => $email] : []);
+        'note' => clean($r['note'] ?? '', 200), 'price' => max(0, (int)($r['price'] ?? 0)), 'remove' => !empty($r['remove']), 'french' => !empty($r['french']), 'remind' => $remind, 'status' => 'booked', 'created' => now_ms()] + ($email ? ['email' => $email] : []);
     $doc['bookings'] = array_values(array_filter($doc['bookings'], fn($b) => ($b['id'] ?? '') !== $id));
     $doc['bookings'][] = $rec;
     doc_note($doc, '📅', 'Новая запись', $name . ' · ' . $svcName . ' · ' . when_text($date, $start), ['tab' => 'day', 'date' => $date]);
@@ -229,7 +229,7 @@ if ($type === 'client_data') {
     $phone = client_phone($in['ctoken'] ?? ''); if (!$phone) json_out(['ok' => false, 'relogin' => true]);
     [$doc, $v] = doc_load(true); if (doc_expire($doc)) $v = doc_save($doc, $v); else doc_abort();
     $mine = fn($x) => digits_phone($x['phone'] ?? '') === $phone;
-    $bk = array_values(array_map(fn($b) => array_intersect_key($b, array_flip(['id', 'date', 'start', 'dur', 'svc', 'remove', 'status', 'price', 'phone', 'name', 'remind', 'by', 'movedBy'])), array_filter($doc['bookings'], $mine)));
+    $bk = array_values(array_map(fn($b) => array_intersect_key($b, array_flip(['id', 'date', 'start', 'dur', 'svc', 'remove', 'french', 'status', 'price', 'phone', 'name', 'remind', 'by', 'movedBy'])), array_filter($doc['bookings'], $mine)));
     $tr = array_values(array_map(fn($t) => array_intersect_key($t, array_flip(['id', 'course', 'date', 'days', 'status', 'price', 'pre', 'hold', 'claimed', 'phone', 'name'])), array_filter($doc['training'], $mine)));
     $ce = array_values(array_map(fn($c) => array_intersect_key($c, array_flip(['id', 'code', 'sum', 'balance', 'to', 'status', 'created', 'till', 'phone'])) + ['spent' => array_map(fn($x) => ['d' => $x['d'] ?? '', 'sum' => (int)($x['sum'] ?? 0)], $c['spent'] ?? [])], array_filter($doc['certs'], $mine)));
     json_out(['ok' => true, 'phone' => phone_nice($phone), 'bookings' => $bk, 'training' => $tr, 'certs' => $ce, 'v' => $v, 'doc' => doc_public($doc)]);
