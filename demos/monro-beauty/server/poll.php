@@ -23,9 +23,10 @@ if (isset($_GET['testpush'])) {  // проверочное уведомлени�
     [$doc, $v] = doc_load(true);
     doc_note($doc, '🔔', 'Проверка уведомлений', 'Всё работает! Так будут приходить новые записи, отмены и заявки.');
     doc_save($doc, $v);
-    $subs = push_db()->query('SELECT endpoint FROM push_subs WHERE acc = 0')->fetchAll(PDO::FETCH_COLUMN);
-    $v2 = vapid(); $t0 = now_ms();
-    foreach ($subs as $e) echo 'Телефон мастера (' . parse_url($e, PHP_URL_HOST) . '): ответ ' . push_send_one($e, $v2) . " (201 = принято)\n";
+    $subs = push_db()->query('SELECT endpoint, p256dh FROM push_subs WHERE acc = 0')->fetchAll();
+    $t0 = now_ms();
+    push_all(push_note('🔔 Проверка уведомлений', 'Всё работает! Так будут приходить новые записи, отмены и заявки.'));
+    foreach ($subs as $r) echo 'Подписка ' . substr(md5($r['endpoint']), 0, 6) . ': ' . ($r['p256dh'] ? 'текст внутри пуша (зашифрован)' : 'старая, без ключей — пустой пуш') . "\n";
     if (!$subs) echo "Нет подписок мастера\n";
     sleep(25);  // успел ли браузер «проснуться» и спросить, что показать (push_peek обновляет seen)
     foreach (push_db()->query('SELECT endpoint, created, seen, ua FROM push_subs WHERE acc = 0') as $r)

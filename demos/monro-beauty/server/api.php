@@ -508,7 +508,7 @@ if ($type === 'broadcast') {
     $title = clean($in['title'] ?? '', 80); $text = mb_substr(trim(strip_tags((string)($in['text'] ?? ''))), 0, 1000);
     if (mb_strlen($title) < 2 || mb_strlen($text) < 2) fail('Напишите заголовок и текст.');
     client_db()->prepare('INSERT INTO cnotes (acc, icon, title, text, link, t) VALUES (0, ?, ?, ?, ?, ?)')->execute(['💌', $title, $text, '', time()]);
-    require_once __DIR__ . '/push.php'; push_clients();
+    require_once __DIR__ . '/push.php'; push_clients(push_note('💌 ' . $title, $text, './#kabinet'));
     $sent = 0;
     if (!empty($in['mail'])) foreach (client_db()->query('SELECT email FROM accounts WHERE verified = 1 AND news = 1') as $a)
         if (send_mail($a['email'], $title, h($text) . "\n\n<small>Вы получили письмо, потому что согласились получать новости студии. Отписаться — в личном кабинете на сайте.</small>")) $sent++;
@@ -630,7 +630,8 @@ if ($type === 'push_sub') {
     require_once __DIR__ . '/push.php';
     $e = (string)($in['endpoint'] ?? '');
     if (!preg_match('#^https://[a-z0-9.-]+/#i', $e) || strlen($e) > 1000) json_out(['ok' => false, 'error' => 'Браузер не дал адрес для уведомлений']);
-    push_db()->prepare('INSERT OR REPLACE INTO push_subs (endpoint, created, seen, ua, acc) VALUES (?, ?, ?, ?, ?)')->execute([$e, time(), now_ms(), mb_substr((string)($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 200), $acc]);
+    $key = fn($k) => preg_match('/^[A-Za-z0-9_-]{16,120}$/', (string)($in[$k] ?? '')) ? (string)$in[$k] : null;  // ключи шифрования от браузера
+    push_db()->prepare('INSERT OR REPLACE INTO push_subs (endpoint, created, seen, ua, acc, p256dh, auth) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$e, time(), now_ms(), mb_substr((string)($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 200), $acc, $key('p256dh'), $key('auth')]);
     json_out(['ok' => true]);
 }
 if ($type === 'push_unsub') {

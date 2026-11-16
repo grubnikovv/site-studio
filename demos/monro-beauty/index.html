@@ -3469,6 +3469,7 @@ a.tel svg { flex: none; }
     if (!kData || !kData.acc) { $("kPushBox").hidden = true; return; }
     pushState().then(function (st0) {
       var b = $("kPushBtn"); b.dataset.st = st0; b.dataset.sure = ""; b.disabled = false;
+      if (st0 === "on" && ctoken) pushKeysSync({ type: "push_sub", ctoken: ctoken });
       $("kPushBox").hidden = st0 === "no";
       $("kPushNote").textContent = { off: "Напоминания о записи, переносы, сертификаты и новости студии придут на телефон сразу — даже если сайт закрыт.", on: "Включены на этом телефоне: напоминания о записи, переносы, сертификаты и новости студии.", "ios-home": "На iPhone: в Safari нажмите «Поделиться» → «На экран Домой», откройте сайт с новой иконки, войдите в кабинет и включите уведомления здесь.", denied: permHint({ message: "perm-denied" }) }[st0] || "";
       b.hidden = st0 === "ios-home" || st0 === "denied";
@@ -3498,7 +3499,7 @@ a.tel svg { flex: none; }
       return navigator.serviceWorker.register("sw.js").then(function () { return navigator.serviceWorker.ready; });
     }).then(function (reg) {
       return apiSend({ type: "push_key" }).then(function (r) { if (!r || !r.key) throw new Error("key"); return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64key(r.key) }); });
-    }).then(function (sub) { return apiSend({ type: "push_sub", ctoken: ctoken, endpoint: sub.endpoint }); })
+    }).then(function (sub) { return apiSend(subKeys(sub, { type: "push_sub", ctoken: ctoken })); })
     .then(function (r) { if (!r || !r.ok) throw new Error((r && r.error) || "sub"); toast("Готово! Напоминания и новости студии будут приходить на этот телефон"); })
     .catch(function (e) { toast(permHint(e) || (e && e.message && e.message.length > 8 ? e.message : "Не получилось включить уведомления. Попробуйте ещё раз"), true); })
     .then(kPushRender);
@@ -5291,6 +5292,13 @@ a.tel svg { flex: none; }
   document.addEventListener("keydown", function (e) { if (tour && e.key === "Escape") tourEnd(false); });
   var IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   function standalone() { return matchMedia("(display-mode: standalone)").matches || navigator.standalone === true; }
+  // Адрес подписки и ключи шифрования — сервер кладёт текст уведомления прямо в пуш
+  function subKeys(sub, o) { var k = (sub.toJSON && sub.toJSON().keys) || {}; o.endpoint = sub.endpoint; o.p256dh = k.p256dh || ""; o.auth = k.auth || ""; return o; }
+  var pushKeysSent = false;
+  function pushKeysSync(o) {  // устройство включило уведомления раньше, без ключей — один раз дослать их серверу
+    if (pushKeysSent) return; pushKeysSent = true;
+    navigator.serviceWorker.getRegistration().then(function (reg) { return reg && reg.pushManager.getSubscription(); }).then(function (sub) { if (sub) apiSend(subKeys(sub, o)); }).catch(function () {});
+  }
   function pushState() {
     if (!SYNC || !window.isSecureContext) return Promise.resolve("no");
     if (IOS && !standalone()) return Promise.resolve("ios-home");
@@ -5302,6 +5310,7 @@ a.tel svg { flex: none; }
   function renderPush() {
     pushState().then(function (st0) {
       pushBtn.dataset.st = st0; pushBtn.hidden = st0 === "no";
+      if (st0 === "on" && token) pushKeysSync({ type: "push_sub", token: token });
       // предложение включить: пока не включены и мама не нажала «Не сейчас» (спросим снова через 3 дня)
       var later = 0; try { later = +localStorage.getItem("ma-pushlater") || 0; } catch (e) {}
       $("aPushNag").hidden = !(st0 === "off" || st0 === "ios-home" || st0 === "denied") || later > Date.now();
@@ -5335,7 +5344,7 @@ a.tel svg { flex: none; }
         return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64key(r.key) });
       });
     }).then(function (sub) {
-      return apiSend({ type: "push_sub", token: token, endpoint: sub.endpoint });
+      return apiSend(subKeys(sub, { type: "push_sub", token: token }));
     }).then(function (r) {
       if (!r || !r.ok) throw new Error((r && r.error) || "sub");
       toast("Готово! Уведомления о записях будут приходить на этот телефон");
