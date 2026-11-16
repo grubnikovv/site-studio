@@ -2031,11 +2031,13 @@ div.f { display: grid; gap: 8px; }
   }
   // после оплаты клиент пишет Марине в удобный мессенджер — текст уже готов
   function payBox(sum, msg, claim, deadline) {
-    return '<div class="paybox" data-box="' + claim + '"><div class="ptimer" data-until="' + deadline + '">Бронь держится <b>30:00</b></div>' +
+    var cert = claim[0] === "c";  // сертификат ждёт оплату без таймера: Марина проверит, когда увидит перевод
+    return '<div class="paybox" data-box="' + claim + '">' + (cert ? '<div class="ptimer">Ждёт оплаты</div>' : '<div class="ptimer" data-until="' + deadline + '">Бронь держится <b>30:00</b></div>') +
       '<b>1. Оплатите ' + rub(sum) + ' по СБП</b>' +
       '<p>Откроется перевод по СБП — выберите свой банк и <b>вставьте сумму ' + rub(sum) + '</b>: она скопируется сама при нажатии. Деньги придут на счёт в СберБанке.</p>' +
       '<button type="button" class="btn glow" data-paynow="' + sum + '">Оплатить по СБП</button>' +
-      '<b>2. Нажмите «Я оплатил(а)» в течение 30 минут</b><p>Иначе бронь отменится. Затем отправьте Марине готовое сообщение в удобный мессенджер — какой курс и даты вы выбрали.</p>' +
+      (cert ? '<b>2. После перевода нажмите «Я оплатил(а)»</b><p>Марина проверит поступление и включит сертификат. Можно сразу отправить ей готовое сообщение в удобный мессенджер.</p>'
+        : '<b>2. Нажмите «Я оплатил(а)» в течение 30 минут</b><p>Иначе бронь отменится. Затем отправьте Марине готовое сообщение в удобный мессенджер — какой курс и даты вы выбрали.</p>') +
       '<button type="button" class="btn ghost locked" aria-disabled="true" data-claim="' + claim + '" data-chat="' + esc(msg) + '" data-chat-title="Сообщить об оплате">Я оплатил(а)</button></div>';
   }
   function course(id) { return COURSES.filter(function (c) { return c.id === id; })[0] || COURSES[0]; }
@@ -2730,7 +2732,7 @@ div.f { display: grid; gap: 8px; }
   document.addEventListener("click", function (e) {
     var b = e.target.closest("[data-claim]"); if (!b) return;
     var r = findClaim(b.dataset.claim); if (!r || r.status !== "wait") return;
-    r.claimed = Date.now();  // бронь всё равно держится 30 минут: за это время Марина подтверждает оплату
+    r.claimed = Date.now();  // бронь обучения всё равно держится 30 минут: за это время Марина подтверждает оплату
     if (SYNC) {
       var kind = b.dataset.claim[0] === "t" ? "training" : "certs"; if (mine[kind][r.id]) addMine(kind, r);
       apiSend({ type: "claim", kind: b.dataset.claim[0], id: r.id, phone: r.phone });
@@ -3889,7 +3891,7 @@ div.f { display: grid; gap: 8px; }
     var name = $("cName").value.trim().replace(/\s+/g, " "), ph = phoneOk($("cPhone").value), phone = ph ? phoneNice(ph) : "";
     var waitC = ph ? (st.certs || []).filter(function (x) { return phoneOk(x.phone) === ph && x.status === "wait"; }).length : 0;
     var err = nameErr(name) || (!ph ? "Укажите мобильный телефон полностью." : "") ||
-      (waitC >= 2 ? "На этот номер уже 2 неоплаченных сертификата. Оплатите их или напишите Марине." : "") || !$("cTerm").checked ? "Отметьте, что знаете срок действия сертификата." : !$("cPd").checked ? "Отметьте согласие на обработку данных." : "";
+      (waitC >= 2 ? "На этот номер уже 2 неоплаченных сертификата. Оплатите их или напишите Марине." : "") || (!$("cTerm").checked ? "Отметьте, что знаете срок действия сертификата." : !$("cPd").checked ? "Отметьте согласие на обработку данных." : "");
     if (!err && botLike(this)) return;
     if (!err && tooFast(this)) err = "Проверьте данные и нажмите кнопку ещё раз.";
     if (!err && tooOften()) err = "Слишком много заявок подряд. Подождите несколько минут или напишите Марине.";
@@ -4016,9 +4018,16 @@ div.f { display: grid; gap: 8px; }
         '<div><b style="font-weight:700">' + esc(c.name) + '</b> · ' + esc(c.phone) + (c.to ? ' · для: ' + esc(c.to) : '') + '</div>' +
         (c.status !== "wait" && digits(c.phone).length === 11 ? '<div class="acts"><a class="btn sm ghost" target="_blank" rel="noopener" href="https://wa.me/' + digits(c.phone) + '?text=' + encodeURIComponent("Здравствуйте! Ваш подарочный сертификат студии «М.А» № " + c.code + " — остаток " + rub(certBalance(c)) + ". Открыть: " + certLink(c)) + '">Отправить ссылку в WhatsApp</a></div>' : '') +
         ((c.spent || []).length ? '<div class="info">Списано: ' + c.spent.map(function (x) { return shortDate(x.d) + ' — ' + rub(x.sum) + (x.who ? ' (' + esc(x.who) + ', запись ' + shortDate(x.date) + ')' : ''); }).join(", ") + '</div>' : '') +
-        (c.status === "wait" ? '<div class="info">' + (c.claimed ? 'Покупатель нажал «Я оплатил(а)». ' : 'Покупатель ещё оплачивает. ') + 'Проверьте поступление ' + rub(c.sum) + ' в СберБанк Онлайн' + (c.hold ? ' и нажмите «Оплата пришла» до ' + new Date(c.hold).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }) + ' — иначе сертификат удалится сам' : '') + '.</div><div class="acts"><button data-cpay="' + c.id + '">Оплата пришла</button><button data-cno="' + c.id + '">Удалить — не оплачен</button></div>' : '') +
+        (c.status === "wait" ? '<div class="info">' + (c.claimed ? 'Покупатель нажал «Я оплатил(а)». ' : 'Покупатель ещё оплачивает. ') + 'Проверьте поступление ' + rub(c.sum) + ' в СберБанк Онлайн и нажмите «Оплата пришла». Сам сертификат не удалится. Денег нет — уточните у покупателя.</div>' + certContact(c) +
+          '<div class="acts"><button data-cpay="' + c.id + '">Оплата пришла</button>' + (c.hold && c.hold > Date.now() ? '<button disabled>Удалить можно после ' + new Date(c.hold).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" }) + '</button>' : '<button data-cno="' + c.id + '">Удалить — не оплачен</button>') + '</div>' : '') +
         (open ? '<div class="spend"><input type="number" inputmode="numeric" min="1" max="' + bal + '" placeholder="Сумма, ₽" data-amt="' + c.id + '" aria-label="Сколько списать с сертификата"><button type="button" data-cert="' + c.id + '" data-st="part">Списать</button><button type="button" data-cert="' + c.id + '" data-st="used">Закрыть полностью</button></div>' : '') + '</div>';
     }).join("") : '<p class="note">Покупок пока нет. Они появятся, когда кто-то оплатит сертификат на странице «Подарочный сертификат».</p>';
+  }
+  // связаться с покупателем неоплаченного сертификата: позвонить или написать в WhatsApp
+  function certContact(c) {
+    var d = digits(c.phone); if (d.length !== 11) return "";
+    var txt = "Здравствуйте! Это Марина, студия «М.А». Вы оформили подарочный сертификат № " + c.code + " на " + rub(c.sum) + ". Подскажите, получилось оплатить? Я пока не вижу перевода.";
+    return '<div class="acts"><a class="btn sm ghost" href="tel:+' + d + '">📞 Позвонить</a><a class="btn sm ghost" target="_blank" rel="noopener" href="https://wa.me/' + d + '?text=' + encodeURIComponent(txt) + '">Написать в WhatsApp</a></div>';
   }
   $("aCerts").addEventListener("click", function (e) {
     var dl = e.target.closest("[data-cdel]"), dOk = e.target.closest("[data-cdelok]"), dNo = e.target.closest("[data-cdelno]");

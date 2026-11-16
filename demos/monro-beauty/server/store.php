@@ -45,11 +45,22 @@ function doc_note(&$doc, $icon, $title, $text, $go = null) {
     $doc['notes'] = array_slice(array_values(array_filter($doc['notes'], fn($n) => ($n['t'] ?? 0) > $lim)), 0, 200);
 }
 
-// Брони обучения и сертификаты держатся 30 минут: за это время нужно оплатить, а Марине — нажать «Оплата пришла».
+// Бронь обучения держится 30 минут: за это время нужно оплатить, а Марине — нажать «Оплата пришла».
 // Не успели — бронь удаляется, Марине приходит сообщение с контактами (вдруг деньги всё же пришли).
+// Сертификат сам не удаляется: Марина проверяет оплату, когда удобно. Через 2 часа — одно напоминание,
+// и с этого времени неоплаченный сертификат можно удалить.
 function doc_expire(&$doc) {
     $now = now_ms(); $changed = false;
-    foreach (['training', 'certs'] as $kind) {
+    foreach ($doc['certs'] as &$c) {
+        if (($c['status'] ?? '') !== 'wait' || !empty($c['reminded']) || ($c['hold'] ?? PHP_INT_MAX) >= $now) continue;
+        $c['reminded'] = 1; $changed = true;
+        $txt = '№ ' . ($c['code'] ?? '') . ' на ' . number_format((int)($c['sum'] ?? 0), 0, ',', ' ') . ' ₽ · ' . ($c['name'] ?? '') . ', ' . ($c['phone'] ?? '')
+            . (!empty($c['claimed']) ? ' · покупатель нажал «Я оплатил(а)»' : '') . '. Проверьте поступление в Сбере. Денег нет — свяжитесь с покупателем или удалите сертификат.';
+        doc_note($doc, '🎁', 'Сертификат ждёт проверки оплаты', $txt, ['tab' => 'req']);
+        notify_admins("🎁 <b>Сертификат ждёт проверки оплаты</b>\n" . h($txt));
+    }
+    unset($c);
+    foreach (['training'] as $kind) {
         $keep = [];
         foreach ($doc[$kind] as $x) {
             if (($x['status'] ?? '') !== 'wait' || ($x['hold'] ?? PHP_INT_MAX) >= $now) { $keep[] = $x; continue; }

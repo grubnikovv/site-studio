@@ -277,7 +277,7 @@ if ($type === 'cert') {
     [$doc, $v] = doc_load(true);
     foreach ($doc['certs'] as $c) if (cert_key($c['code'] ?? '') === cert_key($code)) fail('Попробуйте ещё раз.');
     $rec = ['id' => $id, 'code' => $code, 'sum' => $sum, 'balance' => $sum, 'to' => clean($r['to'] ?? '', 30), 'name' => $name, 'phone' => phone_nice($phone),
-        'status' => 'wait', 'created' => (string)($r['created'] ?? date('Y-m-d')), 'till' => (string)($r['till'] ?? date('Y-m-d', strtotime('+1 year'))), 'hold' => now_ms() + 30 * 60 * 1000];
+        'status' => 'wait', 'created' => (string)($r['created'] ?? date('Y-m-d')), 'till' => (string)($r['till'] ?? date('Y-m-d', strtotime('+1 year'))), 'hold' => now_ms() + 2 * 3600 * 1000];  // с этого времени неоплаченный можно удалить
     $doc['certs'][] = $rec;
     doc_note($doc, '🎁', 'Новый сертификат — ждёт оплату', '№ ' . $code . ' на ' . number_format($sum, 0, ',', ' ') . ' ₽ · ' . $name, ['tab' => 'req']);
     $v = doc_save($doc, $v);
@@ -297,7 +297,9 @@ if ($type === 'claim') {
         if ($kind === 'training') { $t = '💳 Ученица оплатила — проверьте'; $txt = ($x['name'] ?? '') . ' · предоплата ' . number_format((int)($x['pre'] ?? 0), 0, ',', ' ') . ' ₽ · проверьте поступление в Сбере'; }
         else { $t = '💳 Сертификат оплачен — проверьте'; $txt = '№ ' . ($x['code'] ?? '') . ' на ' . number_format((int)($x['sum'] ?? 0), 0, ',', ' ') . ' ₽ · ' . ($x['name'] ?? '') . ' · проверьте поступление в Сбере'; }
         doc_note($doc, '💳', mb_substr($t, 2), $txt, ['tab' => 'req']);
-        notify_admins('<b>' . h($t) . "</b>\n" . h($txt) . "\nОтметьте в кабинете «Оплата пришла» до " . date('H:i', (int)($x['hold'] / 1000)) . " — иначе бронь удалится сама.");
+        notify_admins('<b>' . h($t) . "</b>\n" . h($txt) . ($kind === 'training'
+            ? "\nОтметьте в кабинете «Оплата пришла» до " . date('H:i', (int)($x['hold'] / 1000)) . " — иначе бронь удалится сама."
+            : "\nКогда увидите деньги — нажмите в кабинете «Оплата пришла». Сертификат сам не удалится."));
     }
     unset($x);
     done($doc, $v);
