@@ -29,8 +29,9 @@ if (isset($_GET['testpush'])) {  // проверочное уведомлени�
     foreach ($subs as $r) echo 'Подписка ' . substr(md5($r['endpoint']), 0, 6) . ': ' . ($r['p256dh'] ? 'текст внутри пуша (зашифрован)' : 'старая, без ключей — пустой пуш') . "\n";
     if (!$subs) echo "Нет подписок мастера\n";
     sleep(25);  // успел ли браузер «проснуться» и спросить, что показать (push_peek обновляет seen)
-    foreach (push_db()->query('SELECT endpoint, created, seen, ua FROM push_subs WHERE acc = 0') as $r)
-        echo 'Подписка от ' . date('d.m H:i', (int)$r['created']) . ' (' . (preg_match('/YaBrowser|Android|Windows|Mac|iPhone|Chrome/', $r['ua'], $m) ? $m[0] : '?') . ', ' . substr(md5($r['endpoint']), 0, 6) . '): ' . ((int)$r['seen'] >= $t0 ? 'браузер проснулся и забрал уведомление' : 'браузер НЕ обратился к сайту') . "\n";
+    foreach (push_db()->query('SELECT endpoint, created, seen, ua, p256dh FROM push_subs WHERE acc = 0') as $r)
+        echo 'Подписка от ' . date('d.m H:i', (int)$r['created']) . ' (' . (preg_match('/YaBrowser|Android|Windows|Mac|iPhone|Chrome/', $r['ua'], $m) ? $m[0] : '?') . ', ' . substr(md5($r['endpoint']), 0, 6) . '): '
+            . ($r['p256dh'] ? 'текст внутри пуша — браузеру не нужно обращаться к сайту' : ((int)$r['seen'] >= $t0 ? 'браузер проснулся и забрал уведомление' : 'браузер НЕ обратился к сайту')) . "\n";
     $log = @file(dirname(cfg('db_path')) . '/bot.log') ?: []; echo implode('', array_slice(preg_grep('/push/', $log), -5));
     exit;
 }
