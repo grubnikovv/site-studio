@@ -6,6 +6,9 @@
 <link rel="manifest" href="manifest.json"><link rel="icon" href="img/app-192.png"><link rel="apple-touch-icon" href="img/app-180.png"><meta name="theme-color" content="#2a0f16"><meta name="apple-mobile-web-app-title" content="М.А">
 <link rel="preload" href="fonts/manrope-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/tenorsans-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+<script>/* открыта ссылка на раздел (кабинет, запись…) — не показывать главную, пока скрипт не переключит страницу */
+if (/^#(uslugi|raboty|obuchenie|o-mastere|voprosy|sertifikat|kontakty|zapis|admin|politika|soglasie|podarok|oferta|kabinet|cert-|moi-|kak-proiti)/.test(location.hash)) document.documentElement.className += " deep";</script>
+<style>html.deep #v-home { display: none; }</style>
 <style>/* шрифты Tenor Sans и Manrope лежат на своём хостинге (без Google) */
 @font-face { font-family: 'Manrope'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/manrope-cyrillic.woff2) format('woff2'); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
 @font-face { font-family: 'Manrope'; font-style: normal; font-weight: 400; font-display: swap; src: url(fonts/manrope-latin-ext.woff2) format('woff2'); unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
@@ -736,6 +739,11 @@ div.f { display: grid; gap: 8px; }
 .pass-eye[aria-pressed="false"] .eye-x { display: none; }
 #v-admin.locked .atabs, #v-admin.locked .atab, #v-admin.locked .a-out { display: none !important; }
 .a-save { margin: -6px 0 12px; padding-left: 4px;  /* галочка по букве «К» заголовка */ font-size: 13px; color: var(--mute); }
+/* пока с сервера не пришла база кабинета — вместо пустых блоков короткая загрузка */
+.a-loading .atab { display: none; }
+.a-load { display: flex; align-items: center; gap: 10px; color: var(--mute); font-size: 14px; padding: 18px 2px; }
+.a-load i { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--lac); animation: aspin .8s linear infinite; }
+@keyframes aspin { to { transform: rotate(360deg); } }
 .a-save.bad { color: #B3261E; font-weight: 700; }
 .a-out { margin: 28px auto 0; display: block; }
 .a-acts { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 28px; }
@@ -1881,6 +1889,7 @@ div.f { display: grid; gap: 8px; }
       <button type="button" data-tab="stats" aria-pressed="false">Статистика</button>
       <button type="button" data-tab="req" aria-pressed="false">Заявки<span class="tab-n" id="aReqN" hidden></span></button>
     </div>
+    <p class="a-load" id="aLoad" hidden><i></i>Загружаю записи…</p>
     <section class="atab" data-tab="day">
     <div class="days" id="aDays"></div>
     <div class="aday-bar" id="aDayBar" hidden></div>
@@ -3572,7 +3581,8 @@ div.f { display: grid; gap: 8px; }
     if (n.go.tab === "day") setTimeout(function () { var x = document.querySelector('#aDays [data-d="' + n.go.date + '"]'); if (x) x.scrollIntoView({ block: "nearest", inline: "center" }); }, 50);
   }
   renderBell();
-  function renderTab() { if (SYNC && token && !fullDoc) return;  // ждём полную базу кабинета
+  function adminWait() { var w = !!(SYNC && token && !fullDoc); $("v-admin").classList.toggle("a-loading", w); $("aLoad").hidden = !w; return w; }
+  function renderTab() { if (adminWait()) return;  // ждём полную базу кабинета
     if (aTab === "clients") renderClients(); else if (aTab === "stats") renderStats(); else renderAdmin(); }
 
   // Все записи за период: от -90 дней до горизонта записи
@@ -4065,6 +4075,7 @@ div.f { display: grid; gap: 8px; }
     if (v === "kabinet" && !SYNC) { location.replace("#moi-zapisi"); return; }  // в демо без сервера — записи этого телефона
     if (h === "moi-sertifikaty") { v = "sertifikat"; pendingTo = "mcForm"; }
     var changed = v !== curView; curView = v;
+    document.documentElement.classList.remove("deep");
     document.title = TITLES[v] || TITLES.home;
     if (changed && !$("eSheet").hidden) closeEditor();
     VIEWS.forEach(function (k) { var el = $("v-" + k); el.hidden = k !== v; if (k === v && changed) { el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter"); } });
