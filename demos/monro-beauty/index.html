@@ -2169,7 +2169,12 @@ a.tel svg { flex: none; }
         <p class="note" id="aBkInfo" style="margin:0"></p>
         <span class="lbl">Таблицы для Excel или Google Таблиц</span>
         <div class="acts" id="aExport"><button type="button" class="btn sm ghost" data-exp="clients">Клиентки</button><button type="button" class="btn sm ghost" data-exp="bookings">Все записи</button><button type="button" class="btn sm ghost" data-exp="certs">Сертификаты</button><button type="button" class="btn sm ghost" data-exp="training">Обучение</button></div>
-        <button type="button" class="btn sm" id="aBackup">Скачать полную копию базы</button></div>
+        <button type="button" class="btn sm" id="aBackup">Скачать полную копию базы</button>
+        <span class="lbl">Перенести записи из блокнота</span>
+        <p class="note" style="margin:0">Каждая запись — с новой строки: <b>дата; время; имя; телефон; услуга; сумма</b>. Например: <span class="num">17.11.2026; 15:00; Оксана; 8 902 000-00-00; Коррекция, длина до 3-й; 2000</span></p>
+        <textarea id="aImpTx" rows="5" placeholder="Вставьте список записей"></textarea>
+        <div class="acts"><button type="button" class="btn sm ghost" id="aImpChk">Проверить</button><button type="button" class="btn sm" id="aImpGo" hidden>Загрузить</button></div>
+        <div class="opts" id="aImpRes"></div></div>
       <div class="card"><h3>Клиентки</h3><input type="search" id="aSearch" placeholder="Имя или телефон" aria-label="Поиск клиентки"><div class="opts" id="aClients"></div></div>
     </section>
     <section class="atab" data-tab="stats" hidden>
@@ -4271,6 +4276,47 @@ a.tel svg { flex: none; }
       toast("Отправлено: " + r.accounts + " клиенткам в колокольчик" + (r.mailed ? ", " + r.mailed + " — на почту" : ""));
     });
   });
+  // ---------- перенос записей из бумажного блокнота: проверить список, потом загрузить ----------
+  var impRows = [];
+  function svcByName(t, price) {
+    var n = String(t || "").toLowerCase().replace(/\u00a0/g, " ").replace(/ё/g, "е").trim();
+    var hit = SERVICES.filter(function (x) { return x.id === n || x.name.toLowerCase().replace(/\u00a0/g, " ").replace(/ё/g, "е") === n; })[0];
+    if (hit) return hit;
+    if (/коррекц/.test(n)) return svc(price >= 2200 ? "cor4" : "cor");
+    if (/наращ/.test(n)) return svc(price >= 2800 ? "ext4" : "ext");
+    return null;
+  }
+  function impParse() {
+    var today = dkey(new Date());
+    impRows = $("aImpTx").value.split(/\n+/).map(function (l) { return l.trim(); }).filter(Boolean).map(function (line) {
+      var f = line.split(";").map(function (x) { return x.trim(); }), err = [];
+      var dm = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(f[0] || ""), tm = /^(\d{1,2}):(\d{2})$/.exec(f[1] || "");
+      var date = dm ? dm[3] + "-" + ("0" + dm[2]).slice(-2) + "-" + ("0" + dm[1]).slice(-2) : "";
+      var start = tm ? Number(tm[1]) * 60 + Number(tm[2]) : null;
+      var ph = phoneOk(f[3] || ""), price = Number(String(f[5] || "").replace(/\D/g, "")) || 0, sv = svcByName(f[4], price);
+      if (!date || isNaN(new Date(date + "T12:00"))) err.push("дата");
+      if (start == null) err.push("время");
+      if (!f[2] || f[2].length < 2) err.push("имя");
+      if (!ph) err.push("телефон (нужно 11 цифр)");
+      if (!sv) err.push("услуга «" + (f[4] || "") + "»");
+      var rec = err.length ? null : { id: "i" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), date: date, start: start, svc: sv.id, name: f[2], phone: phoneNice(ph), price: price || sv.price, status: date < today ? "came" : "booked", manual: true, imported: true };
+      if (rec) { rec.dur = bmin(rec); if (st.bookings.some(function (b) { return b.date === rec.date && b.start === rec.start && digits(b.phone) === digits(rec.phone) && b.status !== "cancelled"; })) { err.push("уже есть в кабинете"); rec = null; } }
+      return { line: line, rec: rec, err: err };
+    });
+    var ok = impRows.filter(function (r) { return r.rec; }).length;
+    $("aImpRes").innerHTML = impRows.map(function (r) {
+      return '<div class="bk"><div class="r1"><b>' + (r.rec ? whenText(r.rec.date, r.rec.start) : esc(r.line.slice(0, 60))) + '</b><span class="pill ' + (r.rec ? "ok" : "bad") + '">' + (r.rec ? "готово" : "ошибка") + '</span></div>' +
+        (r.rec ? '<div class="info">' + esc(r.rec.name) + ' · ' + esc(r.rec.phone) + ' · ' + svcLabel(r.rec) + ' · ' + rub(r.rec.price) + '</div>' : '<div class="info">Проверьте: ' + r.err.join(", ") + '</div>') + '</div>';
+    }).join("");
+    $("aImpGo").hidden = !ok; $("aImpGo").textContent = "Загрузить " + ok + " " + plural(ok, "запись", "записи", "записей");
+  }
+  $("aImpChk").onclick = impParse;
+  $("aImpGo").onclick = function () {
+    var add = impRows.filter(function (r) { return r.rec; }).map(function (r) { return r.rec; }); if (!add.length) return;
+    add.forEach(function (r) { st.bookings.push(r); }); save();
+    $("aImpTx").value = ""; $("aImpRes").innerHTML = ""; $("aImpGo").hidden = true; impRows = [];
+    toast("Загружено записей: " + add.length + ". Они уже в днях кабинета"); renderTab();
+  };
   // полная копия базы с сервера одним файлом; заодно — когда была последняя ночная копия
   function bkInfo(r) { $("aBkInfo").textContent = r && r.ok ? (r.last ? "Последняя автокопия: " + dmy(r.last) + ", всего копий: " + r.count + "." : "Первая автокопия появится сегодня ночью.") : ""; }
   $("aBackup").onclick = function () {
