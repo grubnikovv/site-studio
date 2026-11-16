@@ -984,7 +984,8 @@ div.f { display: grid; gap: 8px; }
 @media (max-width: 400px) { .atabs button { font-size: 12px; padding: 9px 3px; } }
 @media (max-width: 350px) { .atabs { flex-wrap: wrap; } .atabs button { flex: 1 1 30%; } }  /* самые узкие телефоны — вкладки в два ряда */
 /* календарь месяца: число и сколько записей */
-.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; width: 100%; max-width: 480px; }
+@media (min-width: 700px) { .cal button { aspect-ratio: auto; height: 62px; } }
 .cal .cw { text-align: center; font-size: 11px; font-weight: 800; color: var(--mute); text-transform: uppercase; padding: 2px 0 4px; }
 .cal button { aspect-ratio: 1 / 1.05; min-width: 0; border: 1.5px solid var(--line); background: var(--bg); border-radius: 12px; padding: 4px 2px; display: grid; align-content: space-between; justify-items: center; font: inherit; color: inherit; cursor: pointer; }
 .cal button b { font-size: 15px; line-height: 1.1; }
@@ -5179,11 +5180,13 @@ a.tel svg { flex: none; }
       '<div class="tt-bar"><i style="width:' + Math.round((idx + 1) / all * 100) + '%"></i></div>' +
       '<div class="tt-acts">' + (tour.s > 0 ? '<button type="button" class="btn sm ghost" data-tt="prev">Назад</button>' : '') + '<button type="button" class="btn sm" data-tt="next">' + (last ? "Готово" : tour.s === b.steps.length - 1 ? "Дальше: " + TOUR[TOUR.indexOf(b) + 1].title : "Понятно, дальше") + '</button></div>';
     tourEls.cur = el;
+    // блок дорисовывается или меняет размер (календарь, шрифты, анимации) — рамка подстраивается сама
+    if (window.ResizeObserver) { if (tourEls.ro) tourEls.ro.disconnect(); tourEls.ro = new ResizeObserver(function () { tourPlace(); }); if (el) tourEls.ro.observe(el); tourEls.ro.observe(document.body); }
     tourScroll(el); tourPlace();
     // вкладка догружается, окна выезжают с анимацией — ещё раз докручиваем и ставим рамку на место
     setTimeout(function () { tourScroll(tourEls.cur); tourPlace(); }, 120);
     setTimeout(function () { tourScroll(tourEls.cur); tourPlace(); }, 500);
-    setTimeout(tourPlace, 950);
+    setTimeout(tourPlace, 950); setTimeout(tourPlace, 1600);
     var nb = tourEls.tip.querySelector('[data-tt="next"]'); if (nb) nb.focus({ preventScroll: true });
   }
   // Прокрутить так, чтобы блок был под шапкой, а под ним хватило места для подсказки. Внутри окна новой записи — прокручиваем само окно.
@@ -5237,6 +5240,7 @@ a.tel svg { flex: none; }
     var b = tour && tBlock(tour.b); if (b && b.post && !finished) b.post();
     var sv = tGet(); if (finished) delete sv.pos; tSet(sv);
     tour = null; [tourEls.shade, tourEls.ring, tourEls.tip].forEach(function (x) { x.remove(); }); document.body.classList.remove("touring");
+    if (tourEls.ro) { tourEls.ro.disconnect(); tourEls.ro = null; }
     window.scrollTo({ top: 0, behavior: "smooth" });
     toast(finished ? "Тема пройдена! Остальные — в «🎓 Обучение по кабинету» внизу кабинета" : "Обучение на паузе. Продолжить можно внизу кабинета: «🎓 Обучение по кабинету»");
     tourHint();
