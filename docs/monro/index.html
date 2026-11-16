@@ -2204,8 +2204,8 @@ a.tel svg { flex: none; }
         <div class="acts" id="aExport"><button type="button" class="btn sm ghost" data-exp="clients">Клиентки</button><button type="button" class="btn sm ghost" data-exp="bookings">Все записи</button><button type="button" class="btn sm ghost" data-exp="certs">Сертификаты</button><button type="button" class="btn sm ghost" data-exp="training">Обучение</button></div>
         <button type="button" class="btn sm" id="aBackup">Скачать полную копию базы</button>
         <span class="lbl">Перенести записи из блокнота</span>
-        <p class="note" style="margin:0">Каждая запись — с новой строки: <b>дата; время; имя; телефон; услуга; сумма</b>. Например: <span class="num">17.11.2026; 15:00; Оксана; 8 902 000-00-00; Коррекция, длина до 3-й; 2000</span></p>
-        <textarea id="aImpTx" rows="5" placeholder="Вставьте список записей"></textarea>
+        <p class="note" style="margin:0">Пишите как в блокноте: дата — строкой выше, ниже записи этого дня: <b>время, имя, телефон, услуга, сумма</b>. Знаки препинания не важны, телефон можно на следующей строке. Вторую услугу той же клиентке — с новой строки через «+». «Проверить» покажет, как сайт понял каждую запись.</p>
+        <textarea id="aImpTx" rows="7" placeholder="21 ноября&#10;16:00 Надя Черкасова 8 927 542 44 16 коррекция 2000&#10;17:30 Аня 89044173560 маникюр гель лак 1700&#10;+ педикюр пальчики и стопы 2200"></textarea>
         <div class="acts"><button type="button" class="btn sm ghost" id="aImpChk">Проверить</button><button type="button" class="btn sm" id="aImpGo" hidden>Загрузить</button></div>
         <div class="opts" id="aImpRes"></div></div>
       <div class="card"><h3>Клиентки</h3><input type="search" id="aSearch" placeholder="Имя или телефон" aria-label="Поиск клиентки"><div class="opts" id="aClients"></div></div>
@@ -4347,35 +4347,79 @@ a.tel svg { flex: none; }
   });
   // ---------- перенос записей из бумажного блокнота: проверить список, потом загрузить ----------
   var impRows = [];
-  function svcByName(t, price) {
-    var n = String(t || "").toLowerCase().replace(/\u00a0/g, " ").replace(/ё/g, "е").trim();
-    var hit = SERVICES.filter(function (x) { return x.id === n || x.name.toLowerCase().replace(/\u00a0/g, " ").replace(/ё/g, "е") === n; })[0];
+  // Услуга по словам из блокнота: «коррекция», «маникюр и гель лак», «педикюр пальчики и стопы»…
+  function svcGuess(t, price) {
+    var n = String(t || "").toLowerCase().replace(/ /g, " ").replace(/ё/g, "е");
+    var hit = SERVICES.filter(function (x) { return n.indexOf(x.name.toLowerCase().replace(/ /g, " ").replace(/ё/g, "е")) >= 0; })[0];
     if (hit) return hit;
-    if (/коррекц/.test(n)) return svc(price >= 2200 ? "cor4" : "cor");
-    if (/наращ/.test(n)) return svc(price >= 2800 ? "ext4" : "ext");
+    var long = /от\s*3|от\s*тре|длинн/.test(n);
+    if (/коррекц/.test(n)) return svc(long || price >= 2200 ? "cor4" : "cor");
+    if (/наращ/.test(n)) return svc(long || price >= 2800 ? "ext4" : "ext");
+    if (/нит/.test(n)) return svc("nit");
+    if (/сняти/.test(n) && !/маник|педик/.test(n)) return svc("off");
+    if (/педик/.test(n)) return svc(/сложн/.test(n) ? "pedh" : /полн/.test(n) ? "pedp" : /стоп/.test(n) ? "pedf" : /гель|лак|покрыт/.test(n) ? "pedg" : "ped");
+    if (/маник/.test(n)) return svc(/укреп/.test(n) ? "str" : /гель|лак|покрыт/.test(n) ? "gel" : "man");
     return null;
   }
+  var MONTHS = ["январ", "феврал", "март", "апрел", "ма", "июн", "июл", "август", "сентябр", "октябр", "ноябр", "декабр"];
+  // год не указан — берём ближайший к сегодняшнему дню (декабрь в январе — прошлый год, январь в декабре — следующий)
+  function impYear(m, d) {
+    var now = new Date(), best = null;
+    [now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1].forEach(function (y) { var t = new Date(y, m, d), diff = Math.abs(t - now); if (!best || diff < best[1]) best = [y, diff]; });
+    return best[0];
+  }
+  function impDate(line) {  // «21 ноября», «21.11», «21.11.2026», «1 дек»
+    var l = line.toLowerCase(), m = /(?:^|[^\d:.])(\d{1,2})\.(\d{1,2})(?:\.(\d{4}|\d{2}))?(?![\d.:])/.exec(l), d, mo, y;
+    if (m && +m[2] >= 1 && +m[2] <= 12) { d = +m[1]; mo = +m[2] - 1; y = m[3] ? (m[3].length === 2 ? 2000 + +m[3] : +m[3]) : null; }
+    else {
+      m = /(\d{1,2})\s+([а-яё]{3,})(?:\s+(20\d{2})(?!\d))?/.exec(l); if (!m) return null;
+      mo = MONTHS.findIndex(function (x) { return m[2].indexOf(x) === 0 && (x !== "ма" || /^ма[йя]/.test(m[2])); }); if (mo < 0) return null;
+      d = +m[1]; y = m[3] ? +m[3] : null;
+    }
+    if (!(d >= 1 && d <= 31)) return null;
+    y = y || impYear(mo, d);
+    var dt = new Date(y, mo, d); if (dt.getMonth() !== mo) return null;
+    return { key: dkey(dt), text: m[0] };
+  }
   function impParse() {
-    var today = dkey(new Date());
-    impRows = $("aImpTx").value.split(/\n+/).map(function (l) { return l.trim(); }).filter(Boolean).map(function (line) {
-      var f = line.split(";").map(function (x) { return x.trim(); }), err = [];
-      var dm = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(f[0] || ""), tm = /^(\d{1,2}):(\d{2})$/.exec(f[1] || "");
-      var date = dm ? dm[3] + "-" + ("0" + dm[2]).slice(-2) + "-" + ("0" + dm[1]).slice(-2) : "";
-      var start = tm ? Number(tm[1]) * 60 + Number(tm[2]) : null;
-      var ph = phoneOk(f[3] || ""), price = Number(String(f[5] || "").replace(/\D/g, "")) || 0, sv = svcByName(f[4], price);
-      if (!date || isNaN(new Date(date + "T12:00"))) err.push("дата");
-      if (start == null) err.push("время");
-      if (!f[2] || f[2].length < 2) err.push("имя");
-      if (!ph) err.push("телефон (нужно 11 цифр)");
-      if (!sv) err.push("услуга «" + (f[4] || "") + "»");
-      var rec = err.length ? null : { id: "i" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), date: date, start: start, svc: sv.id, name: f[2], phone: phoneNice(ph), price: price || sv.price, status: date < today ? "came" : "booked", manual: true, imported: true };
+    var today = dkey(new Date()), recs = [], cur = null, date = null;
+    $("aImpTx").value.split(/\n/).forEach(function (raw) {
+      var line = raw.replace(/ /g, " ").trim(); if (!line) return;
+      var dt = impDate(line), tm = /(?:^|[^\d])(\d{1,2})\s*:\s*(\d{2})(?!\d)/.exec(line);
+      if (dt && !tm && line.replace(dt.text, "").replace(/[^a-zа-яё\d]/gi, "").length <= 6) { date = dt.key; cur = null; return; }  // строка-дата
+      if (dt) date = dt.key;
+      var plus = /^\+/.test(line);
+      if (tm || plus) { cur = { date: date, start: tm ? +tm[1] * 60 + +tm[2] : null, text: line.replace(dt ? dt.text : "", " "), plus: plus && !tm, src: [raw] }; recs.push(cur); }
+      else if (cur) { cur.text += " " + line; cur.src.push(raw); }
+      else recs.push({ date: date, start: null, text: line, src: [raw] });
+    });
+    var done = [];
+    impRows = recs.map(function (r, idx) {
+      var t = r.text, err = [];
+      var phm = /(?:\+?7|8)?[\s(\-]*9\d{2}[\s)\-]*\d{3}[\s\-]*\d{2}[\s\-]*\d{2}/.exec(t), ph = phm ? phoneOk(phm[0]) : "";
+      var rest = phm ? t.replace(phm[0], " ") : t;
+      rest = rest.replace(/(\d{1,2})\s*:\s*(\d{2})/, " ");
+      var tail = rest.replace(/[;,.\s]+$/, ""), pm = /(?:^|[^\d])(\d{1,2} \d{3}|\d{3,5})\s*(?:р\.?|руб\.?|₽)?$/i.exec(tail) || /(?:^|[^\d])(\d{1,2} \d{3}|\d{3,5})(?=\s|$|р|₽)/i.exec(rest);
+      var price = pm ? Number(pm[1].replace(/\s/g, "")) : 0; if (price && (price < 100 || price > 50000)) price = 0;
+      if (pm && price) rest = rest.replace(pm[1], " ");
+      var low = rest.toLowerCase(), cut = low.search(/коррекц|маник|педик|наращ|сняти|нит[ьи]|гель|френч/);
+      var sv = svcGuess(cut >= 0 ? rest.slice(cut) : rest, price);
+      var name = (cut >= 0 ? rest.slice(0, cut) : rest).replace(/[^A-Za-zА-Яа-яЁё\s\-]/g, " ").replace(/\s+/g, " ").trim();
+      var prev = idx > 0 ? done[idx - 1] : null;
+      if (r.plus && prev && prev.rec) { name = name || prev.rec.name; ph = ph || digits(prev.rec.phone); r.date = r.date || prev.rec.date; r.start = prev.rec.start + bmin(prev.rec); }
+      if (!r.date) err.push("дата (напишите её строкой выше, например «21 ноября»)");
+      if (r.start == null) err.push("время, например 15:00");
+      if (name.length < 2) err.push("имя");
+      if (!ph) err.push("телефон (11 цифр)");
+      if (!sv) err.push("услуга — напишите, например, «коррекция» или «маникюр гель лак»");
+      var rec = err.length ? null : { id: "i" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), date: r.date, start: r.start, svc: sv.id, name: name, phone: phoneNice(ph), price: price || sv.price, status: r.date < today ? "came" : "booked", manual: true, imported: true };
       if (rec) { rec.dur = bmin(rec); if (st.bookings.some(function (b) { return b.date === rec.date && b.start === rec.start && digits(b.phone) === digits(rec.phone) && b.status !== "cancelled"; })) { err.push("уже есть в кабинете"); rec = null; } }
-      return { line: line, rec: rec, err: err };
+      var res = { line: r.src.join(" / "), rec: rec, err: err }; done.push(res); return res;
     });
     var ok = impRows.filter(function (r) { return r.rec; }).length;
     $("aImpRes").innerHTML = impRows.map(function (r) {
-      return '<div class="bk"><div class="r1"><b>' + (r.rec ? whenText(r.rec.date, r.rec.start) : esc(r.line.slice(0, 60))) + '</b><span class="pill ' + (r.rec ? "ok" : "bad") + '">' + (r.rec ? "готово" : "ошибка") + '</span></div>' +
-        (r.rec ? '<div class="info">' + esc(r.rec.name) + ' · ' + esc(r.rec.phone) + ' · ' + svcLabel(r.rec) + ' · ' + rub(r.rec.price) + '</div>' : '<div class="info">Проверьте: ' + r.err.join(", ") + '</div>') + '</div>';
+      return '<div class="bk"><div class="r1"><b>' + (r.rec ? whenText(r.rec.date, r.rec.start) : esc(r.line.slice(0, 70))) + '</b><span class="pill ' + (r.rec ? "ok" : "bad") + '">' + (r.rec ? "готово" : "ошибка") + '</span></div>' +
+        (r.rec ? '<div class="info">' + esc(r.rec.name) + ' · ' + esc(r.rec.phone) + ' · ' + svcLabel(r.rec) + ' · ' + rub(r.rec.price) + '</div>' : '<div class="info">Не понял: ' + r.err.join(", ") + '</div>') + '</div>';
     }).join("");
     $("aImpGo").hidden = !ok; $("aImpGo").textContent = "Загрузить " + ok + " " + plural(ok, "запись", "записи", "записей");
   }
@@ -5032,18 +5076,21 @@ a.tel svg { flex: none; }
       { el: "#nBell", t: "Колокольчик — уведомления", p: "Новые записи, отмены, переносы, заявки на обучение и сертификаты. Красная цифра — сколько новых. Всё то же приходит в Telegram-бот." },
       { el: "#hdrM a.bell-btn", t: "Значок кабинета", p: "С любой страницы сайта нажмите сюда — откроется кабинет." },
       { el: "#aTabs", t: "Вкладки кабинета", p: "День — записи и график. Календарь — весь месяц сразу. Клиентки — база и рассылка. Статистика — выручка за месяц. Заявки — обучение и сертификаты." } ] },
-    { id: "cal", icon: "🗓", title: "Календарь месяца", sub: "сколько записей в каждый день", pre: tab("cal"), steps: [
-      { el: "#aCal", t: "Календарь", p: "Весь месяц сразу: цифра — сколько записей в этот день, «обуч.» — дни обучения, «вых» — выходной. Нажмите на день — откроются его записи." },
-      { el: "#calNext", t: "Другие месяцы", p: "Стрелки — листать месяцы вперёд и назад." } ] },
     { id: "day", icon: "📅", title: "Записи на день", sub: "лента дней, цифры, карточка записи", pre: tab("day"), steps: [
       { el: "#aDays", t: "Лента дней", p: "Сегодня выделено и подписано «СЕГОДНЯ». Листайте влево — прошедшие 15 дней, вправо — 2 месяца вперёд. Нажмите на день — откроются его записи." },
       { el: "#aKpi", t: "Цифры дня", p: "Сколько записей, выручка (только по тем, кто пришёл) и сколько свободных часов осталось." },
       { el: "#aAdd", t: "+ Добавить запись", p: "Для клиенток, которые позвонили или написали. Можно и задним числом — на 15 дней назад, чтобы статистика была полной." },
-      { el: firstBk, t: "Карточка записи", p: "Время, клиентка, услуга и сумма. Телефон клиентки можно нажать — сразу позвонить.", none: "Когда в выбранном дне будут записи, здесь появятся их карточки. Выберите день с записями, чтобы посмотреть." },
+      { el: firstBk, t: "Карточка записи", p: "Время, клиентка, услуга и сумма. Плашка справа — статус: «Записана», «Пришла», «Отменена».", none: "Когда в выбранном дне будут записи, здесь появятся их карточки. Выберите день с записями, чтобы посмотреть." },
+      { el: function () { var b = firstBk(); return b && b.querySelector("a.tel"); }, t: "Позвонить клиентке", p: "Нажмите на номер — сразу откроется звонок, копировать не нужно.", skip: true },
       { el: function () { var b = firstBk(); return b && b.querySelector('[data-a="move"]'); }, t: "Изменить", p: "Поменять услугу, добавить френч или снятие, перенести на другой день и время. Сумма и время пересчитаются сами.", skip: true },
       { el: function () { var b = firstBk(); return b && b.querySelector('[data-a="came"]'); }, t: "Пришла / Не пришла", p: "После визита отмечайте, пришла ли клиентка. От этого зависят выручка, статистика и список «Пора на коррекцию».", skip: true },
       { el: function () { var b = firstBk(); return b && b.querySelector('[data-a="cancelask"]'); }, t: "Отменить", p: "Сайт спросит, кто отменил: клиентка или вы. Если клиентка отменяет часто — у неё появится пометка «часто отменяет».", skip: true },
       { el: function () { var b = firstBk(); return b && b.querySelector('[data-cp="open"]'); }, t: "Оплата сертификатом", p: "Впишите номер сертификата — сайт покажет остаток и спишет нужную сумму.", skip: true } ] },
+    { id: "cal", icon: "📆", title: "Календарь месяца", sub: "весь месяц сразу, переход в день", pre: tab("cal"), steps: [
+      { el: "#aTabs [data-tab=\"cal\"]", t: "Вкладка «Календарь»", p: "Весь месяц на одном экране — не нужно листать ленту дней по одному." },
+      { el: "#aCal", t: "Сколько записей в день", p: "Цифра на дне — сколько записей. «обуч.» — дни обучения, «вых» — выходной. Сегодня обведено рамкой." },
+      { el: function () { return document.querySelector("#aCal button:has(i:not(.n0):not(.tr))") || document.querySelector("#aCal button.today"); }, t: "Нажмите на день", p: "Откроется вкладка «День» на этой дате со всеми записями. Попробуйте после обучения." },
+      { el: "#calNext", t: "Другие месяцы", p: "Стрелки ‹ › — листать месяцы назад и вперёд." } ] },
     { id: "add", icon: "➕", title: "Новая запись вручную", sub: "услуга, время, имя и телефон", pre: function () { tab("day")(); openEditor(null); }, post: function () { if (!$("eSheet").hidden) closeEditor(); }, steps: [
       { el: "#eSvc", t: "Услуга", p: "Выберите услугу из списка. Цена и время видны сразу." },
       { el: "#eAdd", t: "Добавки", p: "Френч (+200 ₽) и снятие чужого покрытия (+200 ₽ и 30 минут). Отметьте, если нужно." },
@@ -5056,10 +5103,12 @@ a.tel svg { flex: none; }
       { el: "#aHours", t: "Часы работы", p: "Клиентки онлайн записываются только в эти часы." },
       { el: "#aGrid", t: "Окна дня", p: "Нажмите на окно — оно закроется для онлайн-записи. Ещё раз — откроется." },
       { el: "#aRange", t: "Закрыть промежуток", p: "Быстро: до обеда, после обеда или весь день. Или выберите «С — До», напишите причину (видно только вам) и нажмите «Закрыть это время»." } ] },
-    { id: "clients", icon: "👩", title: "Клиентки и рассылка", sub: "база, коррекция, рассылка, копии", pre: tab("clients"), steps: [
+    { id: "clients", icon: "👩", title: "Клиентки и рассылка", sub: "база, рассылка, копии, записи из блокнота", pre: tab("clients"), steps: [
       { el: "#aSearch", t: "Поиск клиентки", p: "По имени или телефону. Ниже — карточки: визиты, отмены, «Записать снова»." },
       { el: "#aCast", t: "Рассылка", p: "Сообщение придёт в колокольчик всем клиенткам с личным кабинетом: скидки, свободные окошки, новые цены. На почту — только тем, кто согласился." },
-      { el: ".exp", t: "База и резервные копии", p: "Сайт сам сохраняет копию каждую ночь. Здесь можно скачать таблицы для Excel: клиентки, записи, сертификаты, обучение." } ] },
+      { el: ".exp", t: "База и резервные копии", p: "Сайт сам сохраняет копию каждую ночь. Здесь можно скачать таблицы для Excel: клиентки, записи, сертификаты, обучение." },
+      { el: "#aImpTx", t: "Записи из блокнота", p: "Можно вставить сразу много записей списком: дата; время; имя; телефон; услуга; сумма — каждая с новой строки. «Проверить» покажет ошибки, «Загрузить» добавит записи. Повторы сайт не добавит." },
+      { el: function () { return document.querySelector("#aClients .cl"); }, t: "Карточка клиентки", p: "Визиты, отмены, «Записать снова». Если клиентка зарегистрируется на сайте и привяжет свой номер — её имя обновится само, появится «🙋 Есть личный кабинет» и почта.", skip: true } ] },
     { id: "stats", icon: "📊", title: "Статистика", sub: "выручка и клиентки за месяц", pre: tab("stats"), steps: [
       { el: '.atab[data-tab="stats"] .card', t: "Статистика месяца", p: "Выручка, сколько пришло, средний чек, новые клиентки, отмены и популярные услуги. Стрелки вверху — листать месяцы." } ] },
     { id: "req", icon: "🎓", title: "Заявки: обучение и сертификаты", sub: "подтвердить оплату, модели, заметка", pre: tab("req"), steps: [
