@@ -365,7 +365,7 @@ footer a { color: var(--mute); }
 .erange { font-size: 14px; color: var(--lac); min-height: 1em; }
 .slot:disabled { text-decoration: line-through; opacity: .35; cursor: default; }
 label.f { display: grid; gap: 6px; font-size: 13px; font-weight: 700; color: var(--mute); }
-input[type="text"], input[type="tel"], input[type="search"], input[type="password"], textarea, select { width: 100%; border: 1.5px solid var(--line); background: var(--bg); border-radius: 14px; padding: 13px 14px; font-size: 16px; }
+input[type="text"], input[type="tel"], input[type="email"], input[type="search"], input[type="password"], textarea, select { width: 100%; border: 1.5px solid var(--line); background: var(--bg); border-radius: 14px; padding: 13px 14px; font-size: 16px; }
 input, textarea, select { font-weight: 500; color: var(--ink); }
 ::placeholder { color: var(--mute); opacity: .7; font-weight: 400; }
 .check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; }
@@ -764,7 +764,7 @@ div.f { display: grid; gap: 8px; }
 [data-theme="dark"] .sure { background: #3A1F1E; color: #F2B8B5; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .sure { background: #3A1F1E; color: #F2B8B5; } }
 .a-link { border: 0; background: none; color: var(--lac); font-weight: 700; font-size: 14px; padding: 8px 0; justify-self: center; }
-#v-admin.locked .a-acts, #v-admin.pwd .atabs, #v-admin.pwd .atab, #v-admin.pwd .a-acts { display: none !important; }
+#v-admin.locked .a-acts, #v-admin.pwd .atabs, #v-admin.pwd .atab, #v-admin.pwd .a-acts, #v-admin.pwd .a-load { display: none !important; }
 /* ---------- отзывы: лента, листается вбок ---------- */
 .rv-nav { display: flex; align-items: center; gap: 8px; }
 .rv-n { font-size: 14px; color: var(--mute); margin-right: 6px; min-width: 44px; text-align: right; }
@@ -1881,6 +1881,17 @@ div.f { display: grid; gap: 8px; }
       <p class="err" id="aPwdErr" hidden></p>
       <button class="btn" type="submit" id="aPwdGo">Сохранить пароль</button>
       <button type="button" class="a-link" id="aPwdBack">Отмена</button>
+    </form>
+    <form class="card a-login" id="aMail" hidden novalidate>
+      <h3>Почта для уведомлений</h3>
+      <p class="note">Сюда будут приходить копии уведомлений: новые записи, отмены, переносы, заявки. Telegram продолжит работать как раньше.</p>
+      <label for="aMailIn">Ваша почта</label>
+      <input type="email" id="aMailIn" autocomplete="email" inputmode="email" placeholder="например, marina@mail.ru">
+      <p class="note" id="aMailNote"></p>
+      <p class="err" id="aMailErr" hidden></p>
+      <button class="btn" type="submit" id="aMailGo">Сохранить и прислать проверочное письмо</button>
+      <button type="button" class="a-link" id="aMailOff" hidden>Не присылать на почту</button>
+      <button type="button" class="a-link" id="aMailBack">Назад</button>
     </form>
     <p class="a-save" id="aSave" hidden></p>
     <div class="atabs" id="aTabs" role="tablist">
@@ -4169,7 +4180,32 @@ div.f { display: grid; gap: 8px; }
   outBtn.parentNode.insertBefore(acts, outBtn);
   // уведомления от браузера на этом телефоне (нужен https; на iPhone — сайт на экране «Домой»)
   var pushBtn = document.createElement("button"); pushBtn.type = "button"; pushBtn.className = "btn sm ghost"; pushBtn.hidden = true;
-  acts.appendChild(pushBtn); acts.appendChild(pwdBtn); acts.appendChild(outBtn);
+  // почта для копий уведомлений — мама вписывает свой адрес сама
+  var mailBtn = document.createElement("button"); mailBtn.type = "button"; mailBtn.className = "btn sm ghost"; mailBtn.textContent = "Почта для уведомлений";
+  function mailShow(m) { $("aMailIn").value = m || ""; $("aMailOff").hidden = !m; $("aMailNote").textContent = m ? "Сейчас уведомления приходят на " + m + "." : "Сейчас на почту уведомления не приходят."; }
+  mailBtn.onclick = function () {
+    $("v-admin").classList.add("pwd"); $("aMail").hidden = false; errBox("aMailErr"); $("aMailNote").textContent = "Загружаю…"; jumpTop();
+    apiSend({ type: "mail_admin", token: token }).then(function (r) { if (r && r.relogin) { closeMail(); logout(); return; } mailShow(r && r.ok ? r.mail : ""); });
+  };
+  function closeMail() { $("v-admin").classList.remove("pwd"); $("aMail").hidden = true; errBox("aMailErr"); }
+  $("aMailBack").onclick = closeMail;
+  function mailSave(v) {
+    errBox("aMailErr"); var btn = $("aMailGo"); btn.disabled = true;
+    apiSend({ type: "mail_admin", token: token, mail: v }).then(function (r) {
+      btn.disabled = false;
+      if (r && r.relogin) { closeMail(); logout(); return; }
+      if (!r || !r.ok) { errBox("aMailErr", (r && r.error) || "Нет связи с сервером"); return; }
+      mailShow(r.mail);
+      toast(r.mail ? (r.sent ? "Сохранено. Проверочное письмо отправлено на " + r.mail + " — проверьте и папку «Спам»" : "Сохранено, но письмо отправить не удалось. Напишите разработчику") : "Уведомления на почту выключены");
+    });
+  }
+  $("aMail").addEventListener("submit", function (e) {
+    e.preventDefault(); var v = $("aMailIn").value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[a-zа-я]{2,}$/i.test(v)) { errBox("aMailErr", "Проверьте адрес почты, например marina@mail.ru"); return; }
+    mailSave(v);
+  });
+  $("aMailOff").onclick = function () { mailSave(""); };
+  acts.appendChild(pushBtn); acts.appendChild(mailBtn); acts.appendChild(pwdBtn); acts.appendChild(outBtn);
   var IOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   function standalone() { return matchMedia("(display-mode: standalone)").matches || navigator.standalone === true; }
   function pushState() {

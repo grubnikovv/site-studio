@@ -66,6 +66,19 @@ if ($type === 'pass_change') {
     json_out(['ok' => true]);
 }
 
+// Почта мастера для копий уведомлений: без mail — узнать текущую, с mail — сохранить (пустая — выключить) и прислать проверочное письмо
+if ($type === 'mail_admin') {
+    if (!$admin) json_out(['ok' => false, 'error' => 'Войдите в кабинет заново', 'relogin' => true]);
+    if (!array_key_exists('mail', $in)) json_out(['ok' => true, 'mail' => mail_admin()]);
+    $m = trim((string)$in['mail']);
+    if ($m === '') { kv_put('mail_admin', '-'); json_out(['ok' => true, 'mail' => '']); }
+    if (!filter_var($m, FILTER_VALIDATE_EMAIL) || strlen($m) > 80) json_out(['ok' => false, 'error' => 'Проверьте адрес почты']);
+    if (!cfg('mail_from')) json_out(['ok' => false, 'error' => 'Почта студии ещё не подключена. Напишите разработчику.']);
+    kv_put('mail_admin', $m);
+    $sent = send_mail($m, 'Уведомления с сайта подключены', "Готово! 💅\nНа эту почту будут приходить копии уведомлений с сайта: новые записи, отмены, переносы и заявки.\n\nЕсли письмо попало в «Спам» — отметьте «Не спам», чтобы уведомления приходили во «Входящие».");
+    json_out(['ok' => true, 'mail' => $m, 'sent' => (bool)$sent]);
+}
+
 // Забыли пароль: код в Telegram мастеру
 if ($type === 'pass_reset_req') {
     $admins = (int)store_init()->query('SELECT COUNT(*) FROM admins')->fetchColumn();

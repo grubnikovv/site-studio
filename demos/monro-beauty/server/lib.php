@@ -74,11 +74,18 @@ function flush_outbox() {
 // Сообщение Марине (во все подключённые чаты мастера) и копия на почту студии
 function notify_admins($text) {
     foreach (db()->query('SELECT chat_id FROM admins') as $a) send($a['chat_id'], $text);
-    if (cfg('mail_admin')) send_mail(cfg('mail_admin'), strip_tags(strtok($text, "\n")), $text);
+    if ($m = mail_admin()) send_mail($m, strip_tags(strtok($text, "\n")), $text);
     require_once __DIR__ . '/push.php'; push_all();  // уведомление в браузере на телефонах мастера
 }
 
 // ---------- почта ----------
+// Куда слать копии уведомлений мастеру: адрес из кабинета («-» — выключено), иначе из config.php
+function mail_admin() {
+    require_once __DIR__ . '/store.php';
+    $m = (string)kv_get('mail_admin');
+    if ($m === '-') return '';
+    return $m ?: (string)cfg('mail_admin');
+}
 // Письмо от студии. Текст — как в Telegram (<b>, <a>, переносы строк), оборачиваем в простой фирменный шаблон.
 function send_mail($to, $subject, $text) {
     $from = (string)cfg('mail_from');
