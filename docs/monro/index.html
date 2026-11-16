@@ -985,7 +985,10 @@ div.f { display: grid; gap: 8px; }
 @media (max-width: 350px) { .atabs { flex-wrap: wrap; } .atabs button { flex: 1 1 30%; } }  /* самые узкие телефоны — вкладки в два ряда */
 /* календарь месяца: число и сколько записей */
 .cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; width: 100%; }
-@media (min-width: 700px) { .cal { gap: 8px; } .cal button { aspect-ratio: auto; height: 58px; padding: 6px 4px; } }  /* на компьютере — на всю ширину карточки, но невысокие клетки */
+@media (min-width: 700px) {  /* на компьютере — компактная карточка по центру, одинаковые отступы слева и справа */
+  #v-admin .atab[data-tab="cal"] > .card { width: 100%; max-width: 540px; justify-self: center; }
+  .cal { gap: 6px; } .cal button { aspect-ratio: auto; height: 58px; padding: 6px 4px; }
+}
 .cal .cw { text-align: center; font-size: 11px; font-weight: 800; color: var(--mute); text-transform: uppercase; padding: 2px 0 4px; }
 .cal button { width: 100%; aspect-ratio: 1 / 1.05; min-width: 0; border: 1.5px solid var(--line); background: var(--bg); border-radius: 12px; padding: 4px 2px; display: grid; align-content: space-between; justify-items: center; font: inherit; color: inherit; cursor: pointer; }
 .cal button b { font-size: 15px; line-height: 1.1; }
