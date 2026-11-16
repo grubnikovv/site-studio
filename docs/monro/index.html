@@ -436,7 +436,13 @@ body.lock { overflow: hidden; }
 .drawer.on .dnav a:nth-child(1) { animation-delay: .08s; } .drawer.on .dnav a:nth-child(2) { animation-delay: .12s; } .drawer.on .dnav a:nth-child(3) { animation-delay: .16s; } .drawer.on .dnav a:nth-child(4) { animation-delay: .2s; }
 .drawer.on .dnav a:nth-child(5) { animation-delay: .24s; } .drawer.on .dnav a:nth-child(6) { animation-delay: .28s; } .drawer.on .dnav a:nth-child(7) { animation-delay: .32s; } .drawer.on .dnav a:nth-child(8) { animation-delay: .36s; } .drawer.on .dnav a:nth-child(9) { animation-delay: .4s; } .drawer.on .drawer-foot { animation-delay: .42s; }
 @keyframes din { from { opacity: 0; transform: translateX(-18px); } }
-.drawer-foot { display: grid; gap: 12px; font-size: 14px; color: var(--mute); }
+.drawer-foot { display: grid; gap: 12px; font-size: 14px; color: var(--mute); padding-bottom: 56px; }
+.drawer { height: 100dvh; }
+@media (max-width: 380px) {
+  .drawer { padding-left: 18px; padding-right: 18px; width: 92vw; }
+  .theme-seg button { padding: 7px 4px; font-size: 12px; gap: 3px; }
+}
+@media (max-width: 340px) { .theme-seg button svg { display: none; } .drawer-my { grid-template-columns: 1fr; } }
 .drawer-foot p { margin: 0; }
 .drawer-foot .btn { width: 100%; }
 .adm-link { font-size: 13px; color: var(--mute); }
@@ -753,8 +759,8 @@ div.f { display: grid; gap: 8px; }
 .my-link svg { color: var(--lac); flex: none; }
 .my-link small { display: block; font-weight: 500; font-size: 12px; color: var(--mute); }
 .my-top { margin-bottom: 18px; }
-.drawer-my { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
-.drawer-my a { display: flex !important; align-items: center; gap: 8px; padding: 12px !important; border-radius: 14px; border: 1.5px solid var(--line); font-size: 15px !important; }
+.drawer-my { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+.drawer-my a { display: flex !important; align-items: center; gap: 8px; min-width: 0; padding: 12px 10px !important; border-radius: 14px; border: 1.5px solid var(--line); font-family: var(--body) !important; font-size: 14px !important; font-weight: 600; line-height: 1.2 !important; overflow-wrap: anywhere; }
 .drawer-my svg { color: var(--lac); flex: none; }
 .mvbox { display: grid; gap: 10px; margin-top: 10px; padding: 12px; border-radius: 16px; background: var(--bg); border: 1px solid var(--line); }
 .mvbox .days { margin: 0; }
