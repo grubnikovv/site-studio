@@ -120,7 +120,9 @@ if ($type === 'sync') {
     [$doc, $v] = doc_load(true);
     $ops = is_array($in['ops'] ?? null) ? $in['ops'] : [];
     $wasWait = []; foreach ($doc['certs'] as $c) if (($c['status'] ?? '') === 'wait') $wasWait[$c['id'] ?? ''] = true;
+    $before = $doc;
     doc_apply($doc, $ops);
+    try { cnotes_diff($before, $doc); } catch (Throwable $e) { logline('cnotes: ' . $e->getMessage()); }
     mirror_bookings($ops, $doc);
     foreach ($doc['certs'] as $c) if (!empty($wasWait[$c['id'] ?? '']) && ($c['status'] ?? '') === 'paid') cert_mail($c, true);  // сертификат оплачен — письмо покупателю
     done($doc, $v, [], true);
@@ -151,6 +153,7 @@ if ($type === 'booking') {
     $rec = ['id' => $id, 'date' => $date, 'start' => $start, 'dur' => $dur, 'svc' => clean($r['svc'] ?? '', 30), 'name' => $name, 'phone' => phone_nice($phone),
         'note' => clean($r['note'] ?? '', 200), 'price' => max(0, (int)($r['price'] ?? 0)), 'remove' => !empty($r['remove']), 'french' => !empty($r['french']), 'remind' => $remind, 'status' => 'booked', 'created' => now_ms()] + ($email ? ['email' => $email] : []) + (!empty($r['other']) ? ['other' => true] : []);
     if (($cw = client_who($in['ctoken'] ?? '')) && $cw['acc']) $rec['owner'] = (int)$cw['acc']['id'];  // запись из кабинета — видна в нём
+    if (!empty($rec['owner'])) cnote($rec['owner'], '📅', 'Вы записаны', $svcName . ' · ' . when_text($date, $start) . '. Перенести или отменить — в кабинете, не позже чем за 2 дня.', '#kabinet');
     $doc['bookings'] = array_values(array_filter($doc['bookings'], fn($b) => ($b['id'] ?? '') !== $id));
     $doc['bookings'][] = $rec;
     doc_note($doc, '📅', 'Новая запись', $name . ' · ' . $svcName . ' · ' . when_text($date, $start), ['tab' => 'day', 'date' => $date]);
@@ -268,6 +271,7 @@ if ($type === 'acc_register') {
     $h = password_hash($pass, PASSWORD_DEFAULT);
     if ($a) client_db()->prepare('UPDATE accounts SET name = ?, pass = ? WHERE id = ?')->execute([$name, $h, $a['id']]);
     else client_db()->prepare('INSERT INTO accounts (email, name, pass, created) VALUES (?, ?, ?, ?)')->execute([$m, $name, $h, time()]);
+    client_db()->prepare('UPDATE accounts SET news = ? WHERE email = ?')->execute([empty($in['news']) ? 0 : 1, $m]);
     $r = acc_send_code($m, 'reg');
     if ($r === 'fail') fail('Не получилось отправить письмо. Проверьте адрес или попробуйте позже.');
     json_out(['ok' => true, 'email' => $m, 'again' => $r === 'wait']);
@@ -417,6 +421,72 @@ if ($type === 'client_delete') {
     } else $db->prepare('DELETE FROM client_sessions WHERE token = ?')->execute([hash('sha256', (string)$in['ctoken'])]);
     notify_admins("🗑 <b>Клиентка удалила аккаунт</b>\n" . h($name) . ($future ? "\nБудущих записей осталось: " . $future . " — они остаются в кабинете." : '') . ($live ? "\nНеиспользованные сертификаты отправлены ей на почту." : ''));
     json_out(['ok' => true, 'certs' => count($live), 'future' => $future]);
+}
+
+// ---------- уведомления клиентки ----------
+if ($type === 'client_notes') {
+    $w = client_who($in['ctoken'] ?? ''); if (!$w || !$w['acc']) json_out(['ok' => true, 'notes' => [], 'unread' => 0]);
+    $a = $w['acc'];
+    if (!empty($in['seen'])) client_db()->prepare('UPDATE accounts SET seen = ? WHERE id = ?')->execute([time(), $a['id']]);
+    $q = client_db()->prepare('SELECT id, acc, icon, title, text, link, t FROM cnotes WHERE (acc = ? OR (acc = 0 AND t >= ?)) AND t > ? ORDER BY t DESC LIMIT 40');
+    $q->execute([$a['id'], (int)$a['created'], time() - 90 * 86400]);
+    $list = $q->fetchAll(); $seen = !empty($in['seen']) ? time() : (int)$a['seen'];
+    $unread = count(array_filter($list, fn($n) => (int)$n['t'] > $seen));
+    json_out(['ok' => true, 'notes' => $list, 'unread' => $unread, 'news' => (int)$a['news']]);
+}
+if ($type === 'acc_news') {  // согласие на письма с новостями и акциями
+    $w = client_who($in['ctoken'] ?? ''); if (!$w || !$w['acc']) json_out(['ok' => false, 'relogin' => true]);
+    client_db()->prepare('UPDATE accounts SET news = ? WHERE id = ?')->execute([empty($in['on']) ? 0 : 1, $w['acc']['id']]);
+    json_out(['ok' => true]);
+}
+// ---------- нет доступа к старой почте или Telegram: Марина подтверждает номер сама ----------
+if ($type === 'acc_phone_ask') {
+    $w = client_who($in['ctoken'] ?? ''); if (!$w || !$w['acc']) json_out(['ok' => false, 'relogin' => true]);
+    $phone = phone_ok($in['phone'] ?? ''); if (!$phone) fail('Укажите телефон полностью.');
+    $db = client_db();
+    $db->prepare('DELETE FROM link_reqs WHERE acc = ?')->execute([$w['acc']['id']]);
+    $db->prepare('INSERT INTO link_reqs (acc, phone, t) VALUES (?, ?, ?)')->execute([$w['acc']['id'], $phone, time()]);
+    [$doc, $v] = doc_load(true);
+    doc_note($doc, '📱', 'Просят привязать номер', $w['acc']['name'] . ' (' . $w['acc']['email'] . ') — ' . phone_nice($phone) . '. Подтвердите во вкладке «Клиентки».', ['tab' => 'clients']);
+    doc_save($doc, $v);
+    notify_admins("📱 <b>Клиентка просит привязать номер к кабинету</b>\n" . h($w['acc']['name']) . ', ' . h($w['acc']['email']) . "\nНомер: " . phone_nice($phone) . "\nЕсли это её номер — подтвердите в кабинете, вкладка «Клиентки».");
+    json_out(['ok' => true]);
+}
+if ($type === 'link_list') {
+    if (!$admin) json_out(['ok' => false, 'relogin' => true]);
+    $rows = client_db()->query('SELECT r.id, r.phone, r.t, a.name, a.email FROM link_reqs r JOIN accounts a ON a.id = r.acc ORDER BY r.t DESC')->fetchAll();
+    [$doc] = doc_load(false);
+    foreach ($rows as &$r) {  // как клиентка с этим номером записана у Марины
+        $r['known'] = ''; foreach ($doc['bookings'] as $b) if (digits_phone($b['phone'] ?? '') === $r['phone'] && empty($b['anon'])) $r['known'] = $b['name'] ?? '';
+        $r['phone'] = phone_nice($r['phone']);
+    }
+    unset($r);
+    $cnt = (int)client_db()->query('SELECT COUNT(*) FROM accounts WHERE verified = 1')->fetchColumn();
+    $news = (int)client_db()->query('SELECT COUNT(*) FROM accounts WHERE verified = 1 AND news = 1')->fetchColumn();
+    json_out(['ok' => true, 'reqs' => $rows, 'accounts' => $cnt, 'news' => $news]);
+}
+if ($type === 'link_ok') {
+    if (!$admin) json_out(['ok' => false, 'relogin' => true]);
+    $db = client_db(); $q = $db->prepare('SELECT * FROM link_reqs WHERE id = ?'); $q->execute([(int)($in['id'] ?? 0)]); $r = $q->fetch();
+    if (!$r) fail('Запрос уже обработан.');
+    $db->prepare('DELETE FROM link_reqs WHERE id = ?')->execute([$r['id']]);
+    if (!empty($in['yes'])) {
+        $db->prepare('UPDATE accounts SET phone = ? WHERE id = ?')->execute([$r['phone'], $r['acc']]);
+        cnote($r['acc'], '📱', 'Номер привязан', 'Марина подтвердила номер ' . phone_nice($r['phone']) . ' — записи по нему теперь в кабинете.', '#kabinet');
+    } else cnote($r['acc'], '📱', 'Номер не привязан', 'Марина не подтвердила номер ' . phone_nice($r['phone']) . '. Если это ошибка — напишите ей.', '#kabinet');
+    json_out(['ok' => true]);
+}
+// ---------- рассылка от Марины всем клиенткам с кабинетом ----------
+if ($type === 'broadcast') {
+    if (!$admin) json_out(['ok' => false, 'relogin' => true]);
+    $title = clean($in['title'] ?? '', 80); $text = mb_substr(trim(strip_tags((string)($in['text'] ?? ''))), 0, 1000);
+    if (mb_strlen($title) < 2 || mb_strlen($text) < 2) fail('Напишите заголовок и текст.');
+    client_db()->prepare('INSERT INTO cnotes (acc, icon, title, text, link, t) VALUES (0, ?, ?, ?, ?, ?)')->execute(['💌', $title, $text, '', time()]);
+    $sent = 0;
+    if (!empty($in['mail'])) foreach (client_db()->query('SELECT email FROM accounts WHERE verified = 1 AND news = 1') as $a)
+        if (send_mail($a['email'], $title, h($text) . "\n\n<small>Вы получили письмо, потому что согласились получать новости студии. Отписаться — в личном кабинете на сайте.</small>")) $sent++;
+    $cnt = (int)client_db()->query('SELECT COUNT(*) FROM accounts WHERE verified = 1')->fetchColumn();
+    json_out(['ok' => true, 'accounts' => $cnt, 'mailed' => $sent]);
 }
 
 // Всё о клиентке: записи (будущие и история), обучение, сертификаты

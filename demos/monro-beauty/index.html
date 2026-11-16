@@ -252,7 +252,7 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 .msg-ico { flex: none; width: 44px; height: 44px; border-radius: 14px; display: grid; place-content: center; color: #fff; background: linear-gradient(135deg, var(--mc2), var(--mc)); box-shadow: 0 6px 16px color-mix(in srgb, var(--mc) 32%, transparent); }
 .msg-t { display: grid; min-width: 0; flex: 1; }
 .msg-t b { font-size: 16px; white-space: nowrap; }
-.msg-t small { color: var(--mute); font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.msg-t small { color: var(--mute); font-size: 12.5px; line-height: 1.3; }
 .msg-go svg, .mw-go svg, .pnav svg, .vclose svg { display: block; }
 .msg-go { flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-content: center; font-size: 15px; color: var(--mc); background: color-mix(in srgb, var(--mc) 12%, transparent); transition: transform .25s; }
 .msg:hover .msg-go { transform: translateX(3px); }
@@ -555,7 +555,7 @@ section.block.tight { padding-block: 32px clamp(56px, 8vw, 96px); }
 .more-works:hover { transform: translateY(-2px); box-shadow: 0 14px 30px color-mix(in srgb, var(--lac) 18%, transparent); }
 .mw-ico { flex: none; width: 52px; height: 52px; border-radius: 16px; display: grid; place-content: center; color: #fff; background: linear-gradient(135deg, #E9C98A, var(--lac) 55%, #5B1426); box-shadow: 0 8px 18px color-mix(in srgb, var(--lac) 30%, transparent); }
 .mw-t { display: grid; gap: 2px; min-width: 0; flex: 1; }
-.mw-t b { font-family: var(--display); font-weight: 400; font-size: clamp(18px, 2.4vw, 23px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mw-t b { font-family: var(--display); font-weight: 400; font-size: clamp(18px, 2.4vw, 23px); line-height: 1.2; }
 .mw-t small { color: var(--mute); font-size: 13.5px; }
 .mw-go { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-content: center; background: var(--lac); color: var(--lac-ink); font-size: 18px; transition: transform .25s; }
 .more-works:hover .mw-go { transform: translateX(3px); }
@@ -1008,6 +1008,7 @@ div.f { display: grid; gap: 8px; }
 .ni { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; text-align: left; width: 100%; border: 1px solid var(--line); background: var(--bg); padding: 12px 12px 12px 10px; border-radius: 12px; color: var(--ink); }
 .ni:hover { border-color: color-mix(in srgb, var(--lac) 35%, var(--line)); }
 .ni.new { border-left: 3px solid var(--lac); padding-left: 8px; }
+a.ni { text-decoration: none; color: inherit; }
 .ni i { font-style: normal; font-size: 18px; line-height: 1.2; }
 .ni b { display: block; font-size: 14.5px; color: var(--ink); }
 .ni > span { margin-top: 0; }
@@ -1083,6 +1084,30 @@ div.f { display: grid; gap: 8px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
   .reveal.pre { opacity: 1; transform: none; }
+}
+/* Узкие телефоны (до 380 px): всё чуть мельче и плотнее, чтобы текст не выглядел огромным и не рвался на много строк */
+@media (max-width: 380px) {
+  body { font-size: 15px; }
+  h2 { font-size: clamp(26px, 8.2vw, 30px); }
+  h3 { font-size: 19px; }
+  .phero h1 { font-size: clamp(29px, 9.2vw, 34px); }
+  .lead { font-size: 15px; }
+  .card { padding: 18px 16px; gap: 14px; border-radius: 20px; }
+  .btn { padding: 12px 20px; font-size: 14.5px; }
+  .btn.sm { padding: 9px 14px; font-size: 13.5px; }
+  .opt { padding: 12px 14px; gap: 10px; font-size: 14.5px; }
+  .opt small { font-size: 12.5px; }
+  .note { font-size: 13px; }
+  .tcourse summary { gap: 10px; padding: 15px 0; }
+  .prow b { font-size: 18px; }
+  .msg-t b { font-size: 15px; }
+  label.f, .a-login label { font-size: 14px; }
+  input[type="text"], input[type="tel"], input[type="email"], input[type="search"], input[type="password"], select, textarea { padding: 12px 13px; }
+}
+@media (max-width: 340px) {
+  body { font-size: 14.5px; }
+  .phero h1 { font-size: 28px; }
+  h2 { font-size: 25px; }
 }
 </style>
 
@@ -1341,6 +1366,12 @@ div.f { display: grid; gap: 8px; }
 </div>
       <a class="bell-btn" href="#admin" aria-label="Кабинет мастера"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"></path></svg></a>
     </div>
+    <div class="hdr-m" id="hdrK" hidden>
+      <div class="bellwrap"><button type="button" class="bell-btn" id="kBellH" aria-label="Уведомления" aria-expanded="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6.5 2 6.5H4S6 14 6 9z"></path><path d="M10 19a2 2 0 0 0 4 0"></path></svg><span class="bell-n" id="kCountH" hidden></span></button>
+<div class="npanel" id="kPanel" hidden><div class="np-h"><b>Уведомления</b><span>студия «М.А»</span><button type="button" class="np-clear" id="kNClear">Прочитано</button></div><div class="np-list" id="kNList"></div></div>
+</div>
+      <a class="bell-btn" href="#kabinet" aria-label="Личный кабинет"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"></path></svg></a>
+    </div>
   </div>
 </header>
 
@@ -1551,8 +1582,9 @@ div.f { display: grid; gap: 8px; }
       <form class="k-f" id="kfLogin" novalidate>
         <h3>Вход в личный кабинет</h3>
         <p class="note">Перенос и отмена записей, обучение и сертификаты — на любом телефоне.</p>
-        <label for="kEm">Почта</label><input type="email" id="kEm" autocomplete="email" inputmode="email" placeholder="name@mail.ru" maxlength="80">
+        <label for="kEm">Почта</label><input type="email" id="kEm" name="username" autocomplete="username" inputmode="email" placeholder="name@mail.ru" maxlength="80">
         <label for="kPw">Пароль</label><div class="pass-w"><input type="password" id="kPw" autocomplete="current-password" minlength="6"><button type="button" class="pass-eye" aria-label="Показать пароль" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="eye-x" d="M4 4l16 16"/></svg></button></div>
+        <label class="check"><input type="checkbox" id="kRem" checked><span>Запомнить меня на этом телефоне</span></label>
         <p class="err" id="kfLoginErr" hidden></p>
         <button class="btn" type="submit">Войти</button>
         <button type="button" class="a-link" data-kgo="reset">Забыли пароль?</button>
@@ -1565,6 +1597,7 @@ div.f { display: grid; gap: 8px; }
         <label for="kRp">Пароль</label><div class="pass-w"><input type="password" id="kRp" autocomplete="new-password" minlength="6"><button type="button" class="pass-eye" aria-label="Показать пароль" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="eye-x" d="M4 4l16 16"/></svg></button></div>
         <p class="note" style="margin:0">Не короче 6 символов. На почту придёт код, чтобы подтвердить, что она ваша.</p>
         <label class="check"><input type="checkbox" id="kRpd"><span>Согласен(на) на <a href="#soglasie" target="_blank">обработку персональных данных</a> и с <a href="#politika" target="_blank">политикой конфиденциальности</a>.</span></label>
+        <label class="check"><input type="checkbox" id="kRnews"><span>Хочу получать на почту новости и акции студии (можно отключить в кабинете)</span></label>
         <p class="err" id="kfRegErr" hidden></p>
         <button class="btn" type="submit">Зарегистрироваться</button>
       </form>
@@ -1619,8 +1652,9 @@ div.f { display: grid; gap: 8px; }
         <label class="f" id="kPhCL" hidden>Код<input type="text" id="kPhC" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456"></label>
         <p class="err" id="kPhErr" hidden></p>
         <button class="btn sm" type="submit" id="kPhGo">Получить код</button>
+        <button type="button" class="a-link" id="kPhAsk" hidden>Нет доступа к этой почте или Telegram? Попросить Марину подтвердить номер</button>
       </form>
-      <div class="card"><h3>Предстоящие записи</h3><div class="opts" id="kNext"></div><a class="btn sm glow" href="#zapis" style="justify-self:start">Записаться ещё</a></div>
+      <div class="card"><h3>Предстоящие записи</h3><div class="opts" id="kNext"></div><a class="btn sm glow" id="kBook" href="#zapis" style="justify-self:start">Записаться</a></div>
       <div class="card" id="kTrainBox"><h3>Обучение</h3><div class="opts" id="kTrain"></div></div>
       <div class="card" id="kCertBox"><h3>Сертификаты</h3><div class="opts" id="kCerts"></div></div>
       <form class="card k-mail" id="kMailBox" novalidate><h3>Напоминания на почту</h3>
@@ -1629,6 +1663,8 @@ div.f { display: grid; gap: 8px; }
         <p class="err" id="kMailErr" hidden></p>
         <div class="acts"><button class="btn sm" type="submit" id="kMailGo">Сохранить почту</button><button type="button" class="btn sm ghost" id="kMailOff" hidden>Не присылать на почту</button></div>
       </form>
+      <div class="card" id="kNewsBox" hidden><h3>Новости студии</h3><p class="note" style="margin:0">Акции, свободные окошки и новости приходят в колокольчик вверху. Можно получать их и на почту.</p>
+        <label class="check"><input type="checkbox" id="kNews"><span>Присылать новости и акции на почту</span></label></div>
       <div class="card" id="kHistBox"><h3>История визитов</h3><div class="opts" id="kHist"></div></div>
       <button type="button" class="a-link k-delopen" id="kDelOpen">Удалить аккаунт</button>
       <form class="card a-login k-del" id="kDel" novalidate hidden>
@@ -2045,6 +2081,15 @@ div.f { display: grid; gap: 8px; }
     </section>
     <section class="atab" data-tab="clients" hidden>
       <div class="card"><h3>Пора на коррекцию</h3><p class="note" style="margin:0">Клиентки, у которых прошло 3–4 недели после маникюра или педикюра, а новой записи нет. Напишите им — так постоянные клиентки возвращаются без рекламы.</p><div class="opts" id="aDue"></div></div>
+      <div class="card" id="aLinks" hidden><h3>Просят привязать номер</h3><p class="note" style="margin:0">Клиентка зарегистрировалась на сайте и просит привязать номер телефона к кабинету — тогда она увидит свои записи и сможет их переносить. Подтверждайте, только если номер точно её.</p><div class="opts" id="aLinkList"></div></div>
+      <form class="card a-cast" id="aCast" novalidate><h3>Рассылка клиенткам</h3>
+        <p class="note" style="margin:0" id="aCastNote">Сообщение придёт в колокольчик всем, у кого есть личный кабинет на сайте: скидки, свободные окошки, новые цены.</p>
+        <label class="f">Заголовок<input type="text" id="aCastT" maxlength="80" placeholder="Например: −15% на педикюр до конца месяца"></label>
+        <label class="f">Текст<textarea id="aCastX" rows="4" maxlength="1000" placeholder="Подробности акции, сроки, как записаться"></textarea></label>
+        <label class="check"><input type="checkbox" id="aCastM"><span id="aCastML">Продублировать на почту тем, кто согласился получать новости</span></label>
+        <p class="err" id="aCastErr" hidden></p>
+        <button class="btn sm" type="submit" id="aCastGo">Отправить</button>
+      </form>
       <div class="card exp"><h3>База и резервные копии</h3>
         <p class="note" style="margin:0">Всё хранится в базе на хостинге сайта. Каждую ночь сайт сам делает резервную копию (хранится 30 дней), а по понедельникам присылает копию на вашу почту из «Почта для уведомлений».</p>
         <p class="note" id="aBkInfo" style="margin:0"></p>
@@ -2983,19 +3028,21 @@ div.f { display: grid; gap: 8px; }
     }).join("") : '<p class="note">Записей на этот номер не нашли. Проверьте номер или напишите Марине.</p><button type="button" class="btn sm ghost" data-chat="Здравствуйте! Не могу найти свою запись на сайте." data-chat-title="Найти запись">Написать Марине</button>';
   }
   // ---------- личный кабинет клиентки ----------
-  var ctoken = SYNC ? lsGet("ma-ctoken", "") : "", kData = null, kStep = 1;
+  function ctClear() { lsSet("ma-ctoken", null); try { sessionStorage.removeItem("ma-ctoken"); } catch (e) {} }
+  var ctoken = SYNC ? lsGet("ma-ctoken", "") || (function () { try { return sessionStorage.getItem("ma-ctoken") || ""; } catch (e) { return ""; } })() : "", kData = null, kStep = 1;
   function showK() {
+    hdrClient();
     $("kAuth").hidden = !!ctoken || kMode === "phone"; $("kLogin").hidden = !!ctoken || kMode !== "phone"; $("kBody").hidden = !ctoken;
     if (!ctoken) { var mp = lsGet("ma-myphone", ""); if (mp && !$("kPhone").value) $("kPhone").value = mp; return; }
     if (kData) renderK(); loadK();
   }
   function loadK() {
     return apiSend({ type: "client_data", ctoken: ctoken }).then(function (r) {
-      if (r && r.relogin) { ctoken = ""; lsSet("ma-ctoken", null); kData = null; showK(); return; }
+      if (r && r.relogin) { ctoken = ""; ctClear(); kData = null; showK(); return; }
       if (!r || !r.ok) return;
       kData = r; if (!token && r.doc) applyDoc(r.v, r.doc);  // свежая занятость для переноса
       if (curView === "kabinet") renderK();
-      kPrefill();
+      kPrefill(); hdrClient(); if (r.acc) loadNotes(false);
     });
   }
   // вошли в кабинет — имя, телефон и почта в формах подставляются сами
@@ -3007,12 +3054,13 @@ div.f { display: grid; gap: 8px; }
   function renderK() {
     var today = dkey(new Date()), d = kData;
     $("kWho").textContent = d.acc ? (d.acc.name ? d.acc.name + " · " : "") + d.acc.email : d.phone;
-    $("kPwOpen").hidden = !d.acc; $("kPhBox").hidden = !d.acc || !!d.phone;
+    $("kPwOpen").hidden = !d.acc; $("kNewsBox").hidden = !d.acc; $("kPhBox").hidden = !d.acc || !!d.phone;
     var sortT = function (a, b) { return (a.date + hm(a.start).padStart(5, "0")).localeCompare(b.date + hm(b.start).padStart(5, "0")); };
     var next = d.bookings.filter(function (b) { return b.status === "booked" && b.date >= today; }).sort(sortT);
     var hist = d.bookings.filter(function (b) { return !(b.status === "booked" && b.date >= today); }).sort(sortT).reverse();
     var sl = $("kNext").querySelector(".mvbox .days"), keep = sl ? sl.scrollLeft : null;
     $("kNext").innerHTML = next.length ? next.map(bookCard).join("") : '<p class="note" style="margin:0">Предстоящих записей нет.</p>';
+    $("kBook").textContent = next.length ? "Записаться ещё" : "Записаться";
     var nd = $("kNext").querySelector(".mvbox .days"); if (nd) { if (keep != null) nd.scrollLeft = keep; else { var se = nd.querySelector('[aria-pressed="true"]'); if (se) nd.scrollLeft = se.offsetLeft - 8; } }
     // почта для напоминаний — та, что указана в будущих записях
     var withMail = next.filter(function (b) { return b.remind === "mail" && b.email; })[0];
@@ -3074,7 +3122,7 @@ div.f { display: grid; gap: 8px; }
     errBox("kMailErr"); $("kMailGo").disabled = true;
     apiSend({ type: "client_mail", ctoken: ctoken, mail: m }).then(function (r) {
       $("kMailGo").disabled = false;
-      if (r && r.relogin) { ctoken = ""; lsSet("ma-ctoken", null); kData = null; showK(); return; }
+      if (r && r.relogin) { ctoken = ""; ctClear(); kData = null; showK(); return; }
       if (!r || !r.ok) { errBox("kMailErr", (r && r.error) || "Нет связи с сервером"); return; }
       toast(m ? "Почта сохранена: " + m + ". Отправили проверочное письмо" : "Напоминания на почту выключены");
       loadK();
@@ -3117,7 +3165,10 @@ div.f { display: grid; gap: 8px; }
     showK();
   }
   function kErr(id, t) { errBox(id, t); }
-  function kIn(t) { ctoken = t; lsSet("ma-ctoken", ctoken); kMode = "login"; kShow("login"); toast("Вы вошли в личный кабинет"); }
+  // «Запомнить меня» снята — вход хранится только до закрытия браузера
+  function kIn(t, temp) {
+    ctoken = t;
+    if (temp) { lsSet("ma-ctoken", null); try { sessionStorage.setItem("ma-ctoken", t); } catch (e) {} } else lsSet("ma-ctoken", ctoken); kMode = "login"; kShow("login"); toast("Вы вошли в личный кабинет"); }
   function okMail(v) { v = String(v || "").trim().toLowerCase(); return /^[^\s@]+@[^\s@]+\.[a-zа-я]{2,}$/i.test(v) ? v : ""; }
   function busy(form, on) { var b = form.querySelector('[type="submit"]'); if (b) b.disabled = on; }
   $("kSeg").addEventListener("click", function (e) { var b = e.target.closest("[data-m]"); if (b) kShow(b.dataset.m); });
@@ -3142,7 +3193,7 @@ div.f { display: grid; gap: 8px; }
       busy(f, false);
       if (r && r.verify) { kMail = m; $("kCodeTo").textContent = m; kShow("code"); kErr("kfCodeErr", r.error); return; }
       if (!r || !r.ok) { kErr("kfLoginErr", (r && r.error) || "Нет связи с сервером"); return; }
-      $("kPw").value = ""; kIn(r.ctoken);
+      $("kPw").value = ""; kIn(r.ctoken, !$("kRem").checked);
     });
   });
   $("kfReg").addEventListener("submit", function (e) {
@@ -3150,7 +3201,7 @@ div.f { display: grid; gap: 8px; }
     var err = n.length < 2 ? "Укажите имя." : !m ? "Проверьте адрес почты, например name@mail.ru" : $("kRp").value.length < 6 ? "Пароль — не короче 6 символов." : !$("kRpd").checked ? "Отметьте согласие на обработку данных." : "";
     kErr("kfRegErr", err); if (err) return;
     busy(f, true);
-    apiSend({ type: "acc_register", email: m, name: n, pass: $("kRp").value, consent: 1 }).then(function (r) {
+    apiSend({ type: "acc_register", email: m, name: n, pass: $("kRp").value, consent: 1, news: $("kRnews").checked ? 1 : 0 }).then(function (r) {
       busy(f, false);
       if (!r || !r.ok) { kErr("kfRegErr", (r && r.error) || "Нет связи с сервером"); return; }
       kMail = m; $("kCodeTo").textContent = m; $("kCd").value = ""; kErr("kfCodeErr"); kShow("code"); $("kCd").focus();
@@ -3200,6 +3251,17 @@ div.f { display: grid; gap: 8px; }
       $("kPwO").value = ""; $("kPwN").value = ""; $("kPwBox").hidden = true; toast("Пароль изменён");
     });
   });
+  $("kPhAsk").onclick = function () {
+    var ph = phoneOk($("kPhIn").value), btn = this; if (!ph) { kErr("kPhErr", "Укажите мобильный телефон полностью."); return; }
+    btn.disabled = true;
+    apiSend({ type: "acc_phone_ask", ctoken: ctoken, phone: ph }).then(function (r) {
+      btn.disabled = false;
+      if (!r || !r.ok) { kErr("kPhErr", (r && r.error) || "Нет связи с сервером"); return; }
+      kErr("kPhErr"); btn.hidden = true; $("kPhCL").hidden = true; $("kPhGo").textContent = "Получить код";
+      $("kPhNote").textContent = "Запрос отправлен Марине. Когда она подтвердит номер, записи появятся здесь, а в колокольчике будет уведомление.";
+    });
+  };
+  $("kNews").onchange = function () { apiSend({ type: "acc_news", ctoken: ctoken, on: this.checked ? 1 : 0 }).then(function (r) { toast(r && r.ok ? ($("kNews").checked ? "Будем присылать новости на почту" : "Новости на почту отключены") : "Нет связи с сервером"); }); };
   $("kPhBox").addEventListener("submit", function (e) {
     e.preventDefault(); var f = this, ph = phoneOk($("kPhIn").value);
     if (!ph) { kErr("kPhErr", "Укажите мобильный телефон полностью."); return; }
@@ -3207,11 +3269,43 @@ div.f { display: grid; gap: 8px; }
     var withCode = !$("kPhCL").hidden;
     apiSend({ type: "acc_phone", ctoken: ctoken, phone: ph, code: withCode ? $("kPhC").value.trim() : "" }).then(function (r) {
       busy(f, false);
-      if (!r || !r.ok) { kErr("kPhErr", (r && r.error) || "Нет связи с сервером"); return; }
-      if (!withCode) { $("kPhCL").hidden = false; $("kPhGo").textContent = "Привязать"; $("kPhNote").textContent = "Код отправлен " + (r.via === "tg" ? "в Telegram-бот студии" : "на почту " + r.to) + ". Он действует 10 минут."; $("kPhC").focus(); return; }
+      if (!r || !r.ok) { kErr("kPhErr", (r && r.error) || "Нет связи с сервером"); $("kPhAsk").hidden = false; return; }
+      if (!withCode) { $("kPhAsk").hidden = false; $("kPhCL").hidden = false; $("kPhGo").textContent = "Привязать"; $("kPhNote").textContent = "Код отправлен " + (r.via === "tg" ? "в Telegram-бот студии" : "на почту " + r.to) + ". Он действует 10 минут."; $("kPhC").focus(); return; }
       $("kPhCL").hidden = true; $("kPhC").value = ""; $("kPhGo").textContent = "Получить код"; toast("Номер привязан — записи по нему теперь в кабинете"); loadK();
     });
   });
+  // ---------- шапка и уведомления клиентки с кабинетом ----------
+  var kNotes = [], kUnread = 0;
+  function hdrClient() {
+    var on = !!(ctoken && kData && kData.acc) && !document.body.classList.contains("is-master");
+    $("hdrK").hidden = !on; if (!document.body.classList.contains("is-master")) $("hdrCta").hidden = on;
+  }
+  function loadNotes(seen) {
+    if (!ctoken) return;
+    apiSend({ type: "client_notes", ctoken: ctoken, seen: seen ? 1 : 0 }).then(function (r) {
+      if (!r || !r.ok) return;
+      kNotes = r.notes || []; kUnread = r.unread || 0;
+      $("kCountH").hidden = !kUnread; $("kCountH").textContent = kUnread > 99 ? "99+" : kUnread; $("kBellH").classList.toggle("ring", kUnread > 0);
+      if ($("kNews")) $("kNews").checked = !!r.news;
+      if (!$("kPanel").hidden) renderKNotes();
+    });
+  }
+  // номер телефона не переносим по частям: пробелы и дефисы внутри — неразрывные
+  function nbPhone(t) { return t.replace(/\+7[\d\s\-]{10,16}\d/g, function (m) { return m.replace(/ /g, "\u00a0").replace(/-/g, "\u2011"); }); }
+  function renderKNotes() {
+    $("kNList").innerHTML = kNotes.length ? kNotes.map(function (n, i) {
+      return '<a class="ni' + (i < kUnread ? ' new' : '') + '" href="' + esc(n.link || "#kabinet") + '"><i>' + esc(n.icon || "🔔") + '</i><span><b>' + esc(n.title) + '</b><span>' + nbPhone(esc(n.text)) + '</span><small>' + ago(n.t * 1000) + '</small></span></a>';
+    }).join("") : '<p class="np-empty">Пока уведомлений нет. Здесь появятся новости студии и всё о ваших записях и сертификатах.</p>';
+  }
+  $("kBellH").addEventListener("click", function (e) {
+    e.stopPropagation();
+    var open = $("kPanel").hidden; $("kPanel").hidden = !open; this.setAttribute("aria-expanded", String(open));
+    if (open) { renderKNotes(); loadNotes(true); }
+  });
+  $("kNClear").addEventListener("click", function (e) { e.stopPropagation(); loadNotes(true); kUnread = 0; renderKNotes(); });
+  $("kNList").addEventListener("click", function () { $("kPanel").hidden = true; });
+  document.addEventListener("click", function (e) { if (!$("kPanel").hidden && !e.target.closest("#hdrK .bellwrap")) { $("kPanel").hidden = true; $("kBellH").setAttribute("aria-expanded", "false"); } });
+  setInterval(function () { if (ctoken && kData && kData.acc && document.visibilityState === "visible") loadNotes(false); }, 120000);
   // ---------- удаление аккаунта ----------
   function kDelWarn() {
     var d = kData || { bookings: [], certs: [], training: [] }, today = dkey(new Date()), w = [];
@@ -3238,12 +3332,12 @@ div.f { display: grid; gap: 8px; }
     apiSend({ type: "client_delete", ctoken: ctoken, email: m, pass: $("kDelP").value, sure: 1 }).then(function (r) {
       busy(f, false);
       if (!r || !r.ok) { errBox("kDelErr", (r && r.error) || "Нет связи с сервером"); return; }
-      ctoken = ""; lsSet("ma-ctoken", null); lsSet("ma-myphone", null); kData = null;
+      ctoken = ""; ctClear(); lsSet("ma-myphone", null); kData = null;
       $("kDel").hidden = true; $("kDelOpen").hidden = false; $("kDelP").value = ""; $("kDelE").value = ""; $("kDelOk").checked = false;
       kShow("login"); toast("Аккаунт удалён." + (r.certs ? " Сертификаты отправили на " + m + " — проверьте и «Спам»." : ""));
     });
   });
-  $("kOut").onclick = function () { apiSend({ type: "client_logout", ctoken: ctoken }); ctoken = ""; lsSet("ma-ctoken", null); kData = null; showK(); };
+  $("kOut").onclick = function () { apiSend({ type: "client_logout", ctoken: ctoken }); ctoken = ""; ctClear(); kData = null; showK(); };
   function moveMine(btn) {
     var rec = findMyRec(btn.dataset.mvgo); if (!rec || !mv || mv.start == null) return;
     if (!canMove(rec)) { toast("До визита меньше 2 дней — перенести можно только через Марину"); mv = null; rerenderMy(); return; }
@@ -3866,7 +3960,7 @@ div.f { display: grid; gap: 8px; }
     if (ed.move) {
       var own = ownCopy(findBooking(ed.id));
       var movedT = own.date !== ed.date || own.start !== ed.start, changed = own.svc !== ed.svc || !!own.remove !== !!ed.remove || !!own.french !== !!ed.french;
-      own.date = ed.date; own.start = ed.start; flashId = own.id;
+      own.date = ed.date; own.start = ed.start; flashId = own.id; if (movedT) own.movedBy = "master";
       if (changed) { own.svc = ed.svc; own.remove = !!ed.remove; own.french = !!ed.french; own.price = bprice(ed); own.svcName = svcLabel(ed); }
       own.dur = bmin(own);
       if (own.status === "cancelled") { own.status = "booked"; delete own.by; }
@@ -3902,7 +3996,7 @@ div.f { display: grid; gap: 8px; }
   $("aTabs").addEventListener("click", function (e) {
     var b = e.target.closest("[data-tab]"); if (!b) return;
     aTab = b.dataset.tab;
-    if (aTab === "clients" && SYNC) apiSend({ type: "backup", token: token, info: 1 }).then(bkInfo);
+    if (aTab === "clients" && SYNC) { apiSend({ type: "backup", token: token, info: 1 }).then(bkInfo); loadLinks(); }
     document.querySelectorAll("#aTabs button").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
     document.querySelectorAll(".atab").forEach(function (x) { x.hidden = x.dataset.tab !== aTab; });
     renderTab();
@@ -3921,7 +4015,7 @@ div.f { display: grid; gap: 8px; }
   function renderNotes() {
     var list = st.notes || [];
     $("nList").innerHTML = list.length ? list.map(function (n) {
-      return '<button type="button" class="ni' + (n.read ? '' : ' new') + '" data-note="' + n.id + '"><i>' + n.icon + '</i><span><b>' + esc(n.title) + '</b><span>' + esc(n.text) + '</span><small>' + ago(n.t) + '</small></span></button>';
+      return '<button type="button" class="ni' + (n.read ? '' : ' new') + '" data-note="' + n.id + '"><i>' + n.icon + '</i><span><b>' + esc(n.title) + '</b><span>' + nbPhone(esc(n.text)) + '</span><small>' + ago(n.t) + '</small></span></button>';
     }).join("") : '<p class="np-empty">Пока уведомлений нет. Здесь появятся новые записи, отмены, брони обучения и сертификаты.</p>';
     if (!SYNC) $("nList").insertAdjacentHTML("beforeend", '<button type="button" class="btn sm ghost np-test" id="nTest">Показать тестовые уведомления</button>');
   }
@@ -4031,6 +4125,35 @@ div.f { display: grid; gap: 8px; }
       return [course(t.course).short, (t.days || [t.date]).map(dmy).join(", "), t.name, t.phone, t.price, t.pre, ST_NAME[t.status] || t.status];
     }));
   }
+  // запросы клиенток на привязку номера и число кабинетов для рассылки
+  function loadLinks() {
+    apiSend({ type: "link_list", token: token }).then(function (r) {
+      if (!r || !r.ok) return;
+      $("aLinks").hidden = !r.reqs.length;
+      $("aLinkList").innerHTML = r.reqs.map(function (q) {
+        return '<div class="bk"><div class="r1"><b>' + esc(q.name) + '</b><span class="pill">' + esc(q.phone) + '</span></div><div class="info">' + esc(q.email) + (q.known ? ' · по этому номеру у вас записана: <b>' + esc(q.known) + '</b>' : ' · по этому номеру записей нет') + '</div>' +
+          '<div class="acts"><button type="button" class="btn sm" data-link="' + q.id + '" data-yes="1">Подтвердить</button><button type="button" class="btn sm ghost" data-link="' + q.id + '">Отклонить</button></div></div>';
+      }).join("");
+      $("aCastNote").textContent = "Сообщение придёт в колокольчик всем, у кого есть личный кабинет на сайте (сейчас: " + r.accounts + "): скидки, свободные окошки, новые цены.";
+      $("aCastML").textContent = "Продублировать на почту тем, кто согласился получать новости (" + r.news + ")";
+    });
+  }
+  $("aLinkList").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-link]"); if (!b) return; b.disabled = true;
+    apiSend({ type: "link_ok", token: token, id: b.dataset.link, yes: b.dataset.yes ? 1 : 0 }).then(function (r) { toast(r && r.ok ? (b.dataset.yes ? "Номер привязан — клиентка увидит записи" : "Запрос отклонён") : (r && r.error) || "Нет связи"); loadLinks(); });
+  });
+  $("aCast").addEventListener("submit", function (e) {
+    e.preventDefault(); var t = $("aCastT").value.trim(), x = $("aCastX").value.trim(), btn = $("aCastGo");
+    if (t.length < 2 || x.length < 2) { errBox("aCastErr", "Напишите заголовок и текст."); return; }
+    if (btn.dataset.sure !== "1") { btn.dataset.sure = "1"; btn.textContent = "Точно отправить всем? Нажмите ещё раз"; return; }
+    errBox("aCastErr"); btn.disabled = true;
+    apiSend({ type: "broadcast", token: token, title: t, text: x, mail: $("aCastM").checked ? 1 : 0 }).then(function (r) {
+      btn.disabled = false; btn.dataset.sure = ""; btn.textContent = "Отправить";
+      if (!r || !r.ok) { errBox("aCastErr", (r && r.error) || "Нет связи с сервером"); return; }
+      $("aCastT").value = ""; $("aCastX").value = ""; $("aCastM").checked = false;
+      toast("Отправлено: " + r.accounts + " клиенткам в колокольчик" + (r.mailed ? ", " + r.mailed + " — на почту" : ""));
+    });
+  });
   // полная копия базы с сервера одним файлом; заодно — когда была последняя ночная копия
   function bkInfo(r) { $("aBkInfo").textContent = r && r.ok ? (r.last ? "Последняя автокопия: " + dmy(r.last) + ", всего копий: " + r.count + "." : "Первая автокопия появится сегодня ночью.") : ""; }
   $("aBackup").onclick = function () {
@@ -4581,7 +4704,7 @@ div.f { display: grid; gap: 8px; }
     document.querySelectorAll("[data-demo]").forEach(function (el) { el.hidden = SYNC; });
     // в браузере мастера вместо «Записаться» — колокольчик и кабинет
     var master = SYNC ? !!token : curView === "admin";  // в демо — пока открыт кабинет
-    $("hdrCta").hidden = master; $("hdrM").hidden = !master; document.body.classList.toggle("is-master", master);
+    $("hdrCta").hidden = master; $("hdrM").hidden = !master; document.body.classList.toggle("is-master", master); if (typeof hdrClient === "function") hdrClient();
     if (master) renderBell();
   }
 

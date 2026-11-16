@@ -224,6 +224,10 @@ function client_db() {
     $db->exec('CREATE TABLE IF NOT EXISTS accounts (id INTEGER PRIMARY KEY AUTOINCREMENT, email TEXT UNIQUE, name TEXT, pass TEXT, phone TEXT DEFAULT "", verified INTEGER DEFAULT 0, created INTEGER)');
     $db->exec('CREATE TABLE IF NOT EXISTS acc_codes (email TEXT, purpose TEXT, hash TEXT, until INTEGER, tries INTEGER, sent INTEGER, PRIMARY KEY (email, purpose))');
     try { $db->exec('ALTER TABLE client_sessions ADD COLUMN acc INTEGER'); } catch (Throwable $e) {}
+    // уведомления клиенткам: acc = 0 — рассылка всем; seen — когда клиентка последний раз открывала колокольчик; news — согласие на письма с новостями
+    $db->exec('CREATE TABLE IF NOT EXISTS cnotes (id INTEGER PRIMARY KEY AUTOINCREMENT, acc INTEGER, icon TEXT, title TEXT, text TEXT, link TEXT, t INTEGER)');
+    $db->exec('CREATE TABLE IF NOT EXISTS link_reqs (id INTEGER PRIMARY KEY AUTOINCREMENT, acc INTEGER, phone TEXT, t INTEGER)');
+    foreach (['seen INTEGER DEFAULT 0', 'news INTEGER DEFAULT 0'] as $col) { try { $db->exec('ALTER TABLE accounts ADD COLUMN ' . $col); } catch (Throwable $e) {} }
     return $db;
 }
 // Кто вошёл: по номеру телефона (код из Telegram) или в кабинет по почте
@@ -271,6 +275,44 @@ function acc_check_code($email, $purpose, $code) {
     $db->prepare('DELETE FROM acc_codes WHERE email = ? AND purpose = ?')->execute([$email, $purpose]);
     return '';
 }
+// Уведомление в колокольчик клиентки (если у неё есть кабинет)
+function cnote($accId, $icon, $title, $text, $link = '') {
+    if (!$accId) return;
+    client_db()->prepare('INSERT INTO cnotes (acc, icon, title, text, link, t) VALUES (?, ?, ?, ?, ?, ?)')->execute([(int)$accId, $icon, $title, $text, $link, time()]);
+}
+// Чей кабинет у записи или сертификата: владелец, почта покупателя, подтверждённый телефон
+function acc_of($x) {
+    if (!empty($x['owner'])) return (int)$x['owner'];
+    $db = client_db();
+    if (!empty($x['email'])) { $q = $db->prepare('SELECT id FROM accounts WHERE email = ? AND verified = 1'); $q->execute([mb_strtolower($x['email'])]); if ($id = $q->fetchColumn()) return (int)$id; }
+    $ph = digits_phone($x['phone'] ?? '');
+    if ($ph) { $q = $db->prepare('SELECT id FROM accounts WHERE phone = ? AND verified = 1'); $q->execute([$ph]); if ($id = $q->fetchColumn()) return (int)$id; }
+    return 0;
+}
+// Мама изменила записи или сертификаты — сообщить клиенткам в кабинет
+function cnotes_diff($before, $doc) {
+    $old = []; foreach ($before['bookings'] as $b) $old[$b['id'] ?? ''] = $b;
+    foreach ($doc['bookings'] as $b) {
+        $o = $old[$b['id'] ?? ''] ?? null; if (!$o || !empty($b['anon'])) continue;
+        $acc = null; $get = function () use (&$acc, $b) { return $acc ??= acc_of($b); };
+        if (($o['status'] ?? '') === 'booked' && ($b['status'] ?? '') === 'cancelled' && ($b['by'] ?? '') !== 'client')
+            cnote($get(), '❌', 'Марина отменила запись', when_text($b['date'], (int)$b['start']) . '. Если это ошибка — напишите Марине.', '#kabinet');
+        elseif (($b['status'] ?? '') === 'booked' && (($o['date'] ?? '') !== ($b['date'] ?? '') || (int)($o['start'] ?? 0) !== (int)($b['start'] ?? 0)) && ($b['movedBy'] ?? '') !== 'client')
+            cnote($get(), '🔁', 'Запись перенесена', 'Было: ' . when_text($o['date'], (int)$o['start']) . '. Теперь: ' . when_text($b['date'], (int)$b['start']) . '.', '#kabinet');
+        elseif (($b['status'] ?? '') === 'booked' && (($o['svc'] ?? '') !== ($b['svc'] ?? '') || !empty($o['french']) !== !empty($b['french']) || !empty($o['remove']) !== !empty($b['remove'])))
+            cnote($get(), '✏️', 'Марина изменила запись', ($b['svcName'] ?? 'Услуга изменена') . ' · ' . when_text($b['date'], (int)$b['start']) . ($b['price'] ?? 0 ? ' · ' . number_format((int)$b['price'], 0, ',', ' ') . ' ₽' : ''), '#kabinet');
+    }
+    $oc = []; foreach ($before['certs'] as $c) $oc[$c['id'] ?? ''] = $c;
+    foreach ($doc['certs'] as $c) {
+        $o = $oc[$c['id'] ?? ''] ?? null; if (!$o) continue;
+        $bal = (int)($c['balance'] ?? $c['sum'] ?? 0); $obal = (int)($o['balance'] ?? $o['sum'] ?? 0);
+        if (($o['status'] ?? '') === 'wait' && ($c['status'] ?? '') === 'paid') cnote(acc_of($c), '🎁', 'Сертификат активен', '№ ' . ($c['code'] ?? '') . ' на ' . number_format((int)$c['sum'], 0, ',', ' ') . ' ₽ — оплата получена.', '#kabinet');
+        elseif ($bal < $obal) cnote(acc_of($c), '🎁', 'Списание с сертификата', '№ ' . ($c['code'] ?? '') . ': списано ' . number_format($obal - $bal, 0, ',', ' ') . ' ₽, остаток ' . number_format($bal, 0, ',', ' ') . ' ₽.', '#kabinet');
+    }
+    $ot = []; foreach ($before['training'] as $t) $ot[$t['id'] ?? ''] = $t;
+    foreach ($doc['training'] as $t) { $o = $ot[$t['id'] ?? ''] ?? null; if ($o && ($o['status'] ?? '') === 'wait' && ($t['status'] ?? '') === 'paid') cnote(acc_of($t), '🎓', 'Предоплата за обучение получена', 'Даты закреплены за вами. До встречи на курсе!', '#kabinet'); }
+}
+
 function mail_ok($m) { $m = mb_strtolower(trim((string)$m)); return filter_var($m, FILTER_VALIDATE_EMAIL) && strlen($m) <= 80 ? $m : ''; }
 function client_phone($token) {
     if (!is_string($token) || strlen($token) < 32) return '';
