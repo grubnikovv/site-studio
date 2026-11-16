@@ -201,3 +201,28 @@ function pass_ok($pass) {
 }
 function pass_set($pass) { kv_put('pass_hash', password_hash((string)$pass, PASSWORD_DEFAULT)); }
 function pass_weak($p) { return mb_strlen((string)$p) < 6 ? 'Пароль — не короче 6 символов.' : (mb_strlen((string)$p) > 64 ? 'Слишком длинный пароль.' : ''); }
+
+// ---------- кабинет клиентки: вход по телефону и коду из Telegram или почты ----------
+function client_db() {
+    $db = store_init();
+    $db->exec('CREATE TABLE IF NOT EXISTS client_sessions (token TEXT PRIMARY KEY, phone TEXT, created INTEGER)');
+    $db->exec('CREATE TABLE IF NOT EXISTS client_codes (phone TEXT PRIMARY KEY, hash TEXT, until INTEGER, tries INTEGER, sent INTEGER)');
+    return $db;
+}
+function client_phone($token) {
+    if (!is_string($token) || strlen($token) < 32) return '';
+    $q = client_db()->prepare('SELECT phone, created FROM client_sessions WHERE token = ?'); $q->execute([hash('sha256', $token)]);
+    $r = $q->fetch();
+    return ($r && $r['created'] > time() - 180 * 86400) ? $r['phone'] : '';
+}
+// Куда прислать код: последний чат бота с этим телефоном, иначе почта из записи
+function client_channel($phone) {
+    $q = db()->prepare('SELECT chat_id, email, remind FROM bookings WHERE phone = ? ORDER BY updated DESC'); $q->execute([$phone]);
+    $mail = '';
+    foreach ($q->fetchAll() as $r) {
+        if (!empty($r['chat_id'])) return ['tg', $r['chat_id']];
+        if (!$mail && !empty($r['email'])) $mail = $r['email'];
+    }
+    return $mail ? ['mail', $mail] : null;
+}
+function mask_mail($m) { [$a, $d] = explode('@', $m, 2) + ['', '']; return mb_substr($a, 0, 2) . str_repeat('•', max(1, mb_strlen($a) - 2)) . '@' . $d; }

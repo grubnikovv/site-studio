@@ -737,6 +737,15 @@ div.f { display: grid; gap: 8px; }
 .rv-dots i.on { background: var(--lac); transform: scale(1.3); }
 @media (max-width: 560px) { .rv-nav { display: none; } .rv-dots { display: flex; } .rv { padding: 22px 20px 18px; } .rv blockquote { font-size: 16px; } }
 @media (prefers-reduced-motion: reduce) { .rv-track { scroll-behavior: auto; } }
+.kab { display: grid; gap: 16px; max-width: 720px; }
+#kBody:not([hidden]) { display: grid; gap: 16px; }
+#kBody .card { display: grid; gap: 12px; }
+#kBody h3 { margin: 0; }
+#kStep2:not([hidden]) { display: grid; gap: 10px; }
+.k-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 15px; }
+.k-row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 15px; }
+.k-row:first-child { border-top: 0; }
+.k-row small { display: block; color: var(--mute); font-size: 13px; }
 .zap-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .zap-top h2 { margin: 0; }
 .my-link { display: inline-flex; align-items: center; gap: 10px; padding: 9px 16px 9px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); text-decoration: none; font-weight: 700; font-size: 15px; line-height: 1.15; transition: border-color .2s, transform .2s; }
@@ -1251,7 +1260,7 @@ div.f { display: grid; gap: 8px; }
     <a href="#voprosy" data-r="voprosy">Вопросы и ответы</a>
     <a href="#sertifikat" data-r="sertifikat">Сертификаты<small>подарок на любую процедуру</small></a>
     <a href="#kontakty" data-r="kontakty">Контакты</a>
-    <div class="drawer-my"><a href="#moi-zapisi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Мои записи</a><a href="#moi-sertifikaty"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 12h18M12 8v13M12 8c-2-4-6-4-6-1.5S9 8 12 8zm0 0c2-4 6-4 6-1.5S15 8 12 8z"/></svg>Мои сертификаты</a></div>
+    <div class="drawer-my"><a href="#kabinet"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Мои записи</a><a href="#moi-sertifikaty"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 12h18M12 8v13M12 8c-2-4-6-4-6-1.5S9 8 12 8zm0 0c2-4 6-4 6-1.5S15 8 12 8z"/></svg>Мои сертификаты</a></div>
   </nav>
   <div class="drawer-foot">
     <a class="btn" href="#zapis">Записаться онлайн</a>
@@ -1434,6 +1443,28 @@ div.f { display: grid; gap: 8px; }
 </main>
 
 <!-- ===== СЕРТИФИКАТ ===== -->
+<main id="v-kabinet" class="page" hidden>
+  <section class="phero"><div class="wrap"><span class="eyebrow">Личный кабинет</span><h1>Мои записи</h1><p class="lead">Записи, перенос и отмена, обучение и сертификаты — на любом телефоне.</p></div></section>
+  <section class="block tight"><div class="wrap kab">
+    <form class="card a-login" id="kLogin" novalidate>
+      <h3>Вход по номеру телефона</h3>
+      <p class="note" id="kLoginNote">Введите телефон, который указывали при записи. Пришлём код в Telegram-бот студии или на почту — туда, куда приходят напоминания.</p>
+      <label for="kPhone">Телефон</label>
+      <input type="tel" id="kPhone" inputmode="tel" autocomplete="tel" placeholder="+7 900 123-45-67">
+      <div id="kStep2" hidden><label for="kCode">Код из Telegram или письма</label><input type="text" id="kCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456"></div>
+      <p class="err" id="kErr" hidden></p>
+      <button class="btn" type="submit" id="kGo">Получить код</button>
+      <a class="a-link" href="#moi-zapisi">Без входа: записи, сделанные на этом телефоне</a>
+    </form>
+    <div id="kBody" hidden>
+      <div class="k-head"><span>Вы вошли: <b id="kWho"></b></span><button type="button" class="a-link" id="kOut">Выйти</button></div>
+      <div class="card"><h3>Предстоящие записи</h3><div class="opts" id="kNext"></div><a class="btn sm glow" href="#zapis" style="justify-self:start">Записаться ещё</a></div>
+      <div class="card" id="kTrainBox"><h3>Обучение</h3><div class="opts" id="kTrain"></div></div>
+      <div class="card" id="kCertBox"><h3>Сертификаты</h3><div class="opts" id="kCerts"></div></div>
+      <div class="card" id="kHistBox"><h3>История визитов</h3><div class="opts" id="kHist"></div></div>
+    </div>
+  </div></section>
+</main>
 <main id="v-podarok" class="page" hidden>
   <section class="phero"><div class="wrap"><span class="eyebrow">Мой сертификат</span><h1 id="pkH">Вам подарок</h1><p class="lead" id="pkLead"></p></div></section>
   <section class="block tight"><div class="wrap pk" id="pkBody"></div></section>
@@ -1670,7 +1701,7 @@ div.f { display: grid; gap: 8px; }
 <!-- ===== ЗАПИСЬ ===== -->
 <main id="v-zapis" class="page screen" hidden>
   <div class="wrap">
-    <div class="zap-top"><h2>Онлайн-запись</h2><a class="my-link" href="#moi-zapisi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>Мои записи<small>перенести или отменить</small></span></a></div>
+    <div class="zap-top"><h2>Онлайн-запись</h2><a class="my-link" href="#kabinet"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>Мои записи<small>перенести или отменить</small></span></a></div>
     <div class="stepper" id="stepper"><i class="on"></i><i></i><i></i><i></i></div>
 
     <div class="card" id="b1">
@@ -1843,7 +1874,7 @@ div.f { display: grid; gap: 8px; }
   <div class="wrap">
     <div class="fcol"><span class="logo"><svg class="brand" aria-hidden="true"><use href="#lgm"></use></svg><span class="brand-t">Академия маникюра и&nbsp;педикюра</span><span class="sr">М.А — академия маникюра и педикюра</span></span><span>Марина Шевченко · Михайловка, ул. Обороны, 41</span></div>
     <div class="chats" aria-label="Написать Марине"><a class="m-wa" href="https://wa.me/message/22ORQIZQY6J2E1" target="_blank" rel="noopener" aria-label="Написать в WhatsApp"><svg class="ic-g" aria-hidden="true"><use href="#sm-wa"></use></svg></a><a class="m-tg" href="https://t.me/monrobeauty" target="_blank" rel="noopener" aria-label="Написать в Telegram"><svg class="ic-g" aria-hidden="true"><use href="#sm-tg"></use></svg></a><a class="m-mx" href="https://max.ru/u/f9LHodD0cOIMIZCDXDtzuEBoPq33rVYVNwVR5OZQWf6Tq2hFOaYc2Ox7LR4" target="_blank" rel="noopener" aria-label="Написать в MAX"><svg class="mx-g" aria-hidden="true"><use href="#sm-mx"></use></svg></a></div>
-    <div class="fnav"><a href="#uslugi">Услуги</a><a href="#obuchenie">Обучение</a><a href="#voprosy">Вопросы</a><a href="#kontakty">Контакты</a><a href="#admin">Вход для мастера</a><a href="#oferta">Публичная оферта</a><a href="#politika">Политика конфиденциальности</a></div>
+    <div class="fnav"><a href="#uslugi">Услуги</a><a href="#obuchenie">Обучение</a><a href="#voprosy">Вопросы</a><a href="#kontakty">Контакты</a><a href="#kabinet">Личный кабинет</a><a href="#admin">Вход для мастера</a><a href="#oferta">Публичная оферта</a><a href="#politika">Политика конфиденциальности</a></div>
   </div>
 </footer>
 
@@ -2662,27 +2693,97 @@ div.f { display: grid; gap: 8px; }
     var nd = $("myList").querySelector(".mvbox .days");  // лента дней не прыгает в начало, выбранный день виден
     if (nd) { if (keep != null) nd.scrollLeft = keep; else { var sel = nd.querySelector('[aria-pressed="true"]'); if (sel) nd.scrollLeft = sel.offsetLeft - 8; } }
   }
+  // карточка записи клиентки: перенести и отменить — не позже чем за 2 дня до визита, иначе через Марину
+  function bookCard(b) {
+    var s = svc(b.svc), t = statusOf(b), ok = canMove(b);
+    return '<div class="bk"><div class="r1"><b>' + whenText(b.date, b.start) + '</b><span class="pill ' + t[1] + '">' + (b.status === "cancelled" ? "Отменена" : t[0]) + '</span></div><div class="info">' + s.name + ' · ' + priceText(s) + '</div>' +
+      (b.status === "booked" ? (ok ? '<div class="acts"><button type="button" data-mvopen="' + b.id + '">Перенести</button><button type="button" data-my="' + b.id + '">Отменить запись</button></div>'
+        : '<div class="mv-hint">До визита меньше 2 дней — перенести или отменить можно только через Марину: <a href="tel:+79954284788" style="white-space:nowrap">+7 995 428-47-88</a></div>') +
+        (mv && mv.id === b.id ? mvBox(b) : '') : '') + '</div>';
+  }
+  // сначала — запись из кабинета (с телефоном), потом — сделанная на этом телефоне
+  function findMyRec(id) { var k = kData ? kData.bookings.filter(function (x) { return x.id === id; })[0] : null; return k || st.bookings.filter(function (x) { return x.id === id && x.phone; })[0]; }
+  function rerenderMy() { renderMy(); if (curView === "kabinet" && kData) renderK(); }
   function renderMyList() {
     var list = myBookings($("myPhone").value);
     $("myList").innerHTML = list.length ? list.map(function (b) {
-      var s = svc(b.svc), t = statusOf(b);
-      return '<div class="bk"><div class="r1"><b>' + whenText(b.date, b.start) + '</b><span class="pill ' + t[1] + '">' + (b.status === "cancelled" ? "Отменена" : t[0]) + '</span></div><div class="info">' + s.name + ' · ' + priceText(s) + '</div>' +
-        (b.status === "booked" ? '<div class="acts">' + (canMove(b) ? '<button type="button" data-mvopen="' + b.id + '">Перенести</button>' : '') + '<button type="button" data-my="' + b.id + '">Отменить запись</button></div>' +
-          (canMove(b) ? '' : '<div class="mv-hint">До визита меньше 2 дней — перенести можно только через Марину: <a href="tel:+79954284788" style="white-space:nowrap">+7 995 428-47-88</a></div>') +
-          (mv && mv.id === b.id ? mvBox(b) : '') : '') + '</div>';
+      return bookCard(b);
     }).join("") : '<p class="note">Записей на этот номер не нашли. Проверьте номер или напишите Марине.</p><button type="button" class="btn sm ghost" data-chat="Здравствуйте! Не могу найти свою запись на сайте." data-chat-title="Найти запись">Написать Марине</button>';
   }
+  // ---------- личный кабинет клиентки ----------
+  var ctoken = SYNC ? lsGet("ma-ctoken", "") : "", kData = null, kStep = 1;
+  function showK() {
+    $("kLogin").hidden = !!ctoken; $("kBody").hidden = !ctoken;
+    if (!ctoken) { var mp = lsGet("ma-myphone", ""); if (mp && !$("kPhone").value) $("kPhone").value = mp; return; }
+    if (kData) renderK(); loadK();
+  }
+  function loadK() {
+    return apiSend({ type: "client_data", ctoken: ctoken }).then(function (r) {
+      if (r && r.relogin) { ctoken = ""; lsSet("ma-ctoken", null); kData = null; showK(); return; }
+      if (!r || !r.ok) return;
+      kData = r; if (!token && r.doc) applyDoc(r.v, r.doc);  // свежая занятость для переноса
+      if (curView === "kabinet") renderK();
+    });
+  }
+  function renderK() {
+    var today = dkey(new Date()), d = kData;
+    $("kWho").textContent = d.phone;
+    var sortT = function (a, b) { return (a.date + hm(a.start).padStart(5, "0")).localeCompare(b.date + hm(b.start).padStart(5, "0")); };
+    var next = d.bookings.filter(function (b) { return b.status === "booked" && b.date >= today; }).sort(sortT);
+    var hist = d.bookings.filter(function (b) { return !(b.status === "booked" && b.date >= today); }).sort(sortT).reverse();
+    var sl = $("kNext").querySelector(".mvbox .days"), keep = sl ? sl.scrollLeft : null;
+    $("kNext").innerHTML = next.length ? next.map(bookCard).join("") : '<p class="note" style="margin:0">Предстоящих записей нет.</p>';
+    var nd = $("kNext").querySelector(".mvbox .days"); if (nd) { if (keep != null) nd.scrollLeft = keep; else { var se = nd.querySelector('[aria-pressed="true"]'); if (se) nd.scrollLeft = se.offsetLeft - 8; } }
+    $("kHistBox").hidden = !hist.length;
+    $("kHist").innerHTML = hist.slice(0, 30).map(function (b) {
+      var t = b.status === "cancelled" ? ["Отменена", ""] : b.date < today && b.status === "booked" ? ["Была запись", ""] : statusOf(b);
+      return '<div class="k-row"><span>' + whenText(b.date, b.start) + '<small>' + svc(b.svc).name + '</small></span><span class="pill ' + t[1] + '">' + t[0] + '</span></div>';
+    }).join("");
+    $("kTrainBox").hidden = !d.training.length;
+    $("kTrain").innerHTML = d.training.slice().reverse().map(function (t) {
+      var c = course(t.course), lab = t.status === "paid" ? ["Предоплата получена", "ok"] : t.status === "wait" ? [t.claimed ? "Марина проверяет оплату" : "Ждёт оплату", "bad"] : t.status === "refund" ? ["Отменено, предоплата возвращена", ""] : t.status === "late" ? ["Отменено", ""] : ["Не оплачено", ""];
+      return '<div class="k-row"><span>' + esc(c.short) + '<small>' + rangeText(t.days || [t.date]) + ', 10:00–17:00</small></span><span class="pill ' + lab[1] + '">' + lab[0] + '</span></div>';
+    }).join("");
+    $("kCertBox").hidden = !d.certs.length;
+    $("kCerts").innerHTML = d.certs.slice().reverse().map(function (c) {
+      var st0 = certState(c);
+      return '<a class="k-row" style="text-decoration:none;color:inherit" href="#cert-' + certKey(c.code) + '"><span>№ ' + esc(c.code) + '<small>остаток ' + rub(certBalance(c)) + ' из ' + rub(c.sum) + ' · до ' + shortDate(c.till) + '</small></span><span class="pill ' + st0[1] + '">' + st0[0] + '</span></a>';
+    }).join("");
+  }
+  $("kNext").addEventListener("click", myClick);
+  $("kLogin").addEventListener("submit", function (e) {
+    e.preventDefault(); var btn = $("kGo"); $("kErr").hidden = true;
+    var ph = phoneOk($("kPhone").value); if (!ph) { $("kErr").textContent = "Укажите мобильный телефон полностью."; $("kErr").hidden = false; return; }
+    btn.disabled = true;
+    if (kStep === 1) {
+      apiSend({ type: "client_code", phone: ph }).then(function (r) {
+        btn.disabled = false;
+        if (!r || !r.ok) { $("kErr").textContent = (r && r.error) || "Нет связи с сервером"; $("kErr").hidden = false; return; }
+        kStep = 2; $("kStep2").hidden = false; btn.textContent = "Войти"; $("kCode").focus();
+        $("kLoginNote").textContent = "Код отправлен " + (r.via === "tg" ? "в Telegram-бот студии" : "на почту " + r.to) + ". Он действует 10 минут.";
+      });
+      return;
+    }
+    apiSend({ type: "client_login", phone: ph, code: $("kCode").value }).then(function (r) {
+      btn.disabled = false;
+      if (!r || !r.ok) { $("kErr").textContent = (r && r.error) || "Нет связи с сервером"; $("kErr").hidden = false; if (r && /устарел/.test(r.error || "")) { kStep = 1; $("kStep2").hidden = true; btn.textContent = "Получить код"; } return; }
+      ctoken = r.ctoken; lsSet("ma-ctoken", ctoken); lsSet("ma-myphone", r.phone);
+      kStep = 1; $("kStep2").hidden = true; $("kCode").value = ""; btn.textContent = "Получить код";
+      showK(); toast("Вы вошли в личный кабинет");
+    });
+  });
+  $("kOut").onclick = function () { apiSend({ type: "client_logout", ctoken: ctoken }); ctoken = ""; lsSet("ma-ctoken", null); kData = null; showK(); };
   function moveMine(btn) {
-    var rec = st.bookings.filter(function (x) { return x.id === btn.dataset.mvgo; })[0]; if (!rec || !mv || mv.start == null) return;
-    if (!canMove(rec)) { toast("До визита меньше 2 дней — перенести можно только через Марину"); mv = null; renderMy(); return; }
+    var rec = findMyRec(btn.dataset.mvgo); if (!rec || !mv || mv.start == null) return;
+    if (!canMove(rec)) { toast("До визита меньше 2 дней — перенести можно только через Марину"); mv = null; rerenderMy(); return; }
     var from = whenText(rec.date, rec.start), to = whenText(mv.date, mv.start), nd = mv.date, ns = mv.start;
     btn.disabled = true; btn.textContent = "Переношу…";
     function done() {
-      mv = null; renderMy(); toast("Запись перенесена на " + to + ". Марина получит уведомление");
+      mv = null; rerenderMy(); if (kData) loadK(); toast("Запись перенесена на " + to + ". Марина получит уведомление");
     }
     if (SYNC) {
       apiSend({ type: "move", id: rec.id, phone: rec.phone, date: nd, start: ns, dur: bmin(rec) }).then(function (r) {
-        if (!r || !r.ok) { btn.disabled = false; toast((r && r.error) || "Нет связи с сервером. Попробуйте ещё раз"); if (r && /заняли|2 дня/.test(r.error || "")) { mv.start = null; fetchState(true).then(renderMy); } return; }
+        if (!r || !r.ok) { btn.disabled = false; toast((r && r.error) || "Нет связи с сервером. Попробуйте ещё раз"); if (r && /заняли|2 дня/.test(r.error || "")) { mv.start = null; fetchState(true).then(rerenderMy); } return; }
         if (mine.bookings[rec.id]) { mine.bookings[rec.id].date = nd; mine.bookings[rec.id].start = ns; lsSet("ma-mine", mine); }
         pubDoc(r); done();
       });
@@ -2693,21 +2794,30 @@ div.f { display: grid; gap: 8px; }
     done();
   }
   $("myForm").addEventListener("submit", function (e) { e.preventDefault(); if (digits($("myPhone").value).length < 11) { toast("Введите телефон полностью"); return; } mv = null; lsSet("ma-myphone", $("myPhone").value); renderMy(); });
-  $("myList").addEventListener("click", function (e) {
+  $("myList").addEventListener("click", myClick);
+  function myClick(e) {
     var o = e.target.closest("[data-mvopen]"), dd = e.target.closest("[data-mvd]"), tt = e.target.closest("[data-mvt]"), go = e.target.closest("[data-mvgo]"), no = e.target.closest("[data-mvcancel]");
-    if (o) { mv = mv && mv.id === o.dataset.mvopen ? null : { id: o.dataset.mvopen, date: null, start: null }; renderMy(); return; }
-    if (no) { mv = null; renderMy(); return; }
-    if (dd) { mv.date = dd.dataset.mvd; mv.start = null; renderMy(); return; }
-    if (tt) { mv.start = Number(tt.dataset.mvt); renderMy(); return; }
+    if (o) { mv = mv && mv.id === o.dataset.mvopen ? null : { id: o.dataset.mvopen, date: null, start: null }; rerenderMy(); return; }
+    if (no) { mv = null; rerenderMy(); return; }
+    if (dd) { mv.date = dd.dataset.mvd; mv.start = null; rerenderMy(); return; }
+    if (tt) { mv.start = Number(tt.dataset.mvt); rerenderMy(); return; }
     if (go) { moveMine(go); return; }
     var b = e.target.closest("[data-my]"); if (!b) return;
     if (b.dataset.sure !== "1") { b.dataset.sure = "1"; b.textContent = "Точно отменить? Нажмите ещё раз"; return; }
-    var rec = st.bookings.filter(function (x) { return x.id === b.dataset.my; })[0]; if (!rec) return;
-    rec.status = "cancelled"; rec.by = "client"; rec.cancelledAt = Date.now(); certUndo(rec, true); save(); renderMy();
-    apiSend({ type: "cancel", id: rec.id, phone: rec.phone }).then(function (r) { if (r && r.ok) pubDoc(r); });
+    var rec = findMyRec(b.dataset.my); if (!rec) return;
+    if (!canMove(rec)) { toast("До визита меньше 2 дней — отменить можно только через Марину: +7 995 428-47-88", true); rerenderMy(); return; }
+    if (SYNC) {
+      b.disabled = true;
+      apiSend({ type: "cancel", id: rec.id, phone: rec.phone }).then(function (r) {
+        if (!r || !r.ok) { b.disabled = false; toast((r && r.error) || "Нет связи с сервером. Попробуйте ещё раз", true); return; }
+        pubDoc(r); if (kData) loadK(); rerenderMy(); toast("Запись отменена. Марина получит уведомление");
+      });
+      return;
+    }
+    rec.status = "cancelled"; rec.by = "client"; rec.cancelledAt = Date.now(); certUndo(rec, true); save(); rerenderMy();
     note("❌", "Клиентка отменила запись", rec.name + " · " + svc(rec.svc).name + " · " + whenText(rec.date, rec.start) + " — время освободилось", { tab: "day", date: rec.date });
     toast("Запись отменена. Марина получит уведомление");
-  });
+  }
   function resetBooking(pick) {
     bk = { svc: pick || null, date: null, start: null, remove: false, remind: "tg" };
     renderRm();
@@ -3817,7 +3927,7 @@ div.f { display: grid; gap: 8px; }
 
   // ---------- маршруты ----------
   var ORDER = [["home", "Главная"], ["uslugi", "Услуги и цены"], ["zapis", "Онлайн-запись"], ["raboty", "Портфолио"], ["obuchenie", "Обучение"], ["o-mastere", "О мастере и награды"], ["voprosy", "Вопросы и ответы"], ["sertifikat", "Подарочный сертификат"], ["kontakty", "Контакты"]];
-  var VIEWS = ["home", "uslugi", "raboty", "obuchenie", "o-mastere", "voprosy", "sertifikat", "kontakty", "zapis", "admin", "politika", "soglasie", "podarok", "oferta"];
+  var VIEWS = ["home", "uslugi", "raboty", "obuchenie", "o-mastere", "voprosy", "sertifikat", "kontakty", "zapis", "admin", "politika", "soglasie", "podarok", "oferta", "kabinet"];
   var pendingPick = null, pendingTo = null, curView = null;
   document.addEventListener("click", function (e) {
     var a = e.target.closest("[data-pick]"); if (a) pendingPick = a.dataset.pick;
@@ -3827,20 +3937,21 @@ div.f { display: grid; gap: 8px; }
   var TITLES = { home: "М.А — маникюр, педикюр и обучение в Михайловке", uslugi: "Цены на маникюр и педикюр в Михайловке — М.А", raboty: "Работы мастера маникюра — М.А, Михайловка",
     obuchenie: "Обучение маникюру и педикюру в Михайловке — М.А", "o-mastere": "Марина Шевченко, мастер маникюра — М.А", voprosy: "Вопросы и ответы — М.А, Михайловка",
     sertifikat: "Подарочный сертификат на маникюр в Михайловке — М.А",
-    kontakty: "Контакты — академия маникюра «М.А», Михайловка, ул. Обороны, 41", zapis: "Онлайн-запись на маникюр — М.А", admin: "Кабинет мастера — М.А", politika: "Политика обработки персональных данных — М.А", soglasie: "Согласие на обработку персональных данных — М.А", podarok: "Ваш подарочный сертификат — М.А", oferta: "Публичная оферта — М.А" };
+    kontakty: "Контакты — академия маникюра «М.А», Михайловка, ул. Обороны, 41", zapis: "Онлайн-запись на маникюр — М.А", admin: "Кабинет мастера — М.А", politika: "Политика обработки персональных данных — М.А", soglasie: "Согласие на обработку персональных данных — М.А", podarok: "Ваш подарочный сертификат — М.А", oferta: "Публичная оферта — М.А", kabinet: "Личный кабинет — М.А" };
   function route() {
     var h = location.hash.slice(1), v = "home";
     var certHash = h.indexOf("cert-") === 0 ? h.slice(5) : null;
     if (certHash) v = "podarok"; else if (VIEWS.indexOf(h) > 0) v = h;
     var wayHash = h === "kak-proiti"; if (wayHash) v = "kontakty";
     if (h === "moi-zapisi") { v = "zapis"; pendingTo = "myForm"; }
+    if (v === "kabinet" && !SYNC) { location.replace("#moi-zapisi"); return; }  // в демо без сервера — записи этого телефона
     if (h === "moi-sertifikaty") { v = "sertifikat"; pendingTo = "mcForm"; }
     var changed = v !== curView; curView = v;
     document.title = TITLES[v] || TITLES.home;
     if (changed && !$("eSheet").hidden) closeEditor();
     VIEWS.forEach(function (k) { var el = $("v-" + k); el.hidden = k !== v; if (k === v && changed) { el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter"); } });
     document.body.classList.toggle("home", v === "home");
-    $("mbar").hidden = v === "zapis" || v === "admin" || v === "obuchenie" || v === "politika" || v === "soglasie" || v === "oferta";
+    $("mbar").hidden = v === "zapis" || v === "kabinet" || v === "admin" || v === "obuchenie" || v === "politika" || v === "soglasie" || v === "oferta";
     drawer.querySelectorAll("[data-r]").forEach(function (a) { if (a.dataset.r === v || false) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
     var i = -1; ORDER.forEach(function (o, j) { if (o[0] === v) i = j; });
     var nx = i >= 0 && v !== "zapis" ? ORDER[(i + 1) % ORDER.length] : null;
@@ -3854,6 +3965,7 @@ div.f { display: grid; gap: 8px; }
     if (SYNC && changed) fetchState();
     if (certHash) showCertFromHash(certHash);
     if (wayHash) setTimeout(openWay, 300);
+    if (v === "kabinet") showK();
     if (pendingTo) { var el = $(pendingTo); pendingTo = null; if (el) { jumpTop(); setTimeout(function () { el.scrollIntoView({ behavior: "smooth", block: "center" }); }, 80); return; } }
     if (changed || !h || h === "top") jumpTop();
   }

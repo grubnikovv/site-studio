@@ -23,7 +23,7 @@ $type = $in['type'] ?? '';
 $admin = session_ok($in['token'] ?? '');
 
 // Не больше 60 действий (у мобильных операторов много людей на одном адресе) за 10 минут с одного адреса (чтение базы и работа кабинета — без ограничения)
-if (!in_array($type, ['state', 'cert_get', 'push_key', 'push_peek'], true) && !$admin) {
+if (!in_array($type, ['state', 'cert_get', 'push_key', 'push_peek', 'client_data'], true) && !$admin) {
     $ip = $_SERVER['REMOTE_ADDR'] ?? '?';
     $db = store_init();
     $db->prepare('DELETE FROM hits WHERE t < ?')->execute([time() - 600]);
@@ -148,6 +148,7 @@ if ($type === 'cancel') {
     foreach ($doc['bookings'] as $i => $b) if (($b['id'] ?? '') === $id && digits_phone($b['phone'] ?? '') === $phone && $phone) $hit = $i;
     if ($hit === null) fail('Запись не найдена.');
     $b = &$doc['bookings'][$hit];
+    if (($b['status'] ?? '') === 'booked' && booking_ts($b) - time() < 48 * 3600) { unset($b); fail('До визита меньше 2 дней — отменить можно только через Марину: +7 995 428-47-88.'); }
     if (($b['status'] ?? '') === 'booked') {
         $b['status'] = 'cancelled'; $b['by'] = 'client'; $b['cancelledAt'] = now_ms();
         if (!empty($b['certPay']['certId'])) {  // оплата сертификатом возвращается на сертификат
@@ -192,6 +193,46 @@ if ($type === 'move') {
     notify_admins("🔁 <b>Клиентка перенесла запись</b>\n" . h($b['name'] ?? '') . ', ' . h($b['phone'] ?? '') . ($row ? "\n" . h($row['svc']) : '') . "\nБыло: " . $from . "\n<b>Стало: " . $to . "</b>");
     if ($row) notify_client($row, 'Запись перенесена — ' . $to, "Запись перенесена 👌\nБыло: " . $from . "\n<b>Теперь: " . $to . "</b>\nМихайловка, ул. Обороны, 41\n" . way_link());
     json_out(['ok' => true, 'v' => $v, 'doc' => doc_public($doc)]);
+}
+
+// ---------- кабинет клиентки ----------
+if ($type === 'client_code') {
+    $phone = phone_ok($in['phone'] ?? ''); if (!$phone) fail('Укажите телефон полностью.');
+    $db = client_db();
+    $q = $db->prepare('SELECT sent FROM client_codes WHERE phone = ?'); $q->execute([$phone]);
+    if ((int)$q->fetchColumn() > time() - 60) fail('Код уже отправлен. Новый можно запросить через минуту.');
+    $ch = client_channel($phone);
+    if (!$ch) fail('Не нашли, куда прислать код: на этот номер нет записей с напоминаниями в Telegram или на почту. Подключите напоминания при следующей записи или напишите Марине: +7 995 428-47-88.');
+    $code = (string)random_int(100000, 999999);
+    $db->prepare('INSERT OR REPLACE INTO client_codes (phone, hash, until, tries, sent) VALUES (?, ?, ?, 0, ?)')->execute([$phone, password_hash($code, PASSWORD_DEFAULT), time() + 600, time()]);
+    $text = "🔐 Код для входа в личный кабинет студии «М.А»: <b>" . $code . "</b>\nДействует 10 минут. Никому его не сообщайте.";
+    if ($ch[0] === 'tg') send($ch[1], $text); else send_mail($ch[1], 'Код для входа: ' . $code, $text);
+    json_out(['ok' => true, 'via' => $ch[0], 'to' => $ch[0] === 'mail' ? mask_mail($ch[1]) : 'Telegram']);
+}
+if ($type === 'client_login') {
+    $phone = phone_ok($in['phone'] ?? ''); $db = client_db();
+    $q = $db->prepare('SELECT * FROM client_codes WHERE phone = ?'); $q->execute([$phone]); $c = $q->fetch();
+    if (!$c || $c['until'] < time() || $c['tries'] >= 5) fail('Код устарел. Запросите новый.');
+    $db->prepare('UPDATE client_codes SET tries = tries + 1 WHERE phone = ?')->execute([$phone]);
+    if (!password_verify(preg_replace('/\D/', '', (string)($in['code'] ?? '')), $c['hash'])) { sleep(1); fail('Неверный код. Осталось попыток: ' . (4 - (int)$c['tries'])); }
+    $db->prepare('DELETE FROM client_codes WHERE phone = ?')->execute([$phone]);
+    $t = bin2hex(random_bytes(24));
+    $db->prepare('INSERT INTO client_sessions (token, phone, created) VALUES (?, ?, ?)')->execute([hash('sha256', $t), $phone, time()]);
+    json_out(['ok' => true, 'ctoken' => $t, 'phone' => phone_nice($phone)]);
+}
+if ($type === 'client_logout') {
+    client_db()->prepare('DELETE FROM client_sessions WHERE token = ?')->execute([hash('sha256', (string)($in['ctoken'] ?? ''))]);
+    json_out(['ok' => true]);
+}
+// Всё о клиентке: записи (будущие и история), обучение, сертификаты
+if ($type === 'client_data') {
+    $phone = client_phone($in['ctoken'] ?? ''); if (!$phone) json_out(['ok' => false, 'relogin' => true]);
+    [$doc, $v] = doc_load(true); if (doc_expire($doc)) $v = doc_save($doc, $v); else doc_abort();
+    $mine = fn($x) => digits_phone($x['phone'] ?? '') === $phone;
+    $bk = array_values(array_map(fn($b) => array_intersect_key($b, array_flip(['id', 'date', 'start', 'dur', 'svc', 'remove', 'status', 'price', 'phone', 'name', 'remind', 'by', 'movedBy'])), array_filter($doc['bookings'], $mine)));
+    $tr = array_values(array_map(fn($t) => array_intersect_key($t, array_flip(['id', 'course', 'date', 'days', 'status', 'price', 'pre', 'hold', 'claimed', 'phone', 'name'])), array_filter($doc['training'], $mine)));
+    $ce = array_values(array_map(fn($c) => array_intersect_key($c, array_flip(['id', 'code', 'sum', 'balance', 'to', 'status', 'created', 'till', 'phone'])) + ['spent' => array_map(fn($x) => ['d' => $x['d'] ?? '', 'sum' => (int)($x['sum'] ?? 0)], $c['spent'] ?? [])], array_filter($doc['certs'], $mine)));
+    json_out(['ok' => true, 'phone' => phone_nice($phone), 'bookings' => $bk, 'training' => $tr, 'certs' => $ce, 'v' => $v, 'doc' => doc_public($doc)]);
 }
 
 // ---------- обучение ----------
