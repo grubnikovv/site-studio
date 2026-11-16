@@ -87,6 +87,9 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 .hdr .brand-t { font-size: 11px; }
 @media (max-width: 700px) { .hdr .brand-t { width: min-content; white-space: normal; font-size: 9px; letter-spacing: .16em; line-height: 1.45; } .hdr .wrap { height: 84px; gap: 10px; } .hdr .brand { height: 68px; } .hdr .logo { gap: 8px; } }
 .drawer .brand-t { white-space: normal; max-width: 200px; font-size: 10.5px; }
+@media (max-width: 420px) { .fcol .brand-t { white-space: normal; letter-spacing: .14em; } }
+/* самые узкие телефоны: в шапке только знак М.А и кнопка, без подписи — иначе кнопка наезжает на текст */
+@media (max-width: 360px) { .hdr .brand-t { display: none; } .hdr .btn.sm { padding-left: 16px; padding-right: 16px; } }
 .nav { display: flex; gap: 26px; font-size: 14px; font-weight: 600; }
 .nav a { text-decoration: none; color: var(--mute); }
 .nav a:hover { color: var(--ink); }
@@ -351,6 +354,7 @@ input, textarea, select { font-weight: 500; color: var(--ink); }
 .sum div { display: flex; justify-content: space-between; gap: 12px; }
 .sum span { color: var(--mute); min-width: 0; }
 .sum div > b, .sum div > span.num { white-space: nowrap; text-align: right; }
+@media (max-width: 400px) { .sum div > b { white-space: normal; } }
 #tSum div > b:not(.num) { white-space: normal; }
 .sum .big { font-size: 16px; font-weight: 800; }
 .err { color: var(--lac); font-size: 14px; margin: 0; }
@@ -467,6 +471,8 @@ section.block.tight { padding-block: 32px clamp(56px, 8vw, 96px); }
 .pgrp:first-child { margin-top: 0; }
 .pgrp::after { content: ""; flex: 1; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--lac), transparent); opacity: .7; order: 2; }
 .pgrp small { order: 3; font-family: var(--body); font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--lac); white-space: nowrap; }
+@media (max-width: 380px) { .pgrp { font-size: 23px; gap: 10px; } .pgrp small { letter-spacing: .06em; } }
+.sum div > span { flex-shrink: 0; max-width: 45%; }
 .plist { display: grid; border-top: 1px solid var(--line); }
 .prow { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 2px; border-bottom: 1px solid var(--line); }
 .prow > div { display: grid; min-width: 0; }
@@ -748,8 +754,11 @@ div.f { display: grid; gap: 8px; }
 .k-row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 15px; }
 .k-row:first-child { border-top: 0; }
 .k-row small { display: block; color: var(--mute); font-size: 13px; }
+#v-zapis > .wrap, #v-kabinet .kab, #v-admin > .wrap { grid-template-columns: minmax(0, 1fr); }  /* колонка не шире экрана */
+#v-zapis .card, #v-kabinet .card { min-width: 0; grid-template-columns: minmax(0, 1fr); }
+#v-zapis .card > *, #v-kabinet .card > * { min-width: 0; }
 .zap-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-.zap-top h2 { margin: 0; }
+.zap-top h2 { margin: 0; font-size: clamp(30px, 9.5vw, 48px); min-width: 0; overflow-wrap: anywhere; }
 .my-link { display: inline-flex; align-items: center; gap: 10px; padding: 9px 16px 9px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); text-decoration: none; font-weight: 700; font-size: 15px; line-height: 1.15; transition: border-color .2s, transform .2s; }
 .my-link:hover { border-color: var(--lac); transform: translateY(-1px); }
 .my-link svg { color: var(--lac); flex: none; }
@@ -829,8 +838,8 @@ div.f { display: grid; gap: 8px; }
 .badge { line-height: 1.5; }
 .cl .hist { display: grid; gap: 4px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 13px; }
 .cl .hist div { display: flex; justify-content: space-between; gap: 10px; }
-.cl .hgo { flex: 1; display: flex; justify-content: space-between; gap: 10px; border: 0; background: none; color: inherit; font: inherit; text-align: left; padding: 6px 0; cursor: pointer; }
-.cl .hgo b { text-align: right; }
+.cl .hgo { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; border: 0; background: none; color: inherit; font: inherit; text-align: left; padding: 6px 0; cursor: pointer; }
+.cl .hgo b { text-align: left; }
 .cl .hgo span { white-space: nowrap; }
 .cl .hgo i { font-style: normal; color: var(--lac); font-weight: 800; }
 .cl .hist span { color: var(--mute); }
@@ -900,6 +909,8 @@ div.f { display: grid; gap: 8px; }
 .bell-btn { position: relative; width: 46px; height: 46px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); display: grid; place-content: center; }
 .hdr-m { display: flex; gap: 8px; }
 .hdr-m .bell-btn { width: 44px; height: 44px; }
+/* у мастера в шапке две кнопки: на узком экране прячем подпись у логотипа, чтобы всё влезло */
+@media (max-width: 400px) { .is-master .hdr .brand-t { display: none; } .hdr-m { gap: 6px; } .hdr-m .bell-btn { width: 42px; height: 42px; } }
 .hdr-m { position: relative; }
 .hdr-m .bellwrap { position: static; }
 .hdr-m .npanel { text-align: left; right: 0; top: 54px; }
@@ -1758,7 +1769,7 @@ div.f { display: grid; gap: 8px; }
         <div class="rem-done" id="bRemDone"></div>
         <button type="button" class="way-card" data-way>
           <span class="wc-ph"><img src="video/way-poster.webp" alt="" width="72" height="128" loading="lazy"><i aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg></i></span>
-          <span class="wc-t"><b>Как пройти к студии</b><small>Видео 48 секунд: от Wildberries через калитку «Вход» до двери студии</small></span>
+          <span class="wc-t"><b>Как пройти к студии</b><small>Видео 48 секунд: от Wildberries через калитку «Вход» до двери студии. Его всегда можно пересмотреть в разделе «Контакты», а ссылка придёт и в напоминании.</small></span>
         </button>
       </div>
       <div class="tg" aria-label="Пример уведомления мастеру" hidden>
@@ -1892,7 +1903,7 @@ div.f { display: grid; gap: 8px; }
   "use strict";
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
-  var rub = function (n) { return n.toLocaleString("ru-RU") + "\u00a0₽"; };
+  var rub = function (n) { return (Number(n) || 0).toLocaleString("ru-RU") + "\u00a0₽"; };
 
   // ---------- данные ----------
   var SERVICES = [
@@ -1992,7 +2003,7 @@ div.f { display: grid; gap: 8px; }
   if (!SYNC) st = Object.assign(st, lsGet(KEY, {})); else st.sent = lsGet("ma-sent", []);
   // ---------- общая база (если есть сервер) ----------
   // Кабинет мастера входит по паролю и видит всё; посетитель видит только занятость, а свои записи и сертификаты — из памяти телефона.
-  var token = SYNC ? lsGet("ma-token", "") : "", docV = -1, synced = null, inflight = false, syncT = null;
+  var fullDoc = false, token = SYNC ? lsGet("ma-token", "") : "", docV = -1, synced = null, inflight = false, syncT = null;
   var mine = SYNC ? lsGet("ma-mine", { bookings: {}, training: {}, certs: {} }) : null;
   var LISTS = ["bookings", "training", "certs", "notes", "modelBase"];
   function clone(o) { return JSON.parse(JSON.stringify(o)); }
@@ -2046,7 +2057,7 @@ div.f { display: grid; gap: 8px; }
   // записать пришедшую с сервера базу в st (не меняя сам объект st)
   function applyDoc(v, doc, keepOps) {
     if (!doc) return;
-    docV = v; synced = clone(doc);
+    docV = v; synced = clone(doc); fullDoc = !!(token && doc.certs);
     var sent = st.sent; Object.keys(st).forEach(function (k) { delete st[k]; });
     Object.assign(st, { bookings: [], blocks: {}, dayoff: {}, bought: {} }, clone(doc)); st.sent = sent;
     if (keepOps && keepOps.length) applyOps(st, keepOps);
@@ -2099,7 +2110,7 @@ div.f { display: grid; gap: 8px; }
   function logout() { if (token) apiSend({ type: "logout", token: token }); token = ""; lsSet("ma-token", null); synced = null; docV = -1; lockAdmin(); fetchState(true); }
   function rerender() {
     if (typeof renderBell === "function") renderBell();
-    if (curView === "admin" && token && $("eSheet").hidden) renderTab();
+    if (curView === "admin" && token && fullDoc && $("eSheet").hidden) renderTab();
     if (curView === "zapis" && bk && bk.date && !$("b2").hidden) renderDays();
     // обучение и «Ищем моделей» есть на нескольких страницах — обновляем всегда
     try { renderTrain(); renderTrainBand(); renderModels(); } catch (e) {}
@@ -2702,7 +2713,7 @@ div.f { display: grid; gap: 8px; }
   // карточка записи клиентки: перенести и отменить — не позже чем за 2 дня до визита, иначе через Марину
   function bookCard(b) {
     var s = svc(b.svc), t = statusOf(b), ok = canMove(b);
-    return '<div class="bk"><div class="r1"><b>' + whenText(b.date, b.start) + '</b><span class="pill ' + t[1] + '">' + (b.status === "cancelled" ? "Отменена" : t[0]) + '</span></div><div class="info">' + s.name + ' · ' + priceText(s) + '</div>' +
+    return '<div class="bk"><div class="r1"><b>' + whenText(b.date, b.start) + '</b><span class="pill ' + t[1] + '">' + (b.status === "cancelled" ? clientStatus(b) : t[0]) + '</span></div><div class="info">' + s.name + ' · ' + priceText(s) + '</div>' +
       (b.status === "booked" ? (ok ? '<div class="acts"><button type="button" data-mvopen="' + b.id + '">Перенести</button><button type="button" data-my="' + b.id + '">Отменить запись</button></div>'
         : '<div class="mv-hint">До визита меньше 2 дней — перенести или отменить можно только через Марину: <a href="tel:+79954284788" style="white-space:nowrap">+7 995 428-47-88</a></div>') +
         (mv && mv.id === b.id ? mvBox(b) : '') : '') + '</div>';
@@ -2742,7 +2753,7 @@ div.f { display: grid; gap: 8px; }
     var nd = $("kNext").querySelector(".mvbox .days"); if (nd) { if (keep != null) nd.scrollLeft = keep; else { var se = nd.querySelector('[aria-pressed="true"]'); if (se) nd.scrollLeft = se.offsetLeft - 8; } }
     $("kHistBox").hidden = !hist.length;
     $("kHist").innerHTML = hist.slice(0, 30).map(function (b) {
-      var t = b.status === "cancelled" ? ["Отменена", ""] : b.date < today && b.status === "booked" ? ["Была запись", ""] : statusOf(b);
+      var t = b.status === "cancelled" ? [clientStatus(b), ""] : b.date < today && b.status === "booked" ? ["Была запись", ""] : statusOf(b);
       return '<div class="k-row"><span>' + whenText(b.date, b.start) + '<small>' + svc(b.svc).name + '</small></span><span class="pill ' + t[1] + '">' + t[0] + '</span></div>';
     }).join("");
     $("kTrainBox").hidden = !d.training.length;
@@ -2963,7 +2974,7 @@ div.f { display: grid; gap: 8px; }
     var by = {};
     (st.modelBase || []).forEach(function (m) { by[digits(m.phone) || m.name] = { name: m.name, phone: m.phone, days: [] }; });
     Object.keys(st.models || {}).forEach(function (k) {
-      var m = modelOf(k); if (!m) return;
+      var m = modelOf(k); if (!m || !m.name) return;
       var id = digits(m.phone) || m.name;
       by[id] = by[id] || { name: m.name, phone: m.phone, days: [] };
       by[id].name = m.name; by[id].days.push(k);
@@ -2999,10 +3010,12 @@ div.f { display: grid; gap: 8px; }
   renderTrainBand();
 
   // ---------- кабинет мастера ----------
-  var aDate = dkey(addDays(0)), flashId = null, aScrolled = false, aTab = "day", sMonth = 0;
+  var cancelAsk = null, aDate = dkey(addDays(0)), flashId = null, aScrolled = false, aTab = "day", sMonth = 0;
   var STATUS = { booked: ["Записана", ""], came: ["Пришла", "ok"], noshow: ["Не пришла", "bad"], cancelled: ["Отменена", ""] };
   // кто отменил: клиентка сама (на сайте или по ссылке из напоминания) или мастер
-  function statusOf(b) { return b.status === "cancelled" && b.by === "client" ? ["Отменил(а)", "bad"] : (STATUS[b.status] || STATUS.booked); }
+  // кто отменил: клиентка (сама на сайте) или мастер (в кабинете)
+  function statusOf(b) { return b.status === "cancelled" ? (b.by === "client" ? ["Отменила клиентка", "bad"] : b.by === "master" ? ["Отменили вы", ""] : STATUS.cancelled) : (STATUS[b.status] || STATUS.booked); }
+  function clientStatus(b) { return b.by === "client" ? "Вы отменили" : b.by === "master" ? "Отменила Марина" : "Отменена"; }
   // вернуть запись на прежнее время можно, только если его никто не занял
   function canRestore(b) { return freeSlots(b.date, bmin(b), b.id, true).some(function (x) { return x.t === b.start && x.free; }); }
   function ownCopy(rec) {
@@ -3089,7 +3102,8 @@ div.f { display: grid; gap: 8px; }
         (b.remind && b.remind !== "none" ? '<div class="info">🔔 ' + (b.remind === "mail" ? "Почта" + (b.email ? " " + esc(b.email) : "") : REM_NAME[b.remind] || "Telegram") + ' · ' + remindPlan(b.date).join(", ") + '</div>' : '') +
         overlapNote(b) +
         certBlock(b) +
-        (b.status === "booked" ? '<div class="acts"><button data-a="move" data-id="' + b.id + '">Перенести</button><button data-a="came" data-id="' + b.id + '">Пришла</button><button data-a="noshow" data-id="' + b.id + '">Не пришла</button><button data-a="cancel" data-id="' + b.id + '">Отменить</button></div>'
+        (b.status === "booked" ? '<div class="acts"><button data-a="move" data-id="' + b.id + '">Перенести</button><button data-a="came" data-id="' + b.id + '">Пришла</button><button data-a="noshow" data-id="' + b.id + '">Не пришла</button><button data-a="cancelask" data-id="' + b.id + '">Отменить</button></div>' +
+            (cancelAsk === b.id ? '<div class="sure" style="background:var(--bg);color:var(--ink)"><span>Кто отменил запись?</span><button type="button" class="sure-yes" data-a="cancel-client" data-id="' + b.id + '">Клиентка</button><button type="button" class="sure-no" data-a="cancel-master" data-id="' + b.id + '">Я, по своим причинам</button><button type="button" class="sure-no" data-a="cancel-no" data-id="' + b.id + '">Не отменять</button></div>' : '')
           : b.status === "cancelled"
             ? '<div class="acts"><button data-a="move" data-id="' + b.id + '">Перенести</button>' + (canRestore(b) ? '<button data-a="restore" data-id="' + b.id + '">Вернуть на это время</button>' : '<button disabled>Время уже занято</button>') + '<button data-a="del" data-id="' + b.id + '" data-key="d' + b.id + '">Удалить</button></div>' +
               (canRestore(b) ? '' : '<div class="info">На это время уже записана другая клиентка. Перенесите запись на свободное окно.</div>')
@@ -3192,13 +3206,16 @@ div.f { display: grid; gap: 8px; }
     var b = e.target.closest("[data-a]"); if (!b) return;
     var rec = dayBookings(aDate).filter(function (x) { return x.id === b.dataset.id; })[0]; if (!rec) return;
     if (b.dataset.a === "move") { openEditor(rec); return; }
+    if (b.dataset.a === "cancelask") { cancelAsk = cancelAsk === rec.id ? null : rec.id; renderAdmin(); return; }
+    if (b.dataset.a === "cancel-no") { cancelAsk = null; renderAdmin(); return; }
     if (b.dataset.a === "del") { if (rec.status === "cancelled") askDelete(b, "Точно удалить?", function () { deleteBooking(rec.id); renderAdmin(); toast("Отменённая запись удалена"); }); return; }
     var own = ownCopy(rec);
     if (b.dataset.a === "restore" && own.status === "cancelled" && !canRestore(own)) { toast("Это время уже занято. Перенесите запись на другое окно"); return; }
-    own.status = { came: "came", noshow: "noshow", cancel: "cancelled", restore: "booked" }[b.dataset.a];
-    if (own.status === "cancelled" && own.certPay) { certUndo(own, true); toast("Запись отменена, оплата сертификатом возвращена на сертификат"); save(); renderAdmin(); return; }
-    if (own.status === "cancelled") own.by = "master"; else delete own.by;
-    toast({ came: "Отмечено: пришла", noshow: "Отмечено: не пришла", cancel: "Запись отменена", restore: "Запись восстановлена" }[b.dataset.a]);
+    var act = b.dataset.a === "cancel-client" || b.dataset.a === "cancel-master" ? "cancel" : b.dataset.a; cancelAsk = null;
+    own.status = { came: "came", noshow: "noshow", cancel: "cancelled", restore: "booked" }[act];
+    if (own.status === "cancelled" && own.certPay) { own.by = b.dataset.a === "cancel-client" ? "client" : "master"; own.cancelledAt = Date.now(); certUndo(own, true); toast("Запись отменена, оплата сертификатом возвращена на сертификат"); save(); renderAdmin(); return; }
+    if (own.status === "cancelled") { own.by = b.dataset.a === "cancel-client" ? "client" : "master"; own.cancelledAt = Date.now(); } else { delete own.by; delete own.cancelledAt; }
+    toast({ came: "Отмечено: пришла", noshow: "Отмечено: не пришла", cancel: own.by === "client" ? "Отмечено: отменила клиентка" : "Запись отменена вами", restore: "Запись восстановлена" }[act]);
     save(); renderAdmin();
   });
   $("aTrain").addEventListener("click", function (e) {
@@ -3469,7 +3486,8 @@ div.f { display: grid; gap: 8px; }
     if (n.go.tab === "day") setTimeout(function () { var x = document.querySelector('#aDays [data-d="' + n.go.date + '"]'); if (x) x.scrollIntoView({ block: "nearest", inline: "center" }); }, 50);
   }
   renderBell();
-  function renderTab() { if (aTab === "clients") renderClients(); else if (aTab === "stats") renderStats(); else renderAdmin(); }
+  function renderTab() { if (SYNC && token && !fullDoc) return;  // ждём полную базу кабинета
+    if (aTab === "clients") renderClients(); else if (aTab === "stats") renderStats(); else renderAdmin(); }
 
   // Все записи за период: от -90 дней до горизонта записи
   function allBookings() {
@@ -3489,6 +3507,7 @@ div.f { display: grid; gap: 8px; }
       if (b.status === "came") c.came++;
       if (b.status === "noshow") c.noshow++;
       if (b.status === "cancelled") c.cancel++;
+      if (b.status === "cancelled" && b.by === "client") { c.cancelClient = (c.cancelClient || 0) + 1; if (b.cancelledAt && new Date(b.date + "T" + hm(b.start).padStart(5, "0")).getTime() - b.cancelledAt < 48 * 36e5) c.cancelLate = (c.cancelLate || 0) + 1; }
       if (b.status === "booked" && b.date >= today && (!c.future || b.date < c.future.date)) c.future = b;
     });
     return Object.keys(map).map(function (k) {
@@ -3518,9 +3537,9 @@ div.f { display: grid; gap: 8px; }
     var list = db.filter(function (c) { return !q || c.name.toLowerCase().indexOf(q) >= 0 || (qd && c.phone.replace(/\D/g, "").indexOf(qd) >= 0); })
       .sort(function (a, b) { return (b.last ? b.last.date : "").localeCompare(a.last ? a.last.date : ""); });
     $("aClients").innerHTML = list.length ? list.map(function (c) {
-      var badges = (c.noshow >= 2 ? '<span class="badge bad">часто не приходит</span>' : '') + (c.came <= 1 && !c.example ? '<span class="badge new">новая</span>' : '') + (c.example ? '<span class="badge">пример</span>' : '');
+      var badges = (c.noshow >= 2 ? '<span class="badge bad">часто не приходит</span>' : '') + ((c.cancelClient || 0) >= 2 ? '<span class="badge bad">часто отменяет</span>' : '') + (c.came <= 1 && !c.example ? '<span class="badge new">новая</span>' : '') + (c.example ? '<span class="badge">пример</span>' : '');
       return '<details class="bk cl"><summary><div class="r1"><b>' + esc(c.name) + ' · <span class="num" style="font-weight:500">' + esc(c.phone) + '</span></b><span>' + badges + '</span></div>' +
-        '<div class="info">' + (c.came ? 'Пришла: ' + times(c.came) + ' · последний раз ' + shortDate(c.last.date) : 'Ещё не приходила') + (c.noshow ? ' · не пришла: ' + times(c.noshow) : '') + (c.cancel ? ' · отменено: ' + c.cancel : '') + (c.future ? ' · записана на ' + shortDate(c.future.date) : '') + '</div></summary>' +
+        '<div class="info">' + (c.came ? 'Пришла: ' + times(c.came) + ' · последний раз ' + shortDate(c.last.date) : 'Ещё не приходила') + (c.noshow ? ' · не пришла: ' + times(c.noshow) : '') + (c.cancelClient ? ' · отменила сама: ' + times(c.cancelClient) + (c.cancelLate ? ' (поздно: ' + c.cancelLate + ')' : '') : '') + (c.cancel - (c.cancelClient || 0) > 0 ? ' · отменили вы: ' + (c.cancel - (c.cancelClient || 0)) : '') + (c.future ? ' · записана на ' + shortDate(c.future.date) : '') + '</div></summary>' +
         '<div class="hist">' + c.visits.slice(0, 12).map(function (v) { return '<div><button type="button" class="hgo" data-goto="' + v.id + '" data-d="' + v.date + '" aria-label="Открыть запись в расписании"><span>' + shortDate(v.date) + ', ' + hm(v.start) + '</span><b style="font-weight:600">' + svc(v.svc).name + ' · ' + statusOf(v)[0].toLowerCase() + ' <i aria-hidden="true">›</i></b></button>' + (v.status === "cancelled" ? '<button type="button" class="xdel" data-delb="' + v.id + '" data-key="b' + v.id + '" aria-label="Удалить отменённую запись">Удалить</button>' : '') + '</div>'; }).join("") + '</div>' +
         '<div class="acts" style="margin-top:10px"><button type="button" data-again="' + esc(c.phone) + '" data-svc="' + (c.visits[0] ? c.visits[0].svc : "gel") + '" data-name="' + esc(c.name) + '">Записать снова</button>' +
         (c.future ? '<button type="button" disabled title="Сначала отмените будущую запись">Удалить клиентку</button>' : '<button type="button" data-delc="' + esc(c.key) + '" data-key="c' + esc(c.key) + '">Удалить клиентку</button>') + '</div>' +
@@ -4012,7 +4031,7 @@ div.f { display: grid; gap: 8px; }
     document.querySelectorAll("[data-demo]").forEach(function (el) { el.hidden = SYNC; });
     // в браузере мастера вместо «Записаться» — колокольчик и кабинет
     var master = SYNC ? !!token : curView === "admin";  // в демо — пока открыт кабинет
-    $("hdrCta").hidden = master; $("hdrM").hidden = !master;
+    $("hdrCta").hidden = master; $("hdrM").hidden = !master; document.body.classList.toggle("is-master", master);
     if (master) renderBell();
   }
 
