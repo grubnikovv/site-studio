@@ -254,10 +254,31 @@ if ($type === 'client_data') {
     $phone = client_phone($in['ctoken'] ?? ''); if (!$phone) json_out(['ok' => false, 'relogin' => true]);
     [$doc, $v] = doc_load(true); if (doc_expire($doc)) $v = doc_save($doc, $v); else doc_abort();
     $mine = fn($x) => digits_phone($x['phone'] ?? '') === $phone;
-    $bk = array_values(array_map(fn($b) => array_intersect_key($b, array_flip(['id', 'date', 'start', 'dur', 'svc', 'remove', 'french', 'status', 'price', 'phone', 'name', 'remind', 'by', 'movedBy'])), array_filter($doc['bookings'], $mine)));
+    $bk = array_values(array_map(fn($b) => array_intersect_key($b, array_flip(['id', 'date', 'start', 'dur', 'svc', 'remove', 'french', 'status', 'price', 'phone', 'name', 'remind', 'email', 'by', 'movedBy'])), array_filter($doc['bookings'], $mine)));
     $tr = array_values(array_map(fn($t) => array_intersect_key($t, array_flip(['id', 'course', 'date', 'days', 'status', 'price', 'pre', 'hold', 'claimed', 'phone', 'name'])), array_filter($doc['training'], $mine)));
     $ce = array_values(array_map(fn($c) => array_intersect_key($c, array_flip(['id', 'code', 'sum', 'balance', 'to', 'status', 'created', 'till', 'phone'])) + ['spent' => array_map(fn($x) => ['d' => $x['d'] ?? '', 'sum' => (int)($x['sum'] ?? 0)], $c['spent'] ?? [])], array_filter($doc['certs'], $mine)));
     json_out(['ok' => true, 'phone' => phone_nice($phone), 'bookings' => $bk, 'training' => $tr, 'certs' => $ce, 'v' => $v, 'doc' => doc_public($doc)]);
+}
+
+// Клиентка в кабинете меняет почту для напоминаний (или отказывается от писем) — для всех будущих записей
+if ($type === 'client_mail') {
+    $phone = client_phone($in['ctoken'] ?? ''); if (!$phone) json_out(['ok' => false, 'relogin' => true]);
+    $m = mb_strtolower(trim((string)($in['mail'] ?? '')));
+    if ($m !== '' && (!filter_var($m, FILTER_VALIDATE_EMAIL) || strlen($m) > 80)) fail('Проверьте адрес почты.');
+    if ($m !== '' && !cfg('mail_from')) fail('Напоминания на почту пока не работают. Подключите Telegram или напишите Марине.');
+    [$doc, $v] = doc_load(true); $ids = [];
+    foreach ($doc['bookings'] as &$b) {
+        if (digits_phone($b['phone'] ?? '') !== $phone || ($b['status'] ?? '') !== 'booked' || ($b['date'] ?? '') < date('Y-m-d')) continue;
+        if ($m !== '') { $b['email'] = $m; $b['remind'] = 'mail'; } else { unset($b['email']); if (($b['remind'] ?? '') === 'mail') $b['remind'] = 'none'; }
+        $ids[] = $b['id'];
+    }
+    unset($b);
+    if (!$ids) { doc_abort(); fail('Будущих записей нет — почту можно будет указать при следующей записи.'); }
+    $v = doc_save($doc, $v);
+    $q = db()->prepare('UPDATE bookings SET email = ?, remind = CASE WHEN ? <> "" THEN "mail" WHEN remind = "mail" THEN "none" ELSE remind END, updated = ? WHERE id = ?');
+    foreach ($ids as $id) $q->execute([$m, $m, time(), $id]);
+    if ($m !== '') send_mail($m, 'Напоминания о записи будут приходить сюда', "Готово! 💅\nНапоминания о ваших записях в студию «М.А» будут приходить на эту почту: за 2 дня и в день визита.\n\nЕсли письмо попало в «Спам» — отметьте «Не спам».");
+    json_out(['ok' => true, 'mail' => $m, 'count' => count($ids)]);
 }
 
 // ---------- обучение ----------

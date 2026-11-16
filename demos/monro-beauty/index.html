@@ -278,6 +278,9 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 .ch-k { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--lac); }
 .ch-msg p { margin: 0; font-size: 14.5px; line-height: 1.45; color: var(--ink); white-space: pre-line; max-height: 9.5em; overflow: auto; }
 .ch-msg small { color: var(--mute); font-size: 12.5px; line-height: 1.4; }
+.mail-cur { display: grid; gap: 2px; background: var(--bg); border-radius: 14px; padding: 10px 14px; }
+.mail-cur span { font-size: 12.5px; color: var(--mute); }
+.mail-cur b { font-size: 16px; word-break: break-all; }
 .ch-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .ch-copy { display: inline-flex; align-items: center; gap: 6px; flex: none; border: 0; border-radius: 999px; padding: 7px 12px 7px 10px; font: inherit; font-size: 13px; font-weight: 700; background: var(--lac); color: var(--lac-ink); cursor: pointer; box-shadow: 0 4px 12px color-mix(in srgb, var(--lac) 30%, transparent); transition: background .25s, transform .15s; }
 .ch-copy:active { transform: scale(.96); }
@@ -1541,6 +1544,12 @@ div.f { display: grid; gap: 8px; }
       <div class="card"><h3>Предстоящие записи</h3><div class="opts" id="kNext"></div><a class="btn sm glow" href="#zapis" style="justify-self:start">Записаться ещё</a></div>
       <div class="card" id="kTrainBox"><h3>Обучение</h3><div class="opts" id="kTrain"></div></div>
       <div class="card" id="kCertBox"><h3>Сертификаты</h3><div class="opts" id="kCerts"></div></div>
+      <form class="card k-mail" id="kMailBox" novalidate><h3>Напоминания на почту</h3>
+        <p class="note" id="kMailNote" style="margin:0"></p>
+        <label class="f"><span id="kMailL">Почта</span><input type="email" id="kMail" autocomplete="email" inputmode="email" placeholder="name@mail.ru" maxlength="80"></label>
+        <p class="err" id="kMailErr" hidden></p>
+        <div class="acts"><button class="btn sm" type="submit" id="kMailGo">Сохранить почту</button><button type="button" class="btn sm ghost" id="kMailOff" hidden>Не присылать на почту</button></div>
+      </form>
       <div class="card" id="kHistBox"><h3>История визитов</h3><div class="opts" id="kHist"></div></div>
     </div>
   </div></section>
@@ -1904,7 +1913,8 @@ div.f { display: grid; gap: 8px; }
     <form class="card a-login" id="aMail" hidden novalidate>
       <h3>Почта для уведомлений</h3>
       <p class="note">Сюда будут приходить копии уведомлений: новые записи, отмены, переносы, заявки. Telegram продолжит работать как раньше.</p>
-      <label for="aMailIn">Ваша почта</label>
+      <div class="mail-cur" id="aMailCur" hidden><span>Сейчас приходят на</span><b id="aMailCurV"></b></div>
+      <label for="aMailIn" id="aMailInL">Ваша почта</label>
       <input type="email" id="aMailIn" autocomplete="email" inputmode="email" placeholder="например, marina@mail.ru">
       <p class="note" id="aMailNote"></p>
       <p class="err" id="aMailErr" hidden></p>
@@ -2899,6 +2909,12 @@ div.f { display: grid; gap: 8px; }
     var sl = $("kNext").querySelector(".mvbox .days"), keep = sl ? sl.scrollLeft : null;
     $("kNext").innerHTML = next.length ? next.map(bookCard).join("") : '<p class="note" style="margin:0">Предстоящих записей нет.</p>';
     var nd = $("kNext").querySelector(".mvbox .days"); if (nd) { if (keep != null) nd.scrollLeft = keep; else { var se = nd.querySelector('[aria-pressed="true"]'); if (se) nd.scrollLeft = se.offsetLeft - 8; } }
+    // почта для напоминаний — та, что указана в будущих записях
+    var withMail = next.filter(function (b) { return b.remind === "mail" && b.email; })[0];
+    $("kMailBox").hidden = !next.length || !MAIL_REMIND;
+    if (document.activeElement !== $("kMail")) $("kMail").value = "";
+    $("kMailOff").hidden = !withMail; $("kMailL").textContent = withMail ? "Новая почта" : "Почта"; $("kMailGo").textContent = withMail ? "Сменить почту" : "Сохранить почту";
+    $("kMailNote").innerHTML = withMail ? "Напоминания о записях приходят на <b>" + esc(withMail.email) + "</b>." : "Сейчас напоминания на почту не приходят. Укажите почту — будем напоминать за 2 дня и в день визита.";
     $("kHistBox").hidden = !hist.length;
     $("kHist").innerHTML = hist.slice(0, 30).map(function (b) {
       var t = b.status === "cancelled" ? [clientStatus(b), ""] : b.date < today && b.status === "booked" ? ["Была запись", ""] : statusOf(b);
@@ -2916,6 +2932,22 @@ div.f { display: grid; gap: 8px; }
     }).join("");
   }
   $("kNext").addEventListener("click", myClick);
+  function kMailSave(m) {
+    errBox("kMailErr"); $("kMailGo").disabled = true;
+    apiSend({ type: "client_mail", ctoken: ctoken, mail: m }).then(function (r) {
+      $("kMailGo").disabled = false;
+      if (r && r.relogin) { ctoken = ""; lsSet("ma-ctoken", null); kData = null; showK(); return; }
+      if (!r || !r.ok) { errBox("kMailErr", (r && r.error) || "Нет связи с сервером"); return; }
+      toast(m ? "Почта сохранена: " + m + ". Отправили проверочное письмо" : "Напоминания на почту выключены");
+      loadK();
+    });
+  }
+  $("kMailBox").addEventListener("submit", function (e) {
+    e.preventDefault(); var m = $("kMail").value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[a-zа-я]{2,}$/i.test(m)) { errBox("kMailErr", "Проверьте адрес почты, например name@mail.ru"); return; }
+    kMailSave(m);
+  });
+  $("kMailOff").onclick = function () { kMailSave(""); };
   $("kLogin").addEventListener("submit", function (e) {
     e.preventDefault(); var btn = $("kGo"); $("kErr").hidden = true;
     var ph = phoneOk($("kPhone").value); if (!ph) { $("kErr").textContent = "Укажите мобильный телефон полностью."; $("kErr").hidden = false; return; }
@@ -4316,11 +4348,20 @@ div.f { display: grid; gap: 8px; }
   var pushBtn = document.createElement("button"); pushBtn.type = "button"; pushBtn.className = "btn sm ghost"; pushBtn.hidden = true;
   // почта для копий уведомлений — мама вписывает свой адрес сама
   var mailBtn = document.createElement("button"); mailBtn.type = "button"; mailBtn.className = "btn sm ghost"; mailBtn.textContent = "Почта для уведомлений";
-  function mailShow(m) { $("aMailIn").value = m || ""; $("aMailOff").hidden = !m; $("aMailNote").textContent = m ? "Сейчас уведомления приходят на " + m + "." : "Сейчас на почту уведомления не приходят."; }
+  // почта уже есть — показываем её отдельно, а поле пустое: вписать новую и сохранить, ничего не стирая
+  function mailShow(m) {
+    $("aMailCur").hidden = !m; $("aMailCurV").textContent = m || "";
+    $("aMailIn").value = ""; $("aMailInL").textContent = m ? "Новая почта" : "Ваша почта";
+    $("aMailOff").hidden = !m;
+    $("aMailNote").textContent = m ? "" : "Сейчас на почту уведомления не приходят.";
+    $("aMailGo").textContent = m ? "Сменить почту" : "Сохранить и прислать проверочное письмо";
+    mailBtn.textContent = m ? "Почта: " + m : "Почта для уведомлений";
+  }
   mailBtn.onclick = function () {
     $("v-admin").classList.add("pwd"); $("aMail").hidden = false; errBox("aMailErr"); $("aMailNote").textContent = "Загружаю…"; jumpTop();
     apiSend({ type: "mail_admin", token: token }).then(function (r) { if (r && r.relogin) { closeMail(); logout(); return; } mailShow(r && r.ok ? r.mail : ""); });
   };
+  if (SYNC && token) apiSend({ type: "mail_admin", token: token }).then(function (r) { if (r && r.ok) mailShow(r.mail); });  // подпись кнопки: какая почта сейчас
   function closeMail() { $("v-admin").classList.remove("pwd"); $("aMail").hidden = true; errBox("aMailErr"); }
   $("aMailBack").onclick = closeMail;
   function mailSave(v) {
