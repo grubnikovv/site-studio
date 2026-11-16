@@ -99,6 +99,10 @@ jobs:
           echo "--- https://${DOMAIN} ---"
           curl -s -o /dev/null -m 20 -w 'https: код %{http_code}, проверка сертификата %{ssl_verify_result} (0 = в порядке)\n' "https://${DOMAIN}/" || echo "https: не отвечает"
           echo | timeout 20 openssl s_client -connect "${DOMAIN}:443" -servername "${DOMAIN}" 2>/dev/null | openssl x509 -noout -subject -issuer -enddate 2>/dev/null || echo "сертификат: не найден"
+          echo "--- цепочка сертификатов, которую отдаёт хостинг ---"
+          echo | timeout 20 openssl s_client -connect "${DOMAIN}:443" -servername "${DOMAIN}" -showcerts 2>/dev/null | grep -E '^ *[0-9]+ s:|^ *i:' || true
+          curl -s -m 20 -o isrgx1.pem https://letsencrypt.org/certs/isrgrootx1.pem
+          echo | timeout 20 openssl s_client -connect "${DOMAIN}:443" -servername "${DOMAIN}" -CAfile isrgx1.pem -verify_return_error 2>&1 | grep -E 'Verify return code|verify error' | head -3
           curl -s -o /dev/null -D - -H 'Accept-Encoding: gzip' "$SITE/" | grep -i 'content-encoding\|cache-control' || echo "сжатие: нет"
           curl -s -o /dev/null -D - "$SITE/fonts/manrope-cyrillic.woff2" | grep -i 'HTTP/\|expires\|cache-control'
           curl -s -X POST "$SITE/server/api.php" -H 'Content-Type: application/json' -d '{"type":"x"}'; echo
