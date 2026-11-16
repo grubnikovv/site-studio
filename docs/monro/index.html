@@ -827,6 +827,10 @@ div.f { display: grid; gap: 8px; }
 .badge { line-height: 1.5; }
 .cl .hist { display: grid; gap: 4px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 13px; }
 .cl .hist div { display: flex; justify-content: space-between; gap: 10px; }
+.cl .hgo { flex: 1; display: flex; justify-content: space-between; gap: 10px; border: 0; background: none; color: inherit; font: inherit; text-align: left; padding: 6px 0; cursor: pointer; }
+.cl .hgo b { text-align: right; }
+.cl .hgo span { white-space: nowrap; }
+.cl .hgo i { font-style: normal; color: var(--lac); font-weight: 800; }
 .cl .hist span { color: var(--mute); }
 .cl .hist div { align-items: center; }
 .cl .hist b { margin-left: auto; text-align: right; }
@@ -3057,7 +3061,7 @@ div.f { display: grid; gap: 8px; }
     // прошедшие дни не показываем: лента начинается с сегодня
     if (aDate < dkey(addDays(-PAST))) aDate = dkey(addDays(0));
     var sl = $("aDays").scrollLeft; $("aDays").innerHTML = dayBtns(aDate, false, -PAST);
-    if (!aScrolled) { aScrolled = true; requestAnimationFrame(function () { var t = $("aDays").querySelector('[data-d="' + dkey(addDays(0)) + '"]'); if (t) $("aDays").scrollLeft = t.offsetLeft - $("aDays").offsetLeft - 8; }); }
+    if (!aScrolled) { aScrolled = true; requestAnimationFrame(function () { var t = $("aDays").querySelector('[data-d="' + aDate + '"]'); if (t) $("aDays").scrollLeft = t.offsetLeft - $("aDays").offsetLeft - 8; }); }
     else $("aDays").scrollLeft = sl;
     var list = dayBookings(aDate), active = list.filter(function (b) { return b.status !== "cancelled"; });
     var sumDay = active.filter(function (b) { return b.status !== "noshow"; }).reduce(function (s, b) { return s + (b.price || svc(b.svc).price); }, 0);
@@ -3515,10 +3519,10 @@ div.f { display: grid; gap: 8px; }
       var badges = (c.noshow >= 2 ? '<span class="badge bad">часто не приходит</span>' : '') + (c.came <= 1 && !c.example ? '<span class="badge new">новая</span>' : '') + (c.example ? '<span class="badge">пример</span>' : '');
       return '<details class="bk cl"><summary><div class="r1"><b>' + esc(c.name) + ' · <span class="num" style="font-weight:500">' + esc(c.phone) + '</span></b><span>' + badges + '</span></div>' +
         '<div class="info">' + (c.came ? 'Пришла: ' + times(c.came) + ' · последний раз ' + shortDate(c.last.date) : 'Ещё не приходила') + (c.noshow ? ' · не пришла: ' + times(c.noshow) : '') + (c.cancel ? ' · отменено: ' + c.cancel : '') + (c.future ? ' · записана на ' + shortDate(c.future.date) : '') + '</div></summary>' +
-        '<div class="hist">' + c.visits.slice(0, 12).map(function (v) { return '<div><span>' + shortDate(v.date) + ', ' + hm(v.start) + '</span><b style="font-weight:600">' + svc(v.svc).name + ' · ' + statusOf(v)[0].toLowerCase() + '</b>' + (v.status === "cancelled" ? '<button type="button" class="xdel" data-delb="' + v.id + '" data-key="b' + v.id + '" aria-label="Удалить отменённую запись">Удалить</button>' : '') + '</div>'; }).join("") + '</div>' +
+        '<div class="hist">' + c.visits.slice(0, 12).map(function (v) { return '<div><button type="button" class="hgo" data-goto="' + v.id + '" data-d="' + v.date + '" aria-label="Открыть запись в расписании"><span>' + shortDate(v.date) + ', ' + hm(v.start) + '</span><b style="font-weight:600">' + svc(v.svc).name + ' · ' + statusOf(v)[0].toLowerCase() + ' <i aria-hidden="true">›</i></b></button>' + (v.status === "cancelled" ? '<button type="button" class="xdel" data-delb="' + v.id + '" data-key="b' + v.id + '" aria-label="Удалить отменённую запись">Удалить</button>' : '') + '</div>'; }).join("") + '</div>' +
         '<div class="acts" style="margin-top:10px"><button type="button" data-again="' + esc(c.phone) + '" data-svc="' + (c.visits[0] ? c.visits[0].svc : "gel") + '" data-name="' + esc(c.name) + '">Записать снова</button>' +
         (c.future ? '<button type="button" disabled title="Сначала отмените будущую запись">Удалить клиентку</button>' : '<button type="button" data-delc="' + esc(c.key) + '" data-key="c' + esc(c.key) + '">Удалить клиентку</button>') + '</div>' +
-        (c.future ? '<div class="info">Чтобы удалить клиентку, сначала отмените её будущую запись.</div>' : '') + '</details>';
+        (c.future ? '<div class="info">Чтобы удалить клиентку, сначала отмените её будущую запись: <button type="button" class="a-link" style="padding:0" data-goto="' + c.future.id + '" data-d="' + c.future.date + '">открыть запись ' + shortDate(c.future.date) + ', ' + hm(c.future.start) + ' →</button></div>' : '') + '</details>';
     }).join("") : '<p class="note">Никого не нашли.</p>';
   }
   // удалить отменённую запись насовсем (из дня, истории и статистики)
@@ -3542,6 +3546,13 @@ div.f { display: grid; gap: 8px; }
     setTimeout(function () { if (delAsk === btn.dataset.key) { delAsk = null; renderTab(); } }, 4000);
   }
   $("aClients").addEventListener("click", function (e) {
+    var g = e.target.closest("[data-goto]");
+    if (g) {  // открыть запись в расписании дня и подсветить её
+      aDate = g.dataset.d; flashId = g.dataset.goto; aScrolled = false;
+      document.querySelector('#aTabs [data-tab="day"]').click();
+      setTimeout(function () { var el = document.querySelector("#aList .bk.moved"); if (el) el.scrollIntoView({ behavior: "smooth", block: "center" }); }, 120);
+      return;
+    }
     var b = e.target.closest("[data-delb]"), c = e.target.closest("[data-delc]");
     if (b) { askDelete(b, "Точно удалить?", function () { deleteBooking(b.dataset.delb); renderClients(); toast("Запись удалена из истории"); }); return; }
     if (c) {
