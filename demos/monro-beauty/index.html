@@ -897,11 +897,12 @@ div.f { display: grid; gap: 8px; }
 @keyframes pkin { from { opacity: 0; transform: translateY(18px) scale(.97) rotate(-1.5deg); } }
 @media (prefers-reduced-motion: reduce) { .pk .gcard { animation: none; } }
 .pk-side { display: grid; gap: 16px; }
-.pk-stat { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.pk-stat { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.pk-stat div:first-child { grid-column: 1 / -1; }  /* статус во всю ширину: «Использован» не помещается в треть карточки */
 .pk-stat div { background: var(--bg); border-radius: 16px; padding: 12px; min-width: 0; }
 .pk-stat small { display: block; color: var(--mute); font-size: 12px; }
 .pk-stat b { font-size: 16px; white-space: nowrap; }
-@media (max-width: 480px) { .pk-stat { gap: 6px; } .pk-stat div { padding: 10px 9px; } .pk-stat b { font-size: 14px; white-space: normal; } .pk-stat small { font-size: 11.5px; } }
+@media (max-width: 480px) { .pk-stat { gap: 6px; } .pk-stat div { padding: 10px 12px; } .pk-stat b { font-size: 15px; white-space: normal; overflow-wrap: anywhere; } .pk-stat small { font-size: 12px; } }
 .pk-stat .ok { color: var(--ok); } .pk-stat .bad { color: #C0392B; }
 .pk-steps { margin: 0; padding: 0; list-style: none; counter-reset: s; display: grid; gap: 10px; }
 .pk-steps li { counter-increment: s; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; font-size: 14.5px; color: var(--mute); }
@@ -909,7 +910,9 @@ div.f { display: grid; gap: 8px; }
 .pk-steps b { color: var(--ink); font-weight: 700; }
 .pk-acts { display: grid; gap: 8px; }
 .pk-acts .btn { width: 100%; }
-.pk-more { justify-self: center; color: var(--mute); font-size: 14px; }
+.pk-more { justify-self: center; color: var(--mute); font-size: 14px; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+.pk-more span { text-decoration: underline; text-underline-offset: 3px; }
+.pk-more svg { flex: none; }
 .gift { display: grid; grid-template-columns: 1fr 420px; gap: 32px; align-items: start; }
 @media (max-width: 900px) { .gift { grid-template-columns: 1fr; } }
 .gcard { position: relative; aspect-ratio: 1.6; max-width: 100%; border-radius: 24px; padding: clamp(18px, 4vw, 30px); color: #F6ECEF; overflow: hidden; display: grid; grid-template-rows: auto 1fr auto auto; gap: 6px;
@@ -3500,7 +3503,7 @@ div.f { display: grid; gap: 8px; }
       (active ? '<h3 style="margin:0">Как воспользоваться</h3><ol class="pk-steps"><li><span><b>Запишитесь</b> онлайн или напишите Марине</span></li><li><span>Скажите, что оплатите <b>сертификатом № ' + esc(c.code) + '</b></span></li><li><span>После процедуры Марина спишет сумму, <b>остаток сохранится</b> до ' + shortDate(c.till) + '</span></li></ol>' +
         '<div class="pk-acts"><a class="btn glow" href="#zapis">Выбрать процедуру и время</a><button type="button" class="btn ghost" data-chat="Здравствуйте! У меня подарочный сертификат № ' + esc(c.code) + '. Хочу записаться." data-chat-title="Записаться по сертификату">Написать Марине</button><button type="button" class="btn ghost" data-share="save" data-code="' + esc(c.code) + '">Сохранить картинку</button></div>'
         : '<p class="note" style="margin:0">' + (c.status === "wait" ? "Сертификат станет активным, как только Марина подтвердит оплату." : stt[0] === "Использован" ? "Сертификат уже использован. Спасибо, что были у нас!" : "Срок действия сертификата закончился. Если есть вопрос — напишите Марине.") + '</p><button type="button" class="btn ghost" data-chat="Здравствуйте! Вопрос по сертификату № ' + esc(c.code) + '." data-chat-title="Вопрос по сертификату">Написать Марине</button>') +
-      '<a class="pk-more" href="#sertifikat" data-to="mcForm">Мои сертификаты и подарок другу →</a></div>';
+      '<a class="pk-more" href="#sertifikat" data-to="mcForm"><span>Мои сертификаты и подарок другу</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>';
     lastCode = c.code;
   }
   function renderMyCerts(stay) {
