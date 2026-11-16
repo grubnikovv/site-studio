@@ -134,6 +134,7 @@ if ($type === 'booking') {
     $id = preg_replace('/[^A-Za-z0-9]/', '', (string)($r['id'] ?? ''));
     $date = (string)($r['date'] ?? ''); $start = (int)($r['start'] ?? -1); $dur = max(15, min(600, (int)($r['dur'] ?? 60)));
     $phone = phone_ok($r['phone'] ?? ''); $name = clean($r['name'] ?? '', 40);
+    if (!$admin && count(array_filter(preg_split('/\s+/u', $name), fn($w) => mb_strlen(preg_replace("/[-']/u", '', $w)) >= 2)) < 2) fail('Укажите имя и фамилию, например: Анна Иванова.');
     if (!$id || strlen($id) > 24 || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || $start < 0 || $start > 1440 || !$phone || mb_strlen($name) < 2)
         json_out(['ok' => false, 'error' => 'Проверьте данные записи.']);
     if (strtotime($date) < strtotime('today') || strtotime($date) > strtotime('+70 days'))

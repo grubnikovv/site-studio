@@ -2021,7 +2021,7 @@ a.tel svg { flex: none; }
       <h3>3. Ваши данные</h3>
       <label class="check other-ck"><input type="checkbox" id="bOther"><span>Записываю другого человека — дочку, маму, подругу</span></label>
       <p class="note" id="bOtherNote" hidden>Укажите имя и телефон того, кого записываете. Напоминания приходят в Telegram или на почту: после записи вы сможете отправить ему ссылку на бота студии — напоминания будут приходить ему, а не вам.</p>
-      <label class="f"><span id="bNameL">Имя</span><input type="text" id="bName" autocomplete="given-name" required></label>
+      <label class="f"><span id="bNameL">Имя и фамилия</span><input type="text" id="bName" autocomplete="name" placeholder="Например: Анна Иванова" required></label>
       <label class="f"><span id="bPhoneL">Телефон</span><input type="tel" id="bPhone" autocomplete="tel" inputmode="tel" placeholder="+7" required></label>
       <label class="f">Комментарий, по желанию<input type="text" id="bNote" placeholder="Например: хочу дизайн как на фото"></label>
       <div class="sum" id="bSum"></div>
@@ -2850,7 +2850,7 @@ a.tel svg { flex: none; }
     var mine = ph ? st.bookings.filter(function (x) { return !x.example && phoneOk(x.phone) === ph && x.status === "booked" && x.date >= dkey(new Date()); }) : [];
     // повтор — та же услуга в тот же день (и для мастера); разные услуги в один день можно
     var sameDay = mine.filter(function (x) { return x.date === bk.date && x.svc === bk.svc; })[0];
-    var err = nameErr(name) || (!ph ? "Укажите мобильный телефон полностью, например +7 900 123-45-67." : "") ||
+    var err = fullNameErr(name) || (!ph ? "Укажите мобильный телефон полностью, например +7 900 123-45-67." : "") ||
       (sameDay ? (SYNC && token ? "Клиентка уже записана на этот день в " + hm(sameDay.start) + " на «" + svc(sameDay.svc).name + "». Поменяйте услугу или день." : "На этот номер уже есть запись в этот день в " + hm(sameDay.start) + " на «" + svc(sameDay.svc).name + "». Если записываете другого человека (например, дочку) — укажите его номер телефона. Или выберите другую услугу или день.") : "") ||
       (mine.length >= 4 && !(SYNC && token) ? "На этот номер уже 4 будущие записи. Чтобы записаться ещё, напишите Марине." : "") ||
       (bk.remind === "mail" && !/^[^\s@]+@[^\s@]+\.[a-zа-я]{2,}$/i.test($("bMail").value.trim()) ? "Укажите email для напоминаний или выберите другой способ." : "") ||
@@ -2930,8 +2930,8 @@ a.tel svg { flex: none; }
   // запись другого человека: его имя и телефон; автозаполнение своими данными выключаем
   $("bOther").addEventListener("change", function () {
     var o = this.checked; $("bOtherNote").hidden = !o;
-    $("bNameL").textContent = o ? "Имя того, кого записываете" : "Имя"; $("bPhoneL").textContent = o ? "Его телефон" : "Телефон";
-    $("bName").autocomplete = o ? "off" : "given-name"; $("bPhone").autocomplete = o ? "off" : "tel";
+    $("bNameL").textContent = o ? "Имя и фамилия того, кого записываете" : "Имя и фамилия"; $("bPhoneL").textContent = o ? "Его телефон" : "Телефон";
+    $("bName").autocomplete = o ? "off" : "name"; $("bPhone").autocomplete = o ? "off" : "tel";
     $("bMailL").firstChild.textContent = o ? "Его email для напоминаний" : "Email для напоминаний";
     if (o) { $("bName").value = ""; $("bPhone").value = ""; $("bName").focus(); }
   });
@@ -3045,6 +3045,13 @@ a.tel svg { flex: none; }
   function phoneNice(d) { return "+7 " + d.slice(1, 4) + " " + d.slice(4, 7) + "-" + d.slice(7, 9) + "-" + d.slice(9); }
   // Имя: 2–40 букв, без ссылок и цифр
   function nameErr(n) { return n.length < 2 ? "Укажите имя." : n.length > 40 ? "Имя слишком длинное." : /https?:|www\.|@|\d/.test(n) ? "Укажите только имя, без цифр и ссылок." : /^[A-Za-zА-Яа-яЁё\s\-']+$/.test(n) ? "" : "В имени можно использовать только буквы."; }
+  // Для записи нужны имя и фамилия (мастеру в кабинете — не обязательно)
+  function fullNameErr(n) {
+    var e = nameErr(n); if (e) return e.replace("Укажите имя.", "Укажите имя и фамилию.");
+    if (SYNC && token) return "";
+    var w = n.split(/\s+/).filter(function (x) { return x.replace(/[-']/g, "").length >= 2; });
+    return w.length < 2 ? "Укажите имя и фамилию, например: Анна Иванова." : "";
+  }
   // Ловушка: скрытое поле, которое заполняют только боты; и слишком быстрая отправка формы
   var formOpened = {};
   document.addEventListener("focusin", function (e) { var f = e.target.closest("form"); if (f && f.id && !formOpened[f.id]) formOpened[f.id] = Date.now(); });
