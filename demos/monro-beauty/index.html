@@ -346,6 +346,8 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 .tour-tip .tt-bar i { display: block; height: 100%; background: var(--lac); transition: width .3s; }
 .tour-tip .tt-acts { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .tour-tip .tt-acts .btn { flex: 1 1 auto; }
+.tour-tip .tt-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.touring #aTabs { position: static !important; }  /* на время обучения вкладки не закрывают подсвеченный блок */
 .tour-tip .tt-exit { background: none; border: 0; color: var(--mute); font: inherit; font-size: 13px; font-weight: 700; padding: 8px 4px; cursor: pointer; }
 .tour-tip::after { content: ""; position: absolute; left: var(--ax, 50%); width: 14px; height: 14px; background: var(--paper); transform: translateX(-50%) rotate(45deg); }
 .tour-tip.below::after { top: -7px; } .tour-tip.above::after { bottom: -7px; } .tour-tip.mid::after { display: none; }
@@ -4990,6 +4992,7 @@ a.tel svg { flex: none; }
       addEventListener("resize", tourPlace); addEventListener("scroll", tourPlace, true);
     }
     [tourEls.shade, tourEls.ring, tourEls.tip].forEach(function (x) { document.body.appendChild(x); });
+    document.body.classList.add("touring");
     if (tour && tour.b !== bid) { var ob = tBlock(tour.b); if (ob && ob.post) ob.post(); }
     if (!tour || tour.b !== bid) { if (b.pre) b.pre(); }
     tour = { b: bid, s: si || 0, only: !!only };
@@ -5004,9 +5007,9 @@ a.tel svg { flex: none; }
     var all = tour.only ? b.steps.length : TOUR.reduce(function (a, x) { return a + x.steps.length; }, 0);
     var idx = tour.only ? tour.s : TOUR.slice(0, TOUR.indexOf(b)).reduce(function (a, x) { return a + x.steps.length; }, 0) + tour.s;
     var last = tour.s === b.steps.length - 1 && (tour.only || TOUR.indexOf(b) === TOUR.length - 1);
-    tourEls.tip.innerHTML = '<span class="tt-k">' + b.icon + " " + b.title + " · " + (tour.s + 1) + " из " + b.steps.length + '</span><b>' + st.t + '</b><p>' + (el ? st.p : (st.none || st.p)) + '</p>' +
+    tourEls.tip.innerHTML = '<div class="tt-top"><span class="tt-k">' + b.icon + " " + b.title + " · " + (tour.s + 1) + " из " + b.steps.length + '</span><button type="button" class="tt-exit" data-tt="exit">Выйти ✕</button></div><b>' + st.t + '</b><p>' + (el ? st.p : (st.none || st.p)) + '</p>' +
       '<div class="tt-bar"><i style="width:' + Math.round((idx + 1) / all * 100) + '%"></i></div>' +
-      '<div class="tt-acts">' + (tour.s > 0 ? '<button type="button" class="btn sm ghost" data-tt="prev">Назад</button>' : '') + '<button type="button" class="btn sm" data-tt="next">' + (last ? "Готово" : tour.s === b.steps.length - 1 ? "Дальше: " + TOUR[TOUR.indexOf(b) + 1].title : "Понятно, дальше") + '</button><button type="button" class="tt-exit" data-tt="exit">Выйти</button></div>';
+      '<div class="tt-acts">' + (tour.s > 0 ? '<button type="button" class="btn sm ghost" data-tt="prev">Назад</button>' : '') + '<button type="button" class="btn sm" data-tt="next">' + (last ? "Готово" : tour.s === b.steps.length - 1 ? "Дальше: " + TOUR[TOUR.indexOf(b) + 1].title : "Понятно, дальше") + '</button></div>';
     tourEls.cur = el;
     tourScroll(el); tourPlace();
     // вкладка догружается, окна выезжают с анимацией — ещё раз докручиваем и ставим рамку на место
@@ -5018,7 +5021,7 @@ a.tel svg { flex: none; }
   // Прокрутить так, чтобы блок был под шапкой, а под ним хватило места для подсказки. Внутри окна новой записи — прокручиваем само окно.
   function tourScroll(el) {
     if (!el || !tour) return;
-    var vh = innerHeight, th = (tourEls.tip.offsetHeight || 220) + 28, head = 84;
+    var hd = document.querySelector(".hdr"), vh = innerHeight, th = (tourEls.tip.offsetHeight || 220) + 28, head = (hd ? Math.max(0, hd.getBoundingClientRect().bottom) : 70) + 14;
     var box = null, p = el.parentElement;
     while (p && p !== document.body) { var oy = getComputedStyle(p).overflowY; if ((oy === "auto" || oy === "scroll") && p.scrollHeight > p.clientHeight + 4) { box = p; break; } p = p.parentElement; }
     var r = el.getBoundingClientRect();
@@ -5065,7 +5068,7 @@ a.tel svg { flex: none; }
   function tourEnd(finished) {
     var b = tour && tBlock(tour.b); if (b && b.post && !finished) b.post();
     var sv = tGet(); if (finished) delete sv.pos; tSet(sv);
-    tour = null; [tourEls.shade, tourEls.ring, tourEls.tip].forEach(function (x) { x.remove(); });
+    tour = null; [tourEls.shade, tourEls.ring, tourEls.tip].forEach(function (x) { x.remove(); }); document.body.classList.remove("touring");
     window.scrollTo({ top: 0, behavior: "smooth" });
     toast(finished ? "Тема пройдена! Остальные — в «🎓 Обучение по кабинету» внизу кабинета" : "Обучение на паузе. Продолжить можно внизу кабинета: «🎓 Обучение по кабинету»");
     tourHint();
