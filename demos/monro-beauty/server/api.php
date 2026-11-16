@@ -128,15 +128,18 @@ if ($type === 'booking') {
         json_out(['ok' => false, 'error' => 'Дата вне диапазона записи.']);
     [$doc, $v] = doc_load(true);
     $mine = array_filter($doc['bookings'], fn($b) => ($b['status'] ?? '') === 'booked' && digits_phone($b['phone'] ?? '') === $phone && ($b['date'] ?? '') >= date('Y-m-d') && ($b['id'] ?? '') !== $id);
-    foreach ($mine as $b) if ($b['date'] === $date) fail('На этот день у вас уже есть запись в ' . hm((int)$b['start']) . '.');
-    if (count($mine) >= 3) fail('На этот номер уже 3 будущие записи. Чтобы записаться ещё, напишите Марине.');
+    // повтор — та же услуга в тот же день (и для мастера: защита от ошибки); разные услуги в один день можно
+    $svc = (string)($r['svc'] ?? '');
+    foreach ($mine as $b) if ($b['date'] === $date && ($b['svc'] ?? '') === $svc) fail($admin ? 'Клиентка уже записана на этот день в ' . hm((int)$b['start']) . ' на эту услугу. Поменяйте услугу или день.'
+        : 'На этот номер уже есть запись в этот день в ' . hm((int)$b['start']) . ' на эту услугу. Если записываете другого человека (например, дочку) — укажите его номер телефона. Или выберите другую услугу или день.');
+    if (!$admin && count($mine) >= 4) fail('На этот номер уже 4 будущие записи. Чтобы записаться ещё, напишите Марине.');
     if (!slot_free($doc, $date, $start, $dur, $id)) fail('Это время только что заняли. Выберите другое.');
     $remind = in_array($r['remind'] ?? '', ['tg', 'max', 'mail', 'none'], true) ? $r['remind'] : 'none';
     $email = $remind === 'mail' ? mb_strtolower(trim((string)($r['email'] ?? ''))) : '';
     if ($remind === 'mail' && (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 80)) fail('Проверьте email для напоминаний.');
     $svcName = clean($in['svcName'] ?? ($r['svcName'] ?? ''), 80);
     $rec = ['id' => $id, 'date' => $date, 'start' => $start, 'dur' => $dur, 'svc' => clean($r['svc'] ?? '', 30), 'name' => $name, 'phone' => phone_nice($phone),
-        'note' => clean($r['note'] ?? '', 200), 'price' => max(0, (int)($r['price'] ?? 0)), 'remove' => !empty($r['remove']), 'french' => !empty($r['french']), 'remind' => $remind, 'status' => 'booked', 'created' => now_ms()] + ($email ? ['email' => $email] : []);
+        'note' => clean($r['note'] ?? '', 200), 'price' => max(0, (int)($r['price'] ?? 0)), 'remove' => !empty($r['remove']), 'french' => !empty($r['french']), 'remind' => $remind, 'status' => 'booked', 'created' => now_ms()] + ($email ? ['email' => $email] : []) + (!empty($r['other']) ? ['other' => true] : []);
     $doc['bookings'] = array_values(array_filter($doc['bookings'], fn($b) => ($b['id'] ?? '') !== $id));
     $doc['bookings'][] = $rec;
     doc_note($doc, '📅', 'Новая запись', $name . ' · ' . $svcName . ' · ' . when_text($date, $start), ['tab' => 'day', 'date' => $date]);
@@ -145,7 +148,8 @@ if ($type === 'booking') {
         ->execute([$id, $date, $start, $dur, $svcName, empty($r['coat']) ? 0 : 1, $name, $phone, $remind, $email, time(), time()]);
     $v = doc_save($doc, $v);
     notify_admins("📅 <b>Новая запись</b>\n" . h($name) . ', ' . phone_nice($phone) . "\n" . h($svcName) . "\n" . when_text($date, $start)
-        . "\nНапоминания: " . ['tg' => 'Telegram', 'max' => 'MAX', 'mail' => 'почта ' . h($email), 'none' => 'не нужны'][$remind]);
+        . "\nНапоминания: " . ['tg' => 'Telegram', 'max' => 'MAX', 'mail' => 'почта ' . h($email), 'none' => 'не нужны'][$remind]
+        . (!empty($r['other']) ? "\nЗаписал(а) другой человек — ссылку на напоминания отправят клиентке" : ''));
     if ($remind === 'mail') {  // подтверждение записи письмом
         $site = rtrim((string)cfg('site_url'), '/');
         send_mail($email, 'Вы записаны в студию «М.А» — ' . when_text($date, $start), 'Здравствуйте, ' . h($name) . "! 💅\n\nВы записаны в студию «М.А»:\n<b>" . h($svcName) . "</b>\n<b>" . when_text($date, $start)

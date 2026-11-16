@@ -1796,8 +1796,10 @@ div.f { display: grid; gap: 8px; }
 
     <form class="card" id="b3" hidden novalidate><label class="hp" aria-hidden="true">Сайт<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
       <h3>3. Ваши данные</h3>
-      <label class="f">Имя<input type="text" id="bName" autocomplete="given-name" required></label>
-      <label class="f">Телефон<input type="tel" id="bPhone" autocomplete="tel" inputmode="tel" placeholder="+7" required></label>
+      <label class="check other-ck"><input type="checkbox" id="bOther"><span>Записываю другого человека — дочку, маму, подругу</span></label>
+      <p class="note" id="bOtherNote" hidden>Укажите имя и телефон того, кого записываете. Напоминания приходят в Telegram или на почту: после записи вы сможете отправить ему ссылку на бота студии — напоминания будут приходить ему, а не вам.</p>
+      <label class="f"><span id="bNameL">Имя</span><input type="text" id="bName" autocomplete="given-name" required></label>
+      <label class="f"><span id="bPhoneL">Телефон</span><input type="tel" id="bPhone" autocomplete="tel" inputmode="tel" placeholder="+7" required></label>
       <label class="f">Комментарий, по желанию<input type="text" id="bNote" placeholder="Например: хочу дизайн как на фото"></label>
       <div class="sum" id="bSum"></div>
       <div class="remcard">
@@ -1821,7 +1823,7 @@ div.f { display: grid; gap: 8px; }
     <div class="card" id="b4" hidden>
       <div class="done">
         <div class="ok"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></div>
-        <h3>Вы записаны</h3>
+        <h3 id="bDoneT">Вы записаны</h3>
         <p class="lead" id="bDone"></p>
         <div class="rem-done" id="bRemDone"></div>
         <button type="button" class="way-card" data-way>
@@ -2598,10 +2600,11 @@ div.f { display: grid; gap: 8px; }
     e.preventDefault();
     var name = $("bName").value.trim().replace(/\s+/g, " "), ph = phoneOk($("bPhone").value);
     var mine = ph ? st.bookings.filter(function (x) { return !x.example && phoneOk(x.phone) === ph && x.status === "booked" && x.date >= dkey(new Date()); }) : [];
-    var sameDay = mine.filter(function (x) { return x.date === bk.date; })[0];
+    // повтор — та же услуга в тот же день (и для мастера); разные услуги в один день можно
+    var sameDay = mine.filter(function (x) { return x.date === bk.date && x.svc === bk.svc; })[0];
     var err = nameErr(name) || (!ph ? "Укажите мобильный телефон полностью, например +7 900 123-45-67." : "") ||
-      (sameDay ? "На этот день у вас уже есть запись в " + hm(sameDay.start) + ". Чтобы изменить её, отмените старую запись или напишите Марине." : "") ||
-      (mine.length >= 3 ? "На этот номер уже 3 будущие записи. Чтобы записаться ещё, напишите Марине." : "") ||
+      (sameDay ? (SYNC && token ? "Клиентка уже записана на этот день в " + hm(sameDay.start) + " на «" + svc(sameDay.svc).name + "». Поменяйте услугу или день." : "На этот номер уже есть запись в этот день в " + hm(sameDay.start) + " на «" + svc(sameDay.svc).name + "». Если записываете другого человека (например, дочку) — укажите его номер телефона. Или выберите другую услугу или день.") : "") ||
+      (mine.length >= 4 && !(SYNC && token) ? "На этот номер уже 4 будущие записи. Чтобы записаться ещё, напишите Марине." : "") ||
       (bk.remind === "mail" && !/^[^\s@]+@[^\s@]+\.[a-zа-я]{2,}$/i.test($("bMail").value.trim()) ? "Укажите email для напоминаний или выберите другой способ." : "") ||
       (!$("bPd").checked ? "Отметьте согласие на обработку данных." : "");
     if (!err && botLike(this)) return;  // бот — молча игнорируем
@@ -2612,9 +2615,9 @@ div.f { display: grid; gap: 8px; }
     if (!still) { $("bErr").textContent = "Это время только что заняли. Выберите другое."; $("bErr").hidden = false; renderDays(); stepTo(2); return; }
     var btn = $("bPay"); btn.disabled = true; btn.textContent = "Записываю…";
     setTimeout(function () {
-      var s = svc(bk.svc), b = { id: "b" + Date.now().toString(36), date: bk.date, start: bk.start, svc: s.id, name: name, phone: phoneNice(ph), note: $("bNote").value.trim().slice(0, 200), price: bk.price, remove: bk.remove, french: !!bk.french, remind: bk.remind, status: "booked", created: Date.now() };
+      var s = svc(bk.svc), b = { id: "b" + Date.now().toString(36), date: bk.date, start: bk.start, svc: s.id, name: name, phone: phoneNice(ph), note: $("bNote").value.trim().slice(0, 200), price: bk.price, remove: bk.remove, french: !!bk.french, other: $("bOther").checked || undefined, remind: bk.remind, status: "booked", created: Date.now() };
       if (bk.remind === "mail") b.email = $("bMail").value.trim().slice(0, 80);
-      var botLink = apiSend({ type: "booking", rec: Object.assign({ dur: bmin(b), coat: CORR[s.id] ? 1 : 0 }, b), svcName: svcLabel(b) });
+      var botLink = apiSend({ type: "booking", token: SYNC && token ? token : undefined, rec: Object.assign({ dur: bmin(b), coat: CORR[s.id] ? 1 : 0 }, b), svcName: svcLabel(b) });
       if (SYNC) {  // с сервером: запись считается сделанной, только когда сервер её принял
         botLink.then(function (r) {
           if (r && r.ok) { addMine("bookings", b); pubDoc(r); booked(); return; }
@@ -2634,6 +2637,11 @@ div.f { display: grid; gap: 8px; }
         : b.remind === "none"
         ? '<div class="rem-cta"><b>🔔 Чтобы не забыть о записи</b><p>Подключите бесплатные напоминания: за 2 дня и за 2 часа до визита, перенос — одной кнопкой.</p><button class="btn glow" type="button" data-bot="tg">🔔 Подключить в Telegram</button></div>'
         : '<div class="rem-cta"><b>Остался один шаг</b><p>Нажмите кнопку и «Старт» в боте — без этого напоминания не придут. Это бесплатно.</p><button class="btn glow" type="button" data-bot="' + b.remind + '">🔔 Подключить в ' + (REM_NAME[b.remind] || "Telegram") + '</button></div>';
+      $("bDoneT").textContent = b.other ? "Запись оформлена: " + b.name : "Вы записаны";
+      if (b.other && b.remind !== "mail") {  // записали другого человека — ссылку на бота отправляем ему
+        $("bRemDone").innerHTML = '<div class="rem-cta"><b>🔔 Готовлю ссылку на напоминания…</b></div>';
+        botLink.then(function (r) { if (r && r.tg) shareRemind($("bRemDone"), b, r.tg); else $("bRemDone").innerHTML = '<div class="rem-cta"><b>🔔 Напоминания</b><p>Не удалось получить ссылку. Напишите Марине — она подключит напоминания.</p></div>'; });
+      }
       $("bRemDone").querySelectorAll("[data-bot]").forEach(function (x) {
         x.onclick = function () {
           x.classList.remove("pop"); void x.offsetWidth; x.classList.add("pop");
@@ -2670,6 +2678,26 @@ div.f { display: grid; gap: 8px; }
     $("bMailL").hidden = bk.remind !== "mail";
   }
   $("bRem").addEventListener("click", function (e) { var b = e.target.closest("[data-v]"); if (b) { bk.remind = b.dataset.v; renderRem(); } });
+  // запись другого человека: его имя и телефон; автозаполнение своими данными выключаем
+  $("bOther").addEventListener("change", function () {
+    var o = this.checked; $("bOtherNote").hidden = !o;
+    $("bNameL").textContent = o ? "Имя того, кого записываете" : "Имя"; $("bPhoneL").textContent = o ? "Его телефон" : "Телефон";
+    $("bName").autocomplete = o ? "off" : "given-name"; $("bPhone").autocomplete = o ? "off" : "tel";
+    $("bMailL").firstChild.textContent = o ? "Его email для напоминаний" : "Email для напоминаний";
+    if (o) { $("bName").value = ""; $("bPhone").value = ""; $("bName").focus(); }
+  });
+  // ссылка на напоминания для того, кого записали: отправить в WhatsApp, Telegram или скопировать
+  function shareRemind(box, b, link) {
+    var txt = "Записал(а) тебя в студию «М.А» 💅\n" + svcLabel(b) + "\n" + whenText(b.date, b.start) + "\nМихайловка, ул. Обороны, 41\n\nОткрой ссылку и нажми «Старт» в боте — будут приходить напоминания о записи, а перенести или отменить можно одной кнопкой:\n" + link;
+    box.innerHTML = '<div class="rem-cta"><b>🔔 Отправьте ссылку на напоминания</b><p>Напоминания приходят в Telegram. ' + esc(b.name) + ' откроет ссылку, нажмёт «Старт» в боте студии — и напоминания будут приходить в Telegram того, кого вы записали, а не вам.</p>' +
+      '<a class="btn glow" target="_blank" rel="noopener" href="https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(txt.replace("\n" + link, "")) + '">Отправить ссылку в Telegram</a>' +
+      '<a class="btn ghost" target="_blank" rel="noopener" href="https://wa.me/?text=' + encodeURIComponent(txt) + '">Переслать ссылку через WhatsApp</a>' +
+      '<button type="button" class="btn ghost" data-copy>' + (navigator.share ? "Другой мессенджер" : "Скопировать ссылку") + '</button></div>';
+    box.querySelector("[data-copy]").onclick = function () {
+      if (navigator.share) { navigator.share({ text: txt }).catch(function () {}); return; }
+      try { navigator.clipboard.writeText(txt).then(function () { toast("Скопировано — вставьте в сообщение"); }); } catch (e) { toast(link); }
+    };
+  }
   // волна от пальца по кнопке (лёгкая: один span, удаляется после анимации)
   var noMotion = matchMedia("(prefers-reduced-motion: reduce)");
   document.addEventListener("pointerdown", function (e) {
@@ -2769,6 +2797,7 @@ div.f { display: grid; gap: 8px; }
   function tooFast(form) { var t = formOpened[form.id]; if (t && Date.now() - t < 2500) { formOpened[form.id] = 1; return true; } return false; }
   // Не больше 5 отправок любых форм за 10 минут с одного устройства
   function tooOften() {
+    if (SYNC && token) return false;  // мастер записывает клиенток подряд — без ограничения
     var now = Date.now(); st.sent = (st.sent || []).filter(function (t) { return now - t < 6e5; });
     if (st.sent.length >= 5) return true;
     st.sent.push(now); save(); return false;
@@ -2931,7 +2960,7 @@ div.f { display: grid; gap: 8px; }
     toast("Запись отменена. Марина получит уведомление");
   }
   function resetBooking(pick) {
-    bk = { svc: pick || null, date: null, start: null, remove: false, french: false, remind: "tg" };
+    bk = { svc: pick || null, date: null, start: null, remove: false, french: false, remind: "tg" }; if ($("bOther").checked) { $("bOther").checked = false; $("bOther").dispatchEvent(new Event("change")); }
     renderRm();
     $("bRmBox").hidden = !!(bk.svc && svc(bk.svc).noRemove);
     ["bName", "bPhone", "bNote", "bMail"].forEach(function (id) { $(id).value = ""; }); $("bPd").checked = false; $("bErr").hidden = true; renderRem();
@@ -3495,6 +3524,14 @@ div.f { display: grid; gap: 8px; }
     if (!err && !ed.move && !$("eName").value.trim()) err = "Укажите имя клиентки.";
     // перед сохранением ещё раз проверяем, что выбранное время свободно на всю длительность процедуры
     if (!err && !freeSlots(ed.date, bmin(ed), ed.id, true).some(function (x) { return x.t === ed.start && x.free; })) { err = "Это время уже занято или процедура не помещается до следующей записи. Выберите другое."; ed.start = null; renderEditor(); }
+    if (!err) {  // защита от ошибки: та же клиентка уже записана на эту услугу в этот день
+      var phE = ed.move ? digits((findBooking(ed.id) || {}).phone) : digits($("ePhone").value), nmE = ed.move ? "" : $("eName").value.trim().toLowerCase();
+      var dup = st.bookings.filter(function (x) {
+        if (x.id === ed.id || x.date !== ed.date || x.svc !== ed.svc || x.status === "cancelled" || x.example) return false;
+        return phE.length >= 11 ? digits(x.phone) === phE : !!nmE && String(x.name || "").trim().toLowerCase() === nmE;
+      })[0];
+      if (dup) err = "Клиентка " + dup.name + " уже записана на этот день в " + hm(dup.start) + " на «" + svc(ed.svc).name + "». Поменяйте услугу или день.";
+    }
     $("eErr").textContent = err; $("eErr").hidden = !err; if (err) return;
     if (ed.move) {
       var own = ownCopy(findBooking(ed.id));
