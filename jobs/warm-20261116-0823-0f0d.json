@@ -1,0 +1,13 @@
+{
+ "name": "warm-20261116-0823-0f0d",
+ "pause": 4,
+ "per_query": 12,
+ "pubkey": "-----BEGIN PUBLIC KEY-----\nMIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAvvz2ANV9burbeNtwZzMA\n0y4f50SD6DTZw40JXsmyK8wFfblaND2MjrHwSzw0BeZo1lhGU6SQ5DGMR2ozh9XQ\noftukSY9Mv6JgSv2uyBjrwbMqz9Ll8L76u59psLPEPcfEGxbwzGC14sA75J/95LI\nh2T+u533G2kCsEsbhaSHnZ2f0MUfpj9c1Alppktol4uaY1IUbz9CvMMRN8XxriCh\nLnvvjyqVgbsx2zCAl+qwgE1XG3kZg87cm0G2oarjUjN950c93zPkC7vWzRAswuS9\nyuk0O87HLaDjvmJkcFIgue/rC7zrdWzkkMwRacggauGzaJ8OLFEp1I84H1VgIyCE\nDFZ+l6DG4t1xxWMhP5JS6NAUuo+080X7hnNjsEH1HrjYkk/wyr3cYM05kVwPq8zp\nxMHQOFB7Dp6GICWJboKqV/+83Nbm57kYQbDdZ/2z+ByAws4c6IdCYWGOFyzjqX7J\nHAydVqeFDC8TklMx2KKlz0n1Op5brxN+p5UOz0rd0hENAgMBAAE=\n-----END PUBLIC KEY-----\n",
+ "queries": [
+  "грузовой автосервис Балашиха",
+  "грузовой шиномонтаж Балашиха",
+  "запчасти для грузовиков Балашиха",
+  "эвакуатор Балашиха",
+  "грузоперевозки Балашиха"
+ ]
+}
