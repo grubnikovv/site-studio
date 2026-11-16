@@ -974,9 +974,24 @@ div.f { display: grid; gap: 8px; }
 @keyframes qpop { 0% { transform: scale(.92); } 60% { transform: scale(1.06); } 100% { transform: scale(1); } }
 .crange .acts #aCOpen { flex-basis: 100%; }
 .crange .acts { display: flex; gap: 8px; flex-wrap: wrap; }
-.atabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; background: var(--paper); border: 1.5px solid var(--line); border-radius: 14px; padding: 4px; position: sticky; top: calc(70px + env(safe-area-inset-top, 0px)); z-index: 5; }
-.atabs button { border: 0; background: none; border-radius: 10px; padding: 10px 2px; font-weight: 700; font-size: 13px; color: var(--mute); transition: background .25s, color .25s; }
+.atabs { display: flex; gap: 3px; background: var(--paper); border: 1.5px solid var(--line); border-radius: 14px; padding: 4px; position: sticky; top: calc(70px + env(safe-area-inset-top, 0px)); z-index: 5; }
+.atabs button { flex: 1 1 auto; white-space: nowrap; border: 0; background: none; border-radius: 10px; padding: 10px 4px; font-weight: 700; font-size: 13px; color: var(--mute); transition: background .25s, color .25s; }
 .atabs button[aria-pressed="true"] { background: var(--lac); color: var(--lac-ink); }
+@media (max-width: 400px) { .atabs button { font-size: 12px; padding: 9px 3px; } }
+@media (max-width: 350px) { .atabs { flex-wrap: wrap; } .atabs button { flex: 1 1 30%; } }  /* самые узкие телефоны — вкладки в два ряда */
+/* календарь месяца: число и сколько записей */
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.cal .cw { text-align: center; font-size: 11px; font-weight: 800; color: var(--mute); text-transform: uppercase; padding: 2px 0 4px; }
+.cal button { aspect-ratio: 1 / 1.05; min-width: 0; border: 1.5px solid var(--line); background: var(--bg); border-radius: 12px; padding: 4px 2px; display: grid; align-content: space-between; justify-items: center; font: inherit; color: inherit; cursor: pointer; }
+.cal button b { font-size: 15px; line-height: 1.1; }
+.cal button i { font-style: normal; font-size: 11px; font-weight: 800; min-width: 22px; height: 20px; padding: 0 5px; border-radius: 10px; display: grid; place-content: center; background: var(--lac); color: var(--lac-ink); }
+.cal button i.n0 { background: none; color: var(--mute); font-weight: 600; }
+.cal button i.tr { background: color-mix(in srgb, var(--gold) 25%, var(--paper)); color: var(--ink); font-size: 10px; }
+.cal button.off { opacity: .55; }
+.cal button.past { background: var(--paper); }
+.cal button.today { border-color: var(--lac); box-shadow: inset 0 0 0 1px var(--lac); }
+.cal button.sel { background: color-mix(in srgb, var(--lac) 12%, var(--bg)); }
+.cal .pad { visibility: hidden; }
 .atab { display: grid; gap: 20px; }
 .atab[hidden] { display: none; }
 .badge { font-size: 11px; font-weight: 800; border-radius: 999px; padding: 2px 8px; background: var(--blush); white-space: nowrap; }
@@ -2133,6 +2148,7 @@ a.tel svg { flex: none; }
     <p class="a-save" id="aSave" hidden></p>
     <div class="atabs" id="aTabs" role="tablist">
       <button type="button" data-tab="day" aria-pressed="true">День</button>
+      <button type="button" data-tab="cal" aria-pressed="false">Календарь</button>
       <button type="button" data-tab="clients" aria-pressed="false">Клиентки</button>
       <button type="button" data-tab="stats" aria-pressed="false">Статистика</button>
       <button type="button" data-tab="req" aria-pressed="false">Заявки<span class="tab-n" id="aReqN" hidden></span></button>
@@ -2158,6 +2174,13 @@ a.tel svg { flex: none; }
         <div class="acts"><button type="button" class="btn sm" id="aCGo">Закрыть это время</button><button type="button" class="btn sm ghost" id="aCOpenRange">Открыть это время</button><button type="button" class="btn sm ghost" id="aCOpen">Открыть всё на этот день</button></div>
       </div>
     </div>
+    </section>
+    <section class="atab" data-tab="cal" hidden>
+      <div class="card"><div class="adm-top"><h3 id="calTitle">Календарь</h3><div class="mnav"><button type="button" class="btn sm ghost" id="calPrev" aria-label="Предыдущий месяц">‹</button><button type="button" class="btn sm ghost" id="calNext" aria-label="Следующий месяц">›</button></div></div>
+        <p class="note" id="calSum" style="margin:0"></p>
+        <div class="cal" id="aCal"></div>
+        <p class="note" style="margin:0">Цифра — сколько записей в этот день. Нажмите на день — откроются его записи.</p>
+      </div>
     </section>
     <section class="atab" data-tab="clients" hidden>
       <div class="card"><h3>Пора на коррекцию</h3><p class="note" style="margin:0">Клиентки, у которых прошло 3–4 недели после маникюра или педикюра, а новой записи нет. Напишите им — так постоянные клиентки возвращаются без рекламы.</p><div class="opts" id="aDue"></div></div>
@@ -4197,7 +4220,36 @@ a.tel svg { flex: none; }
   renderBell();
   function adminWait() { var w = !!(SYNC && token && !fullDoc); $("v-admin").classList.toggle("a-loading", w); $("aLoad").hidden = !w; return w; }
   function renderTab() { if (adminWait()) return;  // ждём полную базу кабинета
-    if (aTab === "clients") renderClients(); else if (aTab === "stats") renderStats(); else renderAdmin(); }
+    if (aTab === "clients") renderClients(); else if (aTab === "stats") renderStats(); else if (aTab === "cal") renderCal(); else renderAdmin(); }
+  // ---------- вкладка «Календарь»: месяц целиком, сколько записей в каждый день ----------
+  var calM = null;  // первый день показанного месяца
+  function renderCal() {
+    var now = new Date(); if (!calM) calM = new Date(now.getFullYear(), now.getMonth(), 1);
+    var y = calM.getFullYear(), m = calM.getMonth(), today = dkey(now), first = (new Date(y, m, 1).getDay() + 6) % 7, days = new Date(y, m + 1, 0).getDate();
+    $("calTitle").textContent = calM.toLocaleDateString("ru-RU", { month: "long", year: "numeric" }).replace(/^./, function (c) { return c.toUpperCase(); }).replace(" г.", "");
+    var h = ["пн", "вт", "ср", "чт", "пт", "сб", "вс"].map(function (d) { return '<span class="cw">' + d + '</span>'; }).join("");
+    for (var i = 0; i < first; i++) h += '<span class="pad"></span>';
+    var tot = 0, busy = 0;
+    for (var d = 1; d <= days; d++) {
+      var k = y + "-" + ("0" + (m + 1)).slice(-2) + "-" + ("0" + d).slice(-2);
+      var n = dayBookings(k).filter(function (b) { return b.status !== "cancelled" && !b.example; }).length, tr = trainOn(k), off = !isWorkday(k);
+      tot += n; if (n) busy++;
+      h += '<button type="button" data-cal="' + k + '" class="' + (k === today ? "today " : "") + (k < today ? "past " : "") + (off && !n ? "off " : "") + (k === aDate ? "sel" : "") + '" aria-label="' + d + ', записей: ' + n + '"><b>' + d + '</b>' +
+        (tr ? '<i class="tr">обуч.</i>' : n ? '<i>' + n + '</i>' : '<i class="n0">' + (off ? "вых" : "—") + '</i>') + '</button>';
+    }
+    $("aCal").innerHTML = h;
+    $("calSum").textContent = tot ? "Записей за месяц: " + tot + ", дней с записями: " + busy + "." : "В этом месяце записей пока нет.";
+  }
+  $("calPrev").onclick = function () { calM = new Date(calM.getFullYear(), calM.getMonth() - 1, 1); renderCal(); };
+  $("calNext").onclick = function () { calM = new Date(calM.getFullYear(), calM.getMonth() + 1, 1); renderCal(); };
+  $("aCal").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-cal]"); if (!b) return;
+    var k = b.dataset.cal, lo = dkey(addDays(-PAST)), hi = dkey(addDays(DAYS - 1));
+    if (k < lo || k > hi) { toast("Этот день вне ленты кабинета (последние " + PAST + " дней и 2 месяца вперёд)"); return; }
+    aDate = k; aScrolled = false;
+    document.querySelector('#aTabs [data-tab="day"]').click();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
 
   // Все записи за период: от -90 дней до горизонта записи
   function allBookings() {
@@ -4975,7 +5027,10 @@ a.tel svg { flex: none; }
     { id: "start", icon: "👋", title: "Начало", sub: "шапка, уведомления, вкладки", steps: [
       { el: "#nBell", t: "Колокольчик — уведомления", p: "Новые записи, отмены, переносы, заявки на обучение и сертификаты. Красная цифра — сколько новых. Всё то же приходит в Telegram-бот." },
       { el: "#hdrM a.bell-btn", t: "Значок кабинета", p: "С любой страницы сайта нажмите сюда — откроется кабинет." },
-      { el: "#aTabs", t: "Вкладки кабинета", p: "День — записи и график. Клиентки — база и рассылка. Статистика — выручка за месяц. Заявки — обучение и сертификаты." } ] },
+      { el: "#aTabs", t: "Вкладки кабинета", p: "День — записи и график. Календарь — весь месяц сразу. Клиентки — база и рассылка. Статистика — выручка за месяц. Заявки — обучение и сертификаты." } ] },
+    { id: "cal", icon: "🗓", title: "Календарь месяца", sub: "сколько записей в каждый день", pre: tab("cal"), steps: [
+      { el: "#aCal", t: "Календарь", p: "Весь месяц сразу: цифра — сколько записей в этот день, «обуч.» — дни обучения, «вых» — выходной. Нажмите на день — откроются его записи." },
+      { el: "#calNext", t: "Другие месяцы", p: "Стрелки — листать месяцы вперёд и назад." } ] },
     { id: "day", icon: "📅", title: "Записи на день", sub: "лента дней, цифры, карточка записи", pre: tab("day"), steps: [
       { el: "#aDays", t: "Лента дней", p: "Сегодня выделено и подписано «СЕГОДНЯ». Листайте влево — прошедшие 15 дней, вправо — 2 месяца вперёд. Нажмите на день — откроются его записи." },
       { el: "#aKpi", t: "Цифры дня", p: "Сколько записей, выручка (только по тем, кто пришёл) и сколько свободных часов осталось." },
