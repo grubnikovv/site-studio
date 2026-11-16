@@ -279,6 +279,12 @@ function acc_check_code($email, $purpose, $code) {
 function cnote($accId, $icon, $title, $text, $link = '') {
     if (!$accId) return;
     client_db()->prepare('INSERT INTO cnotes (acc, icon, title, text, link, t) VALUES (?, ?, ?, ?, ?, ?)')->execute([(int)$accId, $icon, $title, $text, $link, time()]);
+    require_once __DIR__ . '/push.php'; push_acc($accId);  // и на телефон, если клиентка включила уведомления
+}
+// Напоминание из бота/почты — ещё и в колокольчик кабинета (и на телефон) владелицы записи
+function cnote_booking($bookingId, $title, $text) {
+    [$doc] = doc_load(false);
+    foreach ($doc['bookings'] as $b) if (($b['id'] ?? '') === $bookingId) { $a = acc_of($b); if ($a) cnote($a, '🔔', $title, trim(preg_replace('/\s+/u', ' ', strip_tags(preg_replace('/<a [^>]*>.*?<\/a>/u', '', $text)))), '#kabinet'); return; }
 }
 // Чей кабинет у записи или сертификата: владелец, почта покупателя, подтверждённый телефон
 function acc_of($x) {

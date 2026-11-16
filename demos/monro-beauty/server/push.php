@@ -6,6 +6,7 @@
 function push_db() {
     $db = db();
     $db->exec('CREATE TABLE IF NOT EXISTS push_subs (endpoint TEXT PRIMARY KEY, created INTEGER, seen INTEGER DEFAULT 0, ua TEXT)');
+    try { $db->exec('ALTER TABLE push_subs ADD COLUMN acc INTEGER DEFAULT 0'); } catch (Throwable $e) {}  // 0 — телефон мастера, иначе — кабинет клиентки
     $db->exec('CREATE TABLE IF NOT EXISTS push_vapid (id INTEGER PRIMARY KEY CHECK (id = 1), priv TEXT, pub TEXT)');
     return $db;
 }
@@ -46,10 +47,14 @@ function push_send_one($endpoint, $v) {
     return $code;
 }
 
-// Разбудить все телефоны мастера. Подписки, которые браузер отменил (404/410), удаляем.
-function push_all() {
+// Разбудить телефоны: мастера (push_all), одной клиентки (push_acc) или всех клиенток (push_clients).
+// Подписки, которые браузер отменил (404/410), удаляем.
+function push_all() { push_where('acc = 0', []); }
+function push_acc($accId) { if ($accId) push_where('acc = ?', [(int)$accId]); }
+function push_clients() { push_where('acc > 0', []); }
+function push_where($cond, $args) {
     try {
-        $db = push_db(); $subs = $db->query('SELECT endpoint FROM push_subs')->fetchAll(PDO::FETCH_COLUMN);
+        $db = push_db(); $q = $db->prepare('SELECT endpoint FROM push_subs WHERE ' . $cond); $q->execute($args); $subs = $q->fetchAll(PDO::FETCH_COLUMN);
         if (!$subs) return;
         $v = vapid();
         foreach ($subs as $e) {

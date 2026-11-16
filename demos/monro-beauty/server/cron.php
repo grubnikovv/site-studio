@@ -31,6 +31,25 @@ foreach ($q as $b) {
     }
 }
 
+// Клиенткам с личным кабинетом — напоминания в колокольчик и на телефон (даже если запись внесла Марина вручную)
+try {
+    require_once __DIR__ . '/store.php';
+    [$doc] = doc_load(false); client_db();
+    foreach ($doc['bookings'] as $b) {
+        if (($b['status'] ?? '') !== 'booked' || !empty($b['anon']) || empty($b['date'])) continue;
+        $ts = strtotime($b['date'] . ' 00:00') + (int)$b['start'] * 60; if ($ts < $now) continue;
+        $acc = null; $id = (string)$b['id'];
+        foreach ([['2d', 48 * 3600, 6 * 3600], ['2h', 2 * 3600, 0]] as [$k, $from, $to]) {
+            if ($now < $ts - $from || $now >= $ts - $to || kv_get('cr' . $k . '_' . $id)) continue;
+            kv_put('cr' . $k . '_' . $id, 1);
+            $acc = $acc ?? acc_of($b); if (!$acc) break;
+            if ($k === '2d') cnote($acc, '🔔', 'Через 2 дня ждём вас', when_text($b['date'], (int)$b['start']) . '. Михайловка, ул. Обороны, 41. Перенести или отменить — в кабинете сегодня, позже — только через Марину.', '#kabinet');
+            else cnote($acc, '💗', 'Ждём вас сегодня в ' . hm((int)$b['start']), 'Михайловка, ул. Обороны, 41. Если опаздываете — напишите Марине: +7 995 428-47-88.', '#kabinet');
+            $sent++;
+        }
+    }
+} catch (Throwable $e) { logline('cron cnote: ' . $e->getMessage()); }
+
 // Срок хранения данных — 3 года после визита (политика конфиденциальности)
 $db->prepare('DELETE FROM bookings WHERE date < ?')->execute([date('Y-m-d', strtotime('-3 years'))]);
 if (PHP_SAPI === 'cli') echo "ok, отправлено: $sent\n";

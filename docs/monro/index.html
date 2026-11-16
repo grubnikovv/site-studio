@@ -984,10 +984,10 @@ div.f { display: grid; gap: 8px; }
 @media (max-width: 400px) { .atabs button { font-size: 12px; padding: 9px 3px; } }
 @media (max-width: 350px) { .atabs { flex-wrap: wrap; } .atabs button { flex: 1 1 30%; } }  /* самые узкие телефоны — вкладки в два ряда */
 /* календарь месяца: число и сколько записей */
-.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; width: 100%; max-width: 480px; }
-@media (min-width: 700px) { .cal button { aspect-ratio: auto; height: 62px; } }
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; width: 100%; }
+@media (min-width: 700px) { .cal { gap: 8px; } .cal button { aspect-ratio: auto; height: 58px; padding: 6px 4px; } }  /* на компьютере — на всю ширину карточки, но невысокие клетки */
 .cal .cw { text-align: center; font-size: 11px; font-weight: 800; color: var(--mute); text-transform: uppercase; padding: 2px 0 4px; }
-.cal button { aspect-ratio: 1 / 1.05; min-width: 0; border: 1.5px solid var(--line); background: var(--bg); border-radius: 12px; padding: 4px 2px; display: grid; align-content: space-between; justify-items: center; font: inherit; color: inherit; cursor: pointer; }
+.cal button { width: 100%; aspect-ratio: 1 / 1.05; min-width: 0; border: 1.5px solid var(--line); background: var(--bg); border-radius: 12px; padding: 4px 2px; display: grid; align-content: space-between; justify-items: center; font: inherit; color: inherit; cursor: pointer; }
 .cal button b { font-size: 15px; line-height: 1.1; }
 .cal button i { font-style: normal; font-size: 11px; font-weight: 800; min-width: 22px; height: 20px; padding: 0 5px; border-radius: 10px; display: grid; place-content: center; background: var(--lac); color: var(--lac-ink); }
 .cal button i.n0 { background: none; color: var(--mute); font-weight: 600; }
@@ -1745,6 +1745,9 @@ a.tel svg { flex: none; }
         <button class="btn sm" type="submit" id="kPhGo">Получить код</button>
         <button type="button" class="a-link" id="kPhAsk" hidden>Нет доступа к этой почте или Telegram? Попросить Марину подтвердить номер</button>
       </form>
+      <div class="card k-push" id="kPushBox" hidden><h3>🔔 Уведомления на телефоне</h3>
+        <p class="note" id="kPushNote" style="margin:0"></p>
+        <div class="acts"><button type="button" class="btn sm" id="kPushBtn">Включить уведомления</button></div></div>
       <div class="card"><h3>Предстоящие записи</h3><div class="opts" id="kNext"></div><a class="btn sm glow" id="kBook" href="#zapis" style="justify-self:start">Записаться</a></div>
       <div class="card" id="kTrainBox"><h3>Обучение</h3><div class="opts" id="kTrain"></div></div>
       <div class="card" id="kCertBox"><h3>Сертификаты</h3><div class="opts" id="kCerts"></div></div>
@@ -3176,7 +3179,7 @@ a.tel svg { flex: none; }
   function renderK() {
     var today = dkey(new Date()), d = kData;
     $("kWho").textContent = d.acc ? (d.acc.name ? d.acc.name + " · " : "") + d.acc.email : d.phone;
-    $("kPwOpen").hidden = !d.acc; $("kNewsBox").hidden = !d.acc; $("kPhBox").hidden = !d.acc || !!d.phone;
+    $("kPwOpen").hidden = !d.acc; $("kNewsBox").hidden = !d.acc; kPushRender(); $("kPhBox").hidden = !d.acc || !!d.phone;
     var sortT = function (a, b) { return (a.date + hm(a.start).padStart(5, "0")).localeCompare(b.date + hm(b.start).padStart(5, "0")); };
     var next = d.bookings.filter(function (b) { return b.status === "booked" && b.date >= today; }).sort(sortT);
     var hist = d.bookings.filter(function (b) { return !(b.status === "booked" && b.date >= today); }).sort(sortT).reverse();
@@ -3462,6 +3465,37 @@ a.tel svg { flex: none; }
   $("kNList").addEventListener("click", function () { $("kPanel").hidden = true; });
   document.addEventListener("click", function (e) { if (!$("kPanel").hidden && !e.target.closest("#hdrK .bellwrap")) { $("kPanel").hidden = true; $("kBellH").setAttribute("aria-expanded", "false"); } });
   setInterval(function () { if (ctoken && kData && kData.acc && document.visibilityState === "visible") loadNotes(false); }, 120000);
+  // ---------- уведомления на телефон для клиентки (нужен https и личный кабинет по почте) ----------
+  function kPushRender() {
+    if (!kData || !kData.acc) { $("kPushBox").hidden = true; return; }
+    pushState().then(function (st0) {
+      var b = $("kPushBtn"); b.dataset.st = st0; b.dataset.sure = ""; b.disabled = false;
+      $("kPushBox").hidden = st0 === "no";
+      $("kPushNote").textContent = { off: "Напоминания о записи, переносы, сертификаты и новости студии придут на телефон сразу — даже если сайт закрыт.", on: "Включены на этом телефоне: напоминания о записи, переносы, сертификаты и новости студии.", "ios-home": "На iPhone: в Safari нажмите «Поделиться» → «На экран Домой», откройте сайт с новой иконки, войдите в кабинет и включите уведомления здесь.", denied: "Уведомления для сайта запрещены в браузере. Откройте настройки браузера → Настройки сайтов → Уведомления и разрешите для ma-nails.ru." }[st0] || "";
+      b.hidden = st0 === "ios-home" || st0 === "denied";
+      b.className = st0 === "on" ? "btn sm ghost" : "btn sm"; b.textContent = st0 === "on" ? "Выключить уведомления" : "Включить уведомления";
+    });
+  }
+  $("kPushBtn").onclick = function () {
+    var b = this, st0 = b.dataset.st;
+    if (st0 === "on") {
+      if (b.dataset.sure !== "1") { b.dataset.sure = "1"; b.textContent = "Точно выключить? Нажмите ещё раз"; return; }
+      navigator.serviceWorker.getRegistration().then(function (reg) { return reg && reg.pushManager.getSubscription(); }).then(function (sub) {
+        if (!sub) return; apiSend({ type: "push_unsub", endpoint: sub.endpoint }); return sub.unsubscribe();
+      }).then(function () { toast("Уведомления на этом телефоне выключены"); kPushRender(); });
+      return;
+    }
+    b.disabled = true;
+    Notification.requestPermission().then(function (perm) {
+      if (perm !== "granted") throw new Error("perm");
+      return navigator.serviceWorker.register("sw.js").then(function () { return navigator.serviceWorker.ready; });
+    }).then(function (reg) {
+      return apiSend({ type: "push_key" }).then(function (r) { if (!r || !r.key) throw new Error("key"); return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64key(r.key) }); });
+    }).then(function (sub) { return apiSend({ type: "push_sub", ctoken: ctoken, endpoint: sub.endpoint }); })
+    .then(function (r) { if (!r || !r.ok) throw new Error((r && r.error) || "sub"); toast("Готово! Напоминания и новости студии будут приходить на этот телефон"); })
+    .catch(function (e) { toast(e && e.message === "perm" ? "Без разрешения браузер не сможет показывать уведомления" : (e && e.message && e.message.length > 8 ? e.message : "Не получилось включить уведомления. Попробуйте ещё раз"), true); })
+    .then(kPushRender);
+  };
   // ---------- удаление аккаунта ----------
   function kDelWarn() {
     var d = kData || { bookings: [], certs: [], training: [] }, today = dkey(new Date()), w = [];

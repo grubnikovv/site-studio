@@ -508,6 +508,7 @@ if ($type === 'broadcast') {
     $title = clean($in['title'] ?? '', 80); $text = mb_substr(trim(strip_tags((string)($in['text'] ?? ''))), 0, 1000);
     if (mb_strlen($title) < 2 || mb_strlen($text) < 2) fail('Напишите заголовок и текст.');
     client_db()->prepare('INSERT INTO cnotes (acc, icon, title, text, link, t) VALUES (0, ?, ?, ?, ?, ?)')->execute(['💌', $title, $text, '', time()]);
+    require_once __DIR__ . '/push.php'; push_clients();
     $sent = 0;
     if (!empty($in['mail'])) foreach (client_db()->query('SELECT email FROM accounts WHERE verified = 1 AND news = 1') as $a)
         if (send_mail($a['email'], $title, h($text) . "\n\n<small>Вы получили письмо, потому что согласились получать новости студии. Отписаться — в личном кабинете на сайте.</small>")) $sent++;
@@ -623,11 +624,13 @@ if ($type === 'cert_get') {
 // ---------- уведомления от браузера ----------
 if ($type === 'push_key') { require_once __DIR__ . '/push.php'; json_out(['ok' => true, 'key' => vapid()['pub']]); }
 if ($type === 'push_sub') {
-    if (!$admin) json_out(['ok' => false, 'error' => 'Войдите в кабинет заново', 'relogin' => true]);
+    // телефон мастера (вошла в кабинет мастера) или клиентки (вошла в личный кабинет по почте)
+    $acc = 0;
+    if (!$admin) { $cw = client_who($in['ctoken'] ?? ''); if (!$cw) json_out(['ok' => false, 'error' => 'Войдите в кабинет заново', 'relogin' => true]); if (!$cw['acc']) fail('Уведомления на телефон работают для личного кабинета по почте. Зарегистрируйтесь — это минута.'); $acc = (int)$cw['acc']['id']; }
     require_once __DIR__ . '/push.php';
     $e = (string)($in['endpoint'] ?? '');
     if (!preg_match('#^https://[a-z0-9.-]+/#i', $e) || strlen($e) > 1000) json_out(['ok' => false, 'error' => 'Браузер не дал адрес для уведомлений']);
-    push_db()->prepare('INSERT OR REPLACE INTO push_subs (endpoint, created, seen, ua) VALUES (?, ?, ?, ?)')->execute([$e, time(), now_ms(), mb_substr((string)($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 200)]);
+    push_db()->prepare('INSERT OR REPLACE INTO push_subs (endpoint, created, seen, ua, acc) VALUES (?, ?, ?, ?, ?)')->execute([$e, time(), now_ms(), mb_substr((string)($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 200), $acc]);
     json_out(['ok' => true]);
 }
 if ($type === 'push_unsub') {
@@ -638,13 +641,20 @@ if ($type === 'push_unsub') {
 // Телефон получил пуш и спрашивает, что показать. Адрес подписки известен только этому телефону — он и есть пропуск.
 if ($type === 'push_peek') {
     require_once __DIR__ . '/push.php';
-    $q = push_db()->prepare('SELECT seen FROM push_subs WHERE endpoint = ?'); $q->execute([(string)($in['endpoint'] ?? '')]);
-    $seen = $q->fetchColumn();
-    if ($seen === false) json_out(['ok' => false]);
+    $q = push_db()->prepare('SELECT seen, acc FROM push_subs WHERE endpoint = ?'); $q->execute([(string)($in['endpoint'] ?? '')]);
+    $row = $q->fetch(); if (!$row) json_out(['ok' => false]);
+    $seen = (int)$row['seen'];
+    if ((int)$row['acc'] > 0) {  // телефон клиентки — её уведомления и новости студии
+        $a = acc_get((int)$row['acc']); if (!$a) json_out(['ok' => false]);
+        $n = client_db()->prepare('SELECT icon, title, text, link, t FROM cnotes WHERE (acc = ? OR (acc = 0 AND t >= ?)) AND t * 1000 > ? - 999 ORDER BY t DESC LIMIT 3');
+        $n->execute([$a['id'], (int)$a['created'], $seen]);
+        push_db()->prepare('UPDATE push_subs SET seen = ? WHERE endpoint = ?')->execute([now_ms(), (string)$in['endpoint']]);
+        json_out(['ok' => true, 'notes' => array_map(fn($x) => ['title' => trim($x['icon'] . ' ' . $x['title']), 'body' => (string)$x['text'], 'tag' => 'c' . $x['t'], 'url' => './' . ($x['link'] ?: '#kabinet')], $n->fetchAll())]);
+    }
     [$doc] = doc_load();
     $new = array_values(array_filter($doc['notes'], fn($n) => ($n['t'] ?? 0) > (int)$seen));
     push_db()->prepare('UPDATE push_subs SET seen = ? WHERE endpoint = ?')->execute([now_ms(), (string)$in['endpoint']]);
-    $out = array_map(fn($n) => ['title' => trim(($n['icon'] ?? '') . ' ' . ($n['title'] ?? '')), 'body' => (string)($n['text'] ?? ''), 'tag' => (string)($n['id'] ?? '')], array_slice($new, 0, 3));
+    $out = array_map(fn($n) => ['title' => trim(($n['icon'] ?? '') . ' ' . ($n['title'] ?? '')), 'body' => (string)($n['text'] ?? ''), 'tag' => (string)($n['id'] ?? ''), 'url' => './#admin'], array_slice($new, 0, 3));
     json_out(['ok' => true, 'notes' => $out]);
 }
 
