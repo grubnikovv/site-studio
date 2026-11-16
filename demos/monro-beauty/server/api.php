@@ -166,6 +166,34 @@ if ($type === 'cancel') {
     done($doc, $v);
 }
 
+// Клиентка переносит запись сама: не позже чем за 2 дня до визита, на свободное время
+if ($type === 'move') {
+    $id = preg_replace('/[^A-Za-z0-9]/', '', (string)($in['id'] ?? '')); $phone = phone_ok($in['phone'] ?? '');
+    $date = (string)($in['date'] ?? ''); $start = (int)($in['start'] ?? -1);
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) || $start < 0 || $start > 1440 || strtotime($date) > strtotime('+70 days')) fail('Проверьте новую дату и время.');
+    [$doc, $v] = doc_load(true);
+    $hit = null; foreach ($doc['bookings'] as $i => $b) if (($b['id'] ?? '') === $id && $phone && digits_phone($b['phone'] ?? '') === $phone) $hit = $i;
+    if ($hit === null) fail('Запись не найдена.');
+    $b = $doc['bookings'][$hit];
+    if (($b['status'] ?? '') !== 'booked') fail('Эта запись уже отменена.');
+    if (booking_ts($b) - time() < 48 * 3600) fail('До визита меньше 2 дней — перенести можно только через Марину: +7 995 428-47-88.');
+    $dur = (int)($b['dur'] ?? 0) ?: max(15, min(600, (int)($in['dur'] ?? 60)));
+    foreach ($doc['bookings'] as $o) if (($o['id'] ?? '') !== $id && ($o['status'] ?? '') === 'booked' && digits_phone($o['phone'] ?? '') === $phone && ($o['date'] ?? '') === $date)
+        fail('На этот день у вас уже есть другая запись.');
+    if (!slot_free($doc, $date, $start, $dur, $id)) fail('Это время только что заняли. Выберите другое.');
+    $from = when_text($b['date'], (int)$b['start']); $to = when_text($date, $start);
+    $doc['bookings'][$hit]['date'] = $date; $doc['bookings'][$hit]['start'] = $start; $doc['bookings'][$hit]['dur'] = $dur;
+    $doc['bookings'][$hit]['movedBy'] = 'client'; $doc['bookings'][$hit]['movedFrom'] = $b['date'] . ' ' . hm((int)$b['start']); $doc['bookings'][$hit]['updated'] = now_ms();
+    doc_note($doc, '🔁', 'Клиентка перенесла запись', ($b['name'] ?? '') . ' · с ' . $from . ' на ' . $to, ['tab' => 'day', 'date' => $date]);
+    $v = doc_save($doc, $v);
+    // бот и напоминания — на новое время; клиентке — подтверждение
+    db()->prepare('UPDATE bookings SET date = ?, start = ?, dur = ?, sent_2d = 0, sent_2h = 0, confirmed = 0, updated = ? WHERE id = ?')->execute([$date, $start, $dur, time(), $id]);
+    $q = db()->prepare('SELECT * FROM bookings WHERE id = ?'); $q->execute([$id]); $row = $q->fetch();
+    notify_admins("🔁 <b>Клиентка перенесла запись</b>\n" . h($b['name'] ?? '') . ', ' . h($b['phone'] ?? '') . ($row ? "\n" . h($row['svc']) : '') . "\nБыло: " . $from . "\n<b>Стало: " . $to . "</b>");
+    if ($row) notify_client($row, 'Запись перенесена — ' . $to, "Запись перенесена 👌\nБыло: " . $from . "\n<b>Теперь: " . $to . "</b>\nМихайловка, ул. Обороны, 41\n" . way_link());
+    json_out(['ok' => true, 'v' => $v, 'doc' => doc_public($doc)]);
+}
+
 // ---------- обучение ----------
 if ($type === 'train') {
     $r = is_array($in['rec'] ?? null) ? $in['rec'] : [];

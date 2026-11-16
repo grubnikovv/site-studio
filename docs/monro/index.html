@@ -737,6 +737,20 @@ div.f { display: grid; gap: 8px; }
 .rv-dots i.on { background: var(--lac); transform: scale(1.3); }
 @media (max-width: 560px) { .rv-nav { display: none; } .rv-dots { display: flex; } .rv { padding: 22px 20px 18px; } .rv blockquote { font-size: 16px; } }
 @media (prefers-reduced-motion: reduce) { .rv-track { scroll-behavior: auto; } }
+.zap-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.zap-top h2 { margin: 0; }
+.my-link { display: inline-flex; align-items: center; gap: 10px; padding: 9px 16px 9px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); text-decoration: none; font-weight: 700; font-size: 15px; line-height: 1.15; transition: border-color .2s, transform .2s; }
+.my-link:hover { border-color: var(--lac); transform: translateY(-1px); }
+.my-link svg { color: var(--lac); flex: none; }
+.my-link small { display: block; font-weight: 500; font-size: 12px; color: var(--mute); }
+.my-top { margin-bottom: 18px; }
+.drawer-my { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+.drawer-my a { display: flex !important; align-items: center; gap: 8px; padding: 12px !important; border-radius: 14px; border: 1.5px solid var(--line); font-size: 15px !important; }
+.drawer-my svg { color: var(--lac); flex: none; }
+.mvbox { display: grid; gap: 10px; margin-top: 10px; padding: 12px; border-radius: 16px; background: var(--bg); border: 1px solid var(--line); }
+.mvbox .days { margin: 0; }
+.mvbox .mv-go { justify-self: start; }
+.mv-hint { font-size: 13px; color: var(--mute); }
 .seg3 { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--bg); border: 1.5px solid var(--line); border-radius: 14px; padding: 4px; gap: 4px; }
 .seg3 button { border: 0; background: none; border-radius: 10px; padding: 10px 4px; font-weight: 700; font-size: 14px; color: var(--mute); transition: background .25s, color .25s; }
 .seg3 button[aria-pressed="true"] { background: var(--lac); color: var(--lac-ink); }
@@ -1237,6 +1251,7 @@ div.f { display: grid; gap: 8px; }
     <a href="#voprosy" data-r="voprosy">Вопросы и ответы</a>
     <a href="#sertifikat" data-r="sertifikat">Сертификаты<small>подарок на любую процедуру</small></a>
     <a href="#kontakty" data-r="kontakty">Контакты</a>
+    <div class="drawer-my"><a href="#moi-zapisi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Мои записи</a><a href="#moi-sertifikaty"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 12h18M12 8v13M12 8c-2-4-6-4-6-1.5S9 8 12 8zm0 0c2-4 6-4 6-1.5S15 8 12 8z"/></svg>Мои сертификаты</a></div>
   </nav>
   <div class="drawer-foot">
     <a class="btn" href="#zapis">Записаться онлайн</a>
@@ -1424,7 +1439,7 @@ div.f { display: grid; gap: 8px; }
   <section class="block tight"><div class="wrap pk" id="pkBody"></div></section>
 </main>
 <main id="v-sertifikat" class="page" hidden>
-  <section class="phero"><div class="wrap"><span class="eyebrow">Подарок</span><h1>Подарочный сертификат</h1><p class="lead">Электронный сертификат на любую процедуру студии «М.А». Оплачивается полностью, появляется сразу после оплаты — его можно переслать в мессенджере и показать с телефона. Действует 3 месяца с дня покупки.</p></div></section>
+  <section class="phero"><div class="wrap"><a class="my-link my-top" href="#moi-sertifikaty"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 12h18M12 8v13M12 8c-2-4-6-4-6-1.5S9 8 12 8zm0 0c2-4 6-4 6-1.5S15 8 12 8z"/></svg><span>Мои сертификаты<small>остаток и списания</small></span></a><span class="eyebrow">Подарок</span><h1>Подарочный сертификат</h1><p class="lead">Электронный сертификат на любую процедуру студии «М.А». Оплачивается полностью, появляется сразу после оплаты — его можно переслать в мессенджере и показать с телефона. Действует 3 месяца с дня покупки.</p></div></section>
   <section class="block tight"><div class="wrap gift">
     <div class="gcard" id="gCard" aria-label="Так будет выглядеть сертификат">
       <div class="g-top"><span class="g-brand"><svg class="g-mark" aria-hidden="true"><use href="#lgm"></use></svg><span class="g-bt">Академия маникюра и&nbsp;педикюра</span></span><span class="g-k">подарочный сертификат</span></div>
@@ -1655,7 +1670,7 @@ div.f { display: grid; gap: 8px; }
 <!-- ===== ЗАПИСЬ ===== -->
 <main id="v-zapis" class="page screen" hidden>
   <div class="wrap">
-    <h2>Онлайн-запись</h2>
+    <div class="zap-top"><h2>Онлайн-запись</h2><a class="my-link" href="#moi-zapisi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>Мои записи<small>перенести или отменить</small></span></a></div>
     <div class="stepper" id="stepper"><i class="on"></i><i></i><i></i><i></i></div>
 
     <div class="card" id="b1">
@@ -1717,9 +1732,8 @@ div.f { display: grid; gap: 8px; }
     </div>
 
     <form class="card" id="myForm" novalidate>
-      <h3>Уже записаны?</h3>
-      <p class="note" style="margin:0">Введите телефон, который указывали при записи, — покажем ваши записи. Отменить можно здесь, а перенести — напишите или позвоните Марине.</p>
-      <button type="button" class="btn sm ghost chat-btn" data-chat="Здравствуйте! Хочу перенести запись." data-chat-title="Перенести запись">Написать Марине</button>
+      <h3>Мои записи</h3>
+      <p class="note" style="margin:0">Введите телефон, который указывали при записи. Отменить запись можно здесь в любой момент, а перенести на другой день — не позже чем за 2 дня до визита. Если осталось меньше — напишите Марине.</p>
       <div class="row2"><label class="f">Телефон<input type="tel" id="myPhone" inputmode="tel" placeholder="+7"></label><button class="btn ghost" type="submit" style="align-self:end">Найти мои записи</button></div>
       <div class="opts" id="myList"></div>
     </form>
@@ -2470,7 +2484,7 @@ div.f { display: grid; gap: 8px; }
       st.bookings.push(b); save(); booked();
       function booked() {
       note("📅", "Новая запись", b.name + " · " + s.name + " · " + whenText(b.date, b.start), { tab: "day", date: b.date });
-      $("myPhone").value = b.phone; $("myList").innerHTML = "";
+      $("myPhone").value = b.phone; lsSet("ma-myphone", b.phone); $("myList").innerHTML = "";
       $("bDone").textContent = whenText(b.date, b.start) + ". " + s.name + (b.remove ? " и снятие чужой работы" : "") + ". Адрес: ул. Обороны, 41.";
       $("bRemDone").innerHTML = b.remind === "mail"
         ? '<div class="rem-cta"><b>📩 Письмо отправлено</b><p>Подтверждение записи придёт на ' + esc(b.email) + '. Если его нет через пару минут — проверьте папку «Спам» и отметьте «Не спам», чтобы напоминания приходили во «Входящие».</p></div>'
@@ -2622,16 +2636,70 @@ div.f { display: grid; gap: 8px; }
     var d = digits(phone), today = dkey(new Date());
     return st.bookings.filter(function (b) { return !b.example && digits(b.phone) === d && b.date >= today; }).sort(function (a, b) { return (a.date + hm(a.start)).localeCompare(b.date + hm(b.start)); });
   }
+  // перенос клиенткой: не позже чем за 2 дня до визита
+  var mv = null;
+  function bookTs(b) { return new Date(b.date + "T" + hm(b.start).padStart(5, "0")).getTime(); }
+  function canMove(b) { return b.status === "booked" && bookTs(b) - Date.now() >= 48 * 36e5; }
+  function mvBox(b) {
+    var days = "", n = 0;
+    for (var i = 0; i < DAYS && n < 40; i++) {
+      var k = dkey(addDays(i)); if (!isWorkday(k) || trainOn(k)) continue;
+      var free = freeSlots(k, bmin(b), b.id).filter(function (x) { return x.free && !x.out; });
+      if (!free.length) continue; n++;
+      if (!mv.date) mv.date = k;
+      var d = new Date(k + "T12:00");
+      days += '<button type="button" class="day" data-mvd="' + k + '" aria-pressed="' + (mv.date === k) + '"><small>' + WD[d.getDay()] + '</small><b class="num">' + d.getDate() + '</b><em>' + d.toLocaleDateString("ru-RU", { month: "short" }) + '</em></button>';
+    }
+    var slots = mv.date ? freeSlots(mv.date, bmin(b), b.id).filter(function (x) { return x.free && !x.out; }).map(function (x) { return '<button type="button" class="slot num" data-mvt="' + x.t + '" aria-pressed="' + (mv.start === x.t) + '">' + hm(x.t) + '</button>'; }).join("") : "";
+    return '<div class="mvbox"><b>Новая дата и время</b><div class="days">' + (days || '<span class="mv-hint">Свободных окон нет — напишите Марине</span>') + '</div>' +
+      '<div class="slots">' + slots + '</div>' +
+      (mv.start != null ? '<button type="button" class="btn sm glow mv-go" data-mvgo="' + b.id + '">Перенести: ' + whenText(mv.date, mv.start) + '</button>' : '<span class="mv-hint">Выберите время</span>') +
+      '<button type="button" class="btn sm ghost mv-go" data-mvcancel>Не переносить</button></div>';
+  }
   function renderMy() {
+    var oldDays = $("myList").querySelector(".mvbox .days"), keep = oldDays ? oldDays.scrollLeft : null;
+    renderMyList();
+    var nd = $("myList").querySelector(".mvbox .days");  // лента дней не прыгает в начало, выбранный день виден
+    if (nd) { if (keep != null) nd.scrollLeft = keep; else { var sel = nd.querySelector('[aria-pressed="true"]'); if (sel) nd.scrollLeft = sel.offsetLeft - 8; } }
+  }
+  function renderMyList() {
     var list = myBookings($("myPhone").value);
     $("myList").innerHTML = list.length ? list.map(function (b) {
       var s = svc(b.svc), t = statusOf(b);
       return '<div class="bk"><div class="r1"><b>' + whenText(b.date, b.start) + '</b><span class="pill ' + t[1] + '">' + (b.status === "cancelled" ? "Отменена" : t[0]) + '</span></div><div class="info">' + s.name + ' · ' + priceText(s) + '</div>' +
-        (b.status === "booked" ? '<div class="acts"><button type="button" data-my="' + b.id + '">Отменить запись</button></div>' : '') + '</div>';
+        (b.status === "booked" ? '<div class="acts">' + (canMove(b) ? '<button type="button" data-mvopen="' + b.id + '">Перенести</button>' : '') + '<button type="button" data-my="' + b.id + '">Отменить запись</button></div>' +
+          (canMove(b) ? '' : '<div class="mv-hint">До визита меньше 2 дней — перенести можно только через Марину: <a href="tel:+79954284788" style="white-space:nowrap">+7 995 428-47-88</a></div>') +
+          (mv && mv.id === b.id ? mvBox(b) : '') : '') + '</div>';
     }).join("") : '<p class="note">Записей на этот номер не нашли. Проверьте номер или напишите Марине.</p><button type="button" class="btn sm ghost" data-chat="Здравствуйте! Не могу найти свою запись на сайте." data-chat-title="Найти запись">Написать Марине</button>';
   }
-  $("myForm").addEventListener("submit", function (e) { e.preventDefault(); if (digits($("myPhone").value).length < 11) { toast("Введите телефон полностью"); return; } renderMy(); });
+  function moveMine(btn) {
+    var rec = st.bookings.filter(function (x) { return x.id === btn.dataset.mvgo; })[0]; if (!rec || !mv || mv.start == null) return;
+    if (!canMove(rec)) { toast("До визита меньше 2 дней — перенести можно только через Марину"); mv = null; renderMy(); return; }
+    var from = whenText(rec.date, rec.start), to = whenText(mv.date, mv.start), nd = mv.date, ns = mv.start;
+    btn.disabled = true; btn.textContent = "Переношу…";
+    function done() {
+      mv = null; renderMy(); toast("Запись перенесена на " + to + ". Марина получит уведомление");
+    }
+    if (SYNC) {
+      apiSend({ type: "move", id: rec.id, phone: rec.phone, date: nd, start: ns, dur: bmin(rec) }).then(function (r) {
+        if (!r || !r.ok) { btn.disabled = false; toast((r && r.error) || "Нет связи с сервером. Попробуйте ещё раз"); if (r && /заняли|2 дня/.test(r.error || "")) { mv.start = null; fetchState(true).then(renderMy); } return; }
+        if (mine.bookings[rec.id]) { mine.bookings[rec.id].date = nd; mine.bookings[rec.id].start = ns; lsSet("ma-mine", mine); }
+        pubDoc(r); done();
+      });
+      return;
+    }
+    var own = ownCopy(rec); own.date = nd; own.start = ns; own.movedBy = "client"; save();
+    note("🔁", "Клиентка перенесла запись", rec.name + " · " + svc(rec.svc).name + " · с " + from + " на " + to, { tab: "day", date: nd });
+    done();
+  }
+  $("myForm").addEventListener("submit", function (e) { e.preventDefault(); if (digits($("myPhone").value).length < 11) { toast("Введите телефон полностью"); return; } mv = null; lsSet("ma-myphone", $("myPhone").value); renderMy(); });
   $("myList").addEventListener("click", function (e) {
+    var o = e.target.closest("[data-mvopen]"), dd = e.target.closest("[data-mvd]"), tt = e.target.closest("[data-mvt]"), go = e.target.closest("[data-mvgo]"), no = e.target.closest("[data-mvcancel]");
+    if (o) { mv = mv && mv.id === o.dataset.mvopen ? null : { id: o.dataset.mvopen, date: null, start: null }; renderMy(); return; }
+    if (no) { mv = null; renderMy(); return; }
+    if (dd) { mv.date = dd.dataset.mvd; mv.start = null; renderMy(); return; }
+    if (tt) { mv.start = Number(tt.dataset.mvt); renderMy(); return; }
+    if (go) { moveMine(go); return; }
     var b = e.target.closest("[data-my]"); if (!b) return;
     if (b.dataset.sure !== "1") { b.dataset.sure = "1"; b.textContent = "Точно отменить? Нажмите ещё раз"; return; }
     var rec = st.bookings.filter(function (x) { return x.id === b.dataset.my; })[0]; if (!rec) return;
@@ -3765,6 +3833,8 @@ div.f { display: grid; gap: 8px; }
     var certHash = h.indexOf("cert-") === 0 ? h.slice(5) : null;
     if (certHash) v = "podarok"; else if (VIEWS.indexOf(h) > 0) v = h;
     var wayHash = h === "kak-proiti"; if (wayHash) v = "kontakty";
+    if (h === "moi-zapisi") { v = "zapis"; pendingTo = "myForm"; }
+    if (h === "moi-sertifikaty") { v = "sertifikat"; pendingTo = "mcForm"; }
     var changed = v !== curView; curView = v;
     document.title = TITLES[v] || TITLES.home;
     if (changed && !$("eSheet").hidden) closeEditor();
@@ -3778,6 +3848,7 @@ div.f { display: grid; gap: 8px; }
     $("nextPage").hidden = !nx;
     if (nx) $("nextPage").innerHTML = '<div class="wrap"><a href="#' + (nx[0] === "home" ? "top" : nx[0]) + '"><span><small>Следующий раздел</small><b>' + nx[1] + '</b></span><span class="arr"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></span></a></div>';
     if (v === "zapis") { resetBooking(pendingPick); pendingPick = null; }
+    if (h === "moi-zapisi" && !$("myPhone").value) { var mp = lsGet("ma-myphone", ""); if (mp) { $("myPhone").value = mp; renderMy(); } }
     if (v === "admin" && (!SYNC || token)) renderTab();
     if (!SYNC) lockAdmin();
     if (SYNC && changed) fetchState();
