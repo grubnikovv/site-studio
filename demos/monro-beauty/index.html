@@ -5008,13 +5008,29 @@ a.tel svg { flex: none; }
       '<div class="tt-bar"><i style="width:' + Math.round((idx + 1) / all * 100) + '%"></i></div>' +
       '<div class="tt-acts">' + (tour.s > 0 ? '<button type="button" class="btn sm ghost" data-tt="prev">Назад</button>' : '') + '<button type="button" class="btn sm" data-tt="next">' + (last ? "Готово" : tour.s === b.steps.length - 1 ? "Дальше: " + TOUR[TOUR.indexOf(b) + 1].title : "Понятно, дальше") + '</button><button type="button" class="tt-exit" data-tt="exit">Выйти</button></div>';
     tourEls.cur = el;
-    if (el) {  // высокий блок — к верху экрана (под шапку), иначе — по центру; без плавной прокрутки, чтобы подсказка не «ехала»
-      var th = tourEls.tip.offsetHeight || 200, tall = el.getBoundingClientRect().height > innerHeight - th - 70;
-      el.scrollIntoView({ block: tall ? "start" : "center", behavior: "instant" });
-      if (tall && !el.closest(".sheet")) window.scrollBy({ top: -84, behavior: "instant" });
-    }
-    setTimeout(tourPlace, 60); setTimeout(tourPlace, 400); setTimeout(tourPlace, 900);  // окна выезжают с анимацией — поправляем место ещё раз
+    tourScroll(el); tourPlace();
+    // вкладка догружается, окна выезжают с анимацией — ещё раз докручиваем и ставим рамку на место
+    setTimeout(function () { tourScroll(tourEls.cur); tourPlace(); }, 120);
+    setTimeout(function () { tourScroll(tourEls.cur); tourPlace(); }, 500);
+    setTimeout(tourPlace, 950);
     var nb = tourEls.tip.querySelector('[data-tt="next"]'); if (nb) nb.focus({ preventScroll: true });
+  }
+  // Прокрутить так, чтобы блок был под шапкой, а под ним хватило места для подсказки. Внутри окна новой записи — прокручиваем само окно.
+  function tourScroll(el) {
+    if (!el || !tour) return;
+    var vh = innerHeight, th = (tourEls.tip.offsetHeight || 220) + 28, head = 84;
+    var box = null, p = el.parentElement;
+    while (p && p !== document.body) { var oy = getComputedStyle(p).overflowY; if ((oy === "auto" || oy === "scroll") && p.scrollHeight > p.clientHeight + 4) { box = p; break; } p = p.parentElement; }
+    var r = el.getBoundingClientRect();
+    if (box) {  // прокручиваемое окно (шторка новой записи)
+      var br = box.getBoundingClientRect(), want = r.height + th < br.height ? br.top + 12 : br.top + 8;
+      box.scrollTop += r.top - want; r = el.getBoundingClientRect();
+      if (r.bottom + th <= vh || r.top - th >= 0) return;
+    }
+    var free = vh - head - th, want2 = r.height <= free ? head + Math.max(0, (free - r.height) / 2) : head;
+    var root = document.documentElement, old = root.style.scrollBehavior; root.style.scrollBehavior = "auto";
+    window.scrollTo(0, Math.max(0, window.scrollY + r.top - want2));
+    root.style.scrollBehavior = old;
   }
   function tourPlace() {
     if (!tour || !tourEls) return;
