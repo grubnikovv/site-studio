@@ -48,7 +48,7 @@ jobs:
           mkdir out/server && cp demos/monro-beauty/server/*.php demos/monro-beauty/server/.htaccess out/server/ && rm -f out/server/config.php
           php -r 'file_put_contents("out/server/config.php", "<?php return " . var_export([
             "bot_token" => getenv("BOT_TOKEN"), "bot_name" => "ma_mihaylovka_bot", "admin_key" => getenv("ADMIN_KEY"), "cabinet_pass" => getenv("CABINET_PASS") ?: "", "mail_from" => file_exists("demos/monro-beauty/mail-on") ? "marina@" . getenv("DOMAIN") : "", "mail_admin" => "",
-            "site_url" => (file_exists("demos/monro-beauty/https-on") ? "https://" . getenv("DOMAIN") : getenv("SITE")) . "/", "allow_origin" => "https://" . getenv("DOMAIN") . ",http://" . getenv("DOMAIN") . "," . getenv("SITE"),
+            "site_url" => (file_exists("demos/monro-beauty/https-on") ? "https://" : "http://") . getenv("DOMAIN") . "/", "allow_origin" => "https://" . getenv("DOMAIN") . ",http://" . getenv("DOMAIN") . "," . getenv("SITE"),
             "db_path" => "__DB__", "tz" => "Europe/Volgograd", "tg_api" => "https://api.telegram.org"], true) . ";\n");'
           sed -i "s#'__DB__'#__DIR__ . '/data/bot.sqlite'#" out/server/config.php
           php -l out/server/config.php
