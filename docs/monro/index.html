@@ -2190,7 +2190,7 @@ a.tel svg { flex: none; }
     <form class="card a-login" id="aMail" hidden novalidate>
       <h3>Почта для уведомлений</h3>
       <p class="note">Сюда будут приходить копии уведомлений: новые записи, отмены, переносы, заявки. Telegram продолжит работать как раньше.</p>
-      <div class="mail-cur" id="aMailCur" hidden><span>Сейчас приходят на</span><b id="aMailCurV"></b></div>
+      <div class="mail-cur" id="aMailCur" hidden><span>Сейчас приходят на</span><b id="aMailCurV"></b><button type="button" class="btn sm ghost" id="aMailTest" style="justify-self:start;margin-top:6px">Отправить проверочное письмо</button></div>
       <label for="aMailIn" id="aMailInL">Ваша почта</label>
       <input type="email" id="aMailIn" autocomplete="email" inputmode="email" placeholder="например, marina@mail.ru">
       <p class="note" id="aMailNote"></p>
@@ -5293,6 +5293,15 @@ a.tel svg { flex: none; }
     mailSave(v);
   });
   $("aMailOff").onclick = function () { mailSave(""); };
+  $("aMailTest").onclick = function () {
+    var b = this; b.disabled = true; errBox("aMailErr");
+    apiSend({ type: "mail_admin", token: token, test: true }).then(function (r) {
+      setTimeout(function () { b.disabled = false; }, 3000);
+      if (r && r.relogin) { closeMail(); logout(); return; }
+      if (!r || !r.ok) { errBox("aMailErr", (r && r.error) || "Нет связи с сервером"); return; }
+      toast("Проверочное письмо отправлено на " + r.mail + ". Если его нет во «Входящих» через пару минут — загляните в «Спам».", true);
+    });
+  };
   // настройки кабинета — в меню под шестерёнкой у заголовка
   var gear = $("aGear"), gearMenu = $("aGearMenu");
   [[tgBtn, "📲"], [mailBtn, "✉️"], [pwdBtn, "🔑"], [pushBtn, "🔔"], [outBtn, "🚪"]].forEach(function (x) {
@@ -5547,6 +5556,15 @@ a.tel svg { flex: none; }
     }).then(function () { pushBtn.disabled = false; renderPush(); });
   };
   function closePwd() { $("v-admin").classList.remove("pwd"); $("aPwd").hidden = true; $("aOld").value = ""; $("aNew2").value = ""; errBox("aPwdErr"); }
+  // человечек в шапке, когда мама уже в кабинете: закрыть почту / пароль / Telegram и вернуться на главный экран кабинета
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest('a.bell-btn[href="#admin"]'); if (!a || location.hash !== "#admin") return;
+    e.preventDefault();
+    if (!$("aMail").hidden) closeMail(); if (!$("aPwd").hidden) closePwd();
+    if (!$("aTg").hidden) { $("aTg").hidden = true; $("v-admin").classList.remove("pwd"); }
+    $("aGearMenu").hidden = true; $("aGear").setAttribute("aria-expanded", "false");
+    jumpTop();
+  });
   $("aPwdBack").onclick = closePwd;
   $("aPwd").addEventListener("submit", function (e) {
     e.preventDefault(); errBox("aPwdErr");

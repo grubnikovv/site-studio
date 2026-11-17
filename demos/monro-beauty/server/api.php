@@ -69,6 +69,13 @@ if ($type === 'pass_change') {
 // Почта мастера для копий уведомлений: без mail — узнать текущую, с mail — сохранить (пустая — выключить) и прислать проверочное письмо
 if ($type === 'mail_admin') {
     if (!$admin) json_out(['ok' => false, 'error' => 'Войдите в кабинет заново', 'relogin' => true]);
+    if (!empty($in['test'])) {  // проверочное письмо на текущую почту, без смены
+        $m = mail_admin(); if (!$m) json_out(['ok' => false, 'error' => 'Почта для уведомлений не указана.']);
+        if (time() - (int)kv_get('mail_test_t') < 30) json_out(['ok' => false, 'error' => 'Письмо уже отправлено. Подождите полминуты.']);
+        kv_put('mail_test_t', time());
+        $sent = send_mail($m, 'Проверка почты сайта', "Проверочное письмо 💅\nПочта для уведомлений работает: сюда приходят копии уведомлений с сайта — новые записи, отмены, переносы и заявки.\n\nЕсли письмо попало в «Спам» — нажмите «Не спам», и следующие придут во «Входящие».");
+        json_out(['ok' => (bool)$sent, 'mail' => $m, 'sent' => (bool)$sent, 'error' => $sent ? '' : 'Письмо не отправилось. Попробуйте позже.']);
+    }
     if (!array_key_exists('mail', $in)) json_out(['ok' => true, 'mail' => mail_admin()]);
     $m = trim((string)$in['mail']);
     if ($m === '') { kv_put('mail_admin', '-'); json_out(['ok' => true, 'mail' => '']); }
