@@ -1649,10 +1649,11 @@ a.tel svg { flex: none; }
   <section class="block tight"><div class="wrap">
     <div class="pacc open"><h3 class="pgrp"><button type="button" class="pgrp-b" aria-expanded="true" aria-controls="pHandsW"><span>Руки</span><small id="nHands"></small><i class="chev" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></i></button></h3><div class="pbody" id="pHandsW"><div class="pin"><div class="plist" id="pHands"></div></div></div></div>
     <div class="pacc"><h3 class="pgrp"><button type="button" class="pgrp-b" aria-expanded="false" aria-controls="pFeetW"><span>Ноги</span><small id="nFeet"></small><i class="chev" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></i></button></h3><div class="pbody" id="pFeetW"><div class="pin"><div class="plist" id="pFeet"></div></div></div></div>
-    <div class="pacc"><h3 class="pgrp"><button type="button" class="pgrp-b" aria-expanded="false" aria-controls="pExtraW"><span>Прочее</span><small>2 услуги</small><i class="chev" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></i></button></h3><div class="pbody" id="pExtraW"><div class="pin">
+    <div class="pacc"><h3 class="pgrp"><button type="button" class="pgrp-b" aria-expanded="false" aria-controls="pExtraW"><span>Прочее</span><small id="nOther"></small><i class="chev" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></i></button></h3><div class="pbody" id="pExtraW"><div class="pin">
     <div class="plist">
       <div class="prow"><div><b>Френч</b><small>К любому покрытию. При онлайн-записи отметьте «Френч»</small></div><span class="num">+200 ₽</span></div>
-      <div class="prow"><div><b>Снятие покрытия перед процедурой</b><small>Если покрытие делали не у Марины, а сейчас — новый маникюр, педикюр или наращивание · около 15 минут. Если покрытие делала Марина и вы пришли на новое покрытие — снятие входит в стоимость. Просто снять покрытие без новой работы (любое, в том числе от Марины) — отдельная услуга «Снятие покрытия», 300 ₽, около 15 минут</small></div><span class="num">+200 ₽</span></div>
+      <div class="prow"><div><b>Снятие покрытия перед процедурой</b><small>Если покрытие делали не у Марины, а сейчас — новый маникюр, педикюр или наращивание · около 15 минут. Если покрытие делала Марина и вы пришли на новое покрытие — снятие входит в стоимость. Просто снять покрытие без новой работы (любое, в том числе от Марины) — услуги ниже: с рук, с ног или всё сразу</small></div><span class="num">+200 ₽</span></div>
+      <div id="pOther" style="display:contents"></div>
     </div></div></div></div>
     <a class="card cert cert-link" href="#sertifikat"><span class="eyebrow">Подарок</span><b>Подарочный сертификат на любую процедуру</b><span class="note">2 000, 3 000 или 5 000 ₽ · действует 3 месяца →</span></a>
     <div class="rules"><b>Оплата на месте</b><span>Наличными или переводом после процедуры. Если планы изменились, предупредите Марину заранее, лучше за сутки — она перенесёт запись на удобный день.</span></div>
@@ -2340,7 +2341,9 @@ a.tel svg { flex: none; }
     { id: "cor4", name: "Коррекция, длина от\u00a03-й", price: 2200, from: true, min: 150, text: "Опил отросшей длины, ремонт, новое покрытие. Длинные ногти. Точную цену Марина назовёт по факту длины." },
     { id: "ext", name: "Наращивание, длина до\u00a03-й", price: 2600, min: 120, text: "Наращивание гелем с покрытием, короткая и средняя длина." },
     { id: "ext4", name: "Наращивание, длина от\u00a03-й", price: 2800, from: true, min: 150, text: "Наращивание гелем с покрытием, длинные ногти. Точную цену Марина назовёт по факту длины." },
-    { id: "off", name: "Снятие покрытия", price: 300, min: 15, noRemove: true, text: "Только снять гель-лак или наращивание, без нового покрытия — в том числе работу Марины. Если после снятия делаете новый маникюр или педикюр, отдельно записываться на снятие не нужно." },
+    { id: "off", name: "Снятие покрытия с рук", price: 300, min: 15, noRemove: true, text: "Только снять гель-лак или наращивание с рук, без нового покрытия. Любое покрытие — своё или от другого мастера." },
+    { id: "offf", name: "Снятие покрытия с ног", price: 300, min: 15, noRemove: true, foot: true, text: "Только снять покрытие с ног, без нового. Любое — своё или от другого мастера." },
+    { id: "offb", name: "Снятие покрытия с рук и ног", price: 600, min: 30, noRemove: true, text: "Снять покрытие сразу и с рук, и с ног, без нового покрытия. Любое — своё или от другого мастера." },
     { id: "nit", name: "Титановая нить (вросший ноготь)", price: 2500, min: 30, noRemove: true, text: "Коррекция вросшего ногтя на ноге: нить приподнимает край ногтя и снимает давление. Цена за один палец." },
     { id: "nitc", name: "Коррекция титановой нити", price: 2000, min: 20, noRemove: true, text: "Плановая коррекция уже установленной титановой нити: Марина проверит, как поднимается край ногтя, и переставит нить." },
     { id: "ped", name: "Педикюр: только пальчики", price: 1200, min: 60, foot: true, text: "Обработка пальчиков без покрытия." },
@@ -2403,7 +2406,7 @@ a.tel svg { flex: none; }
       ["Сколько держится покрытие?", "Обычно 3–4 недели. Срок зависит от того, как быстро растут ногти, и от домашних дел: бытовая химия без перчаток сокращает носку. Через 3 недели после визита пришлём напоминание о коррекции, если вы подключили напоминания."],
       ["Можно прийти со своим дизайном?", "Конечно. Пришлите фото дизайна Марине в WhatsApp, Telegram или MAX — она заранее скажет, сколько это займёт и сколько будет стоить."],
       ["Как обрабатываются инструменты?", "После каждой клиентки — мытьё, дезинфекция и стерилизация инструментов в сухожаре."],
-      ["Снимаете покрытие?", "Да. Если вы пришли на новый маникюр, педикюр или наращивание, а покрытие делали у другого мастера, — сначала Марина снимает его: +200 ₽ и около 15 минут. При онлайн-записи отметьте «Снятие покрытия» — время и сумма рассчитаются сами. Если покрытие делала Марина — снятие входит в стоимость новой процедуры. Если нужно просто снять покрытие без новой работы (любое, в том числе от Марины) — запишитесь на услугу «Снятие покрытия»: 300 ₽, около 15 минут."],
+      ["Снимаете покрытие?", "Да. Если вы пришли на новый маникюр, педикюр или наращивание, а покрытие делали у другого мастера, — сначала Марина снимает его: +200 ₽ и около 15 минут. При онлайн-записи отметьте «Снятие покрытия» — время и сумма рассчитаются сами. Если покрытие делала Марина — снятие входит в стоимость новой процедуры. Если нужно просто снять покрытие без новой работы (любое, в том числе от Марины) — запишитесь на снятие в разделе «Прочее»: с рук или с ног — 300 ₽ и около 15 минут, всё сразу — 600 ₽ и около 30 минут."],
       ["Что если появился скол или отслойка?", "Напишите Марине. Если скол или отслойка возникли по вине мастера, Марина бесплатно их исправит."]]],
     ["Запись и оплата", [
       ["Нужно ли платить заранее?", "Нет. Запись на процедуры без предоплаты. Оплата после работы — наличными, переводом по СБП или подарочным сертификатом."],
@@ -2712,7 +2715,7 @@ a.tel svg { flex: none; }
     return '<div class="prow"><div><b>' + s.name + '</b><small>' + s.text + ' ' + dur(s.min) + '.</small></div><div class="pr-r"><span class="num">' + priceText(s) + '</span><a class="btn sm ghost" href="#zapis" data-pick="' + s.id + '">Записаться</a></div></div>';
   }
   $("homeSvc").innerHTML = ["gel", "ext", "pedp"].map(function (id) { return svcCard(svc(id)); }).join("");
-  $("pHands").innerHTML = ["man", "gel", "str", "cor", "cor4", "ext", "ext4", "off"].map(function (id) { return priceRow(svc(id)); }).join("");
+  $("pHands").innerHTML = ["man", "gel", "str", "cor", "cor4", "ext", "ext4"].map(function (id) { return priceRow(svc(id)); }).join("");
   document.querySelectorAll(".pgrp-b").forEach(function (b) {
     b.addEventListener("click", function () {
       var acc = b.closest(".pacc"), on = !acc.classList.contains("open");
@@ -2723,6 +2726,8 @@ a.tel svg { flex: none; }
   $("nHands").textContent = nUsl($("pHands").children.length);
   $("pFeet").innerHTML = ["ped", "pedg", "pedf", "pedp", "pedh", "nit", "nitc"].map(function (id) { return priceRow(svc(id)); }).join("");
   $("nFeet").textContent = nUsl($("pFeet").children.length);
+  $("pOther").innerHTML = ["off", "offf", "offb"].map(function (id) { return priceRow(svc(id)); }).join("");
+  $("nOther").textContent = nUsl($("pExtraW").querySelectorAll(".prow").length);
   document.querySelectorAll(".pacc .prow").forEach(function (r) { r.style.setProperty("--i", [].indexOf.call(r.parentNode.children, r)); });
 
   var phIcon = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 21V9a4 4 0 0 1 8 0v12"></path><path d="M10 9.5a2 2 0 0 1 4 0"></path></svg>';
@@ -2893,8 +2898,9 @@ a.tel svg { flex: none; }
   function renderSvcOpts() {
     // тот же порядок и группы, что в прайсе: руки, ноги
     var opt = function (id) { var s = svc(id); return '<button class="opt" data-s="' + s.id + '" aria-pressed="' + (bk.svc === s.id) + '"><span><b style="font-weight:700">' + s.name + '</b><small>' + dur(s.min) + '</small></span><b class="num">' + priceText(s) + '</b></button>'; };
-    $("bSvc").innerHTML = '<span class="bgrp">Руки</span>' + ["man", "gel", "str", "cor", "cor4", "ext", "ext4", "off"].map(opt).join("") +
-      '<span class="bgrp">Ноги</span>' + ["ped", "pedg", "pedf", "pedp", "pedh", "nit", "nitc"].map(opt).join("");
+    $("bSvc").innerHTML = '<span class="bgrp">Руки</span>' + ["man", "gel", "str", "cor", "cor4", "ext", "ext4"].map(opt).join("") +
+      '<span class="bgrp">Ноги</span>' + ["ped", "pedg", "pedf", "pedp", "pedh", "nit", "nitc"].map(opt).join("") +
+      '<span class="bgrp">Прочее</span>' + ["off", "offf", "offb"].map(opt).join("");
   }
   $("bSvc").addEventListener("click", function (e) {
     var b = e.target.closest("[data-s]"); if (!b) return;
@@ -4572,7 +4578,7 @@ a.tel svg { flex: none; }
     if (/коррекц/.test(n)) return svc(long || price >= 2200 ? "cor4" : "cor");
     if (/наращ/.test(n)) return svc(long || price >= 2800 ? "ext4" : "ext");
     if (/нит/.test(n)) return svc("nit");
-    if (/сняти/.test(n) && !/маник|педик/.test(n)) return svc("off");
+    if (/сняти/.test(n) && !/маник|педик/.test(n)) return svc(/рук[\s\S]*ног|ног[\s\S]*рук|вс[её]/.test(n) || price >= 600 ? "offb" : /ног/.test(n) ? "offf" : "off");
     if (/педик/.test(n)) return svc(/сложн/.test(n) ? "pedh" : /полн/.test(n) ? "pedp" : /стоп/.test(n) ? "pedf" : /гель|лак|покрыт/.test(n) ? "pedg" : "ped");
     if (/маник/.test(n)) return svc(/укреп/.test(n) ? "str" : /гель|лак|покрыт/.test(n) ? "gel" : "man");
     return null;
