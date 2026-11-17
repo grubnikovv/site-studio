@@ -5351,7 +5351,8 @@ a.tel svg { flex: none; }
     copyText(u).then(function () { toast("Ссылка на обучение скопирована: " + u.replace(/^https?:\/\//, "") + " — вставьте её в сообщение, сторис или статус"); }, function () { toast("Не получилось скопировать. Ссылка: " + u, true); });
   };
   [[linkBtn, "🔗"], [certLinkBtn, "🎁"], [trainLinkBtn, "🎓"], [tgBtn, "📲"], [mailBtn, "✉️"], [pwdBtn, "🔑"], [pushBtn, "🔔"], [outBtn, "🚪"]].forEach(function (x) {
-    x[0].className = "gear-item" + (x[0] === outBtn ? " out" : x[0] === tgBtn ? " sep" : "");  // ссылки сверху, настройки — после черты x[0].setAttribute("role", "menuitem"); x[0].dataset.ic = x[1]; gearMenu.appendChild(x[0]);
+    // ссылки сверху, настройки — после черты
+    x[0].className = "gear-item" + (x[0] === outBtn ? " out" : x[0] === tgBtn ? " sep" : ""); x[0].setAttribute("role", "menuitem"); x[0].dataset.ic = x[1]; gearMenu.appendChild(x[0]);
   });
   function gearSet(open) { gearMenu.hidden = !open; gear.setAttribute("aria-expanded", open ? "true" : "false"); }
   gear.onclick = function (e) { e.stopPropagation(); gearSet(gearMenu.hidden); };
