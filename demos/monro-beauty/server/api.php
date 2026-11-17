@@ -628,7 +628,9 @@ if ($type === 'cert_get') {
 // ---------- Telegram мамы: ссылка для переподключения и кто подключён ----------
 if ($type === 'admin_tg') {
     if (!$admin) json_out(['ok' => false, 'relogin' => true]);
-    $list = []; foreach (db()->query('SELECT name, added FROM admins ORDER BY added') as $a) $list[] = ['name' => (string)$a['name'], 'added' => date('d.m.Y', (int)$a['added'])];
+    if (!empty($in['del'])) foreach (db()->query('SELECT chat_id FROM admins')->fetchAll(PDO::FETCH_COLUMN) as $c)  // отключить телефон от уведомлений мастера
+        if (hash_equals(substr(hash_hmac('sha256', 'adm' . $c, (string)cfg('admin_key')), 0, 12), (string)$in['del'])) { db()->prepare('DELETE FROM admins WHERE chat_id = ?')->execute([$c]); send($c, 'Этот Telegram отключён от уведомлений мастера студии «М.А».'); }
+    $list = []; foreach (db()->query('SELECT chat_id, name, added FROM admins ORDER BY added') as $a) $list[] = ['id' => substr(hash_hmac('sha256', 'adm' . $a['chat_id'], (string)cfg('admin_key')), 0, 12), 'name' => (string)$a['name'], 'added' => date('d.m.Y', (int)$a['added'])];
     json_out(['ok' => true, 'link' => 'https://t.me/' . cfg('bot_name') . '?start=' . admin_tg_code(), 'chats' => $list]);
 }
 // ---------- Telegram в личном кабинете: отключить ----------
