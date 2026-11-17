@@ -2536,7 +2536,11 @@ a.tel svg { flex: none; }
   function setSaved(ok) { var el = document.getElementById("aSave"); if (el) { el.textContent = ok ? "✓ Сохранено" : "Нет связи — сохраню, когда появится интернет"; el.className = "a-save " + (ok ? "ok" : "bad"); } }
   // клиентки с личным кабинетом (для мамы): по телефону и почте — почта аккаунта и фото профиля
   var ACCS = { p: {}, e: {} };
-  function accOf(b) { var d = String(b.phone || "").replace(/\D/g, "").replace(/^8/, "7"); return (b.accMail && ACCS.e[String(b.accMail).toLowerCase()]) || (d.length === 11 && ACCS.p[d]) || (b.email && ACCS.e[String(b.email).toLowerCase()]) || null; }
+  function accOf(b) {  // кабинет из записи, по телефону или по почте; если подходят несколько — тот, где есть фото
+    var d = String(b.phone || "").replace(/\D/g, "").replace(/^8/, "7");
+    var all = [b.accMail && ACCS.e[String(b.accMail).toLowerCase()], d.length === 11 && ACCS.p[d], b.email && ACCS.e[String(b.email).toLowerCase()]].filter(Boolean);
+    return all.filter(function (x) { return x.av; })[0] || all[0] || null;
+  }
   function fetchState(force) {
     if (!SYNC || inflight) return Promise.resolve();
     return apiSend({ type: "state", v: force ? -1 : docV, token: token || undefined }).then(function (r) {
