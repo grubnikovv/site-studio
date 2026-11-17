@@ -389,7 +389,16 @@ function av_sync($a, $name) {
         if ($name) $x['accAv'] = $name; else unset($x['accAv']); $n++;
     }
     unset($x);
-    if ($n) doc_save($doc, $v); else doc_abort();
+    doc_save($doc, $v);  // всегда новая версия базы — кабинет мамы подхватит фото и у записей, найденных по почте или телефону
+}
+// Для кабинета мамы: какие телефоны и почты принадлежат клиенткам с личным кабинетом, и их фото
+function acc_map() {
+    $m = ['p' => [], 'e' => []];
+    foreach (client_db()->query('SELECT email, phone, av FROM accounts WHERE verified = 1') as $a) {
+        $x = ['e' => (string)$a['email'], 'av' => (string)($a['av'] ?? '')];
+        $m['e'][mb_strtolower((string)$a['email'])] = $x; if ($a['phone']) $m['p'][(string)$a['phone']] = $x;
+    }
+    return $m;
 }
 
 // Telegram в личном кабинете: ссылка на бота с ключом аккаунта; бот запоминает чат и привязывает к нему будущие записи

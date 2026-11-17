@@ -2531,6 +2531,9 @@ a.tel svg { flex: none; }
     });
   }
   function setSaved(ok) { var el = document.getElementById("aSave"); if (el) { el.textContent = ok ? "✓ Сохранено" : "Нет связи — сохраню, когда появится интернет"; el.className = "a-save " + (ok ? "ok" : "bad"); } }
+  // клиентки с личным кабинетом (для мамы): по телефону и почте — почта аккаунта и фото профиля
+  var ACCS = { p: {}, e: {} };
+  function accOf(b) { var d = String(b.phone || "").replace(/\D/g, "").replace(/^8/, "7"); return (b.accMail && ACCS.e[String(b.accMail).toLowerCase()]) || (d.length === 11 && ACCS.p[d]) || (b.email && ACCS.e[String(b.email).toLowerCase()]) || null; }
   function fetchState(force) {
     if (!SYNC || inflight) return Promise.resolve();
     return apiSend({ type: "state", v: force ? -1 : docV, token: token || undefined }).then(function (r) {
@@ -2538,6 +2541,7 @@ a.tel svg { flex: none; }
       if (token && !r.admin) { logout(); return; }
       if (r.same || inflight) return;
       if (token && synced && diffOps(synced, st).length) { pushSync(); return; }  // сначала сохраним свои изменения — ответ принесёт свежую базу
+      if (r.accs) ACCS = r.accs;
       applyDoc(r.v, r.doc);
       if (token && !purgedOnce) { purgedOnce = true; purgeOld(); }
     });
@@ -3544,6 +3548,7 @@ a.tel svg { flex: none; }
   $("kMailCopy").onclick = function () { copyText("marina@ma-nails.ru").then(function () { toast("Адрес скопирован — добавьте его в контакты почты"); }, function () { toast("Не получилось скопировать. Адрес: marina@ma-nails.ru", true); }); };
   $("kMailOk").onclick = function () { lsSet("ma-mailtip", "1"); $("kMailTip").hidden = true; toast("Спасибо! Теперь письма будут приходить во «Входящие»"); };
   // ---------- фото профиля: сжимаем на телефоне (до 1280 px и квадрат 320 px), на сервере проверяется и пересохраняется ----------
+  function bAv(b) { if (!SYNC || b.example) return ""; var a = accOf(b); return (a && a.av) || b.accAv || ""; }
   function avUrl(n, thumb) { return API.replace(/api\.php$/, "av.php") + "?f=" + (thumb ? n.replace(".", "_t.") : n); }
   function avMake(file) {
     return new Promise(function (res, rej) {
@@ -3991,7 +3996,7 @@ a.tel svg { flex: none; }
       var b = r.b;
       var s = svc(b.svc), t = statusOf(b);
       return '<div class="bk' + (b.id === flashId ? " moved" : "") + '"><div class="r1"><b class="num">' + hm(b.start) + '–' + hm(b.start + bmin(b)) + '</b><span class="pill ' + t[1] + '">' + t[0] + '</span></div>' +
-        '<div class="who-l">' + (b.accAv && SYNC ? '<button type="button" class="b-av" data-av="' + esc(b.accAv) + '" data-avn="' + esc(b.name) + '" aria-label="Фото клиентки"><img src="' + avUrl(b.accAv, true) + '" alt="" width="28" height="28" loading="lazy"></button>' : '') + '<b style="font-weight:700">' + esc(b.name) + '</b>' + telLink(b.phone) + (b.example ? ' <span class="pill">пример</span>' : '') + '</div>' +
+        '<div class="who-l">' + (bAv(b) ? '<button type="button" class="b-av" data-av="' + esc(bAv(b)) + '" data-avn="' + esc(b.name) + '" aria-label="Фото клиентки"><img src="' + avUrl(bAv(b), true) + '" alt="" width="28" height="28" loading="lazy"></button>' : '') + '<b style="font-weight:700">' + esc(b.name) + '</b>' + telLink(b.phone) + (b.example ? ' <span class="pill">пример</span>' : '') + '</div>' +
         '<div class="info">' + svcLabel(b) + ' · ' + rub(b.price || s.price) + (b.note ? ' · «' + esc(b.note) + '»' : '') + '</div>' +
         (b.remind && b.remind !== "none" ? '<div class="info">🔔 ' + (b.remind === "mail" ? "Почта" + (b.email ? " " + esc(b.email) : "") : REM_NAME[b.remind] || "Telegram") + ' · ' + remindPlan(b.date).join(", ") + '</div>' : '') +
         overlapNote(b) +
@@ -4478,7 +4483,8 @@ a.tel svg { flex: none; }
       var key = b.example ? "ex" + b.phone : (b.phone.replace(/\D/g, "").replace(/^8/, "7") || b.name);
       if (b.anon) return;  // удалённая клиентка: запись осталась только для статистики
       var c = map[key] || (map[key] = { key: key, name: b.name, phone: b.phone, example: !!b.example, visits: [], came: 0, noshow: 0, cancel: 0, future: null });
-      c.visits.push(b); if (b.accMail) c.acc = b.accMail; if (b.accAv && !c.av) c.av = b.accAv; if (b.email && !c.mail) c.mail = b.email;
+      c.visits.push(b); if (b.accMail) c.acc = b.accMail; if (b.accAv && !c.av) c.av = b.accAv;
+      var ax = !b.example && accOf(b); if (ax) { c.acc = c.acc || ax.e; if (ax.av) c.av = ax.av; } if (b.email && !c.mail) c.mail = b.email;
       if (b.status === "came") c.came++;
       if (b.status === "noshow") c.noshow++;
       if (b.status === "cancelled") c.cancel++;

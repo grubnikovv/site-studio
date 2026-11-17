@@ -46,7 +46,7 @@ if ($type === 'state') {
     [$doc, $v] = doc_load(true);
     if (doc_expire($doc)) $v = doc_save($doc, $v); else doc_abort();
     if ((int)($in['v'] ?? -1) === $v) json_out(['ok' => true, 'v' => $v, 'same' => true, 'admin' => $admin]);
-    json_out(['ok' => true, 'v' => $v, 'admin' => $admin, 'doc' => $admin ? doc_full($doc) : doc_public($doc)]);
+    json_out(['ok' => true, 'v' => $v, 'admin' => $admin, 'doc' => $admin ? doc_full($doc) : doc_public($doc)] + ($admin ? ['accs' => acc_map()] : []));
 }
 
 if ($type === 'login') {
