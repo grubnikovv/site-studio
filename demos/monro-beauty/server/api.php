@@ -153,7 +153,7 @@ if ($type === 'booking') {
     $svcName = clean($in['svcName'] ?? ($r['svcName'] ?? ''), 80);
     $rec = ['id' => $id, 'date' => $date, 'start' => $start, 'dur' => $dur, 'svc' => clean($r['svc'] ?? '', 30), 'name' => $name, 'phone' => phone_nice($phone),
         'note' => clean($r['note'] ?? '', 200), 'price' => max(0, (int)($r['price'] ?? 0)), 'remove' => !empty($r['remove']), 'french' => !empty($r['french']), 'remind' => $remind, 'status' => 'booked', 'created' => now_ms()] + ($email ? ['email' => $email] : []) + (!empty($r['other']) ? ['other' => true] : []);
-    if (($cw = client_who($in['ctoken'] ?? '')) && $cw['acc']) { $rec['owner'] = (int)$cw['acc']['id']; $rec['accMail'] = $cw['acc']['email']; }  // запись из кабинета — видна в нём
+    if (($cw = client_who($in['ctoken'] ?? '')) && $cw['acc']) { $rec['owner'] = (int)$cw['acc']['id']; $rec['accMail'] = $cw['acc']['email']; if (!empty($cw['acc']['av'])) $rec['accAv'] = $cw['acc']['av']; }  // запись из кабинета — видна в нём
     if (!empty($rec['owner'])) cnote($rec['owner'], '📅', 'Вы записаны', $svcName . ' · ' . when_text($date, $start) . '. Перенести или отменить — в кабинете, не позже чем за 2 дня.', '#kabinet');
     $doc['bookings'] = array_values(array_filter($doc['bookings'], fn($b) => ($b['id'] ?? '') !== $id));
     $doc['bookings'][] = $rec;
@@ -423,7 +423,7 @@ if ($type === 'client_delete') {
     foreach ($doc['bookings'] as $i => &$b) {
         if (!$own($b)) continue;
         if ($name === '') $name = $b['name'] ?? '';
-        if (($b['status'] ?? '') === 'booked' && ($b['date'] ?? '') >= $today) { unset($b['owner']); $future++; continue; }
+        if (($b['status'] ?? '') === 'booked' && ($b['date'] ?? '') >= $today) { unset($b['owner'], $b['accAv']); $future++; continue; }
         $gone[] = $b['id'] ?? '';
         if (($b['status'] ?? '') === 'cancelled') { $b = null; continue; }
         $b = ['id' => $b['id'], 'date' => $b['date'], 'start' => $b['start'], 'dur' => $b['dur'] ?? 60, 'svc' => $b['svc'] ?? '', 'price' => $b['price'] ?? 0, 'status' => $b['status'] ?? '', 'remove' => !empty($b['remove']), 'french' => !empty($b['french']),
@@ -432,7 +432,7 @@ if ($type === 'client_delete') {
     unset($b);
     $doc['bookings'] = array_values(array_filter($doc['bookings']));
     $doc['training'] = array_values(array_filter($doc['training'], fn($t) => !($own($t) && ($t['status'] ?? '') !== 'paid')));
-    foreach ($doc['certs'] as &$c) if ($own($c)) unset($c['owner']);
+    foreach ($doc['certs'] as &$c) if ($own($c)) unset($c['owner'], $c['accAv']);
     unset($c);
     doc_note($doc, '🗑', 'Клиентка удалила аккаунт', $name . ($future ? ' · будущих записей осталось: ' . $future : '') . ($live ? ' · сертификаты отправлены ей на почту' : ''), ['tab' => 'clients']);
     $v = doc_save($doc, $v);
@@ -442,6 +442,7 @@ if ($type === 'client_delete') {
     if ($acc) {
         $db->prepare('DELETE FROM client_sessions WHERE acc = ?')->execute([$acc['id']]);
         $db->prepare('DELETE FROM acc_codes WHERE email = ?')->execute([$acc['email']]);
+        av_remove((string)($acc['av'] ?? ''));  // фото профиля — удалить сразу
         $db->prepare('DELETE FROM accounts WHERE id = ?')->execute([$acc['id']]);
     } else $db->prepare('DELETE FROM client_sessions WHERE token = ?')->execute([hash('sha256', (string)$in['ctoken'])]);
     notify_admins("🗑 <b>Клиентка удалила аккаунт</b>\n" . h($name) . ($future ? "\nБудущих записей осталось: " . $future . " — они остаются в кабинете." : '') . ($live ? "\nНеиспользованные сертификаты отправлены ей на почту." : ''));
@@ -525,7 +526,7 @@ if ($type === 'client_data') {
     $bk = array_values(array_map(fn($b) => array_intersect_key($b, array_flip(['id', 'date', 'start', 'dur', 'svc', 'remove', 'french', 'status', 'price', 'phone', 'name', 'remind', 'email', 'by', 'movedBy'])), array_filter($doc['bookings'], $mine)));
     $tr = array_values(array_map(fn($t) => array_intersect_key($t, array_flip(['id', 'course', 'date', 'days', 'status', 'price', 'pre', 'hold', 'claimed', 'phone', 'name', 'snote', 'mnote', 'by', 'refunded', 'paidAt'])), array_filter($doc['training'], $mine)));
     $ce = array_values(array_map(fn($c) => array_intersect_key($c, array_flip(['id', 'code', 'sum', 'balance', 'to', 'status', 'created', 'till', 'phone', 'email', 'name', 'claimed', 'hold'])) + ['spent' => array_map(fn($x) => ['d' => $x['d'] ?? '', 'sum' => (int)($x['sum'] ?? 0)], $c['spent'] ?? [])], array_filter($doc['certs'], $mine)));
-    json_out(['ok' => true, 'phone' => $phone ? phone_nice($phone) : '', 'acc' => $acc ? ['email' => $acc['email'], 'name' => $acc['name']] : null, 'bookings' => $bk, 'training' => $tr, 'certs' => $ce, 'v' => $v, 'doc' => doc_public($doc)]);
+    json_out(['ok' => true, 'phone' => $phone ? phone_nice($phone) : '', 'acc' => $acc ? ['email' => $acc['email'], 'name' => $acc['name'], 'av' => (string)($acc['av'] ?? '')] : null, 'bookings' => $bk, 'training' => $tr, 'certs' => $ce, 'v' => $v, 'doc' => doc_public($doc)]);
 }
 
 // Клиентка в кабинете меняет почту для напоминаний (или отказывается от писем) — для всех будущих записей
@@ -622,6 +623,22 @@ if ($type === 'cert_get') {
 }
 
 // ---------- уведомления от браузера ----------
+// ---------- фото профиля клиентки ----------
+if ($type === 'client_avatar') {
+    $cw = client_who($in['ctoken'] ?? ''); if (!$cw) json_out(['ok' => false, 'error' => 'Войдите в кабинет заново', 'relogin' => true]);
+    if (!$cw['acc']) fail('Фото профиля можно добавить в личном кабинете по почте.');
+    $a = $cw['acc']; $name = '';
+    if (empty($in['del'])) {
+        $full = av_img($in['full'] ?? '', 900 * 1024, 1600); $thumb = av_img($in['thumb'] ?? '', 120 * 1024, 400);
+        if (!$full || !$thumb) fail('Не получилось загрузить фото. Выберите другое (JPG или PNG).');
+        $id = bin2hex(random_bytes(16)); $name = $id . '.' . $full[1];
+        file_put_contents(av_dir() . '/' . $name, $full[0]); file_put_contents(av_dir() . '/' . $id . '_t.' . $full[1], $thumb[1] === $full[1] ? $thumb[0] : $full[0]);
+    }
+    av_remove((string)($a['av'] ?? ''));
+    client_db()->prepare('UPDATE accounts SET av = ? WHERE id = ?')->execute([$name, (int)$a['id']]);
+    av_sync($a, $name);
+    json_out(['ok' => true, 'av' => $name]);
+}
 if ($type === 'push_key') { require_once __DIR__ . '/push.php'; json_out(['ok' => true, 'key' => vapid()['pub']]); }
 if ($type === 'push_sub') {
     // телефон мастера (вошла в кабинет мастера) или клиентки (вошла в личный кабинет по почте)

@@ -894,7 +894,17 @@ div.f { display: grid; gap: 8px; }
 #kBody h3 { margin: 0; }
 #kStep2:not([hidden]) { display: grid; gap: 10px; }
 .k-head { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 14px; background: var(--blush); border: 1px solid var(--line); border-radius: 24px; padding: 18px; }
-.k-av { width: 54px; height: 54px; border-radius: 50%; background: var(--lac); color: var(--lac-ink); display: grid; place-items: center; font: 600 24px/1 var(--display); }
+.k-av { position: relative; width: 58px; height: 58px; padding: 0; border: 0; border-radius: 50%; background: var(--lac); color: var(--lac-ink); display: grid; place-items: center; font: 600 24px/1 var(--display); cursor: pointer; }
+.k-av img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+.k-av .k-cam { position: absolute; right: -3px; bottom: -3px; width: 24px; height: 24px; border-radius: 50%; background: var(--paper); color: var(--ink); border: 1px solid var(--line); display: grid; place-items: center; }
+.k-av.busy { opacity: .55; }
+.avdlg .pbox img { min-height: 0; }
+.av-acts { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 12px; }
+.av-acts[hidden] { display: none; }
+.cl-av, .b-av { padding: 0; border: 0; background: none; border-radius: 50%; cursor: zoom-in; flex: none; line-height: 0; }
+.cl-av img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+.b-av img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; vertical-align: middle; }
+.cl-who { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .k-id { display: grid; gap: 2px; min-width: 0; }
 .k-id small { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--mute); }
 .k-id b { font-size: 20px; font-weight: 600; overflow-wrap: anywhere; }
@@ -1740,7 +1750,7 @@ a.tel svg { flex: none; }
       <button type="button" class="a-link" data-kgo="login">← Войти по почте</button>
     </form>
     <div id="kBody" hidden>
-      <div class="k-head"><div class="k-av" id="kAv" aria-hidden="true"></div><div class="k-id"><small>Вы вошли</small><b id="kWhoName"></b><span id="kWhoMail"></span></div><span class="k-hb"><button type="button" class="a-link" id="kPwOpen" hidden>Сменить пароль</button><button type="button" class="a-link" id="kOut">Выйти</button></span></div>
+      <div class="k-head"><button type="button" class="k-av" id="kAv" aria-label="Фото профиля"></button><input type="file" id="kAvFile" accept="image/*" hidden><div class="k-id"><small>Вы вошли</small><b id="kWhoName"></b><span id="kWhoMail"></span></div><span class="k-hb"><button type="button" class="a-link" id="kPwOpen" hidden>Сменить пароль</button><button type="button" class="a-link" id="kOut">Выйти</button></span></div>
       <form class="card a-login" id="kPwBox" novalidate hidden><h3>Сменить пароль</h3>
         <label for="kPwO">Текущий пароль</label><div class="pass-w"><input type="password" id="kPwO" autocomplete="current-password" minlength="6"><button type="button" class="pass-eye" aria-label="Показать пароль" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="eye-x" d="M4 4l16 16"/></svg></button></div>
         <label for="kPwN">Новый пароль</label><div class="pass-w"><input type="password" id="kPwN" autocomplete="new-password" minlength="6"><button type="button" class="pass-eye" aria-label="Показать пароль" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="eye-x" d="M4 4l16 16"/></svg></button></div>
@@ -1915,7 +1925,7 @@ a.tel svg { flex: none; }
   </div></section>
 </main>
 <main id="v-politika" class="page" hidden>
-  <section class="phero"><div class="wrap"><span class="eyebrow">Документы</span><h1>Политика обработки персональных данных</h1><p class="lead">Как студия «М.А» собирает, хранит и защищает ваши данные. Редакция от <span id="polDate">14 ноября 2026</span> г.</p></div></section>
+  <section class="phero"><div class="wrap"><span class="eyebrow">Документы</span><h1>Политика обработки персональных данных</h1><p class="lead">Как студия «М.А» собирает, хранит и защищает ваши данные. Редакция от <span id="polDate">17 ноября 2026</span> г.</p></div></section>
   <section class="block tight"><div class="wrap legal">
     <h2>1. Общие положения</h2>
     <p>1.1. Политика составлена по Федеральному закону от 27.07.2006 № 152-ФЗ «О персональных данных» и действует для всех данных, которые оператор получает через этот сайт, по телефону и в мессенджерах.</p>
@@ -1925,10 +1935,11 @@ a.tel svg { flex: none; }
     <h2>2. Какие данные и зачем мы обрабатываем</h2>
     <div class="ltable">
       <div><b>Запись на процедуру</b><span>Имя, телефон, email (если выбраны напоминания на почту), выбранная услуга, дата и время, комментарий, способ напоминания. Чтобы записать вас, напомнить о визите, связаться при переносе и вести историю посещений.</span></div>
-      <div><b>Личный кабинет</b><span>Имя, email и пароль (хранится только в зашифрованном виде — его не знает даже администратор), по желанию — подтверждённый номер телефона. Чтобы вы могли входить в кабинет, переносить и отменять записи, видеть обучение и сертификаты. Аккаунт можно удалить по запросу.</span></div>
+      <div><b>Личный кабинет</b><span>Имя, email и пароль (хранится только в зашифрованном виде — его не знает даже администратор), по желанию — подтверждённый номер телефона и фото профиля, которое вы загружаете сами (его видите только вы и Оператор в кабинете мастера — чтобы узнавать вас; фото не используется для установления личности и не является биометрическими данными). Чтобы вы могли входить в кабинет, переносить и отменять записи, видеть обучение и сертификаты. Аккаунт можно удалить по запросу.</span></div>
       <div><b>Подарочный сертификат</b><span>Имя, телефон и email покупателя (на него приходит сертификат), имя получателя (по желанию), номер, номинал и остаток сертификата. Чтобы выпустить сертификат, найти его по телефону и списать оплату.</span></div>
       <div><b>Обучение</b><span>Имя, телефон, выбранный курс и даты, сведения о предоплате. Чтобы закрепить даты, связаться перед обучением, выдать сертификат о прохождении курса.</span></div>
       <div><b>Модели на обучение</b><span>Имя, телефон, дата и время процедуры. Чтобы договориться о бесплатной процедуре и при необходимости пригласить снова.</span></div>
+      <div><b>Уведомления на телефоне</b><span>Если вы включили уведомления в браузере — технический адрес подписки браузера и ключи шифрования (без имени и телефона). Чтобы присылать напоминания о записи, переносы и новости студии. Выключить можно в любой момент в личном кабинете или в настройках браузера.</span></div>
       <div><b>Работа сайта</b><span>Технические данные: файлы cookie и локальное хранилище браузера, а при подключении Яндекс Метрики — обезличенные сведения о посещениях (тип устройства, браузер, просмотренные страницы). Чтобы сайт работал и становился удобнее.</span></div>
     </div>
     <p>Оператор не обрабатывает специальные категории данных (о здоровье, убеждениях и т. п.) и биометрические данные. Не указывайте их в комментариях к записи.</p>
@@ -1943,15 +1954,18 @@ a.tel svg { flex: none; }
     <ul>
       <li>хостинг-провайдеру, на сервере которого работает сайт, — для хранения;</li>
       <li>сервису уведомлений (Telegram или СМС) — чтобы Оператор узнал о новой записи и чтобы вам пришло напоминание, если вы его выбрали;</li>
+      <li>сервису доставки уведомлений вашего браузера (Google, Apple, Mozilla и др.) — если вы включили уведомления на телефоне; текст уведомления передаётся в зашифрованном виде, расшифровать его может только ваш браузер;</li>
+      <li>почтовому сервису хостинг-провайдера — чтобы отправлять письма с кодами, подтверждениями и напоминаниями;</li>
       <li>банку — при оплате сертификата или предоплаты за обучение; данные банковской карты вводятся на стороне банка и Оператору не передаются;</li>
       <li>государственным органам — только в случаях, прямо предусмотренных законом.</li>
     </ul>
-    <p>4.4. Если для уведомлений используется Telegram, данные записи (имя, телефон, услуга, время) могут передаваться на его серверы за пределами России. Такая передача происходит только с вашего согласия.</p>
+    <p>4.4. Если для уведомлений используется Telegram, данные записи (имя, телефон, услуга, время) могут передаваться на его серверы за пределами России. Уведомления в браузере доставляются через серверы производителя браузера, которые также могут находиться за пределами России; содержимое уведомления при этом зашифровано. Такая передача происходит только с вашего согласия.</p>
 
     <h2>5. Сроки хранения</h2>
     <p>5.1. Данные о записях и сертификатах хранятся, пока нужны для обслуживания, но не дольше 3 лет после последнего визита или окончания срока сертификата. Данные моделей — не дольше 3 лет после последней процедуры.</p>
     <p>5.2. Сведения об оплатах хранятся в сроки, установленные налоговым законодательством.</p>
     <p>5.3. После окончания срока или при отзыве согласия данные уничтожаются в течение 30 дней, если закон не требует хранить их дольше.</p>
+    <p>5.4. Фото профиля хранится, пока вы его не удалите или не удалите личный кабинет. При удалении оно стирается с сервера сразу.</p>
 
     <h2>6. Ваши права</h2>
     <p>Вы можете:</p>
@@ -1976,13 +1990,13 @@ a.tel svg { flex: none; }
   <section class="block tight"><div class="wrap legal">
     <p>Отмечая галочку «Согласен(на) на обработку персональных данных» в форме на сайте, я свободно, своей волей и в своём интересе даю согласие Шевченко Марина Александровна, плательщик налога на профессиональный доход (самозанятая), ИНН 343703467221, адрес: Волгоградская область, г. Михайловка, ул. Обороны, 41 (далее — «Оператор»), на обработку моих персональных данных на следующих условиях.</p>
     <h2>Какие данные</h2>
-    <p>Имя, номер телефона, email (если я выбираю напоминания на почту), а также сведения, которые я указываю в форме: выбранная услуга или курс, дата и время, комментарий, способ напоминания, имя получателя подарочного сертификата.</p>
+    <p>Имя, номер телефона, email (если я выбираю напоминания на почту), а также сведения, которые я указываю в форме: выбранная услуга или курс, дата и время, комментарий, способ напоминания, имя получателя подарочного сертификата; если я пользуюсь личным кабинетом — email, по желанию фото профиля и подписку на уведомления в браузере.</p>
     <h2>Цели</h2>
     <p>Запись на процедуру или обучение, напоминание о визите, связь со мной по поводу записи, выпуск и учёт подарочного сертификата, ведение истории посещений.</p>
     <h2>Действия</h2>
     <p>Сбор, запись, систематизация, накопление, хранение, уточнение, извлечение, использование, передача (предоставление, доступ) хостинг-провайдеру и сервису уведомлений, блокирование, удаление и уничтожение. Обработка смешанная — с помощью компьютера и без него.</p>
     <h2>Передача за границу</h2>
-    <p>Я согласен(на), что для уведомления мастера о моей записи и для напоминаний мои имя, телефон и данные записи могут передаваться через мессенджер Telegram, серверы которого находятся за пределами России.</p>
+    <p>Я согласен(на), что для уведомления мастера о моей записи и для напоминаний мои имя, телефон и данные записи могут передаваться через мессенджер Telegram, серверы которого находятся за пределами России, а уведомления в браузере (если я их включу) — через серверы производителя браузера; текст таких уведомлений зашифрован.</p>
     <h2>Срок и отзыв</h2>
     <p>Согласие действует до достижения целей обработки, но не дольше 3 лет после моего последнего визита. Я могу отозвать согласие в любой момент, сообщив Оператору по телефону или в WhatsApp <a href="tel:+79954284788">+7 995 428-47-88</a> либо письмом по адресу Оператора. После отзыва данные будут уничтожены в течение 30 дней.</p>
     <p>Я ознакомлен(а) с <a href="#politika">Политикой обработки персональных данных</a>.</p>
@@ -2012,6 +2026,7 @@ a.tel svg { flex: none; }
   </div></section>
 </main>
 
+<dialog class="pdlg avdlg" id="avDlg" aria-label="Фото профиля"><figure class="pbox"><img id="avImg" alt="Фото профиля"><figcaption><span id="avCap"></span></figcaption><button type="button" class="vclose" id="avClose" aria-label="Закрыть фото"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></button></figure><div class="av-acts" id="avActs"><button type="button" class="btn sm" id="avChange">Заменить фото</button><button type="button" class="btn sm ghost" id="avDel">Удалить фото</button></div></dialog>
 <dialog class="pdlg" id="pDlg" aria-label="Фото работы"><figure class="pbox"><img id="pImg" alt=""><figcaption><span id="pCap"></span><span id="pNum"></span></figcaption><button type="button" class="pnav prev" id="pPrev" aria-label="Предыдущее фото"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5.5 8.5 12 15 18.5"></path></svg></button><button type="button" class="pnav next" id="pNext" aria-label="Следующее фото"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5.5 15.5 12 9 18.5"></path></svg></button><button type="button" class="vclose" id="pClose" aria-label="Закрыть фото"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></button></figure></dialog>
 <dialog class="cdlg" id="chDlg" aria-labelledby="chT"><div class="cbox"><button type="button" class="vclose" id="chClose" aria-label="Закрыть"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
   <b id="chT">Написать Марине</b>
@@ -3194,7 +3209,9 @@ a.tel svg { flex: none; }
     var today = dkey(new Date()), d = kData;
     var who = d.acc ? (d.acc.name || d.acc.email) : d.phone;
     $("kWhoName").textContent = who; $("kWhoMail").textContent = d.acc && d.acc.name ? d.acc.email : "";
-    $("kAv").textContent = (/[A-Za-zА-Яа-яЁё]/.exec(who || "") || ["🙂"])[0].toUpperCase();
+    var av = d.acc && d.acc.av, letter = (/[A-Za-zА-Яа-яЁё]/.exec(who || "") || ["🙂"])[0].toUpperCase();
+    $("kAv").innerHTML = (av ? '<img src="' + avUrl(av, true) + '" alt="" width="58" height="58">' : esc(letter)) + (d.acc ? '<span class="k-cam" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span>' : '');
+    $("kAv").disabled = !d.acc; $("kAv").setAttribute("aria-label", av ? "Открыть фото профиля" : "Добавить фото профиля");
     $("kPwOpen").hidden = !d.acc; $("kNewsBox").hidden = !d.acc; kPushRender(); $("kMailTip").hidden = !d.acc || lsGet("ma-mailtip", "") === "1"; $("kPhBox").hidden = !d.acc || !!d.phone;
     var sortT = function (a, b) { return (a.date + hm(a.start).padStart(5, "0")).localeCompare(b.date + hm(b.start).padStart(5, "0")); };
     var next = d.bookings.filter(function (b) { return b.status === "booked" && b.date >= today; }).sort(sortT);
@@ -3484,6 +3501,55 @@ a.tel svg { flex: none; }
   // ---------- уведомления на телефон для клиентки (нужен https и личный кабинет по почте) ----------
   $("kMailCopy").onclick = function () { copyText("marina@ma-nails.ru").then(function () { toast("Адрес скопирован — добавьте его в контакты почты"); }, function () { toast("Не получилось скопировать. Адрес: marina@ma-nails.ru", true); }); };
   $("kMailOk").onclick = function () { lsSet("ma-mailtip", "1"); $("kMailTip").hidden = true; toast("Спасибо! Теперь письма будут приходить во «Входящие»"); };
+  // ---------- фото профиля: сжимаем на телефоне (до 1280 px и квадрат 320 px), на сервере проверяется и пересохраняется ----------
+  function avUrl(n, thumb) { return API.replace(/api\.php$/, "av.php") + "?f=" + (thumb ? n.replace(".", "_t.") : n); }
+  function avMake(file) {
+    return new Promise(function (res, rej) {
+      var url = URL.createObjectURL(file), im = new Image();
+      im.onload = function () {
+        URL.revokeObjectURL(url);
+        var enc = function (w, h, sx, sy, sw, sh) {
+          var c = document.createElement("canvas"); c.width = w; c.height = h;
+          var g = c.getContext("2d"); g.imageSmoothingQuality = "high"; g.drawImage(im, sx, sy, sw, sh, 0, 0, w, h);
+          var d = c.toDataURL("image/webp", .86); return d.indexOf("data:image/webp") === 0 ? d : c.toDataURL("image/jpeg", .88);
+        };
+        var W = im.naturalWidth, H = im.naturalHeight, k = Math.min(1, 1280 / Math.max(W, H)), sq = Math.min(W, H), t = Math.min(320, sq);
+        res({ full: enc(Math.round(W * k), Math.round(H * k), 0, 0, W, H), thumb: enc(t, t, (W - sq) / 2, (H - sq) / 2, sq, sq) });
+      };
+      im.onerror = function () { URL.revokeObjectURL(url); rej(); };
+      im.src = url;
+    });
+  }
+  function avOpen(name, cap, mine) {
+    $("avImg").src = avUrl(name, false); $("avCap").textContent = cap || ""; $("avActs").hidden = !mine; $("avDel").textContent = "Удалить фото"; $("avDel").dataset.sure = "";
+    $("avDlg").showModal();
+  }
+  $("avClose").onclick = function () { $("avDlg").close(); };
+  $("avDlg").addEventListener("click", function (e) { if (e.target === this) this.close(); });
+  $("avDlg").addEventListener("close", function () { $("avImg").removeAttribute("src"); });
+  $("kAv").onclick = function () {
+    if (!kData || !kData.acc) return;
+    if (kData.acc.av) avOpen(kData.acc.av, kData.acc.name || "", true); else $("kAvFile").click();
+  };
+  $("avChange").onclick = function () { $("avDlg").close(); $("kAvFile").click(); };
+  function avSave(body, done) {
+    $("kAv").classList.add("busy");
+    apiSend(Object.assign({ type: "client_avatar", ctoken: ctoken }, body)).then(function (r) {
+      $("kAv").classList.remove("busy");
+      if (!r || !r.ok) { toast((r && r.error) || "Нет связи с сервером. Попробуйте ещё раз", true); return; }
+      kData.acc.av = r.av; renderK(); toast(done);
+    });
+  }
+  $("kAvFile").onchange = function () {
+    var f = this.files && this.files[0]; this.value = ""; if (!f) return;
+    if (!/^image\//.test(f.type) && !/\.(jpe?g|png|webp|heic|heif)$/i.test(f.name)) { toast("Выберите фотографию", true); return; }
+    toast("Загружаю фото…");
+    avMake(f).then(function (d) { avSave(d, "Фото профиля сохранено"); }, function () { toast("Телефон не смог открыть это фото. Выберите другое (JPG или PNG) или сделайте скриншот фото и загрузите его.", true); });
+  };
+  $("avDel").onclick = function () {
+    if (this.dataset.sure !== "1") { this.dataset.sure = "1"; this.textContent = "Точно удалить? Нажмите ещё раз"; return; }
+    $("avDlg").close(); avSave({ del: true }, "Фото удалено");
+  };
   function kPushRender() {
     if (!kData || !kData.acc) { $("kPushBox").hidden = true; return; }
     pushState().then(function (st0) {
@@ -3865,7 +3931,7 @@ a.tel svg { flex: none; }
       var b = r.b;
       var s = svc(b.svc), t = statusOf(b);
       return '<div class="bk' + (b.id === flashId ? " moved" : "") + '"><div class="r1"><b class="num">' + hm(b.start) + '–' + hm(b.start + bmin(b)) + '</b><span class="pill ' + t[1] + '">' + t[0] + '</span></div>' +
-        '<div><b style="font-weight:700">' + esc(b.name) + '</b> · ' + telLink(b.phone) + (b.example ? ' <span class="pill">пример</span>' : '') + '</div>' +
+        '<div>' + (b.accAv && SYNC ? '<button type="button" class="b-av" data-av="' + esc(b.accAv) + '" data-avn="' + esc(b.name) + '" aria-label="Фото клиентки"><img src="' + avUrl(b.accAv, true) + '" alt="" width="28" height="28" loading="lazy"></button> ' : '') + '<b style="font-weight:700">' + esc(b.name) + '</b> · ' + telLink(b.phone) + (b.example ? ' <span class="pill">пример</span>' : '') + '</div>' +
         '<div class="info">' + svcLabel(b) + ' · ' + rub(b.price || s.price) + (b.note ? ' · «' + esc(b.note) + '»' : '') + '</div>' +
         (b.remind && b.remind !== "none" ? '<div class="info">🔔 ' + (b.remind === "mail" ? "Почта" + (b.email ? " " + esc(b.email) : "") : REM_NAME[b.remind] || "Telegram") + ' · ' + remindPlan(b.date).join(", ") + '</div>' : '') +
         overlapNote(b) +
@@ -4332,7 +4398,7 @@ a.tel svg { flex: none; }
       var key = b.example ? "ex" + b.phone : (b.phone.replace(/\D/g, "").replace(/^8/, "7") || b.name);
       if (b.anon) return;  // удалённая клиентка: запись осталась только для статистики
       var c = map[key] || (map[key] = { key: key, name: b.name, phone: b.phone, example: !!b.example, visits: [], came: 0, noshow: 0, cancel: 0, future: null });
-      c.visits.push(b); if (b.accMail) c.acc = b.accMail; if (b.email && !c.mail) c.mail = b.email;
+      c.visits.push(b); if (b.accMail) c.acc = b.accMail; if (b.accAv && !c.av) c.av = b.accAv; if (b.email && !c.mail) c.mail = b.email;
       if (b.status === "came") c.came++;
       if (b.status === "noshow") c.noshow++;
       if (b.status === "cancelled") c.cancel++;
@@ -4542,7 +4608,7 @@ a.tel svg { flex: none; }
       .sort(function (a, b) { return (b.last ? b.last.date : "").localeCompare(a.last ? a.last.date : ""); });
     $("aClients").innerHTML = list.length ? list.map(function (c) {
       var badges = (c.noshow >= 2 ? '<span class="badge bad">часто не приходит</span>' : '') + ((c.cancelClient || 0) >= 2 ? '<span class="badge bad">часто отменяет</span>' : '') + (c.came <= 1 && !c.example ? '<span class="badge new">новая</span>' : '') + (c.example ? '<span class="badge">пример</span>' : '');
-      return '<details class="bk cl"><summary><div class="r1"><b>' + esc(c.name) + ' · ' + telLink(c.phone) + '</b><span>' + badges + '</span></div>' +
+      return '<details class="bk cl"><summary><div class="r1"><div class="cl-who">' + (c.av ? '<button type="button" class="cl-av" data-av="' + esc(c.av) + '" data-avn="' + esc(c.name) + '" aria-label="Фото клиентки"><img src="' + avUrl(c.av, true) + '" alt="" width="40" height="40" loading="lazy"></button>' : '') + '<b>' + esc(c.name) + ' · ' + telLink(c.phone) + '</b></div><span>' + badges + '</span></div>' +
         (c.acc || c.mail ? '<div class="info cl-acc">' + (c.acc ? '🙋 Есть личный кабинет · ' : '✉️ ') + '<a href="mailto:' + esc(c.acc || c.mail) + '" onclick="event.stopPropagation()">' + esc(c.acc || c.mail) + '</a></div>' : '') +
         '<div class="info">' + (c.came ? 'Пришла: ' + times(c.came) + ' · последний раз ' + shortDate(c.last.date) : 'Ещё не приходила') + (c.noshow ? ' · не пришла: ' + times(c.noshow) : '') + (c.cancelClient ? ' · отменила сама: ' + times(c.cancelClient) + (c.cancelLate ? ' (поздно: ' + c.cancelLate + ')' : '') : '') + (c.cancel - (c.cancelClient || 0) > 0 ? ' · отменили вы: ' + (c.cancel - (c.cancelClient || 0)) : '') + (c.future ? ' · записана на ' + shortDate(c.future.date) : '') + '</div></summary>' +
         '<div class="hist">' + c.visits.slice(0, 12).map(function (v) { return '<div><button type="button" class="hgo" data-goto="' + v.id + '" data-d="' + v.date + '" aria-label="Открыть запись в расписании"><span>' + shortDate(v.date) + ', ' + hm(v.start) + '</span><b style="font-weight:600">' + svc(v.svc).name + ' · ' + statusOf(v)[0].toLowerCase() + ' <i aria-hidden="true">›</i></b></button>' + (v.status === "cancelled" ? '<button type="button" class="xdel" data-delb="' + v.id + '" data-key="b' + v.id + '" aria-label="Удалить отменённую запись">Удалить</button>' : '') + '</div>'; }).join("") + '</div>' +
@@ -4551,6 +4617,10 @@ a.tel svg { flex: none; }
         (c.future ? '<div class="info">Чтобы удалить клиентку, сначала отмените её будущую запись: <button type="button" class="a-link" style="padding:0" data-goto="' + c.future.id + '" data-d="' + c.future.date + '">открыть запись ' + shortDate(c.future.date) + ', ' + hm(c.future.start) + ' →</button></div>' : '') + '</details>';
     }).join("") : '<p class="note">Никого не нашли.</p>';
   }
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest("[data-av]"); if (!a || !document.getElementById("v-admin").contains(a)) return;
+    e.preventDefault(); e.stopPropagation(); avOpen(a.dataset.av, a.dataset.avn, false);
+  }, true);
   // удалить отменённую запись насовсем (из дня, истории и статистики)
   function deleteBooking(id) {
     st.deleted = st.deleted || {}; st.deleted[id] = 1;

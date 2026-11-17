@@ -227,7 +227,7 @@ function client_db() {
     // уведомления клиенткам: acc = 0 — рассылка всем; seen — когда клиентка последний раз открывала колокольчик; news — согласие на письма с новостями
     $db->exec('CREATE TABLE IF NOT EXISTS cnotes (id INTEGER PRIMARY KEY AUTOINCREMENT, acc INTEGER, icon TEXT, title TEXT, text TEXT, link TEXT, t INTEGER)');
     $db->exec('CREATE TABLE IF NOT EXISTS link_reqs (id INTEGER PRIMARY KEY AUTOINCREMENT, acc INTEGER, phone TEXT, t INTEGER)');
-    foreach (['seen INTEGER DEFAULT 0', 'news INTEGER DEFAULT 0'] as $col) { try { $db->exec('ALTER TABLE accounts ADD COLUMN ' . $col); } catch (Throwable $e) {} }
+    foreach (['seen INTEGER DEFAULT 0', 'news INTEGER DEFAULT 0', 'av TEXT DEFAULT ""'] as $col) { try { $db->exec('ALTER TABLE accounts ADD COLUMN ' . $col); } catch (Throwable $e) {} }
     return $db;
 }
 // Кто вошёл: по номеру телефона (код из Telegram) или в кабинет по почте
@@ -335,6 +335,7 @@ function acc_merge($accId, $phone) {
         if (digits_phone($x['phone'] ?? '') !== $phone || !empty($x['anon'])) continue;
         if (empty($x['owner'])) $x['owner'] = (int)$a['id'];
         $x['accMail'] = $a['email'];
+        if (!empty($a['av'])) $x['accAv'] = $a['av'];
         $cur = trim((string)($x['name'] ?? ''));
         if ($k === 'bookings' && $words >= 2 && $cur !== $full && count(preg_split('/\s+/u', $cur)) < $words) { $old = $old ?: $cur; $x['name'] = $full; }
         $n++;
@@ -363,3 +364,29 @@ function client_channel($phone) {
     return $mail ? ['mail', $mail] : null;
 }
 function mask_mail($m) { [$a, $d] = explode('@', $m, 2) + ['', '']; return mb_substr($a, 0, 2) . str_repeat('•', max(1, mb_strlen($a) - 2)) . '@' . $d; }
+
+// Фото профиля клиентки: проверить картинку, пересохранить (GD — вредное содержимое не пройдёт), вернуть [данные, расширение]
+function av_img($dataUrl, $maxBytes, $maxPx) {
+    if (!preg_match('#^data:image/(webp|jpeg|png);base64,([A-Za-z0-9+/=]+)$#', (string)$dataUrl, $m)) return null;
+    $bin = base64_decode($m[2], true); if ($bin === false || strlen($bin) > $maxBytes) return null;
+    $info = @getimagesizefromstring($bin);
+    if (!$info || !in_array($info[2], [IMAGETYPE_WEBP, IMAGETYPE_JPEG, IMAGETYPE_PNG], true) || $info[0] > $maxPx || $info[1] > $maxPx || $info[0] < 16 || $info[1] < 16) return null;
+    if (!function_exists('imagecreatefromstring')) return [$bin, $info[2] === IMAGETYPE_WEBP ? 'webp' : 'jpg'];
+    $im = @imagecreatefromstring($bin); if (!$im) return null;
+    ob_start(); $webp = function_exists('imagewebp') && imagewebp($im, null, 86); if (!$webp) { ob_clean(); imagejpeg($im, null, 88); }
+    $out = ob_get_clean(); imagedestroy($im);
+    return [$out, $webp ? 'webp' : 'jpg'];
+}
+function av_dir() { $d = dirname((string)cfg('db_path')) . '/av'; if (!is_dir($d)) @mkdir($d, 0755, true); return $d; }
+function av_remove($name) { if ($name && preg_match('/^([a-f0-9]{32})\.(webp|jpg)$/', $name, $m)) { @unlink(av_dir() . '/' . $name); @unlink(av_dir() . '/' . $m[1] . '_t.' . $m[2]); } }
+// Обновить фото в записях, сертификатах и обучении этой клиентки — мама видит его в своём кабинете
+function av_sync($a, $name) {
+    [$doc, $v] = doc_load(true); $n = 0;
+    foreach (['bookings', 'certs', 'training'] as $k) foreach ($doc[$k] as &$x) {
+        if ((int)($x['owner'] ?? 0) !== (int)$a['id'] && ($x['accMail'] ?? '') !== $a['email']) continue;
+        if ($name) $x['accAv'] = $name; else unset($x['accAv']); $n++;
+    }
+    unset($x);
+    if ($n) doc_save($doc, $v); else doc_abort();
+}
+
