@@ -2538,9 +2538,9 @@ a.tel svg { flex: none; }
     return apiSend({ type: "state", v: force ? -1 : docV, token: token || undefined }).then(function (r) {
       if (!r || !r.ok) return;
       if (token && !r.admin) { logout(); return; }
+      if (r.accs) { var accCh = JSON.stringify(r.accs) !== JSON.stringify(ACCS); ACCS = r.accs; if (accCh && r.same && token) renderTab(); }  // клиентка поставила фото — показать сразу
       if (r.same || inflight) return;
       if (token && synced && diffOps(synced, st).length) { pushSync(); return; }  // сначала сохраним свои изменения — ответ принесёт свежую базу
-      if (r.accs) ACCS = r.accs;
       applyDoc(r.v, r.doc);
       if (token && !purgedOnce) { purgedOnce = true; purgeOld(); }
     });
