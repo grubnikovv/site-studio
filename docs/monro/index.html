@@ -915,8 +915,9 @@ div.f { display: grid; gap: 8px; }
 .k-id span { font-size: 14px; color: var(--mute); overflow-wrap: anywhere; }
 .k-id span:empty { display: none; }
 @media (min-width: 700px) { .k-head { grid-template-columns: auto minmax(0, 1fr) auto; } .k-hb { grid-column: auto; } }
-.k-row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 15px; }
+.k-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 15px; }
 .k-row:first-child { border-top: 0; }
+.k-row > .pill { flex: none; white-space: nowrap; }
 .k-row small { display: block; color: var(--mute); font-size: 13px; }
 #v-zapis > .wrap, #v-kabinet .kab, #v-admin > .wrap { grid-template-columns: minmax(0, 1fr); }  /* колонка не шире экрана */
 #v-zapis .card, #v-kabinet .card { min-width: 0; grid-template-columns: minmax(0, 1fr); }
