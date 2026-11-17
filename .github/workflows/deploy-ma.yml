@@ -39,6 +39,11 @@ jobs:
           test -n "$BOT_TOKEN" && test ${#ADMIN_KEY} -ge 16 || { echo "Нет секретов BOT_TOKEN или ADMIN_KEY (не короче 16 символов)"; exit 1; }
           mkdir out && cp -r docs/monro/. out/
           sed -i 's#var API = ""#var API = "/server/api.php"#' out/index.html
+          # рабочий сайт открыт для Яндекса и Google (демо-сборка закрывает страницы от поиска — здесь убираем)
+          sed -i 's#<meta name="robots" content="noindex,nofollow">#<link rel="canonical" href="https://'"$DOMAIN"'/">#' out/index.html
+          ! grep -q 'name="robots"' out/index.html
+          printf 'User-agent: *\nDisallow: /server/\n\nSitemap: https://%s/sitemap.xml\n' "$DOMAIN" > out/robots.txt
+          printf '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://%s/</loc></url>\n</urlset>\n' "$DOMAIN" > out/sitemap.xml
           grep -q 'var API = "/server/api.php"' out/index.html
           # письма клиенткам — только когда у домена работает почта (файл demos/monro-beauty/mail-on)
           [ -f demos/monro-beauty/mail-on ] || sed -i 's#var MAIL_REMIND = true;#var MAIL_REMIND = false;#' out/index.html
