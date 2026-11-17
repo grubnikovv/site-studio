@@ -1,5 +1,0 @@
-# Закрыть от просмотра настройки, базу и журнал
-<FilesMatch "^(config\.php|config\.sample\.php|lib\.php|bot\.php|store\.php|push\.php|backup\.php|\.ht.*)$">
-  Require all denied
-</FilesMatch>
-RedirectMatch 403 /data/
