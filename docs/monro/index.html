@@ -2289,6 +2289,7 @@ a.tel svg { flex: none; }
     <div class="f"><span class="lbl">День</span><div class="days" id="eDays"></div></div>
     <div class="f"><span class="lbl">Время</span><div class="slots" id="eSlots"></div><b class="erange" id="eRange"></b><div class="ectx" id="eCtx"></div><div class="ewarn" id="eWarn" role="status" hidden></div><span class="note">Зачёркнуто — процедура не поместится: залезет на другую клиентку. Пунктиром — время вне обычного графика. <span class="lg-lunch">Золотым — время обеда.</span> Вам записать можно, клиентки онлайн это время не видят.</span></div>
     <div class="row2" id="eContact"><label class="f">Имя клиентки<input type="text" id="eName"></label><label class="f">Телефон<input type="tel" id="ePhone" inputmode="tel" placeholder="+7"></label></div>
+    <label class="check" id="eAllL" hidden><input type="checkbox" id="eAll" checked><span id="eAllT">Исправить во всех её записях</span></label>
     <p class="err" id="eErr" hidden></p>
     <button class="btn" id="eSave">Сохранить</button>
   </div>
@@ -4249,8 +4250,16 @@ a.tel svg { flex: none; }
     // если выбранный день выходной или занят — открываем ближайший день со свободным временем
     if (!freeSlots(ed.date, bmin(ed), ed.id, true).some(function (x) { return x.free; }) && rec === null) { for (var i = 0; i < DAYS; i++) { var k = dkey(addDays(i)); if (freeSlots(k, bmin(ed), ed.id, true).some(function (x) { return x.free; })) { ed.date = k; break; } } }
     $("eTitle").textContent = ed.move ? "Изменить запись" : "Новая запись";
-    $("eWho").textContent = ed.move ? rec.name + " · сейчас: " + whenText(rec.date, rec.start) + ". Можно поменять услугу, добавить френч или снятие, перенести время." : "Для клиентки, которая записалась по телефону или в мессенджере.";
-    $("eContact").hidden = ed.move; $("eSvc").value = ed.svc; $("eName").value = ""; $("ePhone").value = ""; $("eErr").hidden = true;
+    $("eWho").textContent = ed.move ? rec.name + " · сейчас: " + whenText(rec.date, rec.start) + (rec.manual && !rec.owner && !rec.accMail && !rec.anon ? ". Можно поменять услугу, время, а также имя и телефон клиентки." : ". Можно поменять услугу, добавить френч или снятие, перенести время.") : "Для клиентки, которая записалась по телефону или в мессенджере.";
+    // данные клиентки мама меняет только в записях, которые вносила сама: что клиентка указала сама — меняет только она
+    ed.who = !!(rec && rec.manual && !rec.owner && !rec.accMail && !rec.anon);
+    $("eContact").hidden = ed.move && !ed.who; $("eSvc").value = ed.svc; $("eName").value = ""; $("ePhone").value = ""; $("eErr").hidden = true; $("eAllL").hidden = true;
+    if (ed.who) {
+      $("eName").value = rec.name || ""; $("ePhone").value = rec.phone && rec.phone !== "—" ? rec.phone : "";
+      ed.same = st.bookings.filter(function (x) { return x.id !== rec.id && !x.anon && x.manual && !x.owner && !x.accMail && (digits(rec.phone).length >= 11 ? digits(x.phone) === digits(rec.phone) : String(x.name || "").trim() === String(rec.name || "").trim()); });
+      $("eAllL").hidden = !ed.same.length; $("eAll").checked = true; $("eAllT").textContent = "Исправить и в других её записях (" + ed.same.length + ")";
+    }
+    if (rec && !ed.who && !rec.anon) $("eWho").textContent += " Имя и телефон клиентка указала сама — изменить их может только она в личном кабинете.";
     $("eSave").textContent = ed.move ? "Сохранить" : "Добавить запись";
     if (pre) { ed.svc = pre.svc || ed.svc; $("eSvc").value = ed.svc; $("eName").value = pre.name || ""; $("ePhone").value = pre.phone && /\d{10}/.test(pre.phone.replace(/\D/g, "")) ? pre.phone : ""; }
     renderEditor();
@@ -4277,7 +4286,8 @@ a.tel svg { flex: none; }
   $("eSlots").addEventListener("click", function (e) { var b = e.target.closest("[data-t]"); if (b && !b.disabled) { ed.start = Number(b.dataset.t); renderEditor(); } });
   $("eSave").onclick = function () {
     var err = ed.start == null ? "Выберите время." : "";
-    if (!err && !ed.move && !$("eName").value.trim()) err = "Укажите имя клиентки.";
+    if (!err && (!ed.move || ed.who) && !$("eName").value.trim()) err = "Укажите имя клиентки.";
+    if (!err && ed.who && $("ePhone").value.trim() && !phoneOk($("ePhone").value)) err = "Проверьте телефон: нужно 11 цифр, например +7 900 123-45-67.";
     // перед сохранением ещё раз проверяем, что выбранное время свободно на всю длительность процедуры
     if (!err && !freeSlots(ed.date, bmin(ed), ed.id, true).some(function (x) { return x.t === ed.start && x.free; })) { err = "Это время уже занято или процедура не помещается до следующей записи. Выберите другое."; ed.start = null; renderEditor(); }
     if (!err) {  // защита от ошибки: та же клиентка уже записана на эту услугу в этот день
@@ -4296,7 +4306,16 @@ a.tel svg { flex: none; }
       if (changed) { own.svc = ed.svc; own.remove = !!ed.remove; own.french = !!ed.french; own.price = bprice(ed); own.svcName = svcLabel(ed); }
       own.dur = bmin(own);
       if (own.status === "cancelled") { own.status = "booked"; delete own.by; }
-      toast(changed && movedT ? "Запись изменена и перенесена на " + whenText(ed.date, ed.start) : changed ? "Запись изменена: " + rub(own.price) + ", " + dur(own.dur) : "Перенесено на " + whenText(ed.date, ed.start));
+      var whoFix = "";
+      if (ed.who) {  // исправить имя и телефон (и в других записях этой клиентки, если отмечено)
+        var nn = $("eName").value.trim().replace(/\s+/g, " "), pp = phoneOk($("ePhone").value), np = pp ? phoneNice(pp) : (own.phone || "—");
+        if (nn !== own.name || digits(np) !== digits(own.phone)) {
+          var fix = [own].concat($("eAll").checked && ed.same ? ed.same.map(function (x) { return ownCopy(x); }) : []);
+          fix.forEach(function (x) { x.name = nn; x.phone = np; });
+          whoFix = fix.length > 1 ? "Данные клиентки исправлены в " + fix.length + " записях. " : "Данные клиентки исправлены. ";
+        }
+      }
+      toast(whoFix + (changed && movedT ? "Запись изменена и перенесена на " + whenText(ed.date, ed.start) : changed ? "Запись изменена: " + rub(own.price) + ", " + dur(own.dur) : movedT ? "Перенесено на " + whenText(ed.date, ed.start) : "Сохранено"));
     } else {
       var nb = { id: "b" + Date.now().toString(36), date: ed.date, start: ed.start, svc: ed.svc, remove: !!ed.remove, french: !!ed.french, name: $("eName").value.trim(), phone: $("ePhone").value.trim() || "—", price: bprice(ed), status: "booked", manual: true }; nb.dur = bmin(nb);
       // прошедшая дата (или уже закончилось сегодня) — клиентка пришла
