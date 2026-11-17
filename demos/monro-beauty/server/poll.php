@@ -11,6 +11,14 @@ if (isset($_GET['diag'])) {  // проверка связи: poll.php?key=...&di
     echo 'Telegram: ' . (!empty($me['ok']) ? 'связь есть, бот @' . $me['result']['username'] : 'нет связи') . ' (' . round(microtime(true) - $t, 1) . " с)\n";
     $w = tg('getWebhookInfo'); echo 'Вебхук: ' . json_encode($w['result'] ?? null, JSON_UNESCAPED_UNICODE) . "\n";
     echo 'Почта: ' . (cfg('smtp_pass') ? 'через ящик ' . cfg('mail_from') . ' (SMTP, с подписью DKIM)' : 'через mail() хостинга — пароль ящика не задан (секрет MAIL_PASS)') . "\n";
+    try {  // фото профиля: сколько в базе, есть ли файлы, открываются ли
+        require_once __DIR__ . '/store.php';
+        $avs = client_db()->query("SELECT av FROM accounts WHERE av <> '' AND av IS NOT NULL")->fetchAll(PDO::FETCH_COLUMN);
+        $files = glob(av_dir() . '/*') ?: [];
+        echo 'Фото профиля: в базе ' . count($avs) . ', файлов ' . count($files) . ', GD ' . (function_exists('imagecreatefromstring') ? 'есть' : 'НЕТ') . ', WebP ' . (function_exists('imagewebp') ? 'есть' : 'нет');
+        if ($avs) { $f = av_dir() . '/' . $avs[0]; echo ', первый файл ' . (is_file($f) ? 'на месте (' . round(filesize($f) / 1024) . ' КБ)' : 'НЕ НАЙДЕН'); }
+        echo "\n";
+    } catch (Throwable $e) { echo 'Фото профиля: ошибка ' . $e->getMessage() . "\n"; }
     echo 'PHP ' . PHP_VERSION . ', curl ' . (curl_version()['version'] ?? '?') . "\n";
     $q = db()->query('SELECT COUNT(*) FROM admins'); echo 'Подключено админов: ' . $q->fetchColumn() . "\n";
     $bk = glob(dirname(cfg('db_path')) . '/backups/ma-*.sqlite') ?: []; echo 'Резервных копий: ' . count($bk) . ($bk ? ', последняя ' . basename(end($bk)) . ' (' . round(filesize(end($bk)) / 1024) . ' КБ)' : '') . "\n";
