@@ -51,6 +51,51 @@ try {
     }
 } catch (Throwable $e) { logline('cron cnote: ' . $e->getMessage()); }
 
+// «Пора на коррекцию»: как список в кабинете мастера — последний визит с покрытием, прошло 3–4 недели, новой записи нет.
+// Раз в день (11:00–19:00): Марине — о новых клиентках в списке (колокольчик, Telegram, почта); клиенткам с кабинетом — напоминание.
+try {
+    require_once __DIR__ . '/store.php';
+    $hr = (int)date('G'); $today = date('Y-m-d');
+    if ((($hr >= 11 && $hr < 19) || (PHP_SAPI === 'cli' && getenv('CORR_FORCE'))) && kv_get('corr_day') !== $today) {
+        kv_put('corr_day', $today);
+        $CORR = ['gel' => 21, 'str' => 21, 'cor' => 21, 'cor4' => 21, 'ext' => 21, 'ext4' => 21, 'pedg' => 28, 'pedp' => 28];
+        $SVN = ['gel' => 'маникюра с гель-лаком', 'str' => 'маникюра с укреплением', 'cor' => 'коррекции', 'cor4' => 'коррекции', 'ext' => 'наращивания', 'ext4' => 'наращивания', 'pedg' => 'педикюра с гель-лаком', 'pedp' => 'педикюра'];
+        [$doc] = doc_load(false); $cl = [];
+        foreach ($doc['bookings'] as $b) {
+            if (!empty($b['anon']) || !empty($b['example']) || empty($b['date'])) continue;
+            $key = digits_phone($b['phone'] ?? '') ?: trim((string)($b['name'] ?? '')); if ($key === '') continue;
+            $c = &$cl[$key]; $c = $c ?? ['last' => null, 'future' => false];
+            if (($b['status'] ?? '') === 'booked' && $b['date'] >= $today) $c['future'] = true;
+            if (($b['status'] ?? '') === 'came' && (!$c['last'] || $b['date'] . str_pad((string)$b['start'], 4, '0', STR_PAD_LEFT) > $c['last']['date'] . str_pad((string)$c['last']['start'], 4, '0', STR_PAD_LEFT))) $c['last'] = $b;
+            unset($c);
+        }
+        $seen = json_decode((string)kv_get('corr_seen'), true) ?: []; $new = [];
+        foreach ($cl as $key => $c) {
+            $l = $c['last']; if (!$l || $c['future'] || empty($CORR[$l['svc'] ?? ''])) continue;
+            $days = (int)round((strtotime($today . ' 12:00') - strtotime($l['date'] . ' 12:00')) / 86400); $need = $CORR[$l['svc']];
+            if ($days < $need - 3) continue;
+            if (($seen[$key] ?? '') !== $l['date']) { $seen[$key] = $l['date']; $new[] = [$l, $days]; }
+            // клиентке с личным кабинетом — напоминание (если бот по этой записи уже не напомнил)
+            if ($days >= $need && !kv_get('ccorr_' . $l['id']) && ($acc = acc_of($l))) {
+                kv_put('ccorr_' . $l['id'], 1);
+                $q = db()->prepare('SELECT sent_corr FROM bookings WHERE id = ? AND (chat_id IS NOT NULL OR remind = "mail")'); $q->execute([(string)$l['id']]);
+                if (!$q->fetchColumn()) cnote($acc, '💅', 'Пора обновить покрытие', 'Прошло ' . round($days / 7) . ' нед. после ' . ($SVN[$l['svc']] ?? 'визита') . '. Самое время записаться, пока ногти не отросли.', '#zapis');
+            }
+        }
+        // старые отметки (клиентка давно не в списке) — не храним
+        foreach ($seen as $k => $d) if ($d < date('Y-m-d', strtotime('-120 days'))) unset($seen[$k]);
+        kv_put('corr_seen', json_encode($seen, JSON_UNESCAPED_UNICODE));
+        if ($new) {
+            usort($new, fn($a, $b) => $b[1] <=> $a[1]);
+            $lines = array_map(fn($x) => '• ' . h($x[0]['name'] ?? '') . ', ' . (digits_phone($x[0]['phone'] ?? '') ? phone_nice(digits_phone($x[0]['phone'])) : '') . ' — ' . $x[1] . ' дн. после ' . ($SVN[$x[0]['svc']] ?? 'визита'), $new);
+            notify_admins('💅 <b>Пора на коррекцию: ' . count($new) . "</b>\n" . implode("\n", $lines) . "\n\nНаписать клиентке или записать — в кабинете, вкладка «Клиентки»: " . h(rtrim((string)cfg('site_url'), '/') . '/#admin'));
+            [$doc2, $v2] = doc_load(true);
+            doc_note($doc2, '💅', 'Пора на коррекцию: ' . count($new), implode(', ', array_map(fn($x) => ($x[0]['name'] ?? '') . ' (' . $x[1] . ' дн.)', array_slice($new, 0, 6))) . (count($new) > 6 ? ' и ещё ' . (count($new) - 6) : '') . '. Список — во вкладке «Клиентки».', ['tab' => 'clients']);
+            doc_save($doc2, $v2);
+        }
+    }
+} catch (Throwable $e) { logline('cron corr: ' . $e->getMessage()); }
+
 // Срок хранения данных — 3 года после визита (политика конфиденциальности)
 $db->prepare('DELETE FROM bookings WHERE date < ?')->execute([date('Y-m-d', strtotime('-3 years'))]);
 if (PHP_SAPI === 'cli') echo "ok, отправлено: $sent\n";
