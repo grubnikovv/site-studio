@@ -1698,7 +1698,7 @@ a.tel svg { flex: none; }
       <form class="k-f" id="kfCode" novalidate hidden>
         <h3>Подтвердите почту</h3>
         <p class="note">Отправили код из 6 цифр на <b id="kCodeTo"></b>.</p>
-        <div class="k-spam"><b>Письмо придёт в течение пары минут</b> от <span class="num">marina@ma-nails.ru</span>. Нет во «Входящих» — загляните в «Спам» и «Промоакции» и отметьте письмо «Не спам», чтобы следующие приходили как обычно.</div>
+        <div class="k-spam"><b>Письмо придёт в течение пары минут</b> от <span class="num">marina@ma-nails.ru</span>. Наши письма <b>могут попасть в «Спам»</b> — если во «Входящих» нет, загляните туда (и в «Промоакции») и нажмите «Не спам». А лучше добавьте этот адрес в контакты — тогда все письма будут приходить во «Входящие».</div>
         <label for="kCd">Код из письма</label><input type="text" id="kCd" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456">
         <p class="err" id="kfCodeErr" hidden></p>
         <button class="btn" type="submit">Подтвердить</button>
@@ -1710,7 +1710,7 @@ a.tel svg { flex: none; }
         <p class="note" id="kRsNote">Укажите почту, с которой регистрировались, — пришлём код для смены пароля.</p>
         <label for="kRsE">Почта</label><input type="email" id="kRsE" autocomplete="email" inputmode="email" placeholder="name@mail.ru" maxlength="80">
         <div id="kRs2" hidden>
-          <div class="k-spam"><b>Письмо придёт в течение пары минут</b> от <span class="num">marina@ma-nails.ru</span>. Нет во «Входящих» — загляните в «Спам» и «Промоакции» и отметьте письмо «Не спам», чтобы следующие приходили как обычно.</div>
+          <div class="k-spam"><b>Письмо придёт в течение пары минут</b> от <span class="num">marina@ma-nails.ru</span>. Наши письма <b>могут попасть в «Спам»</b> — если во «Входящих» нет, загляните туда (и в «Промоакции») и нажмите «Не спам». А лучше добавьте этот адрес в контакты — тогда все письма будут приходить во «Входящие».</div>
           <label for="kRsC">Код из письма</label><input type="text" id="kRsC" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456">
           <label for="kRsP">Новый пароль</label><div class="pass-w"><input type="password" id="kRsP" autocomplete="new-password" minlength="6"><button type="button" class="pass-eye" aria-label="Показать пароль" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="eye-x" d="M4 4l16 16"/></svg></button></div>
         </div>
@@ -1796,7 +1796,7 @@ a.tel svg { flex: none; }
       <label class="f">Кому, по желанию — напишем на сертификате<input type="text" id="cTo" maxlength="30" placeholder="Например: Любимой маме"></label>
       <div class="row2"><label class="f">Ваше имя<input type="text" id="cName" autocomplete="given-name"></label><label class="f">Телефон<input type="tel" id="cPhone" inputmode="tel" placeholder="+7"></label></div>
       <label class="f">Почта — пришлём на неё сертификат<input type="email" id="cEmail" autocomplete="email" inputmode="email" placeholder="name@mail.ru" maxlength="80"></label>
-      <p class="note" style="margin:-4px 0 0">Сразу придёт письмо с номером сертификата, а после оплаты — что он активен. Так он точно не потеряется. Нет письма — проверьте «Спам».</p>
+      <p class="note" style="margin:-4px 0 0">Сразу придёт письмо с номером сертификата, а после оплаты — что он активен. Так он точно не потеряется. Письма могут попасть в «Спам» — если во «Входящих» нет, загляните туда и добавьте marina@ma-nails.ru в контакты.</p>
       <div class="till-warn" id="cTillWarn"></div>
       <label class="check"><input type="checkbox" id="cTerm"><span><span id="cTermText">Знаю, до какого числа действует сертификат.</span> Согласен(на) с <a href="#oferta" target="_blank">условиями оферты</a>.</span></label>
       <label class="check"><input type="checkbox" id="cPd"><span>Согласен(на) на <a href="#soglasie" target="_blank">обработку персональных данных</a> и с <a href="#politika" target="_blank">политикой конфиденциальности</a>.</span></label>
@@ -2922,7 +2922,7 @@ a.tel svg { flex: none; }
       $("myPhone").value = b.phone; lsSet("ma-myphone", b.phone); $("myList").innerHTML = "";
       $("bDone").textContent = whenText(b.date, b.start) + ". " + svcLabel(b) + ". Адрес: ул. Обороны, 41.";
       $("bRemDone").innerHTML = b.remind === "mail"
-        ? '<div class="rem-cta"><b>📩 Письмо отправлено</b><p>Подтверждение записи придёт на ' + esc(b.email) + '. Если его нет через пару минут — проверьте папку «Спам» и отметьте «Не спам», чтобы напоминания приходили во «Входящие».</p></div>'
+        ? '<div class="rem-cta"><b>📩 Письмо отправлено</b><p>Подтверждение записи придёт на ' + esc(b.email) + '. Письма могут попасть в «Спам»: если во «Входящих» нет через пару минут, загляните туда и нажмите «Не спам». Добавьте marina@ma-nails.ru в контакты — и напоминания будут приходить во «Входящие».</p></div>'
         : b.remind === "none"
         ? '<div class="rem-cta"><b>🔔 Чтобы не забыть о записи</b><p>Подключите бесплатные напоминания: за 2 дня и за 2 часа до визита, перенос — одной кнопкой.</p><button class="btn glow" type="button" data-bot="tg">🔔 Подключить в Telegram</button></div>'
         : '<div class="rem-cta"><b>Остался один шаг</b><p>Нажмите кнопку и «Старт» в боте — без этого напоминания не придут. Это бесплатно.</p><button class="btn glow" type="button" data-bot="' + b.remind + '">🔔 Подключить в ' + (REM_NAME[b.remind] || "Telegram") + '</button></div>';
@@ -2959,7 +2959,7 @@ a.tel svg { flex: none; }
   function remindText(via, k) {
     if (via === "none") return "Без напоминаний легко забыть о записи. Если планы изменятся, напишите или позвоните Марине.";
     var w = remindPlan(k).join(", ");
-    if (via === "mail") return "Пришлём письмо с подтверждением, напомним " + w + " до визита и через 3 недели — о коррекции. Если письма нет — загляните в «Спам».";
+    if (via === "mail") return "Пришлём письмо с подтверждением, напомним " + w + " до визита и через 3 недели — о коррекции. Письма могут попасть в «Спам» — добавьте marina@ma-nails.ru в контакты, чтобы они приходили во «Входящие».";
     return "Напомним " + w + " до визита и через 3 недели — о коррекции. После записи останется нажать одну кнопку, чтобы подключить бота в " + (REM_NAME[via] || "Telegram") + ".";
   }
   function renderRem() {
@@ -4801,7 +4801,7 @@ a.tel svg { flex: none; }
         var until = cid.hold || Date.now() + PAY.payMin * 6e4;
         $("mcPhone").value = phone;
         save(); renderGift(code); btn.disabled = false; btn.textContent = "Оплатить " + rub(cSum);
-        $("cDone").innerHTML = "<b>Сертификат № " + code + "</b> на " + rub(cSum) + " создан и ждёт оплаты. Письмо с номером отправили на " + esc(cid.email || "") + " (нет во «Входящих» — проверьте «Спам»). Оплатите по СБП — как только Марина подтвердит поступление, он станет активным и его можно будет подарить." + payBox(cSum, "Здравствуйте, Марина! Я оплатил(а) подарочный сертификат № " + code + " на " + rub(cSum) + ". Меня зовут " + name + ", телефон " + phone + ".", "c:" + cid.id, until) +
+        $("cDone").innerHTML = "<b>Сертификат № " + code + "</b> на " + rub(cSum) + " создан и ждёт оплаты. Письмо с номером отправили на " + esc(cid.email || "") + " (письмо может попасть в «Спам» — если во «Входящих» нет, загляните туда). Оплатите по СБП — как только Марина подтвердит поступление, он станет активным и его можно будет подарить." + payBox(cSum, "Здравствуйте, Марина! Я оплатил(а) подарочный сертификат № " + code + " на " + rub(cSum) + ". Меня зовут " + name + ", телефон " + phone + ".", "c:" + cid.id, until) +
           tgPreview("🎁 Новый сертификат № " + code + " на " + rub(cSum) + "\n" + name + ", " + phone + "\nЖдёт оплату по СБП.");
         $("cDone").hidden = false; $("cName").value = ""; $("cPhone").value = ""; $("cEmail").value = ""; $("cPd").checked = false; $("cTerm").checked = false;
         lastCode = code; $("cShare").hidden = true;
@@ -5106,7 +5106,7 @@ a.tel svg { flex: none; }
       if (r && r.relogin) { closeMail(); logout(); return; }
       if (!r || !r.ok) { errBox("aMailErr", (r && r.error) || "Нет связи с сервером"); return; }
       mailShow(r.mail);
-      toast(r.mail ? (r.sent ? "Сохранено. Проверочное письмо отправлено на " + r.mail + " — проверьте и папку «Спам»" : "Сохранено, но письмо отправить не удалось. Напишите разработчику") : "Уведомления на почту выключены");
+      toast(r.mail ? (r.sent ? "Сохранено. Проверочное письмо отправлено на " + r.mail + ". Если оно в «Спаме» — нажмите «Не спам» и добавьте marina@ma-nails.ru в контакты своей почты, тогда все уведомления будут приходить во «Входящие»." : "Сохранено, но письмо отправить не удалось. Напишите разработчику") : "Уведомления на почту выключены");
     });
   }
   $("aMail").addEventListener("submit", function (e) {

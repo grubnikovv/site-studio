@@ -127,10 +127,11 @@ function send_mail($to, $subject, $text) {
         . '<div style="font-family:Georgia,serif;font-size:22px;color:#9b1f45;margin-bottom:16px">М.А — академия маникюра и педикюра</div>'
         . '<div style="background:#fff;border-radius:16px;padding:22px 20px;font-size:16px;line-height:1.55">' . str_replace('<a href=', '<a style="color:#9b1f45" href=', nl2br($text)) . '</div>'
         . '<div style="font-size:13px;color:#7a6a6e;margin-top:14px;line-height:1.5">Михайловка, ул. Обороны, 41 · +7 995 428-47-88<br>'
-        . '<a href="' . h($site) . '/" style="color:#9b1f45">' . h(preg_replace('#^https?://#', '', $site)) . '</a></div></div></body></html>';
+        . '<a href="' . h($site) . '/" style="color:#9b1f45">' . h(preg_replace('#^https?://#', '', $site)) . '</a><br>'
+        . 'Чтобы письма не попадали в «Спам», добавьте ' . h($from) . ' в контакты.</div></div></body></html>';
     // Обычный текст + красивая версия (письмо только из HTML почтовики чаще считают спамом), свой Message-ID и дата
     $plain = html_entity_decode(strip_tags(preg_replace(['#<a [^>]*href="([^"]+)"[^>]*>(.*?)</a>#u', '#<br\s*/?>#i'], ['$2 ($1)', "\n"], $text)), ENT_QUOTES, 'UTF-8')
-        . "\n\n—\nСтудия «М.А», Михайловка, ул. Обороны, 41 · +7 995 428-47-88\n" . $site . '/';
+        . "\n\n—\nСтудия «М.А», Михайловка, ул. Обороны, 41 · +7 995 428-47-88\n" . $site . "/\nЧтобы письма не попадали в «Спам», добавьте $from в контакты.";
     $plain = preg_replace('/\((https?:[^)]+)\) \(\1\)|(https?:\S+) \(\2\)/u', '$1$2', $plain);  // ссылка, подписанная самой собой, — один раз
     $b = 'ma' . bin2hex(random_bytes(8)); $dom = substr(strrchr($from, '@'), 1);
     $headers = "MIME-Version: 1.0\r\nContent-Type: multipart/alternative; boundary=\"$b\"\r\n"
