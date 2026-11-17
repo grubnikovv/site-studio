@@ -283,7 +283,8 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 #kSeg { margin-bottom: 4px; }
 .k-spam { font-size: 13.5px; line-height: 1.45; color: var(--ink); background: color-mix(in srgb, var(--gold) 12%, var(--paper)); border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--line)); border-radius: 14px; padding: 10px 12px; }
 .k-alt { margin-top: 6px; }
-.k-hb { display: inline-flex; gap: 14px; }
+.k-hb { display: flex; gap: 8px; flex-wrap: wrap; grid-column: 1 / -1; }
+.k-hb .a-link { border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; background: var(--paper); font-size: 14px; text-decoration: none; }
 .k-delopen { justify-self: center; color: var(--mute); font-weight: 600; margin-top: 8px; }
 .k-del { border-color: color-mix(in srgb, #B3261E 35%, var(--line)); }
 .k-warn { margin: 0; padding: 0 0 0 4px; list-style: none; display: grid; gap: 8px; font-size: 14px; line-height: 1.45; }
@@ -888,7 +889,14 @@ div.f { display: grid; gap: 8px; }
 #kBody .card { display: grid; gap: 12px; }
 #kBody h3 { margin: 0; }
 #kStep2:not([hidden]) { display: grid; gap: 10px; }
-.k-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 15px; }
+.k-head { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 14px; background: var(--blush); border: 1px solid var(--line); border-radius: 24px; padding: 18px; }
+.k-av { width: 54px; height: 54px; border-radius: 50%; background: var(--lac); color: var(--lac-ink); display: grid; place-items: center; font: 600 24px/1 var(--display); }
+.k-id { display: grid; gap: 2px; min-width: 0; }
+.k-id small { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--mute); }
+.k-id b { font-size: 20px; font-weight: 600; overflow-wrap: anywhere; }
+.k-id span { font-size: 14px; color: var(--mute); overflow-wrap: anywhere; }
+.k-id span:empty { display: none; }
+@media (min-width: 700px) { .k-head { grid-template-columns: auto minmax(0, 1fr) auto; } .k-hb { grid-column: auto; } }
 .k-row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 15px; }
 .k-row:first-child { border-top: 0; }
 .k-row small { display: block; color: var(--mute); font-size: 13px; }
@@ -1728,7 +1736,7 @@ a.tel svg { flex: none; }
       <button type="button" class="a-link" data-kgo="login">← Войти по почте</button>
     </form>
     <div id="kBody" hidden>
-      <div class="k-head"><span>Вы вошли: <b id="kWho"></b></span><span class="k-hb"><button type="button" class="a-link" id="kPwOpen" hidden>Сменить пароль</button><button type="button" class="a-link" id="kOut">Выйти</button></span></div>
+      <div class="k-head"><div class="k-av" id="kAv" aria-hidden="true"></div><div class="k-id"><small>Вы вошли</small><b id="kWhoName"></b><span id="kWhoMail"></span></div><span class="k-hb"><button type="button" class="a-link" id="kPwOpen" hidden>Сменить пароль</button><button type="button" class="a-link" id="kOut">Выйти</button></span></div>
       <form class="card a-login" id="kPwBox" novalidate hidden><h3>Сменить пароль</h3>
         <label for="kPwO">Текущий пароль</label><div class="pass-w"><input type="password" id="kPwO" autocomplete="current-password" minlength="6"><button type="button" class="pass-eye" aria-label="Показать пароль" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="eye-x" d="M4 4l16 16"/></svg></button></div>
         <label for="kPwN">Новый пароль</label><div class="pass-w"><input type="password" id="kPwN" autocomplete="new-password" minlength="6"><button type="button" class="pass-eye" aria-label="Показать пароль" aria-pressed="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="eye-x" d="M4 4l16 16"/></svg></button></div>
@@ -3180,7 +3188,9 @@ a.tel svg { flex: none; }
   }
   function renderK() {
     var today = dkey(new Date()), d = kData;
-    $("kWho").textContent = d.acc ? (d.acc.name ? d.acc.name + " · " : "") + d.acc.email : d.phone;
+    var who = d.acc ? (d.acc.name || d.acc.email) : d.phone;
+    $("kWhoName").textContent = who; $("kWhoMail").textContent = d.acc && d.acc.name ? d.acc.email : "";
+    $("kAv").textContent = (/[A-Za-zА-Яа-яЁё]/.exec(who || "") || ["🙂"])[0].toUpperCase();
     $("kPwOpen").hidden = !d.acc; $("kNewsBox").hidden = !d.acc; kPushRender(); $("kMailTip").hidden = !d.acc || lsGet("ma-mailtip", "") === "1"; $("kPhBox").hidden = !d.acc || !!d.phone;
     var sortT = function (a, b) { return (a.date + hm(a.start).padStart(5, "0")).localeCompare(b.date + hm(b.start).padStart(5, "0")); };
     var next = d.bookings.filter(function (b) { return b.status === "booked" && b.date >= today; }).sort(sortT);
