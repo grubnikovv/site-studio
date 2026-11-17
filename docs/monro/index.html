@@ -2252,7 +2252,7 @@ a.tel svg { flex: none; }
       <div class="card"><div class="adm-top"><h3 id="calTitle">Календарь</h3><div class="mnav"><button type="button" class="btn sm ghost" id="calPrev" aria-label="Предыдущий месяц">‹</button><button type="button" class="btn sm ghost" id="calNext" aria-label="Следующий месяц">›</button></div></div>
         <p class="note" id="calSum" style="margin:0"></p>
         <div class="cal" id="aCal"></div>
-        <p class="note" style="margin:0">Цифра — сколько записей в этот день. Нажмите на день — откроются его записи.</p>
+        <p class="note" style="margin:0">Цифра в кружке — сколько записей, под ней — сумма дня (1,7к = 1 700 ₽, без отмен и неявок). Нажмите на день — откроются его записи.</p>
       </div>
     </section>
     <section class="atab" data-tab="clients" hidden>
@@ -4446,7 +4446,7 @@ a.tel svg { flex: none; }
         (tr ? '<i class="tr">обуч.</i>' : n ? '<i>' + n + '</i>' : '<i class="n0">' + (off ? "вых" : "—") + '</i>') + '<span class="cs">' + (sum ? kk(sum) : "") + '</span></button>';
     }
     $("aCal").innerHTML = h;
-    $("calSum").innerHTML = tot ? "Записей за месяц: <b>" + tot + "</b> на сумму <b>" + rub(money) + "</b>, дней с записями: " + busy + ". Под числом записей — сумма дня (6,2к = 6 200 ₽)." : "В этом месяце записей пока нет.";
+    $("calSum").innerHTML = tot ? "Записей за месяц: <b>" + tot + "</b> на сумму <b>" + rub(money) + "</b>, дней с записями: " + busy + "." : "В этом месяце записей пока нет.";
   }
   $("calPrev").onclick = function () { calM = new Date(calM.getFullYear(), calM.getMonth() - 1, 1); renderCal(); };
   $("calNext").onclick = function () { calM = new Date(calM.getFullYear(), calM.getMonth() + 1, 1); renderCal(); };
