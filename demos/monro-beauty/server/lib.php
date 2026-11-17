@@ -15,6 +15,8 @@ function db() {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
     $pdo->exec('PRAGMA journal_mode=WAL');
+    $pdo->exec('PRAGMA synchronous=FULL');   // каждая запись сразу надёжно на диске — даже если сервер внезапно выключится
+    $pdo->exec('PRAGMA busy_timeout=8000');  // одновременные запросы ждут очереди, а не падают с ошибкой
     $pdo->exec('CREATE TABLE IF NOT EXISTS bookings (
         id TEXT PRIMARY KEY, date TEXT, start INTEGER, dur INTEGER, svc TEXT, coat INTEGER DEFAULT 0,
         name TEXT, phone TEXT, status TEXT DEFAULT "booked", remind TEXT, chat_id INTEGER,
@@ -167,16 +169,18 @@ function cert_mail($c, $paid) {
 }
 
 // Письмо с файлом (резервная копия базы)
-function send_mail_file($to, $subject, $text, $fname, $data) {
+function send_mail_file($to, $subject, $text, $fname, $data = null) {  // $fname — имя файла или список [имя => данные]
     $from = (string)cfg('mail_from');
     if (!$from || !filter_var($to, FILTER_VALIDATE_EMAIL)) return false;
     $b = 'ma' . bin2hex(random_bytes(8));
     $headers = "MIME-Version: 1.0\r\nContent-Type: multipart/mixed; boundary=\"$b\"\r\n"
         . 'From: =?UTF-8?B?' . base64_encode('Студия «М.А»') . "?= <$from>\r\n"
         . 'Message-ID: <' . bin2hex(random_bytes(12)) . '@' . substr(strrchr($from, '@'), 1) . ">\r\nDate: " . date('r') . "\r\n";
-    $body = "--$b\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($text))
-        . "--$b\r\nContent-Type: application/gzip; name=\"$fname\"\r\nContent-Transfer-Encoding: base64\r\nContent-Disposition: attachment; filename=\"$fname\"\r\n\r\n" . chunk_split(base64_encode($data))
-        . "--$b--\r\n";
+    $files = is_array($fname) ? $fname : [$fname => $data];
+    $body = "--$b\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($text));
+    foreach ($files as $fn => $fd)
+        $body .= "--$b\r\nContent-Type: application/gzip; name=\"$fn\"\r\nContent-Transfer-Encoding: base64\r\nContent-Disposition: attachment; filename=\"$fn\"\r\n\r\n" . chunk_split(base64_encode($fd));
+    $body .= "--$b--\r\n";
     $ok = mail_out($to, '=?UTF-8?B?' . base64_encode($subject) . '?=', $body, $headers);
     if (!$ok) logline('mail file to ' . $to . ' failed');
     return $ok;
