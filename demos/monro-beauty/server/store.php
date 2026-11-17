@@ -227,7 +227,7 @@ function client_db() {
     // уведомления клиенткам: acc = 0 — рассылка всем; seen — когда клиентка последний раз открывала колокольчик; news — согласие на письма с новостями
     $db->exec('CREATE TABLE IF NOT EXISTS cnotes (id INTEGER PRIMARY KEY AUTOINCREMENT, acc INTEGER, icon TEXT, title TEXT, text TEXT, link TEXT, t INTEGER)');
     $db->exec('CREATE TABLE IF NOT EXISTS link_reqs (id INTEGER PRIMARY KEY AUTOINCREMENT, acc INTEGER, phone TEXT, t INTEGER)');
-    foreach (['seen INTEGER DEFAULT 0', 'news INTEGER DEFAULT 0', 'av TEXT DEFAULT ""'] as $col) { try { $db->exec('ALTER TABLE accounts ADD COLUMN ' . $col); } catch (Throwable $e) {} }
+    foreach (['seen INTEGER DEFAULT 0', 'news INTEGER DEFAULT 0', 'av TEXT DEFAULT ""', 'tg INTEGER DEFAULT 0'] as $col) { try { $db->exec('ALTER TABLE accounts ADD COLUMN ' . $col); } catch (Throwable $e) {} }
     return $db;
 }
 // Кто вошёл: по номеру телефона (код из Telegram) или в кабинет по почте
@@ -276,9 +276,11 @@ function acc_check_code($email, $purpose, $code) {
     return '';
 }
 // Уведомление в колокольчик клиентки (если у неё есть кабинет)
-function cnote($accId, $icon, $title, $text, $link = '') {
+function cnote($accId, $icon, $title, $text, $link = '', $tg = true) {
     if (!$accId) return;
     client_db()->prepare('INSERT INTO cnotes (acc, icon, title, text, link, t) VALUES (?, ?, ?, ?, ?, ?)')->execute([(int)$accId, $icon, $title, $text, $link, time()]);
+    if ($tg && ($a = acc_get((int)$accId)) && !empty($a['tg']))  // клиентка подключила Telegram в кабинете
+        tg_later($a['tg'], trim($icon . ' <b>' . h($title) . '</b>') . "\n" . h($text) . "\n\n<a href=\"" . h(rtrim((string)cfg('site_url'), '/') . '/' . ($link ?: '#kabinet')) . "\">Открыть личный кабинет</a>");
     require_once __DIR__ . '/push.php'; push_acc($accId, push_note(trim($icon . ' ' . $title), $text, './' . ($link ?: '#kabinet')));  // и на телефон, если клиентка включила уведомления
 }
 // Напоминание из бота/почты — ещё и в колокольчик кабинета (и на телефон) владелицы записи
@@ -388,5 +390,18 @@ function av_sync($a, $name) {
     }
     unset($x);
     if ($n) doc_save($doc, $v); else doc_abort();
+}
+
+// Telegram в личном кабинете: ссылка на бота с ключом аккаунта; бот запоминает чат и привязывает к нему будущие записи
+function acc_tg_link($id) { return 'https://t.me/' . cfg('bot_name') . '?start=a_' . (int)$id . '_' . substr(hash_hmac('sha256', 'acc' . (int)$id, (string)cfg('admin_key')), 0, 10); }
+function acc_tg_bind($a, $chat) {
+    client_db()->prepare('UPDATE accounts SET tg = ? WHERE id = ?')->execute([(int)$chat, (int)$a['id']]);
+    $a['tg'] = $chat; [$doc] = doc_load(false); $today = date('Y-m-d'); $n = 0;
+    foreach ($doc['bookings'] as $b) {
+        if (($b['status'] ?? '') !== 'booked' || ($b['date'] ?? '') < $today) continue;
+        $o = acc_of($b); if ((int)$o !== (int)$a['id']) continue;
+        $q = db()->prepare('UPDATE bookings SET chat_id = ? WHERE id = ? AND (chat_id IS NULL OR chat_id = 0)'); $q->execute([(int)$chat, (string)$b['id']]); $n += $q->rowCount();
+    }
+    return $n;
 }
 

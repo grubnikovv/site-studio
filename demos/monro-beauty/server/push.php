@@ -81,7 +81,10 @@ function push_note($title, $body, $url = './#admin') {
 function push_all($note = null) { push_where('acc = 0', [], $note); }
 function push_acc($accId, $note = null) { if ($accId) push_where('acc = ?', [(int)$accId], $note); }
 function push_clients($note = null) { push_where('acc > 0', [], $note); }
+// Уведомления от браузера пока выключены (остались почта и Telegram). Включить снова — true.
+const PUSH_ON = false;
 function push_where($cond, $args, $note = null) {
+    if (!PUSH_ON) return;
     try {
         $db = push_db(); $q = $db->prepare('SELECT endpoint, p256dh, auth FROM push_subs WHERE ' . $cond); $q->execute($args); $subs = $q->fetchAll();
         if (!$subs) return;

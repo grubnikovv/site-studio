@@ -2,6 +2,8 @@
 // Логика бота: обработка сообщений и нажатий кнопок. Используют tg.php (вебхук) и poll.php (опрос раз в минуту).
 require_once __DIR__ . '/lib.php';
 
+// Ссылка для Марины из её кабинета на сайте (сам ключ кабинета в ссылку не попадает)
+function admin_tg_code() { return 'adm_' . substr(hash_hmac('sha256', 'admin-tg', (string)cfg('admin_key')), 0, 16); }
 function link_key($id) { return substr(hash_hmac('sha256', $id, cfg('admin_key')), 0, 10); }
 function booking($id) { $q = db()->prepare('SELECT * FROM bookings WHERE id = ?'); $q->execute([$id]); return $q->fetch(); }
 
@@ -17,9 +19,21 @@ function handle_update($u) {
         $first = $m['from']['first_name'] ?? '';
 
         // Марина подключает себя: /start admin_КЛЮЧ
-        if ($text === '/start admin_' . cfg('admin_key')) {
+        if ($text === '/start admin_' . cfg('admin_key') || $text === '/start ' . admin_tg_code()) {
             $db->prepare('INSERT OR REPLACE INTO admins (chat_id, name, added) VALUES (?, ?, ?)')->execute([$chat, $first, time()]);
             send($chat, "Готово! Сюда будут приходить уведомления о новых записях, отменах, бронях обучения и сертификатах.");
+            return;
+        }
+
+        // Клиентка подключает Telegram в личном кабинете: /start a_ID_КЛЮЧ
+        if (preg_match('/^\/start a_(\d{1,9})_([0-9a-f]{10})$/', $text, $mm)) {
+            require_once __DIR__ . '/store.php';
+            $a = acc_get((int)$mm[1]);
+            if (!$a || !hash_equals(substr(acc_tg_link($mm[1]), -10), $mm[2])) { send($chat, 'Ссылка устарела. Откройте личный кабинет на сайте и нажмите «Подключить Telegram» ещё раз.'); return; }
+            $n = acc_tg_bind($a, $chat);
+            send($chat, "Готово" . ($a['name'] ? ', ' . h(strtok($a['name'], ' ')) : '') . "! 💅\n\nТеперь сюда будут приходить напоминания о записях, переносы, сертификаты и новости студии «М.А»."
+                . ($n ? "\nБудущих записей подключено: " . $n . '.' : '') . "\n\nОтключить можно в личном кабинете на сайте.");
+            notify_admins('📲 Клиентка подключила Telegram: ' . h($a['name'] ?: $a['email']));
             return;
         }
 

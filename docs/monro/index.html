@@ -896,6 +896,8 @@ div.f { display: grid; gap: 8px; }
 .k-head { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 14px; background: var(--blush); border: 1px solid var(--line); border-radius: 24px; padding: 18px; }
 .k-av { position: relative; width: 58px; height: 58px; padding: 0; border: 0; border-radius: 50%; background: var(--lac); color: var(--lac-ink); display: grid; place-items: center; font: 600 24px/1 var(--display); cursor: pointer; }
 .k-av img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+.tg-help { background: var(--blush); border-radius: 16px; padding: 14px 16px; display: grid; gap: 8px; font-size: 15px; }
+.tg-help ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
 .k-av .k-cam { position: absolute; right: -3px; bottom: -3px; width: 24px; height: 24px; border-radius: 50%; background: var(--paper); color: var(--ink); border: 1px solid var(--line); display: grid; place-items: center; }
 .k-av.busy { opacity: .55; }
 .avdlg .pbox img { min-height: 0; }
@@ -1766,6 +1768,9 @@ a.tel svg { flex: none; }
         <button class="btn sm" type="submit" id="kPhGo">Получить код</button>
         <button type="button" class="a-link" id="kPhAsk" hidden>Нет доступа к этой почте или Telegram? Попросить Марину подтвердить номер</button>
       </form>
+      <div class="card" id="kTgBox" hidden><h3>📲 Уведомления в Telegram</h3>
+        <p class="note" id="kTgNote" style="margin:0"></p>
+        <div class="acts"><a class="btn sm" id="kTgGo" target="_blank" rel="noopener">Подключить Telegram</a><button type="button" class="btn sm ghost" id="kTgOff" hidden>Отключить</button></div></div>
       <div class="card k-push" id="kPushBox" hidden><h3>🔔 Уведомления на телефоне</h3>
         <p class="note" id="kPushNote" style="margin:0"></p>
         <div class="acts"><button type="button" class="btn sm" id="kPushBtn">Включить уведомления</button></div></div>
@@ -1935,7 +1940,7 @@ a.tel svg { flex: none; }
     <h2>2. Какие данные и зачем мы обрабатываем</h2>
     <div class="ltable">
       <div><b>Запись на процедуру</b><span>Имя, телефон, email (если выбраны напоминания на почту), выбранная услуга, дата и время, комментарий, способ напоминания. Чтобы записать вас, напомнить о визите, связаться при переносе и вести историю посещений.</span></div>
-      <div><b>Личный кабинет</b><span>Имя, email и пароль (хранится только в зашифрованном виде — его не знает даже администратор), по желанию — подтверждённый номер телефона и фото профиля, которое вы загружаете сами (его видите только вы и Оператор в кабинете мастера — чтобы узнавать вас; фото не используется для установления личности и не является биометрическими данными). Чтобы вы могли входить в кабинет, переносить и отменять записи, видеть обучение и сертификаты. Аккаунт можно удалить по запросу.</span></div>
+      <div><b>Личный кабинет</b><span>Имя, email и пароль (хранится только в зашифрованном виде — его не знает даже администратор), по желанию — подтверждённый номер телефона подключённый Telegram (номер чата с ботом студии — чтобы присылать туда уведомления) и фото профиля, которое вы загружаете сами (его видите только вы и Оператор в кабинете мастера — чтобы узнавать вас; фото не используется для установления личности и не является биометрическими данными). Чтобы вы могли входить в кабинет, переносить и отменять записи, видеть обучение и сертификаты. Аккаунт можно удалить по запросу.</span></div>
       <div><b>Подарочный сертификат</b><span>Имя, телефон и email покупателя (на него приходит сертификат), имя получателя (по желанию), номер, номинал и остаток сертификата. Чтобы выпустить сертификат, найти его по телефону и списать оплату.</span></div>
       <div><b>Обучение</b><span>Имя, телефон, выбранный курс и даты, сведения о предоплате. Чтобы закрепить даты, связаться перед обучением, выдать сертификат о прохождении курса.</span></div>
       <div><b>Модели на обучение</b><span>Имя, телефон, дата и время процедуры. Чтобы договориться о бесплатной процедуре и при необходимости пригласить снова.</span></div>
@@ -2182,6 +2187,22 @@ a.tel svg { flex: none; }
       <button type="button" class="a-link" id="aMailOff" hidden>Не присылать на почту</button>
       <button type="button" class="a-link" id="aMailBack">Назад</button>
     </form>
+    <div class="card a-login" id="aTg" hidden>
+      <h3>Уведомления в Telegram</h3>
+      <p class="note" id="aTgState">Загружаю…</p>
+      <a class="btn" id="aTgGo" target="_blank" rel="noopener" href="#">Подключить Telegram заново</a>
+      <div class="tg-help">
+        <b>Если уведомления перестали приходить:</b>
+        <ol>
+          <li>Нажмите кнопку «Подключить Telegram заново» — откроется бот студии.</li>
+          <li>Если внизу чата написано <b>«Разблокировать»</b> — нажмите. Бот был заблокирован случайно.</li>
+          <li>Нажмите <b>«Запустить»</b> («Старт»). Если такой кнопки нет — нажмите «Перезапустить бота» в меню ⋮ вверху чата.</li>
+          <li>Бот ответит: <b>«Готово! Сюда будут приходить уведомления…»</b> — значит, всё работает.</li>
+        </ol>
+        <p class="note" style="margin:0">Подключить можно и второй телефон: откройте этот кабинет на нём и сделайте то же самое. Ссылку никому не пересылайте — по ней приходят все записи.</p>
+      </div>
+      <button type="button" class="a-link" id="aTgBack">Назад</button>
+    </div>
     <p class="a-save" id="aSave" hidden></p>
     <div class="atabs" id="aTabs" role="tablist">
       <button type="button" data-tab="day" aria-pressed="true">День</button>
@@ -3212,7 +3233,7 @@ a.tel svg { flex: none; }
     var av = d.acc && d.acc.av, letter = (/[A-Za-zА-Яа-яЁё]/.exec(who || "") || ["🙂"])[0].toUpperCase();
     $("kAv").innerHTML = (av ? '<img src="' + avUrl(av, true) + '" alt="" width="58" height="58">' : esc(letter)) + (d.acc ? '<span class="k-cam" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span>' : '');
     $("kAv").disabled = !d.acc; $("kAv").setAttribute("aria-label", av ? "Открыть фото профиля" : "Добавить фото профиля");
-    $("kPwOpen").hidden = !d.acc; $("kNewsBox").hidden = !d.acc; kPushRender(); $("kMailTip").hidden = !d.acc || lsGet("ma-mailtip", "") === "1"; $("kPhBox").hidden = !d.acc || !!d.phone;
+    $("kPwOpen").hidden = !d.acc; $("kNewsBox").hidden = !d.acc; kPushRender(); kTgRender(); $("kMailTip").hidden = !d.acc || lsGet("ma-mailtip", "") === "1"; $("kPhBox").hidden = !d.acc || !!d.phone;
     var sortT = function (a, b) { return (a.date + hm(a.start).padStart(5, "0")).localeCompare(b.date + hm(b.start).padStart(5, "0")); };
     var next = d.bookings.filter(function (b) { return b.status === "booked" && b.date >= today; }).sort(sortT);
     var hist = d.bookings.filter(function (b) { return !(b.status === "booked" && b.date >= today); }).sort(sortT).reverse();
@@ -3550,8 +3571,26 @@ a.tel svg { flex: none; }
     if (this.dataset.sure !== "1") { this.dataset.sure = "1"; this.textContent = "Точно удалить? Нажмите ещё раз"; return; }
     $("avDlg").close(); avSave({ del: true }, "Фото удалено");
   };
+  // ---------- Telegram в личном кабинете: напоминания, переносы, сертификаты и новости ----------
+  var kTgWait = false;
+  function kTgRender() {
+    var a = kData && kData.acc; $("kTgBox").hidden = !a; if (!a) return;
+    $("kTgNote").textContent = a.tg ? "✅ Подключено. В Telegram приходят напоминания о записях, переносы, сертификаты и новости студии." : "Напоминания о записях, переносы, сертификаты и новости студии будут приходить в Telegram — быстрее и надёжнее почты. Нажмите кнопку, в Telegram нажмите «Запустить» («Старт»).";
+    $("kTgGo").href = a.tgLink || "#"; $("kTgGo").hidden = !!a.tg; $("kTgOff").hidden = !a.tg; $("kTgOff").textContent = "Отключить"; $("kTgOff").dataset.sure = "";
+  }
+  $("kTgGo").onclick = function () { kTgWait = true; };
+  document.addEventListener("visibilitychange", function () {  // вернулась из Telegram — обновить состояние
+    if (document.visibilityState === "visible" && kTgWait && ctoken) { kTgWait = false; setTimeout(function () { loadK().then(function () { if (kData && kData.acc && kData.acc.tg) toast("Telegram подключён ✅"); }); }, 1500); }
+  });
+  $("kTgOff").onclick = function () {
+    if (this.dataset.sure !== "1") { this.dataset.sure = "1"; this.textContent = "Точно отключить? Нажмите ещё раз"; return; }
+    apiSend({ type: "client_tg_off", ctoken: ctoken }).then(function (r) { if (r && r.ok) { kData.acc.tg = false; kTgRender(); toast("Telegram отключён. Уведомления остаются в колокольчике и на почте"); } else toast((r && r.error) || "Нет связи с сервером", true); });
+  };
+  // уведомления от браузера пока выключены: прячем их и снимаем старые подписки на этом телефоне
+  var PUSH_ON = false;
+  if (!PUSH_ON && "serviceWorker" in navigator) navigator.serviceWorker.getRegistration().then(function (reg) { return reg && reg.pushManager && reg.pushManager.getSubscription(); }).then(function (sub) { if (sub) { apiSend({ type: "push_unsub", endpoint: sub.endpoint }); sub.unsubscribe(); } }).catch(function () {});
   function kPushRender() {
-    if (!kData || !kData.acc) { $("kPushBox").hidden = true; return; }
+    if (!PUSH_ON || !kData || !kData.acc) { $("kPushBox").hidden = true; return; }
     pushState().then(function (st0) {
       var b = $("kPushBtn"); b.dataset.st = st0; b.dataset.sure = ""; b.disabled = false;
       if (st0 === "on" && ctoken) pushKeysSync({ type: "push_sub", ctoken: ctoken });
@@ -5163,6 +5202,17 @@ a.tel svg { flex: none; }
   outBtn.parentNode.insertBefore(acts, outBtn);
   // уведомления от браузера на этом телефоне (нужен https; на iPhone — сайт на экране «Домой»)
   var pushBtn = document.createElement("button"); pushBtn.type = "button"; pushBtn.className = "btn sm ghost"; pushBtn.hidden = true;
+  // Telegram мамы: переподключить, если бот заблокирован или уведомления пропали
+  var tgBtn = document.createElement("button"); tgBtn.type = "button"; tgBtn.className = "btn sm ghost"; tgBtn.textContent = "Telegram-уведомления";
+  tgBtn.onclick = function () {
+    $("v-admin").classList.add("pwd"); $("aTg").hidden = false; $("aTgState").textContent = "Загружаю…"; $("aTgGo").removeAttribute("href"); jumpTop();
+    apiSend({ type: "admin_tg", token: token }).then(function (r) {
+      if (!r || !r.ok) { $("aTgState").textContent = "Нет связи с сервером. Попробуйте ещё раз."; return; }
+      $("aTgGo").href = r.link;
+      $("aTgState").textContent = r.chats.length ? "Подключено: " + r.chats.map(function (c) { return (c.name || "Telegram") + " (с " + c.added + ")"; }).join(", ") + ". Сюда приходят новые записи, отмены, переносы и заявки." : "Telegram не подключён — уведомления о записях не приходят. Нажмите кнопку ниже.";
+    });
+  };
+  $("aTgBack").onclick = function () { $("v-admin").classList.remove("pwd"); $("aTg").hidden = true; };
   // почта для копий уведомлений — мама вписывает свой адрес сама
   var mailBtn = document.createElement("button"); mailBtn.type = "button"; mailBtn.className = "btn sm ghost"; mailBtn.textContent = "Почта для уведомлений";
   // почта уже есть — показываем её отдельно, а поле пустое: вписать новую и сохранить, ничего не стирая
@@ -5200,7 +5250,7 @@ a.tel svg { flex: none; }
     mailSave(v);
   });
   $("aMailOff").onclick = function () { mailSave(""); };
-  acts.appendChild(pushBtn); acts.appendChild(mailBtn); acts.appendChild(pwdBtn); acts.appendChild(outBtn);
+  acts.appendChild(pushBtn); acts.appendChild(tgBtn); acts.appendChild(mailBtn); acts.appendChild(pwdBtn); acts.appendChild(outBtn);
   // ---------- интерактивное обучение: подсветка кнопки + подсказка, прогресс сохраняется на телефоне ----------
   var tourBtn = document.createElement("button"); tourBtn.type = "button"; tourBtn.className = "btn sm ghost"; tourBtn.textContent = "🎓 Обучение по кабинету";
   acts.insertBefore(tourBtn, acts.firstChild);
@@ -5399,6 +5449,7 @@ a.tel svg { flex: none; }
       .then(function (sub) { return sub ? "on" : "off"; }).catch(function () { return "off"; });
   }
   function renderPush() {
+    if (!PUSH_ON) { pushBtn.hidden = true; $("aPushNag").hidden = true; return; }
     pushState().then(function (st0) {
       pushBtn.dataset.st = st0; pushBtn.hidden = st0 === "no";
       if (st0 === "on" && token) pushKeysSync({ type: "push_sub", token: token });

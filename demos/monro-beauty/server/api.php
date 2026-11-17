@@ -161,6 +161,7 @@ if ($type === 'booking') {
     // для бота и напоминаний
     db()->prepare('INSERT OR REPLACE INTO bookings (id, date, start, dur, svc, coat, name, phone, status, remind, email, created, updated) VALUES (?, ?, ?, ?, ?, ?, ?, ?, "booked", ?, ?, ?, ?)')
         ->execute([$id, $date, $start, $dur, $svcName, empty($r['coat']) ? 0 : 1, $name, $phone, $remind, $email, time(), time()]);
+    if (!empty($rec['owner']) && !empty($cw['acc']['tg'])) db()->prepare('UPDATE bookings SET chat_id = ? WHERE id = ?')->execute([(int)$cw['acc']['tg'], $id]);  // Telegram подключён в кабинете — напоминания туда
     $v = doc_save($doc, $v);
     notify_admins("📅 <b>Новая запись</b>\n" . h($name) . ', ' . phone_nice($phone) . "\n" . h($svcName) . "\n" . when_text($date, $start)
         . "\nНапоминания: " . ['tg' => 'Telegram', 'max' => 'MAX', 'mail' => 'почта ' . h($email), 'none' => 'не нужны'][$remind]
@@ -510,6 +511,7 @@ if ($type === 'broadcast') {
     if (mb_strlen($title) < 2 || mb_strlen($text) < 2) fail('Напишите заголовок и текст.');
     client_db()->prepare('INSERT INTO cnotes (acc, icon, title, text, link, t) VALUES (0, ?, ?, ?, ?, ?)')->execute(['💌', $title, $text, '', time()]);
     require_once __DIR__ . '/push.php'; push_clients(push_note('💌 ' . $title, $text, './#kabinet'));
+    foreach (client_db()->query('SELECT tg FROM accounts WHERE tg <> 0 AND news = 1') as $a) tg_later($a['tg'], '💌 <b>' . h($title) . "</b>\n" . h($text));
     $sent = 0;
     if (!empty($in['mail'])) foreach (client_db()->query('SELECT email FROM accounts WHERE verified = 1 AND news = 1') as $a)
         if (send_mail($a['email'], $title, h($text) . "\n\n<small>Вы получили письмо, потому что согласились получать новости студии. Отписаться — в личном кабинете на сайте.</small>")) $sent++;
@@ -526,7 +528,7 @@ if ($type === 'client_data') {
     $bk = array_values(array_map(fn($b) => array_intersect_key($b, array_flip(['id', 'date', 'start', 'dur', 'svc', 'remove', 'french', 'status', 'price', 'phone', 'name', 'remind', 'email', 'by', 'movedBy'])), array_filter($doc['bookings'], $mine)));
     $tr = array_values(array_map(fn($t) => array_intersect_key($t, array_flip(['id', 'course', 'date', 'days', 'status', 'price', 'pre', 'hold', 'claimed', 'phone', 'name', 'snote', 'mnote', 'by', 'refunded', 'paidAt'])), array_filter($doc['training'], $mine)));
     $ce = array_values(array_map(fn($c) => array_intersect_key($c, array_flip(['id', 'code', 'sum', 'balance', 'to', 'status', 'created', 'till', 'phone', 'email', 'name', 'claimed', 'hold'])) + ['spent' => array_map(fn($x) => ['d' => $x['d'] ?? '', 'sum' => (int)($x['sum'] ?? 0)], $c['spent'] ?? [])], array_filter($doc['certs'], $mine)));
-    json_out(['ok' => true, 'phone' => $phone ? phone_nice($phone) : '', 'acc' => $acc ? ['email' => $acc['email'], 'name' => $acc['name'], 'av' => (string)($acc['av'] ?? '')] : null, 'bookings' => $bk, 'training' => $tr, 'certs' => $ce, 'v' => $v, 'doc' => doc_public($doc)]);
+    json_out(['ok' => true, 'phone' => $phone ? phone_nice($phone) : '', 'acc' => $acc ? ['email' => $acc['email'], 'name' => $acc['name'], 'av' => (string)($acc['av'] ?? ''), 'tg' => !empty($acc['tg']), 'tgLink' => acc_tg_link($acc['id'])] : null, 'bookings' => $bk, 'training' => $tr, 'certs' => $ce, 'v' => $v, 'doc' => doc_public($doc)]);
 }
 
 // Клиентка в кабинете меняет почту для напоминаний (или отказывается от писем) — для всех будущих записей
@@ -623,6 +625,20 @@ if ($type === 'cert_get') {
 }
 
 // ---------- уведомления от браузера ----------
+// ---------- Telegram мамы: ссылка для переподключения и кто подключён ----------
+if ($type === 'admin_tg') {
+    if (!$admin) json_out(['ok' => false, 'relogin' => true]);
+    $list = []; foreach (db()->query('SELECT name, added FROM admins ORDER BY added') as $a) $list[] = ['name' => (string)$a['name'], 'added' => date('d.m.Y', (int)$a['added'])];
+    json_out(['ok' => true, 'link' => 'https://t.me/' . cfg('bot_name') . '?start=' . admin_tg_code(), 'chats' => $list]);
+}
+// ---------- Telegram в личном кабинете: отключить ----------
+if ($type === 'client_tg_off') {
+    $cw = client_who($in['ctoken'] ?? ''); if (!$cw || !$cw['acc']) json_out(['ok' => false, 'error' => 'Войдите в кабинет заново', 'relogin' => true]);
+    $chat = (int)($cw['acc']['tg'] ?? 0);
+    client_db()->prepare('UPDATE accounts SET tg = 0 WHERE id = ?')->execute([(int)$cw['acc']['id']]);
+    if ($chat) { db()->prepare('UPDATE bookings SET chat_id = NULL WHERE chat_id = ? AND date >= ?')->execute([$chat, date('Y-m-d')]); send($chat, 'Уведомления студии «М.А» в Telegram отключены. Подключить снова можно в личном кабинете на сайте.'); }
+    json_out(['ok' => true]);
+}
 // ---------- фото профиля клиентки ----------
 if ($type === 'client_avatar') {
     $cw = client_who($in['ctoken'] ?? ''); if (!$cw) json_out(['ok' => false, 'error' => 'Войдите в кабинет заново', 'relogin' => true]);

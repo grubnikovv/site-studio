@@ -71,6 +71,13 @@ function flush_outbox() {
     }
 }
 
+// Сообщение в Telegram после ответа сайту — чтобы медленная связь с Telegram не задерживала страницу и базу
+function tg_later($chat, $text, $buttons = null) {
+    static $q = null;
+    if ($q === null) { $q = []; register_shutdown_function(function () use (&$q) { if (function_exists('fastcgi_finish_request')) @fastcgi_finish_request(); foreach ($q as $m) send($m[0], $m[1], $m[2]); }); }
+    $q[] = [$chat, $text, $buttons];
+}
+
 // Сообщение Марине (во все подключённые чаты мастера) и копия на почту студии
 function notify_admins($text) {
     foreach (db()->query('SELECT chat_id FROM admins') as $a) send($a['chat_id'], $text);
