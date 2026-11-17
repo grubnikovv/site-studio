@@ -2321,6 +2321,7 @@ a.tel svg { flex: none; }
     { id: "ext4", name: "Наращивание, длина от\u00a03-й", price: 2800, from: true, min: 150, text: "Наращивание гелем с покрытием, длинные ногти. Точную цену Марина назовёт по факту длины." },
     { id: "off", name: "Снятие покрытия", price: 300, min: 30, noRemove: true, text: "Только снять гель-лак или наращивание, без нового покрытия — в том числе работу Марины. Если после снятия делаете новый маникюр или педикюр, отдельно записываться на снятие не нужно." },
     { id: "nit", name: "Титановая нить (вросший ноготь)", price: 2500, min: 30, noRemove: true, text: "Коррекция вросшего ногтя на ноге: нить приподнимает край ногтя и снимает давление. Цена за один палец." },
+    { id: "nitc", name: "Коррекция титановой нити", price: 2000, min: 20, noRemove: true, text: "Плановая коррекция уже установленной титановой нити: Марина проверит, как поднимается край ногтя, и переставит нить." },
     { id: "ped", name: "Педикюр: только пальчики", price: 1200, min: 60, foot: true, text: "Обработка пальчиков без покрытия." },
     { id: "pedg", name: "Педикюр: пальчики с гель-лаком", price: 2000, min: 90, foot: true, text: "Обработка пальчиков и покрытие гель-лаком." },
     { id: "pedf", name: "Педикюр: пальчики и стопы", price: 2200, min: 90, foot: true, text: "Обработка пальчиков и стоп, без покрытия." },
@@ -2694,7 +2695,7 @@ a.tel svg { flex: none; }
     });
   });
   $("nHands").textContent = "8 услуг"; $("nFeet").textContent = "6 услуг";
-  $("pFeet").innerHTML = ["ped", "pedg", "pedf", "pedp", "pedh", "nit"].map(function (id) { return priceRow(svc(id)); }).join("");
+  $("pFeet").innerHTML = ["ped", "pedg", "pedf", "pedp", "pedh", "nit", "nitc"].map(function (id) { return priceRow(svc(id)); }).join("");
   document.querySelectorAll(".pacc .prow").forEach(function (r) { r.style.setProperty("--i", [].indexOf.call(r.parentNode.children, r)); });
 
   var phIcon = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 21V9a4 4 0 0 1 8 0v12"></path><path d="M10 9.5a2 2 0 0 1 4 0"></path></svg>';
@@ -2866,7 +2867,7 @@ a.tel svg { flex: none; }
     // тот же порядок и группы, что в прайсе: руки, ноги
     var opt = function (id) { var s = svc(id); return '<button class="opt" data-s="' + s.id + '" aria-pressed="' + (bk.svc === s.id) + '"><span><b style="font-weight:700">' + s.name + '</b><small>' + dur(s.min) + '</small></span><b class="num">' + priceText(s) + '</b></button>'; };
     $("bSvc").innerHTML = '<span class="bgrp">Руки</span>' + ["man", "gel", "str", "cor", "cor4", "ext", "ext4", "off"].map(opt).join("") +
-      '<span class="bgrp">Ноги</span>' + ["ped", "pedg", "pedf", "pedp", "pedh", "nit"].map(opt).join("");
+      '<span class="bgrp">Ноги</span>' + ["ped", "pedg", "pedf", "pedp", "pedh", "nit", "nitc"].map(opt).join("");
   }
   $("bSvc").addEventListener("click", function (e) {
     var b = e.target.closest("[data-s]"); if (!b) return;
@@ -4518,6 +4519,7 @@ a.tel svg { flex: none; }
     var hit = SERVICES.filter(function (x) { return n.indexOf(x.name.toLowerCase().replace(/ /g, " ").replace(/ё/g, "е")) >= 0; })[0];
     if (hit) return hit;
     var long = /от\s*3|от\s*тре|длинн/.test(n);
+    if (/нит/.test(n) && /коррекц/.test(n)) return svc("nitc");
     if (/коррекц/.test(n)) return svc(long || price >= 2200 ? "cor4" : "cor");
     if (/наращ/.test(n)) return svc(long || price >= 2800 ? "ext4" : "ext");
     if (/нит/.test(n)) return svc("nit");
