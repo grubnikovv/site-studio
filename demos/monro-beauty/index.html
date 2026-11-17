@@ -1095,6 +1095,17 @@ div.f { display: grid; gap: 8px; }
 .hp { position: absolute !important; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .adm-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .adm-head h2 { margin: 0; }
+.gear-w { position: relative; flex: none; }
+.gear-btn { width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); color: var(--ink); display: grid; place-items: center; cursor: pointer; transition: color .2s, border-color .2s, transform .3s; }
+.gear-btn[aria-expanded="true"] { color: var(--lac); border-color: var(--lac); transform: rotate(45deg); }
+.gear-menu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 40; width: max-content; min-width: 250px; max-width: calc(100vw - 32px); background: var(--paper); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); padding: 6px; display: grid; }
+.gear-menu[hidden], .gear-item[hidden] { display: none; }
+.gear-item { text-align: left; background: none; border: 0; padding: 12px 14px; border-radius: 12px; font: 500 16px/1.3 var(--body); color: var(--ink); display: flex; gap: 10px; align-items: center; cursor: pointer; overflow-wrap: anywhere; }
+.gear-item::before { content: attr(data-ic); width: 22px; flex: none; text-align: center; }
+.gear-item:hover, .gear-item:focus-visible { background: var(--blush); }
+.gear-item.out { color: var(--lac); border-top: 1px solid var(--line); border-radius: 0 0 12px 12px; margin-top: 4px; }
+#v-admin.locked .gear-w, #v-admin.pwd .gear-w { display: none; }
+@media (prefers-reduced-motion: reduce) { .gear-btn { transition: none; } }
 .bellwrap { position: relative; }
 .bell-btn { position: relative; width: 46px; height: 46px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); display: grid; place-content: center; }
 .hdr-m { display: flex; gap: 8px; }
@@ -2135,6 +2146,7 @@ a.tel svg { flex: none; }
 <main id="v-admin" class="page screen" hidden>
   <div class="wrap">
     <div class="adm-head"><h2>Кабинет мастера</h2>
+      <div class="gear-w"><button type="button" class="gear-btn" id="aGear" aria-label="Настройки кабинета" aria-expanded="false" aria-controls="aGearMenu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button><div class="gear-menu" id="aGearMenu" role="menu" hidden></div></div>
     </div>
     <p class="demo" data-demo>Тестовая версия: записи хранятся только на этом телефоне. В рабочей версии — вход по паролю и общая база для всех устройств.</p>
     <form class="card a-login" id="aLogin" hidden>
@@ -5174,7 +5186,7 @@ a.tel svg { flex: none; }
   function lockAdmin() {
     var locked = SYNC && !token;
     $("v-admin").classList.toggle("locked", locked); $("aLogin").hidden = !locked;
-    $("aSave").hidden = !SYNC || locked; outBtn.parentNode.hidden = !SYNC || locked;
+    $("aSave").hidden = !SYNC || locked; var aa = document.querySelector("#v-admin .a-acts"); if (aa) aa.hidden = !SYNC || locked; $("aGear").parentNode.hidden = !SYNC || locked;
     if (!locked) renderPush();
     document.querySelectorAll("[data-demo]").forEach(function (el) { el.hidden = SYNC; });
     // в браузере мастера вместо «Записаться» — колокольчик и кабинет
@@ -5277,7 +5289,17 @@ a.tel svg { flex: none; }
     mailSave(v);
   });
   $("aMailOff").onclick = function () { mailSave(""); };
-  acts.appendChild(pushBtn); acts.appendChild(tgBtn); acts.appendChild(mailBtn); acts.appendChild(pwdBtn); acts.appendChild(outBtn);
+  // настройки кабинета — в меню под шестерёнкой у заголовка
+  var gear = $("aGear"), gearMenu = $("aGearMenu");
+  [[tgBtn, "📲"], [mailBtn, "✉️"], [pwdBtn, "🔑"], [pushBtn, "🔔"], [outBtn, "🚪"]].forEach(function (x) {
+    x[0].className = "gear-item" + (x[0] === outBtn ? " out" : ""); x[0].setAttribute("role", "menuitem"); x[0].dataset.ic = x[1]; gearMenu.appendChild(x[0]);
+  });
+  function gearSet(open) { gearMenu.hidden = !open; gear.setAttribute("aria-expanded", open ? "true" : "false"); }
+  gear.onclick = function (e) { e.stopPropagation(); gearSet(gearMenu.hidden); };
+  gearMenu.addEventListener("click", function () { setTimeout(function () { if (outBtn.dataset.sure !== "1") gearSet(false); }); });  // «Точно выйти?» — меню остаётся открытым
+  gear.addEventListener("click", function () { if (outBtn.dataset.sure === "1") { outBtn.dataset.sure = ""; outBtn.textContent = "Выйти из кабинета"; } });
+  document.addEventListener("click", function (e) { if (!gearMenu.hidden && !e.target.closest(".gear-w")) gearSet(false); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !gearMenu.hidden) { gearSet(false); gear.focus(); } });
   // ---------- интерактивное обучение: подсветка кнопки + подсказка, прогресс сохраняется на телефоне ----------
   var tourBtn = document.createElement("button"); tourBtn.type = "button"; tourBtn.className = "btn sm ghost"; tourBtn.textContent = "🎓 Обучение по кабинету";
   acts.insertBefore(tourBtn, acts.firstChild);
@@ -5326,9 +5348,8 @@ a.tel svg { flex: none; }
     { id: "req", icon: "🎓", title: "Заявки: обучение и сертификаты", sub: "подтвердить оплату, модели, заметка", pre: tab("req"), steps: [
       { el: "#aTrain", t: "Заявки на обучение", p: "Проверьте оплату в СберБанк Онлайн и нажмите «Оплата пришла». После — впишите заметку для ученицы и моделей на каждый день. Если ученица отменит раньше чем за 7 дней — верните предоплату и нажмите «Предоплату вернула»." },
       { el: "#aCerts", t: "Сертификаты", p: "Покупатель платит по СБП. Проверьте поступление и нажмите «Оплата пришла» — ему придёт письмо. Можно позвонить или написать покупателю. Неоплаченный сертификат можно удалить через 2 часа." } ] },
-    { id: "settings", icon: "⚙️", title: "Почта, пароль, выход", sub: "внизу кабинета", pre: tab("day"), steps: [
-      { el: function () { return mailBtn; }, t: "Почта для уведомлений", p: "Копии уведомлений и резервная копия базы по понедельникам." },
-      { el: function () { return pwdBtn; }, t: "Сменить пароль", p: "На других телефонах кабинет попросит войти заново." },
+    { id: "settings", icon: "⚙️", title: "Telegram, почта, пароль, выход", sub: "шестерёнка у заголовка", pre: tab("day"), steps: [
+      { el: "#aGear", t: "Настройки кабинета", p: "Нажмите на шестерёнку: Telegram-уведомления (переподключить, если пропали), почта для копий уведомлений, смена пароля и выход из кабинета." },
       { el: function () { return tourBtn; }, t: "Обучение", p: "Сюда можно вернуться в любой момент и пройти любую тему ещё раз." } ] }
   ];
   var TK = "ma-tour", tour = null, tourEls = null;
