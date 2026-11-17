@@ -1007,13 +1007,14 @@ div.f { display: grid; gap: 8px; }
 .cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; width: 100%; }
 @media (min-width: 700px) {  /* на компьютере — компактная карточка по центру, одинаковые отступы слева и справа */
   #v-admin .atab[data-tab="cal"] > .card { width: 100%; max-width: 540px; justify-self: center; }
-  .cal { gap: 6px; } .cal button { aspect-ratio: auto; height: 58px; padding: 6px 4px; }
+  .cal { gap: 6px; } .cal button { aspect-ratio: auto; height: 74px; padding: 6px 4px; } .cal button .cs { font-size: 12px; }
 }
 .cal .cw { text-align: center; font-size: 11px; font-weight: 800; color: var(--mute); text-transform: uppercase; padding: 2px 0 4px; }
-.cal button { width: 100%; aspect-ratio: 1 / 1.05; min-width: 0; border: 1.5px solid var(--line); background: var(--bg); border-radius: 12px; padding: 4px 2px; display: grid; align-content: space-between; justify-items: center; font: inherit; color: inherit; cursor: pointer; }
+.cal button { width: 100%; aspect-ratio: 1 / 1.4; min-width: 0; border: 1.5px solid var(--line); background: var(--bg); border-radius: 12px; padding: 4px 2px; display: grid; align-content: space-between; justify-items: center; font: inherit; color: inherit; cursor: pointer; }
 .cal button b { font-size: 15px; line-height: 1.1; }
 .cal button i { font-style: normal; font-size: 11px; font-weight: 800; min-width: 22px; height: 20px; padding: 0 5px; border-radius: 10px; display: grid; place-content: center; background: var(--lac); color: var(--lac-ink); }
 .cal button i.n0 { background: none; color: var(--mute); font-weight: 600; }
+.cal button .cs { font-size: 10.5px; font-weight: 700; line-height: 1; color: var(--mute); min-height: 10px; letter-spacing: -.01em; }
 .cal button i.tr { background: color-mix(in srgb, var(--gold) 25%, var(--paper)); color: var(--ink); font-size: 10px; }
 .cal button.off { opacity: .55; }
 .cal button.past { background: var(--paper); }
@@ -4434,16 +4435,18 @@ a.tel svg { flex: none; }
     $("calTitle").textContent = calM.toLocaleDateString("ru-RU", { month: "long", year: "numeric" }).replace(/^./, function (c) { return c.toUpperCase(); }).replace(" г.", "");
     var h = ["пн", "вт", "ср", "чт", "пт", "сб", "вс"].map(function (d) { return '<span class="cw">' + d + '</span>'; }).join("");
     for (var i = 0; i < first; i++) h += '<span class="pad"></span>';
-    var tot = 0, busy = 0;
+    var tot = 0, busy = 0, money = 0;
+    var kk = function (v) { return v >= 1000 ? String(Math.round(v / 100) / 10).replace(".", ",") + "к" : String(v); };  // 6200 → «6,2к»
     for (var d = 1; d <= days; d++) {
       var k = y + "-" + ("0" + (m + 1)).slice(-2) + "-" + ("0" + d).slice(-2);
-      var n = dayBookings(k).filter(function (b) { return b.status !== "cancelled" && !b.example; }).length, tr = trainOn(k), off = !isWorkday(k);
-      tot += n; if (n) busy++;
-      h += '<button type="button" data-cal="' + k + '" class="' + (k === today ? "today " : "") + (k < today ? "past " : "") + (off && !n ? "off " : "") + (k === aDate ? "sel" : "") + '" aria-label="' + d + ', записей: ' + n + '"><b>' + d + '</b>' +
-        (tr ? '<i class="tr">обуч.</i>' : n ? '<i>' + n + '</i>' : '<i class="n0">' + (off ? "вых" : "—") + '</i>') + '</button>';
+      var dl = dayBookings(k).filter(function (b) { return b.status !== "cancelled" && !b.example; }), n = dl.length, tr = trainOn(k), off = !isWorkday(k);
+      var sum = dl.filter(function (b) { return b.status !== "noshow"; }).reduce(function (s0, b) { return s0 + (b.price || svc(b.svc).price); }, 0);  // как «Выручка дня»: кроме отмен и неявок
+      tot += n; money += sum; if (n) busy++;
+      h += '<button type="button" data-cal="' + k + '" class="' + (k === today ? "today " : "") + (k < today ? "past " : "") + (off && !n ? "off " : "") + (k === aDate ? "sel" : "") + '" aria-label="' + d + ', записей: ' + n + (sum ? ', на ' + sum + ' рублей' : '') + '"><b>' + d + '</b>' +
+        (tr ? '<i class="tr">обуч.</i>' : n ? '<i>' + n + '</i>' : '<i class="n0">' + (off ? "вых" : "—") + '</i>') + '<span class="cs">' + (sum ? kk(sum) : "") + '</span></button>';
     }
     $("aCal").innerHTML = h;
-    $("calSum").textContent = tot ? "Записей за месяц: " + tot + ", дней с записями: " + busy + "." : "В этом месяце записей пока нет.";
+    $("calSum").innerHTML = tot ? "Записей за месяц: <b>" + tot + "</b> на сумму <b>" + rub(money) + "</b>, дней с записями: " + busy + ". Под числом записей — сумма дня (6,2к = 6 200 ₽)." : "В этом месяце записей пока нет.";
   }
   $("calPrev").onclick = function () { calM = new Date(calM.getFullYear(), calM.getMonth() - 1, 1); renderCal(); };
   $("calNext").onclick = function () { calM = new Date(calM.getFullYear(), calM.getMonth() + 1, 1); renderCal(); };
