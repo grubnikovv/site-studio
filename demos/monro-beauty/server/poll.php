@@ -17,6 +17,19 @@ if (isset($_GET['diag'])) {  // проверка связи: poll.php?key=...&di
         $files = glob(av_dir() . '/*') ?: [];
         echo 'Фото профиля: в базе ' . count($avs) . ', файлов ' . count($files) . ', GD ' . (function_exists('imagecreatefromstring') ? 'есть' : 'НЕТ') . ', WebP ' . (function_exists('imagewebp') ? 'есть' : 'нет');
         if ($avs) { $f = av_dir() . '/' . $avs[0]; echo ', первый файл ' . (is_file($f) ? 'на месте (' . round(filesize($f) / 1024) . ' КБ)' : 'НЕ НАЙДЕН'); }
+        if ($avs) {  // открывается ли по ссылке и сколько записей найдено для этой клиентки
+            foreach (['https://' . parse_url((string)cfg('site_url'), PHP_URL_HOST), 'http://' . ($_SERVER['HTTP_HOST'] ?? '')] as $base) {
+                $ch = curl_init($base . '/server/av.php?f=' . str_replace('.', '_t.', $avs[0])); curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10, CURLOPT_NOBODY => false]);
+                $body = curl_exec($ch); echo ', ' . parse_url($base, PHP_URL_SCHEME) . ': код ' . curl_getinfo($ch, CURLINFO_RESPONSE_CODE) . ' ' . curl_getinfo($ch, CURLINFO_CONTENT_TYPE) . ' ' . strlen((string)$body) . ' б'; curl_close($ch);
+            }
+            $a = client_db()->query("SELECT email, phone FROM accounts WHERE av <> '' LIMIT 1")->fetch(); [$doc] = doc_load(false); $hit = 0; $why = [];
+            foreach ($doc['bookings'] as $b) {
+                $byE = mb_strtolower((string)($b['email'] ?? '')) === mb_strtolower($a['email']) || mb_strtolower((string)($b['accMail'] ?? '')) === mb_strtolower($a['email']);
+                $byP = $a['phone'] && digits_phone($b['phone'] ?? '') === $a['phone'];
+                if ($byE || $byP) { $hit++; $why[] = $byE ? 'почта' : 'телефон'; }
+            }
+            echo ', записей этой клиентки: ' . $hit . ($why ? ' (' . implode(', ', array_unique($why)) . ')' : '') . ', телефон в аккаунте ' . ($a['phone'] ? 'есть' : 'нет');
+        }
         echo "\n";
     } catch (Throwable $e) { echo 'Фото профиля: ошибка ' . $e->getMessage() . "\n"; }
     echo 'PHP ' . PHP_VERSION . ', curl ' . (curl_version()['version'] ?? '?') . "\n";
