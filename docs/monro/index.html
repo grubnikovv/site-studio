@@ -2713,8 +2713,10 @@ a.tel svg { flex: none; }
       acc.classList.toggle("open", on); b.setAttribute("aria-expanded", String(on));
     });
   });
-  $("nHands").textContent = "8 услуг"; $("nFeet").textContent = "6 услуг";
+  var nUsl = function (n) { return n + " " + plural(n, "услуга", "услуги", "услуг"); };  // считаем, сколько строк в прайсе
+  $("nHands").textContent = nUsl($("pHands").children.length);
   $("pFeet").innerHTML = ["ped", "pedg", "pedf", "pedp", "pedh", "nit", "nitc"].map(function (id) { return priceRow(svc(id)); }).join("");
+  $("nFeet").textContent = nUsl($("pFeet").children.length);
   document.querySelectorAll(".pacc .prow").forEach(function (r) { r.style.setProperty("--i", [].indexOf.call(r.parentNode.children, r)); });
 
   var phIcon = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M8 21V9a4 4 0 0 1 8 0v12"></path><path d="M10 9.5a2 2 0 0 1 4 0"></path></svg>';
