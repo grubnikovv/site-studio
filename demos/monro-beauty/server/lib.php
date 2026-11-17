@@ -107,7 +107,7 @@ function smtp_send($from, $to, $head, $body) {
     $rd = function () use ($fp) { $r = ''; while (($l = fgets($fp, 1024)) !== false) { $r .= $l; if (strlen($l) < 4 || $l[3] === ' ') break; } return $r; };
     $cmd = function ($c, $want) use ($fp, $rd) {
         if ($c !== null) fwrite($fp, $c . "\r\n"); $r = $rd();
-        $GLOBALS['smtp_log'][] = ($c === null ? '' : (strpos($c, 'AUTH') === 0 || strlen($c) > 60 || preg_match('/^[A-Za-z0-9+\/=]+$/', $c) ? '[скрыто]' : $c) . ' → ') . trim($r);
+        $GLOBALS['smtp_log'][] = ($c === null ? '' : (strpos($c, 'AUTH') === 0 || strlen($c) > 60 || preg_match('/^[A-Za-z0-9+\/=]+$/', $c) ? '[скрыто]' : preg_replace('/<.(.*)@/U', '<*@', $c)) . ' → ') . preg_replace('/\S+@\S+/', '*@*', trim($r));
         return strpos($r, (string)$want) === 0 ? true : trim($r);
     };
     $data = preg_replace('/^\./m', '..', str_replace("\r\n", "\n", $head . "\r\n" . $body));
