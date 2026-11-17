@@ -88,6 +88,31 @@ function mail_admin() {
     return $m ?: (string)cfg('mail_admin');
 }
 // Письмо от студии. Текст — как в Telegram (<b>, <a>, переносы строк), оборачиваем в простой фирменный шаблон.
+// Отправить письмо: через почтовый сервер ящика marina@ (SMTP с паролем — письмо подписывается DKIM, меньше спама),
+// если пароль ящика не задан или сервер недоступен — обычной функцией mail() хостинга.
+function mail_out($to, $subj, $body, $headers) {
+    $from = (string)cfg('mail_from');
+    if (cfg('smtp_pass')) {
+        $ok = smtp_send($from, $to, "To: <$to>\r\nSubject: $subj\r\n" . $headers, $body);
+        if ($ok === true) return true;
+        logline('smtp → ' . $to . ': ' . $ok . ' — отправляю через mail()');
+    }
+    return @mail($to, $subj, $body, $headers, '-f' . $from);
+}
+function smtp_send($from, $to, $head, $body) {
+    $host = (string)(cfg('smtp_host') ?: 'ssl://smtp.timeweb.ru:465');
+    $fp = @stream_socket_client($host, $en, $es, 10); if (!$fp) return 'нет связи: ' . $es;
+    stream_set_timeout($fp, 15);
+    $rd = function () use ($fp) { $r = ''; while (($l = fgets($fp, 1024)) !== false) { $r .= $l; if (strlen($l) < 4 || $l[3] === ' ') break; } return $r; };
+    $cmd = function ($c, $want) use ($fp, $rd) { if ($c !== null) fwrite($fp, $c . "\r\n"); $r = $rd(); return strpos($r, (string)$want) === 0 ? true : trim($r); };
+    $data = preg_replace('/^\./m', '..', str_replace("\r\n", "\n", $head . "\r\n" . $body));
+    foreach ([[null, 220], ['EHLO ' . substr(strrchr($from, '@'), 1), 250], ['AUTH LOGIN', 334], [base64_encode($from), 334], [base64_encode((string)cfg('smtp_pass')), 235],
+              ['MAIL FROM:<' . $from . '>', 250], ['RCPT TO:<' . $to . '>', 25], ['DATA', 354], [str_replace("\n", "\r\n", rtrim($data, "\n")) . "\r\n.", 250]] as [$c, $w]) {
+        $r = $cmd($c, $w); if ($r !== true) { fclose($fp); return 'SMTP ' . ($c ? strtok($c, ' :') : 'привет') . ': ' . mb_substr($r, 0, 120); }
+    }
+    fwrite($fp, "QUIT\r\n"); fclose($fp); return true;
+}
+
 function send_mail($to, $subject, $text) {
     $from = (string)cfg('mail_from');
     if (!$from || !filter_var($to, FILTER_VALIDATE_EMAIL)) return false;
@@ -108,7 +133,7 @@ function send_mail($to, $subject, $text) {
         . 'Message-ID: <' . bin2hex(random_bytes(12)) . '@' . $dom . ">\r\nDate: " . date('r') . "\r\n";
     $mime = "--$b\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($plain))
         . "--$b\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($body)) . "--$b--\r\n";
-    $ok = @mail($to, '=?UTF-8?B?' . base64_encode($subject) . '?=', $mime, $headers, '-f' . $from);
+    $ok = mail_out($to, '=?UTF-8?B?' . base64_encode($subject) . '?=', $mime, $headers);
     if (!$ok) logline('mail to ' . $to . ' failed');
     return $ok;
 }
@@ -139,7 +164,7 @@ function send_mail_file($to, $subject, $text, $fname, $data) {
     $body = "--$b\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n" . chunk_split(base64_encode($text))
         . "--$b\r\nContent-Type: application/gzip; name=\"$fname\"\r\nContent-Transfer-Encoding: base64\r\nContent-Disposition: attachment; filename=\"$fname\"\r\n\r\n" . chunk_split(base64_encode($data))
         . "--$b--\r\n";
-    $ok = @mail($to, '=?UTF-8?B?' . base64_encode($subject) . '?=', $body, $headers, '-f' . $from);
+    $ok = mail_out($to, '=?UTF-8?B?' . base64_encode($subject) . '?=', $body, $headers);
     if (!$ok) logline('mail file to ' . $to . ' failed');
     return $ok;
 }

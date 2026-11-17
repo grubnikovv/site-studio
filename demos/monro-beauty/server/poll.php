@@ -10,6 +10,7 @@ if (isset($_GET['diag'])) {  // проверка связи: poll.php?key=...&di
     $t = microtime(true); $me = tg('getMe');
     echo 'Telegram: ' . (!empty($me['ok']) ? 'связь есть, бот @' . $me['result']['username'] : 'нет связи') . ' (' . round(microtime(true) - $t, 1) . " с)\n";
     $w = tg('getWebhookInfo'); echo 'Вебхук: ' . json_encode($w['result'] ?? null, JSON_UNESCAPED_UNICODE) . "\n";
+    echo 'Почта: ' . (cfg('smtp_pass') ? 'через ящик ' . cfg('mail_from') . ' (SMTP, с подписью DKIM)' : 'через mail() хостинга — пароль ящика не задан (секрет MAIL_PASS)') . "\n";
     echo 'PHP ' . PHP_VERSION . ', curl ' . (curl_version()['version'] ?? '?') . "\n";
     $q = db()->query('SELECT COUNT(*) FROM admins'); echo 'Подключено админов: ' . $q->fetchColumn() . "\n";
     $bk = glob(dirname(cfg('db_path')) . '/backups/ma-*.sqlite') ?: []; echo 'Резервных копий: ' . count($bk) . ($bk ? ', последняя ' . basename(end($bk)) . ' (' . round(filesize(end($bk)) / 1024) . ' КБ)' : '') . "\n";

@@ -34,6 +34,7 @@ jobs:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           ADMIN_KEY: ${{ secrets.ADMIN_KEY }}
           CABINET_PASS: ${{ secrets.CABINET_PASS }}
+          MAIL_PASS: ${{ secrets.MAIL_PASS }}
         run: |
           test -n "$BOT_TOKEN" && test ${#ADMIN_KEY} -ge 16 || { echo "Нет секретов BOT_TOKEN или ADMIN_KEY (не короче 16 символов)"; exit 1; }
           mkdir out && cp -r docs/monro/. out/
@@ -49,7 +50,7 @@ jobs:
           php -r 'file_put_contents("out/server/config.php", "<?php return " . var_export([
             "bot_token" => getenv("BOT_TOKEN"), "bot_name" => "ma_mihaylovka_bot", "admin_key" => getenv("ADMIN_KEY"), "cabinet_pass" => getenv("CABINET_PASS") ?: "", "mail_from" => file_exists("demos/monro-beauty/mail-on") ? "marina@" . getenv("DOMAIN") : "", "mail_admin" => "",
             "site_url" => (file_exists("demos/monro-beauty/https-on") ? "https://" : "http://") . getenv("DOMAIN") . "/", "allow_origin" => "https://" . getenv("DOMAIN") . ",http://" . getenv("DOMAIN") . "," . getenv("SITE"),
-            "db_path" => "__DB__", "tz" => "Europe/Volgograd", "tg_api" => "https://api.telegram.org"], true) . ";\n");'
+            "db_path" => "__DB__", "tz" => "Europe/Volgograd", "tg_api" => "https://api.telegram.org", "smtp_pass" => getenv("MAIL_PASS") ?: ""], true) . ";\n");'
           sed -i "s#'__DB__'#__DIR__ . '/data/bot.sqlite'#" out/server/config.php
           php -l out/server/config.php
           # .htaccess сайта: сжатие, кэш картинок и шрифтов, и (когда выпущен сертификат) переход на https://ma-nails.ru
