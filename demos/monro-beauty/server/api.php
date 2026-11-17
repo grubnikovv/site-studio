@@ -275,7 +275,7 @@ if ($type === 'acc_register') {
     if (mb_strlen($pass) < 6) fail('Пароль — не короче 6 символов.');
     if (empty($in['consent'])) fail('Отметьте согласие на обработку персональных данных.');
     if (!cfg('mail_from')) fail('Регистрация временно недоступна. Напишите Марине.');
-    $a = acc_by_mail($m);
+    $a = acc_by_mail($m); if ($a) $m = $a['email'];
     if ($a && $a['verified']) fail('Эта почта уже зарегистрирована. Войдите или нажмите «Забыли пароль?».');
     $h = password_hash($pass, PASSWORD_DEFAULT);
     if ($a) client_db()->prepare('UPDATE accounts SET name = ?, pass = ? WHERE id = ?')->execute([$name, $h, $a['id']]);
@@ -287,7 +287,7 @@ if ($type === 'acc_register') {
 }
 if ($type === 'acc_code') {  // прислать код ещё раз
     $m = mail_ok($in['email'] ?? ''); $p = ($in['purpose'] ?? '') === 'reset' ? 'reset' : 'reg';
-    $a = $m ? acc_by_mail($m) : null;
+    $a = $m ? acc_by_mail($m) : null; if ($a) $m = $a['email'];
     if ($a && ($p === 'reset' ? $a['verified'] : !$a['verified'])) {
         $r = acc_send_code($m, $p);
         if ($r === 'wait') fail('Новый код можно запросить через минуту.');
@@ -296,26 +296,26 @@ if ($type === 'acc_code') {  // прислать код ещё раз
     json_out(['ok' => true]);
 }
 if ($type === 'acc_verify') {
-    $m = mail_ok($in['email'] ?? ''); $a = $m ? acc_by_mail($m) : null;
+    $m = mail_ok($in['email'] ?? ''); $a = $m ? acc_by_mail($m) : null; if ($a) $m = $a['email'];
     if (!$a) fail('Сначала зарегистрируйтесь.');
     if ($e = acc_check_code($m, 'reg', $in['code'] ?? '')) fail($e);
     client_db()->prepare('UPDATE accounts SET verified = 1 WHERE id = ?')->execute([$a['id']]);
     json_out(['ok' => true, 'ctoken' => acc_session((int)$a['id'])]);
 }
 if ($type === 'acc_login') {
-    $m = mail_ok($in['email'] ?? ''); $a = $m ? acc_by_mail($m) : null;
+    $m = mail_ok($in['email'] ?? ''); $a = $m ? acc_by_mail($m) : null; if ($a) $m = $a['email'];
     if (!$a || !password_verify((string)($in['pass'] ?? ''), (string)$a['pass'])) { sleep(1); fail('Неверная почта или пароль.'); }
     if (!$a['verified']) { acc_send_code($m, 'reg'); json_out(['ok' => false, 'verify' => true, 'email' => $m, 'error' => 'Почта ещё не подтверждена — отправили код ещё раз.']); }
     json_out(['ok' => true, 'ctoken' => acc_session((int)$a['id'])]);
 }
 if ($type === 'acc_reset_req') {  // ответ одинаковый, есть такая почта или нет — чтобы нельзя было перебирать чужие адреса
     $m = mail_ok($in['email'] ?? ''); if (!$m) fail('Проверьте адрес почты.');
-    $a = acc_by_mail($m);
+    $a = acc_by_mail($m); if ($a) $m = $a['email'];
     if ($a && $a['verified'] && acc_send_code($m, 'reset') === 'wait') fail('Код уже отправлен. Новый можно запросить через минуту.');
     json_out(['ok' => true, 'email' => $m]);
 }
 if ($type === 'acc_reset') {
-    $m = mail_ok($in['email'] ?? ''); $a = $m ? acc_by_mail($m) : null; $pass = (string)($in['pass'] ?? '');
+    $m = mail_ok($in['email'] ?? ''); $a = $m ? acc_by_mail($m) : null; if ($a) $m = $a['email']; $pass = (string)($in['pass'] ?? '');
     if (mb_strlen($pass) < 6) fail('Новый пароль — не короче 6 символов.');
     if (!$a || !$a['verified']) fail('Код устарел. Запросите новый.');
     if ($e = acc_check_code($m, 'reset', $in['code'] ?? '')) fail($e);

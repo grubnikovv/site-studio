@@ -11,6 +11,7 @@ if (isset($_GET['diag'])) {  // проверка связи: poll.php?key=...&di
     echo 'Telegram: ' . (!empty($me['ok']) ? 'связь есть, бот @' . $me['result']['username'] : 'нет связи') . ' (' . round(microtime(true) - $t, 1) . " с)\n";
     $w = tg('getWebhookInfo'); echo 'Вебхук: ' . json_encode($w['result'] ?? null, JSON_UNESCAPED_UNICODE) . "\n";
     echo 'Почта: ' . (cfg('smtp_pass') ? 'через ящик ' . cfg('mail_from') . ' (SMTP, с подписью DKIM)' : 'через mail() хостинга — пароль ящика не задан (секрет MAIL_PASS)') . "\n";
+    try { require_once __DIR__ . '/store.php'; $n = acc_dedupe(); if ($n) echo 'Объединено кабинетов с одинаковой почтой: ' . $n . " (оставлен тот, где фото)\n"; } catch (Throwable $e) { echo 'Объединение кабинетов: ошибка ' . $e->getMessage() . "\n"; }
     try {  // фото профиля: сколько в базе, есть ли файлы, открываются ли
         require_once __DIR__ . '/store.php';
         $avs = client_db()->query("SELECT av FROM accounts WHERE av <> '' AND av IS NOT NULL")->fetchAll(PDO::FETCH_COLUMN);
