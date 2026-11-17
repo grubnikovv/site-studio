@@ -1108,6 +1108,7 @@ div.f { display: grid; gap: 8px; }
 .gear-item::before { content: attr(data-ic); width: 22px; flex: none; text-align: center; }
 .gear-item:hover, .gear-item:focus-visible { background: var(--blush); }
 .gear-item.out { color: var(--lac); border-top: 1px solid var(--line); border-radius: 0 0 12px 12px; margin-top: 4px; }
+.gear-item.sep { border-top: 1px solid var(--line); border-radius: 0 0 12px 12px; margin-top: 4px; }
 #v-admin.locked .gear-w, #v-admin.pwd .gear-w { display: none; }
 @media (prefers-reduced-motion: reduce) { .gear-btn { transition: none; } }
 .bellwrap { position: relative; }
@@ -5343,8 +5344,14 @@ a.tel svg { flex: none; }
     var u = (location.origin && /^https?:/.test(location.origin) ? location.origin : "https://ma-nails.ru") + "/#sertifikat";
     copyText(u).then(function () { toast("Ссылка на подарочные сертификаты скопирована: " + u.replace(/^https?:\/\//, "") + " — вставьте её в сообщение, сторис или статус"); }, function () { toast("Не получилось скопировать. Ссылка: " + u, true); });
   };
-  [[linkBtn, "🔗"], [certLinkBtn, "🎁"], [tgBtn, "📲"], [mailBtn, "✉️"], [pwdBtn, "🔑"], [pushBtn, "🔔"], [outBtn, "🚪"]].forEach(function (x) {
-    x[0].className = "gear-item" + (x[0] === outBtn ? " out" : ""); x[0].setAttribute("role", "menuitem"); x[0].dataset.ic = x[1]; gearMenu.appendChild(x[0]);
+  // ссылка на обучение — для набора учениц
+  var trainLinkBtn = document.createElement("button"); trainLinkBtn.type = "button"; trainLinkBtn.textContent = "Скопировать ссылку на обучение";
+  trainLinkBtn.onclick = function () {
+    var u = (location.origin && /^https?:/.test(location.origin) ? location.origin : "https://ma-nails.ru") + "/#obuchenie";
+    copyText(u).then(function () { toast("Ссылка на обучение скопирована: " + u.replace(/^https?:\/\//, "") + " — вставьте её в сообщение, сторис или статус"); }, function () { toast("Не получилось скопировать. Ссылка: " + u, true); });
+  };
+  [[linkBtn, "🔗"], [certLinkBtn, "🎁"], [trainLinkBtn, "🎓"], [tgBtn, "📲"], [mailBtn, "✉️"], [pwdBtn, "🔑"], [pushBtn, "🔔"], [outBtn, "🚪"]].forEach(function (x) {
+    x[0].className = "gear-item" + (x[0] === outBtn ? " out" : x[0] === tgBtn ? " sep" : "");  // ссылки сверху, настройки — после черты x[0].setAttribute("role", "menuitem"); x[0].dataset.ic = x[1]; gearMenu.appendChild(x[0]);
   });
   function gearSet(open) { gearMenu.hidden = !open; gear.setAttribute("aria-expanded", open ? "true" : "false"); }
   gear.onclick = function (e) { e.stopPropagation(); gearSet(gearMenu.hidden); };
@@ -5403,7 +5410,7 @@ a.tel svg { flex: none; }
       { el: "#aTrain", t: "Заявки на обучение", p: "Проверьте оплату в СберБанк Онлайн и нажмите «Оплата пришла». После — впишите заметку для ученицы и моделей на каждый день. Если ученица отменит раньше чем за 7 дней — верните предоплату и нажмите «Предоплату вернула»." },
       { el: "#aCerts", t: "Сертификаты", p: "Покупатель платит по СБП. Проверьте поступление и нажмите «Оплата пришла» — ему придёт письмо. Можно позвонить или написать покупателю. Неоплаченный сертификат можно удалить через 2 часа." } ] },
     { id: "settings", ver: 2, icon: "⚙️", title: "Telegram, почта, пароль, выход", sub: "шестерёнка у заголовка", pre: tab("day"), steps: [
-      { el: "#aGear", t: "Настройки кабинета", p: "Нажмите на шестерёнку. «Скопировать ссылку на сайт» — чтобы отправить её клиентке, «…на сертификаты» — для рекламы подарочных сертификатов. «Telegram-уведомления» — какие телефоны подключены, отключить чужой, «Подключить Telegram заново», если уведомления пропали или бот случайно заблокирован. «Почта» — сменить адрес или отправить проверочное письмо. Ещё — смена пароля и выход." },
+      { el: "#aGear", t: "Настройки кабинета", p: "Нажмите на шестерёнку. «Скопировать ссылку на сайт» — чтобы отправить её клиентке, «…на сертификаты» и «…на обучение» — для рекламы сертификатов и курсов. «Telegram-уведомления» — какие телефоны подключены, отключить чужой, «Подключить Telegram заново», если уведомления пропали или бот случайно заблокирован. «Почта» — сменить адрес или отправить проверочное письмо. Ещё — смена пароля и выход." },
       { el: "#hdrM a.bell-btn", t: "Вернуться на главный экран", p: "Открыли почту, пароль или Telegram — нажмите на этот значок, и кабинет вернётся к записям. Или кнопка «Назад»." },
       { el: function () { return tourBtn; }, t: "Обучение", p: "Сюда можно вернуться в любой момент и пройти любую тему ещё раз." } ] }
   ];
