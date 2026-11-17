@@ -18,6 +18,16 @@ if (isset($_GET['diag'])) {  // проверка связи: poll.php?key=...&di
     echo "Журнал (последнее):\n" . preg_replace('/bot\d+:[\w-]+/', 'bot***', implode('', array_slice($log, -8)));
     exit;
 }
+if (isset($_GET['testmail'])) {  // проверка почты через ящик: poll.php?key=...&testmail=1 — разговор с сервером и последние ошибки
+    header('Content-Type: text/plain; charset=utf-8');
+    require_once __DIR__ . '/store.php';
+    $to = mail_admin() ?: (string)cfg('mail_from'); echo 'Кому: ' . preg_replace('/^(.).*(@.*)$/', '$1***$2', $to) . "\n";
+    $GLOBALS['smtp_log'] = [];
+    $r = smtp_send((string)cfg('mail_from'), $to, "To: <$to>\r\nSubject: =?UTF-8?B?" . base64_encode('Проверка почты сайта') . "?=\r\nFrom: <" . cfg('mail_from') . ">\r\nMessage-ID: <" . bin2hex(random_bytes(8)) . '@' . substr(strrchr((string)cfg('mail_from'), '@'), 1) . ">\r\nDate: " . date('r') . "\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\n", "Это проверочное письмо с сайта ma-nails.ru.\r\n");
+    echo implode("\n", $GLOBALS['smtp_log']) . "\nИтог: " . ($r === true ? 'сервер принял письмо' : $r) . "\n";
+    $log = @file(dirname(cfg('db_path')) . '/bot.log') ?: []; echo "Журнал почты:\n" . implode('', array_slice(preg_grep('/mail|smtp/i', $log), -8));
+    exit;
+}
 if (isset($_GET['testpush'])) {  // проверочное уведомление на телефоны мастера: poll.php?key=...&testpush=1
     header('Content-Type: text/plain; charset=utf-8');
     require_once __DIR__ . '/store.php'; require_once __DIR__ . '/push.php';

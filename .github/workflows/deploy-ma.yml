@@ -119,6 +119,11 @@ jobs:
         env:
           ADMIN_KEY: ${{ secrets.ADMIN_KEY }}
         run: curl -s --max-time 60 "$SITE/server/poll.php?key=$ADMIN_KEY&testpush=1"
+      - name: Проверка почты
+        if: steps.chk.outputs.ok == 'true' && contains(github.event.head_commit.message, '[test-mail]')
+        env:
+          ADMIN_KEY: ${{ secrets.ADMIN_KEY }}
+        run: curl -s --max-time 60 "$SITE/server/poll.php?key=$ADMIN_KEY&testmail=1"
       - name: Очистить уведомления или тестовые данные кабинета
         if: steps.chk.outputs.ok == 'true' && (contains(github.event.head_commit.message, '[clear-notes]') || contains(github.event.head_commit.message, '[clear-data]') || contains(github.event.head_commit.message, '[clear-cancelled]'))
         env:

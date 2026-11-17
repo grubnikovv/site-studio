@@ -92,7 +92,8 @@ function mail_admin() {
 // если пароль ящика не задан или сервер недоступен — обычной функцией mail() хостинга.
 function mail_out($to, $subj, $body, $headers) {
     $from = (string)cfg('mail_from');
-    if (cfg('smtp_pass')) {
+    if (cfg('smtp_pass')) require_once __DIR__ . '/store.php';
+    if (cfg('smtp_pass') && kv_get('smtp_on')) {  // включается после проверки (poll.php?testmail=1)
         $ok = smtp_send($from, $to, "To: <$to>\r\nSubject: $subj\r\n" . $headers, $body);
         if ($ok === true) return true;
         logline('smtp → ' . $to . ': ' . $ok . ' — отправляю через mail()');
@@ -104,7 +105,11 @@ function smtp_send($from, $to, $head, $body) {
     $fp = @stream_socket_client($host, $en, $es, 10); if (!$fp) return 'нет связи: ' . $es;
     stream_set_timeout($fp, 15);
     $rd = function () use ($fp) { $r = ''; while (($l = fgets($fp, 1024)) !== false) { $r .= $l; if (strlen($l) < 4 || $l[3] === ' ') break; } return $r; };
-    $cmd = function ($c, $want) use ($fp, $rd) { if ($c !== null) fwrite($fp, $c . "\r\n"); $r = $rd(); return strpos($r, (string)$want) === 0 ? true : trim($r); };
+    $cmd = function ($c, $want) use ($fp, $rd) {
+        if ($c !== null) fwrite($fp, $c . "\r\n"); $r = $rd();
+        $GLOBALS['smtp_log'][] = ($c === null ? '' : (strpos($c, 'AUTH') === 0 || strlen($c) > 60 || preg_match('/^[A-Za-z0-9+\/=]+$/', $c) ? '[скрыто]' : $c) . ' → ') . trim($r);
+        return strpos($r, (string)$want) === 0 ? true : trim($r);
+    };
     $data = preg_replace('/^\./m', '..', str_replace("\r\n", "\n", $head . "\r\n" . $body));
     foreach ([[null, 220], ['EHLO ' . substr(strrchr($from, '@'), 1), 250], ['AUTH LOGIN', 334], [base64_encode($from), 334], [base64_encode((string)cfg('smtp_pass')), 235],
               ['MAIL FROM:<' . $from . '>', 250], ['RCPT TO:<' . $to . '>', 25], ['DATA', 354], [str_replace("\n", "\r\n", rtrim($data, "\n")) . "\r\n.", 250]] as [$c, $w]) {
