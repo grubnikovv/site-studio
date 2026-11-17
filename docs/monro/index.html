@@ -4450,9 +4450,11 @@ a.tel svg { flex: none; }
       var tail = rest.replace(/[;,.\s]+$/, ""), pm = /(?:^|[^\d])(\d{1,2} \d{3}|\d{3,5})\s*(?:р\.?|руб\.?|₽)?$/i.exec(tail) || /(?:^|[^\d])(\d{1,2} \d{3}|\d{3,5})(?=\s|$|р|₽)/i.exec(rest);
       var price = pm ? Number(pm[1].replace(/\s/g, "")) : 0; if (price && (price < 100 || price > 50000)) price = 0;
       if (pm && price) rest = rest.replace(pm[1], " ");
-      var low = rest.toLowerCase(), cut = low.search(/коррекц|маник|педик|наращ|сняти|нит[ьи]|гель|френч/);
+      var low = rest.toLowerCase(), cut = low.search(/коррекц|маник|педик|наращ|сняти|титан|нит[ьи]|вросш|укреп|гель|френч/);
       var sv = svcGuess(cut >= 0 ? rest.slice(cut) : rest, price);
       var name = (cut >= 0 ? rest.slice(0, cut) : rest).replace(/[^A-Za-zА-Яа-яЁё\s\-]/g, " ").replace(/\s+/g, " ").trim();
+      var cols = r.src.length === 1 ? r.src[0].split(";") : [];  // строгий формат «дата; время; имя; телефон; услуга; цена» — имя берём из своей колонки
+      if (cols.length >= 5 && /[А-Яа-яЁёA-Za-z]/.test(cols[2]) && !/\d/.test(cols[2])) name = cols[2].replace(/\s+/g, " ").trim();
       var prev = idx > 0 ? done[idx - 1] : null;
       if (r.plus && prev && prev.rec) { name = name || prev.rec.name; ph = ph || digits(prev.rec.phone); r.date = r.date || prev.rec.date; r.start = prev.rec.start + bmin(prev.rec); }
       if (!r.date) err.push("дата (напишите её строкой выше, например «21 ноября»)");
