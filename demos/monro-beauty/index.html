@@ -903,6 +903,7 @@ div.f { display: grid; gap: 8px; }
 .cl-av img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
 .b-av img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; vertical-align: middle; }
 .cl-who { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.who-l { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; min-width: 0; }
 .k-id { display: grid; gap: 2px; min-width: 0; }
 .k-id small { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--mute); }
 .k-id b { font-size: 20px; font-weight: 600; overflow-wrap: anywhere; }
@@ -1130,7 +1131,7 @@ div.f { display: grid; gap: 8px; }
 a.ni { text-decoration: none; color: inherit; }
 a.tel { display: inline-flex; align-items: center; gap: 5px; color: var(--lac); font-weight: 700; text-decoration: none; border-bottom: 1px dashed color-mix(in srgb, var(--lac) 45%, transparent); padding: 2px 0; }
 a.tel svg { flex: none; }
-.cl-acc a { color: var(--lac); text-decoration: none; word-break: break-all; }
+.cl-acc a { color: var(--lac); text-decoration: none; overflow-wrap: anywhere; }
 .ni i { font-style: normal; font-size: 18px; line-height: 1.2; }
 .ni b { display: block; font-size: 14.5px; color: var(--ink); }
 .ni > span { margin-top: 0; }
@@ -3982,7 +3983,7 @@ a.tel svg { flex: none; }
       var b = r.b;
       var s = svc(b.svc), t = statusOf(b);
       return '<div class="bk' + (b.id === flashId ? " moved" : "") + '"><div class="r1"><b class="num">' + hm(b.start) + '–' + hm(b.start + bmin(b)) + '</b><span class="pill ' + t[1] + '">' + t[0] + '</span></div>' +
-        '<div>' + (b.accAv && SYNC ? '<button type="button" class="b-av" data-av="' + esc(b.accAv) + '" data-avn="' + esc(b.name) + '" aria-label="Фото клиентки"><img src="' + avUrl(b.accAv, true) + '" alt="" width="28" height="28" loading="lazy"></button> ' : '') + '<b style="font-weight:700">' + esc(b.name) + '</b> · ' + telLink(b.phone) + (b.example ? ' <span class="pill">пример</span>' : '') + '</div>' +
+        '<div class="who-l">' + (b.accAv && SYNC ? '<button type="button" class="b-av" data-av="' + esc(b.accAv) + '" data-avn="' + esc(b.name) + '" aria-label="Фото клиентки"><img src="' + avUrl(b.accAv, true) + '" alt="" width="28" height="28" loading="lazy"></button>' : '') + '<b style="font-weight:700">' + esc(b.name) + '</b>' + telLink(b.phone) + (b.example ? ' <span class="pill">пример</span>' : '') + '</div>' +
         '<div class="info">' + svcLabel(b) + ' · ' + rub(b.price || s.price) + (b.note ? ' · «' + esc(b.note) + '»' : '') + '</div>' +
         (b.remind && b.remind !== "none" ? '<div class="info">🔔 ' + (b.remind === "mail" ? "Почта" + (b.email ? " " + esc(b.email) : "") : REM_NAME[b.remind] || "Telegram") + ' · ' + remindPlan(b.date).join(", ") + '</div>' : '') +
         overlapNote(b) +
@@ -4680,8 +4681,8 @@ a.tel svg { flex: none; }
       .sort(function (a, b) { return (b.last ? b.last.date : "").localeCompare(a.last ? a.last.date : ""); });
     $("aClients").innerHTML = list.length ? list.map(function (c) {
       var badges = (c.noshow >= 2 ? '<span class="badge bad">часто не приходит</span>' : '') + ((c.cancelClient || 0) >= 2 ? '<span class="badge bad">часто отменяет</span>' : '') + (c.came <= 1 && !c.example ? '<span class="badge new">новая</span>' : '') + (c.example ? '<span class="badge">пример</span>' : '');
-      return '<details class="bk cl"><summary><div class="r1"><div class="cl-who">' + (c.av ? '<button type="button" class="cl-av" data-av="' + esc(c.av) + '" data-avn="' + esc(c.name) + '" aria-label="Фото клиентки"><img src="' + avUrl(c.av, true) + '" alt="" width="40" height="40" loading="lazy"></button>' : '') + '<b>' + esc(c.name) + ' · ' + telLink(c.phone) + '</b></div><span>' + badges + '</span></div>' +
-        (c.acc || c.mail ? '<div class="info cl-acc">' + (c.acc ? '🙋 Есть личный кабинет · ' : '✉️ ') + '<a href="mailto:' + esc(c.acc || c.mail) + '" onclick="event.stopPropagation()">' + esc(c.acc || c.mail) + '</a></div>' : '') +
+      return '<details class="bk cl"><summary><div class="r1"><div class="cl-who">' + (c.av ? '<button type="button" class="cl-av" data-av="' + esc(c.av) + '" data-avn="' + esc(c.name) + '" aria-label="Фото клиентки"><img src="' + avUrl(c.av, true) + '" alt="" width="40" height="40" loading="lazy"></button>' : '') + '<div class="who-l"><b>' + esc(c.name) + '</b>' + telLink(c.phone) + '</div></div><span>' + badges + '</span></div>' +
+        (c.acc || c.mail ? '<div class="info cl-acc">' + (c.acc ? '🙋 Есть личный кабинет<br>' : '✉️ ') + '<a href="mailto:' + esc(c.acc || c.mail) + '" onclick="event.stopPropagation()">' + esc(c.acc || c.mail) + '</a></div>' : '') +
         '<div class="info">' + (c.came ? 'Пришла: ' + times(c.came) + ' · последний раз ' + shortDate(c.last.date) : 'Ещё не приходила') + (c.noshow ? ' · не пришла: ' + times(c.noshow) : '') + (c.cancelClient ? ' · отменила сама: ' + times(c.cancelClient) + (c.cancelLate ? ' (поздно: ' + c.cancelLate + ')' : '') : '') + (c.cancel - (c.cancelClient || 0) > 0 ? ' · отменили вы: ' + (c.cancel - (c.cancelClient || 0)) : '') + (c.future ? ' · записана на ' + shortDate(c.future.date) : '') + '</div></summary>' +
         '<div class="hist">' + c.visits.slice(0, 12).map(function (v) { return '<div><button type="button" class="hgo" data-goto="' + v.id + '" data-d="' + v.date + '" aria-label="Открыть запись в расписании"><span>' + shortDate(v.date) + ', ' + hm(v.start) + '</span><b style="font-weight:600">' + svc(v.svc).name + ' · ' + statusOf(v)[0].toLowerCase() + ' <i aria-hidden="true">›</i></b></button>' + (v.status === "cancelled" ? '<button type="button" class="xdel" data-delb="' + v.id + '" data-key="b' + v.id + '" aria-label="Удалить отменённую запись">Удалить</button>' : '') + '</div>'; }).join("") + '</div>' +
         '<div class="acts" style="margin-top:10px"><button type="button" data-again="' + esc(c.phone) + '" data-svc="' + (c.visits[0] ? c.visits[0].svc : "gel") + '" data-name="' + esc(c.name) + '">Записать снова</button>' +
