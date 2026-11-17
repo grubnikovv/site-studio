@@ -335,6 +335,7 @@ section.block { padding-block: clamp(56px, 8vw, 104px); }
 .tour-list span small { color: var(--mute); font-size: 12.5px; }
 .tour-list em { font-style: normal; font-size: 12px; font-weight: 800; color: var(--mute); white-space: nowrap; }
 .tour-list em.ok { color: #2E7D4F; }
+.tour-list em.new { color: var(--lac); font-weight: 800; }
 .tour-shade { position: fixed; inset: 0; z-index: 9990; background: transparent; }
 .tour-ring { position: fixed; z-index: 9991; border-radius: 14px; pointer-events: none; box-shadow: 0 0 0 9999px rgba(20, 8, 12, .62); outline: 3px solid #FF3B30; outline-offset: 3px; transition: top .3s, left .3s, width .3s, height .3s; animation: tourPulse 1.3s ease-in-out infinite; }
 .tour-ring.none { width: 0 !important; height: 0 !important; outline: 0; left: 50% !important; top: 50% !important; }
@@ -2191,6 +2192,7 @@ a.tel svg { flex: none; }
       <div class="mail-cur" id="aMailCur" hidden><span>Сейчас приходят на</span><b id="aMailCurV"></b><button type="button" class="btn sm ghost" id="aMailTest" style="justify-self:start;margin-top:6px">Отправить проверочное письмо</button></div>
       <label for="aMailIn" id="aMailInL">Ваша почта</label>
       <input type="email" id="aMailIn" autocomplete="email" inputmode="email" placeholder="например, marina@mail.ru">
+      <p class="note" style="margin:0">Чтобы письма не попадали в «Спам», добавьте <b>marina@ma-nails.ru</b> в контакты почты. В Mail.ru проще всего через браузер: откройте <a href="https://e.mail.ru/addressbook" target="_blank" rel="noopener">e.mail.ru/addressbook</a> → «Добавить контакт» → впишите имя и этот адрес → «Сохранить».</p>
       <p class="note" id="aMailNote"></p>
       <p class="err" id="aMailErr" hidden></p>
       <button class="btn" type="submit" id="aMailGo">Сохранить и прислать проверочное письмо</button>
@@ -5325,19 +5327,20 @@ a.tel svg { flex: none; }
       { el: "#nBell", t: "Колокольчик — уведомления", p: "Новые записи, отмены, переносы, заявки на обучение и сертификаты. Красная цифра — сколько новых. Всё то же приходит в Telegram-бот." },
       { el: "#hdrM a.bell-btn", t: "Значок кабинета", p: "С любой страницы сайта нажмите сюда — откроется кабинет." },
       { el: "#aTabs", t: "Вкладки кабинета", p: "День — записи и график. Календарь — весь месяц сразу. Клиентки — база и рассылка. Статистика — выручка за месяц. Заявки — обучение и сертификаты." } ] },
-    { id: "day", icon: "📅", title: "Записи на день", sub: "лента дней, цифры, карточка записи", pre: tab("day"), steps: [
+    { id: "day", ver: 2, icon: "📅", title: "Записи на день", sub: "лента дней, цифры, карточка записи", pre: tab("day"), steps: [
       { el: "#aDays", t: "Лента дней", p: "Сегодня выделено и подписано «СЕГОДНЯ». Листайте влево — прошедшие 15 дней, вправо — 2 месяца вперёд. Нажмите на день — откроются его записи." },
-      { el: "#aKpi", t: "Цифры дня", p: "Сколько записей, выручка (только по тем, кто пришёл) и сколько свободных часов осталось." },
+      { el: "#aKpi", t: "Цифры дня", p: "Сколько записей, выручка дня (все записи, кроме отмен и неявок) и сколько свободных часов осталось." },
       { el: "#aAdd", t: "+ Добавить запись", p: "Для клиенток, которые позвонили или написали. Можно и задним числом — на 15 дней назад, чтобы статистика была полной." },
-      { el: firstBk, t: "Карточка записи", p: "Время, клиентка, услуга и сумма. Плашка справа — статус: «Записана», «Пришла», «Отменена».", none: "Когда в выбранном дне будут записи, здесь появятся их карточки. Выберите день с записями, чтобы посмотреть." },
+      { el: firstBk, t: "Карточка записи", p: "Время, клиентка, услуга и сумма. Плашка справа — статус: «Записана», «Пришла», «Отменена». Если клиентка поставила фото в личном кабинете — оно рядом с именем, нажмите — откроется крупно.", none: "Когда в выбранном дне будут записи, здесь появятся их карточки. Выберите день с записями, чтобы посмотреть." },
       { el: function () { var b = firstBk(); return b && b.querySelector("a.tel"); }, t: "Позвонить клиентке", p: "Нажмите на номер — сразу откроется звонок, копировать не нужно.", skip: true },
-      { el: function () { var b = firstBk(); return b && b.querySelector('[data-a="move"]'); }, t: "Изменить", p: "Поменять услугу, добавить френч или снятие, перенести на другой день и время. Сумма и время пересчитаются сами.", skip: true },
+      { el: function () { var b = firstBk(); return b && b.querySelector('[data-a="move"]'); }, t: "Изменить", p: "Поменять услугу, добавить френч или снятие, перенести на другой день и время. Сумма и время пересчитаются сами. В записях, которые вы вносили сами, здесь же можно исправить имя и телефон — сразу во всех её записях.", skip: true },
       { el: function () { var b = firstBk(); return b && b.querySelector('[data-a="came"]'); }, t: "Пришла / Не пришла", p: "После визита отмечайте, пришла ли клиентка. От этого зависят выручка, статистика и список «Пора на коррекцию».", skip: true },
       { el: function () { var b = firstBk(); return b && b.querySelector('[data-a="cancelask"]'); }, t: "Отменить", p: "Сайт спросит, кто отменил: клиентка или вы. Если клиентка отменяет часто — у неё появится пометка «часто отменяет».", skip: true },
       { el: function () { var b = firstBk(); return b && b.querySelector('[data-cp="open"]'); }, t: "Оплата сертификатом", p: "Впишите номер сертификата — сайт покажет остаток и спишет нужную сумму.", skip: true } ] },
-    { id: "cal", icon: "📆", title: "Календарь месяца", sub: "весь месяц сразу, переход в день", pre: tab("cal"), steps: [
+    { id: "cal", ver: 2, icon: "📆", title: "Календарь месяца", sub: "записи и суммы за месяц", pre: tab("cal"), steps: [
       { el: "#aTabs [data-tab=\"cal\"]", t: "Вкладка «Календарь»", p: "Весь месяц на одном экране — не нужно листать ленту дней по одному." },
-      { el: "#aCal", t: "Сколько записей в день", p: "Цифра на дне — сколько записей. «обуч.» — дни обучения, «вых» — выходной. Сегодня обведено рамкой." },
+      { el: "#aCal", t: "Записи и суммы", p: "Цифра в кружке — сколько записей, под ней — сумма дня: 1,7к = 1 700 ₽ (без отмен и неявок). «обуч.» — дни обучения, «вых» — выходной. Сегодня обведено рамкой." },
+      { el: "#calSum", t: "Итог месяца", p: "Сколько записей за месяц и на какую сумму, сколько дней с записями." },
       { el: function () { return document.querySelector("#aCal button:has(i:not(.n0):not(.tr))") || document.querySelector("#aCal button.today"); }, t: "Нажмите на день", p: "Откроется вкладка «День» на этой дате со всеми записями. Попробуйте после обучения." },
       { el: "#calNext", t: "Другие месяцы", p: "Стрелки ‹ › — листать месяцы назад и вперёд." } ] },
     { id: "add", icon: "➕", title: "Новая запись вручную", sub: "услуга, время, имя и телефон", pre: function () { tab("day")(); openEditor(null); }, post: function () { if (!$("eSheet").hidden) closeEditor(); }, steps: [
@@ -5352,7 +5355,8 @@ a.tel svg { flex: none; }
       { el: "#aHours", t: "Часы работы", p: "Клиентки онлайн записываются только в эти часы." },
       { el: "#aGrid", t: "Окна дня", p: "Нажмите на окно — оно закроется для онлайн-записи. Ещё раз — откроется." },
       { el: "#aRange", t: "Закрыть промежуток", p: "Быстро: до обеда, после обеда или весь день. Или выберите «С — До», напишите причину (видно только вам) и нажмите «Закрыть это время»." } ] },
-    { id: "clients", icon: "👩", title: "Клиентки и рассылка", sub: "база, рассылка, копии, записи из блокнота", pre: tab("clients"), steps: [
+    { id: "clients", ver: 2, icon: "👩", title: "Клиентки и рассылка", sub: "пора на коррекцию, база, рассылка, блокнот", pre: tab("clients"), steps: [
+      { el: "#aDue", t: "Пора на коррекцию", p: "Клиентки, у которых прошло 3–4 недели после визита, а новой записи нет. «Написать в WhatsApp» — готовое сообщение, «Записать» — сразу в запись. Когда здесь появляется новая клиентка, раз в день приходит уведомление в Telegram, на почту и в колокольчик." },
       { el: "#aSearch", t: "Поиск клиентки", p: "По имени или телефону. Ниже — карточки: визиты, отмены, «Записать снова»." },
       { el: "#aCast", t: "Рассылка", p: "Сообщение придёт в колокольчик всем клиенткам с личным кабинетом: скидки, свободные окошки, новые цены. На почту — только тем, кто согласился." },
       { el: ".exp", t: "База и резервные копии", p: "Сайт сам сохраняет копию каждую ночь. Здесь можно скачать таблицы для Excel: клиентки, записи, сертификаты, обучение." },
@@ -5363,8 +5367,9 @@ a.tel svg { flex: none; }
     { id: "req", icon: "🎓", title: "Заявки: обучение и сертификаты", sub: "подтвердить оплату, модели, заметка", pre: tab("req"), steps: [
       { el: "#aTrain", t: "Заявки на обучение", p: "Проверьте оплату в СберБанк Онлайн и нажмите «Оплата пришла». После — впишите заметку для ученицы и моделей на каждый день. Если ученица отменит раньше чем за 7 дней — верните предоплату и нажмите «Предоплату вернула»." },
       { el: "#aCerts", t: "Сертификаты", p: "Покупатель платит по СБП. Проверьте поступление и нажмите «Оплата пришла» — ему придёт письмо. Можно позвонить или написать покупателю. Неоплаченный сертификат можно удалить через 2 часа." } ] },
-    { id: "settings", icon: "⚙️", title: "Telegram, почта, пароль, выход", sub: "шестерёнка у заголовка", pre: tab("day"), steps: [
-      { el: "#aGear", t: "Настройки кабинета", p: "Нажмите на шестерёнку: Telegram-уведомления (переподключить, если пропали), почта для копий уведомлений, смена пароля и выход из кабинета." },
+    { id: "settings", ver: 2, icon: "⚙️", title: "Telegram, почта, пароль, выход", sub: "шестерёнка у заголовка", pre: tab("day"), steps: [
+      { el: "#aGear", t: "Настройки кабинета", p: "Нажмите на шестерёнку. «Telegram-уведомления» — какие телефоны подключены, отключить чужой, «Подключить Telegram заново», если уведомления пропали или бот случайно заблокирован. «Почта» — сменить адрес или отправить проверочное письмо. Ещё — смена пароля и выход." },
+      { el: "#hdrM a.bell-btn", t: "Вернуться на главный экран", p: "Открыли почту, пароль или Telegram — нажмите на этот значок, и кабинет вернётся к записям. Или кнопка «Назад»." },
       { el: function () { return tourBtn; }, t: "Обучение", p: "Сюда можно вернуться в любой момент и пройти любую тему ещё раз." } ] }
   ];
   var TK = "ma-tour", tour = null, tourEls = null;
@@ -5373,14 +5378,15 @@ a.tel svg { flex: none; }
   function tBlock(id) { return TOUR.filter(function (b) { return b.id === id; })[0]; }
   function tourMenu() {
     var sv = tGet(), done = sv.done || {}, pos = sv.pos;
-    var cnt = TOUR.filter(function (b) { return done[b.id]; }).length;
+    var ok = function (b) { return (done[b.id] || 0) >= (b.ver || 1); };  // тема обновилась (ver выше) — снова не пройдена
+    var cnt = TOUR.filter(ok).length;
     $("tourNote").textContent = cnt === TOUR.length ? "Вы прошли все темы. Можно повторить любую." : cnt ? "Пройдено тем: " + cnt + " из " + TOUR.length + "." : "Подсветим нужную кнопку и подскажем, что она делает. Можно выйти в любой момент — место сохранится.";
     var m = "";
     if (pos && tBlock(pos.b)) m += '<button type="button" class="btn sm" data-tgo="resume">Продолжить: «' + tBlock(pos.b).title + '»</button><button type="button" class="btn sm ghost" data-tgo="restart">Начать сначала</button>';
     else m += '<button type="button" class="btn sm" data-tgo="restart">' + (cnt ? "Пройти всё заново" : "Начать обучение") + '</button>';
     $("tourMain").innerHTML = m;
     $("tourReset").hidden = !(cnt || pos);
-    $("tourList").innerHTML = TOUR.map(function (b) { return '<button type="button" data-tblock="' + b.id + '"><i>' + b.icon + '</i><span><b>' + b.title + '</b><small>' + b.sub + '</small></span><em class="' + (done[b.id] ? "ok" : "") + '">' + (done[b.id] ? "✓ пройдено" : b.steps.length + " шаг.") + '</em></button>'; }).join("");
+    $("tourList").innerHTML = TOUR.map(function (b) { return '<button type="button" data-tblock="' + b.id + '"><i>' + b.icon + '</i><span><b>' + b.title + '</b><small>' + b.sub + '</small></span><em class="' + (ok(b) ? "ok" : done[b.id] ? "new" : "") + '">' + (ok(b) ? "✓ пройдено" : done[b.id] ? "✨ обновлено" : b.steps.length + " шаг.") + '</em></button>'; }).join("");
     if (!$("tourDlg").open) $("tourDlg").showModal();
   }
   $("tourClose").onclick = function () { $("tourDlg").close(); };
@@ -5476,7 +5482,7 @@ a.tel svg { flex: none; }
     var b = tBlock(tour.b), i = TOUR.indexOf(b), ns = tour.s + d;
     if (ns < 0) return;
     if (ns >= b.steps.length) {
-      var sv = tGet(); sv.done = sv.done || {}; sv.done[b.id] = 1; tSet(sv);
+      var sv = tGet(); sv.done = sv.done || {}; sv.done[b.id] = b.ver || 1; tSet(sv);
       if (b.post) b.post();
       if (tour.only || i === TOUR.length - 1) { tourEnd(true); return; }
       var nb = TOUR[i + 1]; tour = { b: nb.id, s: 0, only: false }; if (nb.pre) nb.pre(); setTimeout(tourShow, 350); return;
