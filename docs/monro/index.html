@@ -2536,10 +2536,10 @@ a.tel svg { flex: none; }
   function setSaved(ok) { var el = document.getElementById("aSave"); if (el) { el.textContent = ok ? "✓ Сохранено" : "Нет связи — сохраню, когда появится интернет"; el.className = "a-save " + (ok ? "ok" : "bad"); } }
   // клиентки с личным кабинетом (для мамы): по телефону и почте — почта аккаунта и фото профиля
   var ACCS = { p: {}, e: {} };
-  function mailKey(m) {  // как mail_key на сервере: ya.ru = yandex.ru, точки в Gmail не важны
+  function mailKey(m) {  // как mail_key на сервере: ya.ru = yandex.ru, gmail.com = googlemail.com
     m = String(m || "").trim().toLowerCase(); var p = m.split("@"); if (p.length !== 2) return m;
-    if (/^(ya\.ru|yandex\.(ru|com|by|kz|ua)|narod\.ru)$/.test(p[1])) return p[0].replace(/\./g, "-") + "@yandex.ru";
-    if (/^(gmail|googlemail)\.com$/.test(p[1])) return p[0].split("+")[0].replace(/\./g, "") + "@gmail.com";
+    if (/^(ya\.ru|yandex\.(ru|com|by|kz|ua)|narod\.ru)$/.test(p[1])) return p[0] + "@yandex.ru";
+    if (/^(gmail|googlemail)\.com$/.test(p[1])) return p[0] + "@gmail.com";
     return m;
   }
   function accOf(b) {  // кабинет из записи, по телефону или по почте; если подходят несколько — тот, где есть фото

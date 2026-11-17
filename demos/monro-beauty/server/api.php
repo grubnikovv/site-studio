@@ -275,8 +275,9 @@ if ($type === 'acc_register') {
     if (mb_strlen($pass) < 6) fail('Пароль — не короче 6 символов.');
     if (empty($in['consent'])) fail('Отметьте согласие на обработку персональных данных.');
     if (!cfg('mail_from')) fail('Регистрация временно недоступна. Напишите Марине.');
-    $a = acc_by_mail($m); if ($a) $m = $a['email'];
-    if ($a && $a['verified']) fail('Эта почта уже зарегистрирована. Войдите или нажмите «Забыли пароль?».');
+    $typed = $m; $a = acc_by_mail($m); if ($a) $m = $a['email'];
+    if ($a && $a['verified']) fail($a['email'] === $typed ? 'У вас уже есть личный кабинет с этой почтой. Войдите или нажмите «Забыли пароль?».'
+        : 'У вас уже есть личный кабинет с этой почтой: ' . $a['email'] . ' и ' . $typed . ' — один и тот же ящик. Войдите с любым из этих адресов или нажмите «Забыли пароль?».');
     $h = password_hash($pass, PASSWORD_DEFAULT);
     if ($a) client_db()->prepare('UPDATE accounts SET name = ?, pass = ? WHERE id = ?')->execute([$name, $h, $a['id']]);
     else client_db()->prepare('INSERT INTO accounts (email, name, pass, created) VALUES (?, ?, ?, ?)')->execute([$m, $name, $h, time()]);

@@ -240,13 +240,13 @@ function client_who($token) {
     return ['phone' => $a['phone'], 'acc' => $a];
 }
 function acc_get($id) { $q = client_db()->prepare('SELECT * FROM accounts WHERE id = ?'); $q->execute([$id]); return $q->fetch() ?: null; }
-// Один ящик — разные адреса: Яндекс (ya.ru, yandex.ru/.com/.by/.kz, narod.ru; точка и дефис в логине равны), Gmail (googlemail, точки, +метки).
-// У Mail.ru адреса на mail.ru, bk.ru, list.ru, inbox.ru — разные ящики, их не объединяем.
+// Один ящик — разные адреса домена: у Яндекса ya.ru = yandex.ru (а также yandex.com/.by/.kz/.ua, narod.ru), у Google gmail.com = googlemail.com.
+// Сравниваем только домены, сам адрес до @ — как написан. У Mail.ru mail.ru, bk.ru, list.ru, inbox.ru — разные ящики, их не сравниваем.
 function mail_key($m) {
     $m = mb_strtolower(trim((string)$m)); if (!strpos($m, '@')) return $m;
     [$u, $d] = explode('@', $m, 2);
-    if (in_array($d, ['ya.ru', 'yandex.ru', 'yandex.com', 'yandex.by', 'yandex.kz', 'yandex.ua', 'narod.ru'], true)) return str_replace('.', '-', $u) . '@yandex.ru';
-    if (in_array($d, ['gmail.com', 'googlemail.com'], true)) return str_replace('.', '', explode('+', $u)[0]) . '@gmail.com';
+    if (in_array($d, ['ya.ru', 'yandex.ru', 'yandex.com', 'yandex.by', 'yandex.kz', 'yandex.ua', 'narod.ru'], true)) return $u . '@yandex.ru';
+    if (in_array($d, ['gmail.com', 'googlemail.com'], true)) return $u . '@gmail.com';
     return $m;
 }
 function acc_by_mail($m) {
@@ -254,37 +254,6 @@ function acc_by_mail($m) {
     $k = mail_key($m); if ($k === mb_strtolower(trim((string)$m)) && !preg_match('/@(ya|yandex|narod|gmail|googlemail)\./', $k)) return null;
     foreach (client_db()->query('SELECT * FROM accounts ORDER BY verified DESC, id') as $a) if (mail_key($a['email']) === $k) return $a;
     return null;
-}
-// Объединить кабинеты одного ящика (раньше можно было зарегистрироваться на ya.ru и на yandex.ru): остаётся кабинет с фото (иначе — старший)
-function acc_dedupe() {
-    $db = client_db(); $groups = [];
-    foreach ($db->query('SELECT * FROM accounts WHERE verified = 1 ORDER BY id') as $a) $groups[mail_key($a['email'])][] = $a;
-    $n = 0;
-    foreach ($groups as $list) {
-        if (count($list) < 2) continue;
-        usort($list, fn($x, $y) => (empty($x['av']) <=> empty($y['av'])) ?: ($x['id'] <=> $y['id']));  // сначала с фото, потом старший
-        $keep = array_shift($list);
-        foreach ($list as $b) {
-            $set = [];
-            foreach (['phone', 'av', 'tg', 'name'] as $f) if (empty($keep[$f]) && !empty($b[$f])) { $set[$f] = $b[$f]; $keep[$f] = $b[$f]; }
-            if (!empty($b['news'])) $set['news'] = 1;
-            foreach ($set as $f => $v) $db->prepare("UPDATE accounts SET $f = ? WHERE id = ?")->execute([$v, $keep['id']]);
-            if (!empty($b['av']) && $b['av'] !== $keep['av']) av_remove($b['av']);
-            foreach (['client_sessions', 'cnotes', 'link_reqs'] as $t) $db->prepare("UPDATE $t SET acc = ? WHERE acc = ?")->execute([$keep['id'], $b['id']]);
-            try { require_once __DIR__ . '/push.php'; push_db()->prepare('UPDATE push_subs SET acc = ? WHERE acc = ?')->execute([$keep['id'], $b['id']]); } catch (Throwable $e) {}
-            [$doc, $v] = doc_load(true);
-            foreach (['bookings', 'certs', 'training'] as $k) foreach ($doc[$k] as &$x) {
-                if ((int)($x['owner'] ?? 0) === (int)$b['id']) $x['owner'] = (int)$keep['id'];
-                if (($x['accMail'] ?? '') === $b['email']) $x['accMail'] = $keep['email'];
-                if (!empty($keep['av']) && (!empty($x['accAv']) || (int)($x['owner'] ?? 0) === (int)$keep['id'])) $x['accAv'] = $keep['av'];
-            }
-            unset($x); doc_save($doc, $v);
-            $db->prepare('DELETE FROM acc_codes WHERE email = ?')->execute([$b['email']]);
-            $db->prepare('DELETE FROM accounts WHERE id = ?')->execute([$b['id']]);
-            logline('кабинеты объединены: #' . $b['id'] . ' → #' . $keep['id']); $n++;
-        }
-    }
-    return $n;
 }
 function acc_session($accId) {
     $t = bin2hex(random_bytes(24));
