@@ -1751,6 +1751,9 @@ a.tel svg { flex: none; }
       <div class="card k-push" id="kPushBox" hidden><h3>🔔 Уведомления на телефоне</h3>
         <p class="note" id="kPushNote" style="margin:0"></p>
         <div class="acts"><button type="button" class="btn sm" id="kPushBtn">Включить уведомления</button></div></div>
+      <div class="card" id="kMailTip" hidden><h3>📩 Чтобы письма не попадали в «Спам»</h3>
+        <p class="note" style="margin:0">На почту приходят коды для входа, подтверждения и изменения по вашим записям. Почтовые сервисы иногда отправляют наши письма в «Спам». Добавьте адрес <b class="num">marina@ma-nails.ru</b> в контакты: откройте любое наше письмо → нажмите на имя отправителя → «Добавить в контакты». Если письмо уже в «Спаме» — откройте его и нажмите «Не спам».</p>
+        <div class="acts"><button type="button" class="btn sm" id="kMailCopy">Скопировать адрес</button><button type="button" class="btn sm ghost" id="kMailOk">Готово, добавлено</button></div></div>
       <div class="card"><h3>Предстоящие записи</h3><div class="opts" id="kNext"></div><a class="btn sm glow" id="kBook" href="#zapis" style="justify-self:start">Записаться</a></div>
       <div class="card" id="kTrainBox"><h3>Обучение</h3><div class="opts" id="kTrain"></div></div>
       <div class="card" id="kCertBox"><h3>Сертификаты</h3><div class="opts" id="kCerts"></div></div>
@@ -3182,7 +3185,7 @@ a.tel svg { flex: none; }
   function renderK() {
     var today = dkey(new Date()), d = kData;
     $("kWho").textContent = d.acc ? (d.acc.name ? d.acc.name + " · " : "") + d.acc.email : d.phone;
-    $("kPwOpen").hidden = !d.acc; $("kNewsBox").hidden = !d.acc; kPushRender(); $("kPhBox").hidden = !d.acc || !!d.phone;
+    $("kPwOpen").hidden = !d.acc; $("kNewsBox").hidden = !d.acc; kPushRender(); $("kMailTip").hidden = !d.acc || lsGet("ma-mailtip", "") === "1"; $("kPhBox").hidden = !d.acc || !!d.phone;
     var sortT = function (a, b) { return (a.date + hm(a.start).padStart(5, "0")).localeCompare(b.date + hm(b.start).padStart(5, "0")); };
     var next = d.bookings.filter(function (b) { return b.status === "booked" && b.date >= today; }).sort(sortT);
     var hist = d.bookings.filter(function (b) { return !(b.status === "booked" && b.date >= today); }).sort(sortT).reverse();
@@ -3469,6 +3472,8 @@ a.tel svg { flex: none; }
   document.addEventListener("click", function (e) { if (!$("kPanel").hidden && !e.target.closest("#hdrK .bellwrap")) { $("kPanel").hidden = true; $("kBellH").setAttribute("aria-expanded", "false"); } });
   setInterval(function () { if (ctoken && kData && kData.acc && document.visibilityState === "visible") loadNotes(false); }, 120000);
   // ---------- уведомления на телефон для клиентки (нужен https и личный кабинет по почте) ----------
+  $("kMailCopy").onclick = function () { copyText("marina@ma-nails.ru").then(function () { toast("Адрес скопирован — добавьте его в контакты почты"); }, function () { toast("Не получилось скопировать. Адрес: marina@ma-nails.ru", true); }); };
+  $("kMailOk").onclick = function () { lsSet("ma-mailtip", "1"); $("kMailTip").hidden = true; toast("Спасибо! Теперь письма будут приходить во «Входящие»"); };
   function kPushRender() {
     if (!kData || !kData.acc) { $("kPushBox").hidden = true; return; }
     pushState().then(function (st0) {
