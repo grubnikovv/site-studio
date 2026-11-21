@@ -13,6 +13,7 @@ MIN_PROFIT = int(os.environ.get("MIN_PROFIT", 40000))
 MIN_PRICE = int(os.environ.get("MIN_PRICE", 150000))
 MAX_PRICE = int(os.environ.get("MAX_PRICE", 0)) or 10 ** 10
 MAX_DETAILS = int(os.environ.get("MAX_DETAILS", 25))
+EMBED = os.environ.get("EMBED_COLLAGE") == "1"
 
 
 def main(state_path, out_path=None, pub_path=None):
@@ -51,8 +52,11 @@ def main(state_path, out_path=None, pub_path=None):
         x["red"], x["good"] = judge.flags(d)
         x["p"] = judge.profit(d)
         ok = x["p"] and x["p"]["discount"] >= MIN_DISCOUNT and x["p"]["profit"] >= MIN_PROFIT
+        img = ai.collage(d.get("photos") or [], 9) if ok and (EMBED or ai.available()) else None
+        if img and EMBED:  # коллаж в зашифрованный отчёт — для разбора вручную
+            x["collage"] = base64.b64encode(img).decode()
         if ok and ai.available():
-            x["ai"] = ai.analyze(d) or {}
+            x["ai"] = ai.analyze(d, img) or {}
             rep = x["ai"].get("repair_rub")
             if isinstance(rep, (int, float)) and rep > 0:
                 x["p"] = judge.profit(d, int(rep))

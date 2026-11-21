@@ -18,7 +18,7 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,6 +35,12 @@ jobs:
           path: cars-state
           key: cars-state-${{ github.run_id }}
           restore-keys: cars-state-
+      - name: Своя нейросеть (кэш модели)
+        uses: actions/cache@v4
+        with:
+          path: /home/runner/ollama-models
+          key: ollama-${{ github.run_id }}
+          restore-keys: ollama-
       - name: Поиск
         env:
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
@@ -51,6 +57,15 @@ jobs:
             n=$(basename "$f" .json)
             python -c "import json;print(json.load(open('$f'))['pubkey'])" > /tmp/pub.pem
             eval $(python -c "import json;[print(f'export {k}={v}') for k,v in json.load(open('$f')).get('env',{}).items()]")
+          fi
+          if [ -n "$OLLAMA_MODEL" ]; then
+            export OLLAMA_MODELS=/home/runner/ollama-models
+            curl -fsSL https://ollama.com/install.sh | sh >/dev/null
+            sudo systemctl stop ollama 2>/dev/null || true
+            (ollama serve > /tmp/ollama.log 2>&1 &) ; sleep 5
+            ollama pull "$OLLAMA_MODEL" 2>&1 | tail -1
+          fi
+          if [ -n "$f" ] && [ -f "$f" ]; then
             python cars/run.py cars-state/seen.json "results/$n.enc.json" /tmp/pub.pem
           else
             python cars/run.py cars-state/seen.json

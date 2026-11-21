@@ -2,7 +2,8 @@
 
 Провайдер выбирается переменными окружения:
 - GIGACHAT_KEY (ключ авторизации из личного кабинета GigaChat API, физлица) — GigaChat;
-- AI_URL + AI_KEY + AI_MODEL — любой сервис с OpenAI-совместимым API (например, Yandex AI Studio).
+- AI_URL + AI_KEY + AI_MODEL — любой сервис с OpenAI-совместимым API (например, Yandex AI Studio);
+- OLLAMA_MODEL — своя открытая нейросеть, запущенная прямо на сервере через Ollama (бесплатно, без ключей).
 Без ключей возвращает None — сервис работает на правилах из judge.py.
 """
 import base64, io, json, os, re, time, uuid
@@ -82,21 +83,34 @@ def _openai(prompt, img):
     return r.json()["choices"][0]["message"]["content"]
 
 
+def _ollama(prompt, img):
+    msg = {"role": "user", "content": prompt}
+    if img:
+        msg["images"] = [base64.b64encode(img).decode()]
+    r = requests.post("http://127.0.0.1:11434/api/chat", timeout=900,
+                      json={"model": os.environ["OLLAMA_MODEL"], "messages": [msg], "stream": False, "format": "json",
+                            "options": {"temperature": 0.2, "num_ctx": 8192}})
+    return r.json()["message"]["content"]
+
+
 def available():
-    return bool(os.environ.get("GIGACHAT_KEY") or os.environ.get("AI_KEY"))
+    return bool(os.environ.get("GIGACHAT_KEY") or os.environ.get("AI_KEY") or os.environ.get("OLLAMA_MODEL"))
 
 
-def analyze(d):
+def analyze(d, img=None):
     if not available():
         return None
     data = {k: d.get(k) for k in ("brand", "model", "year", "price", "market", "km", "owners", "generation", "complect",
                                   "engine", "hp", "city", "damaged", "docs", "vin_report", "private", "seller_age", "text")}
     prompt = PROMPT.format(data=json.dumps(data, ensure_ascii=False))
-    img = collage(d.get("photos") or [])
-    call = _gigachat if os.environ.get("GIGACHAT_KEY") else _openai
+    img = img or collage(d.get("photos") or [])
+    t0 = time.time()
+    call = _gigachat if os.environ.get("GIGACHAT_KEY") else _openai if os.environ.get("AI_KEY") else _ollama
     for i in range(2):
         try:
-            return parse(call(prompt, img))
+            res = parse(call(prompt, img)) or {}
+            res["_sec"] = round(time.time() - t0)
+            return res
         except Exception as e:
             err = str(e)[:200]; time.sleep(3)
     return {"error": err}
