@@ -33,6 +33,10 @@ def main(state_path, out_path=None, pub_path=None):
     log["fresh"] = len(fresh)
     cands = [b for b in fresh if not b["new"] and b["mark"] in ("отличная цена", "хорошая цена")
              and MIN_PRICE <= b["price"] <= MAX_PRICE]
+    uniq = {}
+    for b in cands:  # салоны часто дублируют одну машину
+        uniq.setdefault((b["title"], b["price"], b["km"], b["city"]), b)
+    cands = list(uniq.values())
     log["candidates"] = len(cands)
     report = []
     for b in cands[:MAX_DETAILS]:

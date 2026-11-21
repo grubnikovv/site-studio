@@ -1,5 +1,5 @@
 """Сбор объявлений с Дрома: свежая лента и страница объявления (данные берём из встроенного JSON)."""
-import json, re, time
+import html as htmllib, json, re, time
 import requests
 
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36"
@@ -62,7 +62,8 @@ def details(url):
     rep = [x for x in (d.get("report") or {}).get("fields", []) if x.get("type") == "report_item"]
     info = d.get("additionalInfo") or {}
     text = (info.get("visible") or "") + (info.get("hidden") or "")
-    text = re.sub(r"<br\s*/?>", "\n", text); text = re.sub(r"<[^>]+>", "", text).replace(" ", "").strip()
+    text = re.sub(r"<br\s*/?>", "\n", text); text = htmllib.unescape(re.sub(r"<[^>]+>", "", text)).replace("\u2028", "")
+    text = re.sub(r"\n\s*\n+", "\n", re.sub(r"[ \t]+", " ", text)).strip()
     photos = [i["image"]["sources"].get("gen600") or i["image"]["src"] for i in d["gallery"]["photos"]["images"]]
     special = f.get("specialDescription") or {}
     mil = f.get("mileage") or {}
