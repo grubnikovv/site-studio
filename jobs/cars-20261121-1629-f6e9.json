@@ -1,0 +1,14 @@
+{
+ "name": "cars-20261121-1629-f6e9",
+ "pause": 20,
+ "pubkey": "-----BEGIN PUBLIC KEY-----\nMIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEAyjD3VRHwWrAM/T5jzouj\nyT/hs5jcRZn5jYpuxohjSi51ib3rTfdU3a3C84vujieda6trNd6mTDvCcypG4vJ4\nuy4dueY1f02LN5PoGRGWt1y/AGUSq9OP4buFba0jP7luxxObNUJJi40KvMbiFP0g\nVKEU8K81l+LQmLbtUgWWHpfJh/XzCQ32efvZY7bnXKpS/SqrZLvUEeJFRdPebXQb\nwDmZEAFApoAvK9Lamk7i7NZL1zgcipzLZzJz2+os2u36Cm4JT56WqG3iA4EZBGcK\nmqOO5X4Ep7OP8kB2YEN7x4+P3RYoWl2fM7HN6hEDJWioBUVislvfjdewV5QcHRl9\nebX4wcsNLf0ibKL1wGUwBiLkU/8xh3qBJbm0ENQgsNeLF76LXJm57ZGxhCvMpX7u\n6WNSNJEesoDMFhQR6PMYcqGo/KqlSswNZtBYOl3u7cZqNSLhpn2tyIJGsSUewTDh\nlI9IxT1Dd3sBMm14YkKv7qx7qIPyb4Kr6hZdghfXEBH9AgMBAAE=\n-----END PUBLIC KEY-----\n",
+ "urls": [
+  "https://www.avito.ru/all/avtomobili?s=104",
+  "https://auto.ru/rossiya/cars/all/?sort=cr_date-desc",
+  "https://auto.drom.ru/all/",
+  "https://www.avito.ru/moskva/avtomobili?s=104",
+  "https://auto.ru/moskva/cars/all/?sort=cr_date-desc",
+  "https://www.avito.ru/all/avtomobili?s=104",
+  "https://auto.ru/rossiya/cars/all/?sort=cr_date-desc"
+ ]
+}
