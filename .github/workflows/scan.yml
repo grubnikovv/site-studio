@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  models: read
 
 concurrency:
   group: scan-${{ github.sha }}
@@ -35,7 +36,9 @@ jobs:
           for f in $(git diff --name-only HEAD~1 HEAD -- 'jobs/*.json'); do
             [ -f "$f" ] || continue
             n=$(basename "$f" .json)
-            if python -c "import json,sys;sys.exit(0 if 'shots' in json.load(open('$f')) else 1)"; then
+            if python -c "import json,sys;sys.exit(0 if 'raw' in json.load(open('$f')) else 1)"; then
+              GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }} python scanner/raw.py "$f" "results/$n.enc.json"
+            elif python -c "import json,sys;sys.exit(0 if 'shots' in json.load(open('$f')) else 1)"; then
               python scanner/shots.py "$f" "results/$n.enc.json"
             elif python -c "import json,sys;sys.exit(0 if 'queries' in json.load(open('$f')) else 1)"; then
               python scanner/ymaps.py "$f" "results/$n.enc.json"
