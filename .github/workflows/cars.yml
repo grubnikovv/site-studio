@@ -1,0 +1,66 @@
+name: Поиск выгодных авто
+
+# Пробный запуск — файл задания carjobs/*.json с публичным ключом (отчёт шифруется).
+# Регулярный запуск по расписанию включим, когда подключим Telegram.
+on:
+  push:
+    paths:
+      - "carjobs/*.json"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cars
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests pillow cryptography
+      - name: Сертификат Минцифры для GigaChat
+        run: curl -sf -o /tmp/ru_ca.crt https://gu-st.ru/content/lending/russian_trusted_root_ca_pem.crt || true
+      - name: Память о просмотренных объявлениях
+        uses: actions/cache@v4
+        with:
+          path: cars-state
+          key: cars-state-${{ github.run_id }}
+          restore-keys: cars-state-
+      - name: Поиск
+        env:
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT: ${{ secrets.TG_CHAT }}
+          GIGACHAT_KEY: ${{ secrets.GIGACHAT_KEY }}
+          AI_URL: ${{ secrets.AI_URL }}
+          AI_KEY: ${{ secrets.AI_KEY }}
+          AI_MODEL: ${{ secrets.AI_MODEL }}
+        run: |
+          mkdir -p cars-state results
+          [ -f /tmp/ru_ca.crt ] && export GIGACHAT_CA=/tmp/ru_ca.crt
+          f=$(git diff --name-only HEAD~1 HEAD -- 'carjobs/*.json' | head -1)
+          if [ -n "$f" ] && [ -f "$f" ]; then
+            n=$(basename "$f" .json)
+            python -c "import json;print(json.load(open('$f'))['pubkey'])" > /tmp/pub.pem
+            eval $(python -c "import json;[print(f'export {k}={v}') for k,v in json.load(open('$f')).get('env',{}).items()]")
+            python cars/run.py cars-state/seen.json "results/$n.enc.json" /tmp/pub.pem
+          else
+            python cars/run.py cars-state/seen.json
+          fi
+      - name: Сохранение отчёта
+        run: |
+          git config user.name "scan-bot"
+          git config user.email "scan-bot@users.noreply.github.com"
+          git add results
+          git diff --cached --quiet && exit 0
+          git commit -m "Отчёт поиска авто"
+          for i in 1 2 3 4 5; do git pull --rebase && git push && exit 0; sleep $((i*5)); done
+          exit 1
