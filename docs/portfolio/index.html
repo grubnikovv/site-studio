@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Портфолио для Kwork</title><link rel="icon" href="data:,">
+<style>
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#f3f4f6;color:#111}
+main{max-width:720px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:8px 0 4px}p{line-height:1.5;color:#444;margin:6px 0}
+.card{background:#fff;border-radius:14px;padding:14px;margin:16px 0;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+img{width:100%;height:auto;border-radius:8px;display:block}
+h2{font-size:17px;margin:12px 0 6px}
+.btn{display:block;text-align:center;background:#16a34a;color:#fff;text-decoration:none;padding:13px;border-radius:10px;font-weight:600;margin-top:10px}
+.copy{display:flex;gap:8px;align-items:flex-start;background:#f3f4f6;border-radius:8px;padding:10px;margin-top:8px;font-size:14px;line-height:1.4}
+.copy span{flex:1}.copy button{border:0;background:#111;color:#fff;border-radius:6px;padding:7px 10px;font-size:13px}
+small{color:#666}
+</style></head><body><main>
+<h1>Портфолио: каталог, меню, книга</h1>
+<p>Нажмите «Скачать», затем на Kwork: Профиль → Портфолио → Добавить работу. Рубрика: <b>Дизайн → Каталог, меню, книга</b>. Название и описание — кнопкой «Копировать».</p>
+
+<div class="card"><img src="kniga-servis.png" width="3000" height="2000" alt="Вёрстка деловой книги" loading="lazy">
+<h2>1. Вёрстка деловой книги</h2>
+<div class="copy"><span>Вёрстка деловой книги: глава, таблицы, сноски</span><button>Копировать</button></div>
+<div class="copy"><span>Вёрстка книги для печати и Ridero: открытие главы, буквица, цитата, таблица с подписью, сноски, колонтитулы и нумерация. Аккуратная типографика и единый стиль по всей книге.</span><button>Копировать</button></div>
+<a class="btn" href="kniga-servis.png" download>Скачать картинку</a></div>
+
+<div class="card"><img src="katalog-trakdetal.png" width="3000" height="2000" alt="Каталог запчастей для грузовиков" loading="lazy">
+<h2>2. Каталог запчастей</h2>
+<div class="copy"><span>Каталог запчастей для грузовиков</span><button>Копировать</button></div>
+<div class="copy"><span>Товарный каталог: обложка, раздел с карточками товаров (артикул, цена, наличие) и таблица применимости. Удобно искать нужную позицию, готов к печати и отправке клиентам в PDF.</span><button>Копировать</button></div>
+<a class="btn" href="katalog-trakdetal.png" download>Скачать картинку</a></div>
+
+<div class="card"><img src="menu-ugol.png" width="3000" height="2000" alt="Меню гриль-бара" loading="lazy">
+<h2>3. Меню ресторана</h2>
+<div class="copy"><span>Меню гриль-бара</span><button>Копировать</button></div>
+<div class="copy"><span>Дизайн меню ресторана: фирменный стиль, разделы, описания блюд и цены, метки хитов. Читается за секунды, готово к печати.</span><button>Копировать</button></div>
+<a class="btn" href="menu-ugol.png" download>Скачать картинку</a></div>
+
+<p><small>Работы концептуальные (названия компаний вымышленные) — так и пишем, если заказчик спросит.</small></p>
+</main>
+<script>
+document.querySelectorAll('.copy button').forEach(function (b) {
+  b.addEventListener('click', function () {
+    var t = b.previousElementSibling.textContent;
+    var done = function () { b.textContent = 'Скопировано'; setTimeout(function () { b.textContent = 'Копировать'; }, 1500); };
+    if (navigator.clipboard) navigator.clipboard.writeText(t).then(done, fallback); else fallback();
+    function fallback() { var a = document.createElement('textarea'); a.value = t; document.body.appendChild(a); a.select(); document.execCommand('copy'); a.remove(); done(); }
+  });
+});
+</script>
+</body></html>
