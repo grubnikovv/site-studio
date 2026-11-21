@@ -6,9 +6,9 @@ FL.ru исключена из поиска по решению владельц�
 
 1. Создать временный ключ: `openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:3072 -out /tmp/k.pem && openssl pkey -in /tmp/k.pem -pubout -out /tmp/k.pub`.
 2. Записать `jobs/watch-<YYYYMMDD-HHMM>.json`: `{"name": "...", "pause": 14, "pubkey": "<содержимое /tmp/k.pub>", "urls": [...]}` — ссылки:
-   - Kwork по словам: лендинг, сайт, редизайн, дизайн сайта, telegram бот, бот, чат-бот, верстка, квиз, калькулятор, mini app, автоматизация, презентация, инфографика, баннер (`https://kwork.ru/projects?keyword=<слово>`);
+   - Kwork: 12 постоянных слов + 5 дополнительных по очереди (Kwork блокирует после ~17 запросов), см. `WORDS`/`EXTRA` в `scanner/watch_run.py`; раньше по словам: лендинг, сайт, редизайн, дизайн сайта, telegram бот, бот, чат-бот, верстка, квиз, калькулятор, mini app, автоматизация, презентация, инфографика, баннер (`https://kwork.ru/projects?keyword=<слово>`);
    - YouDo: `https://youdo.com/tasks-all-opened-all`;
-   - другие биржи (Freelance.ru, Workspace — тендеры, Pchel.net, Weblancer, Freelancehunt): адреса в `scanner/watch_run.py`, разбор по ссылкам на заказы (`parse_generic`);
+   - другие биржи (Freelance.ru, Workspace — тендеры, Pchel.net; Weblancer и Freelancehunt закрыты Cloudflare): адреса в `scanner/watch_run.py`, разбор по ссылкам на заказы (`parse_generic`);
    - Telegram-каналы с заказами: `https://t.me/s/job_for_bots`, `https://t.me/s/digitaltender`, `https://t.me/s/freelancetaverna`, `https://t.me/s/mirfri`, `https://t.me/s/FrWork3`, `https://t.me/s/job_webdev`.
    Раз в неделю (по понедельникам) дополнительно — тёплые клиенты: задание с полем `"queries"` (см. `scanner/ymaps.py`) по запросам «грузовой автосервис», «грузовой шиномонтаж», «запчасти для грузовиков», «эвакуатор», «грузоперевозки» в новых районах Москвы и области; показать компании без собственного сайта с рейтингом от 4,5.
 3. Закоммитить и запушить в ветку `claude/low-code-business-ideas-0dr8l2`. GitHub Actions выполнит `scanner/boards.py` и положит `results/watch-....enc.json`.

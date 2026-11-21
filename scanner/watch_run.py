@@ -14,13 +14,14 @@ from cryptography.fernet import Fernet
 
 BRANCH = "claude/low-code-business-ideas-0dr8l2"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-WORDS = ["лендинг", "сайт", "редизайн", "дизайн сайта", "telegram бот", "бот", "чат-бот", "верстка", "квиз",
-         "калькулятор", "mini app", "автоматизация", "презентация", "инфографика", "баннер",
-         "python", "парсер", "нейросеть", "тексты", "wordpress", "тильда", "excel",
-         "настройка", "приложение", "1с", "перевод"]
-# Другие биржи разбираются по ссылкам на заказы (parse_generic); мёртвые адреса просто дают пустой результат.
+WORDS = ["лендинг", "сайт", "редизайн", "дизайн сайта", "telegram бот", "бот", "верстка", "автоматизация",
+         "презентация", "инфографика", "python", "парсер"]
+# Kwork блокирует после ~17 запросов за запуск, поэтому дополнительные слова идут по очереди: 5 за запуск.
+EXTRA = ["чат-бот", "квиз", "калькулятор", "mini app", "баннер", "нейросеть", "тексты", "wordpress", "тильда",
+         "excel", "настройка", "приложение", "1с", "перевод", "интернет-магазин"]
+# Другие биржи разбираются по ссылкам на заказы (parse_generic). Weblancer и Freelancehunt закрыты Cloudflare.
 OTHER = ["https://youdo.com/tasks-all-opened-all", "https://freelance.ru/project/search", "https://workspace.ru/tenders/",
-         "https://pchel.net/jobs/", "https://www.weblancer.net/freelance/", "https://freelancehunt.com/projects"] + ["https://t.me/s/" + c for c in
+         "https://pchel.net/jobs/"] + ["https://t.me/s/" + c for c in
          ("job_for_bots", "digitaltender", "freelancetaverna", "mirfri", "FrWork3", "job_webdev",
           "rabota_freelancee", "digital_jobster")]
 WARM = ["грузовой автосервис", "грузовой шиномонтаж", "запчасти для грузовиков", "эвакуатор", "грузоперевозки"]
@@ -72,7 +73,8 @@ def main():
 
     names = ["watch-" + stamp]
     # Kwork вперемешку с другими площадками — подряд он блокирует после ~13 запросов.
-    kw = ["https://kwork.ru/projects?keyword=" + quote(w) for w in WORDS]; urls = []
+    k = (now.toordinal() * 6 + now.hour) % len(EXTRA); extra = (EXTRA * 2)[k:k + 5]
+    kw = ["https://kwork.ru/projects?keyword=" + quote(w) for w in WORDS + extra]; urls = []
     step = len(kw) / max(len(OTHER), 1); j = 0  # другие площадки равномерно между запросами Kwork
     for i, u in enumerate(kw):
         urls.append(u)
