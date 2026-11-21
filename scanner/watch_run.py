@@ -16,10 +16,7 @@ BRANCH = "claude/low-code-business-ideas-0dr8l2"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORDS = ["лендинг", "сайт", "редизайн", "дизайн сайта", "telegram бот", "бот", "чат-бот", "верстка", "квиз",
          "калькулятор", "mini app", "автоматизация", "презентация", "инфографика", "баннер"]
-OTHER = ["https://www.fl.ru/projects/", "https://www.fl.ru/projects/category/razrabotka-sajtov/",
-         "https://www.fl.ru/projects/category/avtomatizaciya-biznesa/", "https://www.fl.ru/projects/category/ai-iskusstvenniy-intellekt/",
-         "https://www.fl.ru/projects/category/dizajn/", "https://www.fl.ru/projects/category/teksty/",
-         "https://youdo.com/tasks-all-opened-all"] + ["https://t.me/s/" + c for c in
+OTHER = ["https://youdo.com/tasks-all-opened-all"] + ["https://t.me/s/" + c for c in
          ("job_for_bots", "digitaltender", "freelancetaverna", "mirfri", "FrWork3", "job_webdev")]
 WARM = ["грузовой автосервис", "грузовой шиномонтаж", "запчасти для грузовиков", "эвакуатор", "грузоперевозки"]
 # Новые районы Москвы и области — по одному на неделю, по кругу.
