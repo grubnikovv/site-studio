@@ -20,19 +20,15 @@ def main(job_path, out_path):
             r["error"] = str(e)[:300]
         print(url, r.get("status"), len(r.get("html", "")), r.get("error", ""), flush=True)
         out.append(r); time.sleep(job.get("pause", 3))
-    if job.get("llm"):
-        for ep, model in job["llm"]:
-            try:
-                resp = requests.post(ep, timeout=60,
-                    headers={"Authorization": "Bearer " + os.environ.get("GITHUB_TOKEN", ""), "Accept": "application/vnd.github+json",
-                             "X-GitHub-Api-Version": "2022-11-28", "Content-Type": "application/json"},
-                    json={"model": model, "messages": [{"role": "user", "content": [
-                        {"type": "text", "text": "Что на фото? Ответь одной фразой по-русски."},
-                        {"type": "image_url", "image_url": {"url": job.get("img", "")}}]}]})
-                out.append({"llm": model, "ep": ep, "hist": [(h.status_code, h.url) for h in resp.history], "status": resp.status_code, "body": resp.text[:3000], "headers": dict(resp.headers)})
-            except Exception as e:
-                out.append({"llm": model, "error": str(e)[:300]})
-            print("llm", ep, model, out[-1].get("status"), out[-1].get("hist"), str(out[-1].get("body"))[:200], flush=True)
+    # Токен уходит только на models.github.ai.
+    for method, url, body in job.get("http", []):
+        try:
+            assert url.startswith("https://models.github.ai/"), "только models.github.ai"
+            resp = requests.request(method, url, json=body, timeout=60, headers={"Authorization": "Bearer " + os.environ.get("GITHUB_TOKEN", "")})
+            out.append({"http": url, "status": resp.status_code, "body": resp.text[:3000], "ctype": resp.headers.get("Content-Type")})
+        except Exception as e:
+            out.append({"http": url, "error": str(e)[:300]})
+        print("http", method, url, out[-1].get("status"), flush=True)
     blob = json.dumps(out, ensure_ascii=False).encode()
     key = Fernet.generate_key()
     pub = serialization.load_pem_public_key(job["pubkey"].encode())
