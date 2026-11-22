@@ -14,13 +14,16 @@ from cryptography.fernet import Fernet
 
 BRANCH = "claude/low-code-business-ideas-0dr8l2"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-WORDS = ["лендинг", "сайт", "редизайн", "дизайн сайта", "telegram бот", "бот", "чат-бот", "верстка", "квиз",
-         "калькулятор", "mini app", "автоматизация", "презентация", "инфографика", "баннер"]
-OTHER = ["https://www.fl.ru/projects/", "https://www.fl.ru/projects/category/razrabotka-sajtov/",
-         "https://www.fl.ru/projects/category/avtomatizaciya-biznesa/", "https://www.fl.ru/projects/category/ai-iskusstvenniy-intellekt/",
-         "https://www.fl.ru/projects/category/dizajn/", "https://www.fl.ru/projects/category/teksty/",
-         "https://youdo.com/tasks-all-opened-all"] + ["https://t.me/s/" + c for c in
-         ("job_for_bots", "digitaltender", "freelancetaverna", "mirfri", "FrWork3", "job_webdev")]
+WORDS = ["лендинг", "сайт", "редизайн", "дизайн сайта", "telegram бот", "бот", "верстка", "автоматизация",
+         "презентация", "инфографика", "python", "парсер"]
+# Kwork блокирует после ~17 запросов за запуск, поэтому дополнительные слова идут по очереди: 5 за запуск.
+EXTRA = ["чат-бот", "квиз", "калькулятор", "mini app", "баннер", "нейросеть", "тексты", "wordpress", "тильда",
+         "excel", "настройка", "приложение", "1с", "перевод", "интернет-магазин"]
+# Другие биржи разбираются по ссылкам на заказы (parse_generic). Weblancer и Freelancehunt закрыты Cloudflare.
+OTHER = ["https://youdo.com/tasks-all-opened-all", "https://freelance.ru/project/search", "https://workspace.ru/tenders/",
+         "https://pchel.net/jobs/"] + ["https://t.me/s/" + c for c in
+         ("job_for_bots", "digitaltender", "freelancetaverna", "mirfri", "FrWork3", "job_webdev",
+          "rabota_freelancee", "digital_jobster")]
 WARM = ["грузовой автосервис", "грузовой шиномонтаж", "запчасти для грузовиков", "эвакуатор", "грузоперевозки"]
 # Новые районы Москвы и области — по одному на неделю, по кругу.
 DISTRICTS = ["Коммунарка", "Новая Москва", "Видное", "Подольск", "Домодедово", "Балашиха", "Мытищи",
@@ -70,8 +73,13 @@ def main():
 
     names = ["watch-" + stamp]
     # Kwork вперемешку с другими площадками — подряд он блокирует после ~13 запросов.
-    kw = ["https://kwork.ru/projects?keyword=" + quote(w) for w in WORDS]; urls = []
-    for i in range(max(len(kw), len(OTHER))): urls += kw[i:i + 1] + OTHER[i:i + 1]
+    k = (now.toordinal() * 6 + now.hour) % len(EXTRA); extra = (EXTRA * 2)[k:k + 5]
+    kw = ["https://kwork.ru/projects?keyword=" + quote(w) for w in WORDS + extra]; urls = []
+    step = len(kw) / max(len(OTHER), 1); j = 0  # другие площадки равномерно между запросами Kwork
+    for i, u in enumerate(kw):
+        urls.append(u)
+        while j < len(OTHER) and j * step <= i: urls.append(OTHER[j]); j += 1
+    urls += OTHER[j:]
     json.dump({"name": names[0], "pause": 8, "pubkey": pub, "urls": urls}, open(f"{ROOT}/jobs/{names[0]}.json", "w"), ensure_ascii=False, indent=1)
     push("Плановая проверка заказов", f"jobs/{names[0]}.json")
     if now.weekday() == 0:

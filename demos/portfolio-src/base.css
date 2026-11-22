@@ -1,0 +1,8 @@
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1500px;height:1000px;overflow:hidden}
+body{font-family:Inter,sans-serif;display:flex;align-items:center;justify-content:center;gap:0}
+.page{width:600px;height:850px;position:relative;overflow:hidden}
+.spread{display:flex;box-shadow:0 40px 80px rgba(0,0,0,.35),0 8px 20px rgba(0,0,0,.2)}
+.spread .page:first-child::after{content:"";position:absolute;right:0;top:0;bottom:0;width:40px;background:linear-gradient(90deg,transparent,rgba(0,0,0,.10))}
+.spread .page:last-child::before{content:"";position:absolute;left:0;top:0;bottom:0;width:30px;background:linear-gradient(90deg,rgba(0,0,0,.08),transparent);z-index:2}
+.serif{font-family:Caladea,"Bitstream Charter",serif}

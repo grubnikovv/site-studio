@@ -5,7 +5,7 @@ python3 scanner/parse_kwork.py results.json state/seen_kwork.json
 """
 import hashlib, json, re, sys
 
-BAD = re.compile(r"звон|лидоген|привлеч|подписчик|рассылк|продвиж|раскрут|директ|seo|сео|реклам|инвайт|менеджер|ватсап|отзыв|1с\b|rustore|монетизац|чертеж|генплан|corel|autocad|smm|таргет|ютуб|youtube|android|ios|kotlin|ставк|крипт|казино|арбитраж|3ds|ландшафт|вакансия", re.I)
+BAD = re.compile(r"выкладк|перепечат|помощник по|авитолог|прослушиван|просмотр видео|курсак|курсов\w* работ|диплом|отзыв\w* на wb|привлеч|b2b-клиент|лидов|лиды|заявок/лид|поиск заказчик|найти заказчик|продвиж|\bseo\b|\bсео\b|директ|google ads|\bcpa\b|таргет|залив|реклам|разместить вакансию|обзвон|холодн\w* звон|лидоген|привлеч\w* клиент|найти клиент|поиск\w* клиент|подписчик|рассылк|накрут|раскрут|казино|ставк|крипт|арбитраж трафик|вакансия|в штат|оклад|инвайт|ферм\w* аккаунт", re.I)
 
 def parse(data):
     out = {}
@@ -32,7 +32,7 @@ def parse(data):
 
 
 # ---------- Другие площадки ----------
-KW = re.compile(r"сайт|лендинг|бот|telegram|телеграм|дизайн|верст|тильд|tilda|баннер|презентац|инфографик|текст|копирайт|таблиц|excel|парсер|автоматизац|нейросет|ии\b|ai\b|видео|логотип|карточк", re.I)
+KW = re.compile(r"сайт|лендинг|бот|telegram|телеграм|дизайн|верст|тильд|tilda|wordpress|битрикс|баннер|презентац|инфографик|текст|стат[ьеи]|копирайт|перевод|таблиц|excel|google|парс|автоматизац|интеграц|настро|crm|amo|1с|нейросет|ии\b|ai\b|gpt|python|скрипт|код|приложен|программ|аналит|отч[её]т|ozon|wildberries|wb\b|авито|карточк|логотип|видео|макет|figma|фигм", re.I)
 
 def parse_fl(r):
     out = []
@@ -53,10 +53,23 @@ def parse_tg(r, days=2):
         p = p.strip()
         if len(p) < 80 or not KW.search(p) or BAD.search(p): continue
         if not re.search(r"(нужен|нужна|нужно|ищу|ищем|требуется|сделать|разработать)", p, re.I): continue
-        if re.search(r"(вакансия|зарплата|в штат|оклад|резюме)", p, re.I): continue
+        if re.search(r"(вакансия|зарплат|в штат|оклад|резюме|в команду|постоянн\w* работ|тип работы: постоянная|full-time|фулл-тайм|парт-тайм|part-time|график \d|5/2|kpi|junior|middle|senior|джун|мидл)", p, re.I): continue
         key = "tg:" + ch + ":" + hashlib.md5(p[:120].encode()).hexdigest()[:12]
         lines = [l.strip() for l in p.split("\n") if len(l.strip()) >= 15 and re.search(r"[А-Яа-яA-Za-z]{4}", l) and not re.match(r"^(edited|\d{1,2}:\d{2}|January|February|March|April|May|June|July|August|September|October|November|December)", l.strip())]
         out.append(dict(site="Telegram @" + ch, id=key, url="https://t.me/" + ch, title=(lines[1] if len(lines) > 1 and lines[0].startswith(("Работа", "Фриланс", "Вакансии")) else (lines[0] if lines else ch))[:120], offers=None, desc=re.sub(r"\s+", " ", p)[:400]))
+    return out
+
+GENERIC = {"freelance.ru": "Freelance.ru", "workspace.ru": "Workspace", "pchel.net": "Pchel.net",
+           "weblancer.net": "Weblancer", "freelancehunt.com": "Freelancehunt"}
+
+def parse_generic(r, site):
+    """Заказы с бирж без отдельного разбора: ссылки на страницы заказов с подходящим названием."""
+    out = []; host = r["url"].split("/")[2].replace("www.", "")
+    for text, href in r.get("links", []):
+        title = text.split("\n")[0].strip()
+        if host not in href or not re.search(r"(project|tender|job|task)[^?#]*\d", href): continue
+        if not (12 <= len(title) <= 150) or not KW.search(title) or BAD.search(title): continue
+        out.append(dict(site=site, id=site + ":" + href.split("?")[0], url=href.split("?")[0], title=title, offers=None, desc=""))
     return out
 
 def parse_all(data):
@@ -66,6 +79,9 @@ def parse_all(data):
     for r in data:
         if "fl.ru" in r["url"]:
             for v in parse_fl(r): items[v["id"]] = v
+        for host, site in GENERIC.items():
+            if host in r["url"]:
+                for v in parse_generic(r, site): items[v["id"]] = v
         if "t.me/s/" in r["url"]:
             for v in parse_tg(r): items[v["id"]] = v
         if "youdo.com" in r["url"]:

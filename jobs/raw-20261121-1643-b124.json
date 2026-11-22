@@ -1,0 +1,38 @@
+{
+ "raw": [],
+ "http": [
+  [
+   "GET",
+   "https://models.github.ai/catalog/models",
+   null
+  ],
+  [
+   "POST",
+   "https://models.github.ai/inference/chat/completions",
+   {
+    "model": "openai/gpt-4o-mini",
+    "messages": [
+     {
+      "role": "user",
+      "content": "Скажи привет одним словом"
+     }
+    ]
+   }
+  ],
+  [
+   "POST",
+   "https://models.github.ai/orgs/grubnikovv/inference/chat/completions",
+   {
+    "model": "openai/gpt-4o-mini",
+    "messages": [
+     {
+      "role": "user",
+      "content": "Скажи привет одним словом"
+     }
+    ]
+   }
+  ]
+ ],
+ "name": "raw-20261121-1643-b124",
+ "pubkey": "-----BEGIN PUBLIC KEY-----\nMIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEArMoNBYshqu9CF+o9opBg\nmJzcYOmOzUCR+DomZJL5wbZvUC6rY4fM3lSUJs5s4ronJ4HvEjGkRAuPxpr7O1Mm\n9bjp5RZFIfO6tmxPss459erh5K1Fpt87lQNUYnG0Z5J4J9CDo318R4Q+u4uvjUP1\nIQ+Mp8GxvzUlBPpr1qgFS2cnv1CfUpl8NXte4q8XR69aMKsXlpVUOgbanE7k0KAp\nHhWPdeDOKWgQ8f++9iDL3qdMck+0JwnClJupgCPUhx6vOJJV1qQbeCktcYFe3tmp\ngGhU7jb1dx6RIfPyuBLn0qo9EpdV/kcxIJbxhiTdOWKplNZTnJbLzkN420tOKNDM\naZGEIewVm3U3emcF93De97zUsn/rjhr6DJ6CUBVDxkXOoNzL/noLE5xSfnkyDpRB\n+l2CboHzbEDAe8tGVCDaVvYD7KyGWq0ZXUeD9TH0FAmF5PNTUPQmzAEC7klIwoUQ\n7jr4+Vherdzq4HGRPKBIDyZ0oPNy3Gw8PLdsIEwK1jKZAgMBAAE=\n-----END PUBLIC KEY-----\n"
+}
