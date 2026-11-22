@@ -1,10 +1,18 @@
 """Собирает публичные версии демо в docs/ для GitHub Pages."""
 import os, re, shutil
-PAIRS = {'okna': 'demos/okna-chelyabinsk/index.html', 'krovlya': 'demos/krovlya/index.html', 'avtomatika': 'demos/avtomatika/index.html', 'vizitka': 'demos/vizitka-chip/index.html', 'sto': 'demos/sto/index.html', 'delo': 'demos/delo-dnya/index.html', 'porcia': 'demos/porcia/index.html', 'detailing': 'templates/detailing/index.html',
+PAIRS = {'okna': 'demos/okna-chelyabinsk/index.html', 'krovlya': 'demos/krovlya/index.html', 'avtomatika': 'demos/avtomatika/index.html', 'vizitka': 'demos/vizitka-chip/index.html', 'sto': 'demos/sto/index.html', 'delo': 'demos/delo-dnya/index.html', 'porcia': 'demos/porcia/index.html', 'lit-energy': 'demos/lit-energy/index.html', 'detailing': 'templates/detailing/index.html',
          'coffee': 'templates/coffee/index.html', 'dental': 'templates/dental/index.html',
          'kitchen': 'templates/kitchen/index.html', 'fitness': 'templates/fitness/index.html'}
 for k, src in PAIRS.items():
     s = open(src).read()
+    if s.lstrip().lower().startswith('<!doctype'):
+        os.makedirs('docs/' + k, exist_ok=True)
+        open('docs/' + k + '/index.html', 'w').write(s)
+        for sub in ('img', 'video', 'fonts'):
+            d = os.path.join(os.path.dirname(src), sub)
+            if os.path.isdir(d):
+                shutil.copytree(d, os.path.join('docs', k, sub), dirs_exist_ok=True)
+        continue
     m = re.search(r'<title>(.*?)</title>', s); t = m.group(1) if m else k
     if m: s = s.replace(m.group(0), '', 1)
     s = s.replace('<meta name="claude:viewport-fit-sides" content="cover">', '').replace('<meta name="robots" content="noindex">', '')

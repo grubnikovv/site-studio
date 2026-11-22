@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>LIT ENERGY — концепт редизайна</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0B0B0D">
+<link rel="preload" href="img/pina.webp" as="image">
+<style>
+@font-face { font-family: "Oswald"; font-weight: 200 700; font-display: swap; src: url(fonts/oswald-cyr.woff2) format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: "Oswald"; font-weight: 200 700; font-display: swap; src: url(fonts/oswald-lat.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+20AC, U+20BD, U+2122, U+2190-2199; }
+@font-face { font-family: "Manrope"; font-weight: 200 800; font-display: swap; src: url(fonts/manrope-cyrillic.woff2) format("woff2"); unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116; }
+@font-face { font-family: "Manrope"; font-weight: 200 800; font-display: swap; src: url(fonts/manrope-latin.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+20AC, U+20BD, U+2190-2199; }
+:root { --bg: #0B0B0D; --ink: #F5F3EE; --mute: rgba(245,243,238,.62); --line: rgba(245,243,238,.16); --a1: #8E3FC4; --a2: #FFB02E; }
+* { box-sizing: border-box; margin: 0; }
+html { scroll-behavior: smooth; overflow-x: clip; }
+body { background: var(--bg); color: var(--ink); font-family: Manrope, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+/* свечение цвета вкуса за банкой */
+.glow { position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(48% 52% at var(--gx, 68%) 48%, color-mix(in srgb, var(--a1) 55%, transparent), transparent 72%),
+              radial-gradient(40% 40% at 90% 100%, color-mix(in srgb, var(--a2) 26%, transparent), transparent 70%), var(--bg); transition: background 1s ease; }
+.grain { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .06; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.ghost { position: fixed; z-index: 1; left: 0; right: 0; top: 50%; transform: translateY(-50%); text-align: center; pointer-events: none; font-family: Oswald, sans-serif; font-weight: 700; text-transform: uppercase; font-size: 24vw; line-height: .8; color: transparent; -webkit-text-stroke: 1.5px rgba(255,255,255,.07); white-space: nowrap; }
+#fx { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; }
+/* сцена с банкой: фото банки, тень, блик, затемнение на повороте */
+.stage { position: fixed; z-index: 2; top: 50%; left: var(--sx, 68%); height: min(78vh, 760px); aspect-ratio: 550 / 1400; transform: translate(-50%, -50%); perspective: 1400px; pointer-events: none; }
+.can { position: absolute; inset: 0; transform-style: preserve-3d; will-change: transform; }
+.can img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0; filter: drop-shadow(0 50px 60px rgba(0,0,0,.55)); }
+.can img.on { opacity: 1; }
+/* блик и тень повторяют форму банки: маска из того же фото */
+.can .lit, .can .dim { position: absolute; inset: 0; -webkit-mask: var(--m) center / contain no-repeat; mask: var(--m) center / contain no-repeat; pointer-events: none; }
+.can .lit { background: linear-gradient(100deg, transparent calc(var(--h, 30%) - 9%), rgba(255,255,255,.5) var(--h, 30%), transparent calc(var(--h, 30%) + 9%)); mix-blend-mode: soft-light; }
+.can .dim { background: linear-gradient(90deg, rgba(0,0,0,var(--dl, 0)), rgba(0,0,0,0) 50%, rgba(0,0,0,var(--dr, 0))); }
+.floor { position: absolute; left: 10%; right: 10%; bottom: -3%; height: 6%; border-radius: 50%; background: radial-gradient(closest-side, rgba(0,0,0,.6), transparent); filter: blur(6px); }
+/* шапка */
+header { position: fixed; z-index: 10; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px clamp(16px, 4vw, 48px); }
+.logo { font-family: Oswald, sans-serif; font-weight: 700; font-style: italic; font-size: 26px; text-decoration: none; text-transform: uppercase; letter-spacing: .01em; }
+.tag { font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; color: var(--mute); background: rgba(11,11,13,.45); }
+.rail { position: fixed; z-index: 10; right: clamp(14px, 3vw, 40px); top: 50%; transform: translateY(-50%); display: grid; gap: 12px; }
+.rail a { display: block; width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.25); transition: transform .35s, background .35s; }
+.rail a[aria-current="true"] { background: var(--a2); transform: scale(1.7); }
+/* главы */
+main { position: relative; z-index: 5; }
+.ch { min-height: 100svh; display: grid; align-items: center; padding: 110px clamp(16px, 7vw, 110px) 80px; }
+.t { max-width: 540px; }
+.eyebrow { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--mute); }
+.eyebrow b { color: var(--a2); font-family: Oswald, sans-serif; font-weight: 600; letter-spacing: .2em; transition: color .6s; }
+.badge { padding: 6px 11px; border-radius: 999px; border: 1px solid var(--line); color: var(--ink); font-size: 12px; }
+.ch h2 { font-family: Oswald, sans-serif; font-weight: 700; font-style: italic; text-transform: uppercase; font-size: clamp(66px, 9.5vw, 156px); line-height: .88; letter-spacing: -.01em; margin-top: 20px; }
+.ch p.d { font-size: clamp(18px, 1.6vw, 22px); line-height: 1.45; color: var(--mute); margin-top: 22px; max-width: 420px; text-transform: none; }
+.buy { display: inline-flex; align-items: center; gap: 14px; margin-top: 34px; padding: 17px 26px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,.55); font-weight: 800; font-size: 15px; letter-spacing: .14em; text-transform: uppercase; text-decoration: none; transition: background .3s, color .3s, border-color .3s; }
+.buy:hover { background: var(--ink); color: #0B0B0D; border-color: var(--ink); }
+.buy:focus-visible, .rail a:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.hero h1 { font-family: Oswald, sans-serif; font-weight: 700; font-style: italic; text-transform: uppercase; font-size: clamp(88px, 14vw, 230px); line-height: .82; letter-spacing: -.02em; }
+.hero h1 span { display: block; color: var(--a2); transition: color .6s; }
+.hero .d { font-size: clamp(18px, 1.8vw, 24px); color: var(--mute); margin-top: 26px; line-height: 1.45; max-width: 400px; }
+.hint { display: inline-flex; align-items: center; gap: 12px; margin-top: 40px; font-size: 12px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--mute); }
+.hint i { width: 1px; height: 46px; background: linear-gradient(var(--a2), transparent); animation: drip 1.8s ease-in-out infinite; transform-origin: top; }
+@keyframes drip { 0% { transform: scaleY(0); } 60% { transform: scaleY(1); opacity: 1; } 100% { opacity: 0; } }
+footer { position: relative; z-index: 5; padding: 60px clamp(16px, 7vw, 110px) 50px; border-top: 1px solid var(--line); color: var(--mute); font-size: 14px; line-height: 1.6; background: var(--bg); }
+footer b { color: var(--ink); }
+/* телефон: банка сверху по центру, текст снизу */
+@media (max-width: 760px) {
+  .stage { left: 50% !important; top: 34%; height: 54svh; }
+  .ch { align-items: end; padding-bottom: 54px; }
+  .ch h2 { font-size: clamp(54px, 15.5vw, 84px); margin-top: 14px; }
+  .ch p.d { font-size: 16px; margin-top: 12px; }
+  .buy { margin-top: 22px; padding: 14px 20px; }
+  .hero h1 { font-size: clamp(66px, 21vw, 104px); }
+  .hero .d { font-size: 16px; margin-top: 14px; }
+  .hint { margin-top: 20px; }
+  .ghost { top: 34%; font-size: 38vw; }
+  .rail { right: 8px; } .rail a { width: 6px; height: 6px; }
+  .tag { font-size: 10px; padding: 7px 10px; }
+  .eyebrow { font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .hint i { animation: none; } }
+</style>
+</head>
+<body>
+<div class="glow" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="ghost" id="ghost" aria-hidden="true">ПИНА</div>
+<div class="stage" aria-hidden="true">
+  <div class="floor"></div>
+  <div class="can" id="can">
+    <img src="img/pina.webp" alt="" class="on" width="621" height="1400">
+    <img src="img/turbo.webp" alt="" width="558" height="1400">
+    <img src="img/klub.webp" alt="" width="499" height="1400">
+    <i class="dim"></i><i class="lit"></i>
+  </div>
+</div>
+<canvas id="fx" aria-hidden="true"></canvas>
+
+<header>
+  <a class="logo" href="#top">Lit Energy</a>
+  <span class="tag">Концепт редизайна</span>
+</header>
+<nav class="rail" id="rail" aria-label="Вкусы"></nav>
+
+<main id="top">
+  <section class="ch hero" data-i="0" aria-label="LIT ENERGY">
+    <div class="t">
+      <h1>Lit<span>Energy</span></h1>
+      <p class="d">Энергетический напиток. Листайте — банка покажет каждый вкус.</p>
+      <span class="hint"><i aria-hidden="true"></i>Листайте</span>
+    </div>
+  </section>
+  <div id="chapters"></div>
+</main>
+<footer>
+  <b>Концепт редизайна.</b> Неофициальный проект для презентации бренду LIT ENERGY. Фото банок — с сайта бренда. Автор концепта — Владислав, разработчик.
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  // вкус: название, подпись с сайта бренда, метка, фото банки, два цвета (фон и акцент), частицы и их цвета
+  var F = [
+    { n: "Пина колада", d: "Тропический ананас и мягкий кокос", b: "Лимитированная серия", img: "pina", a1: "#8E3FC4", a2: "#FFB02E", kind: "slice", c: ["#FFD24A", "#F7F1DE"], word: "ПИНА" },
+    { n: "Турбо", d: "Тропический микс с нотками ананаса и кокоса", b: "#Новинка", img: "turbo", a1: "#5DB8FF", a2: "#BFE6FF", kind: "ice", c: ["#E9F6FF", "#9FD4FF"], word: "ТУРБО" },
+    { n: "Клубничная жвачка", d: "Вкусно, сладко, с лёгкой кислинкой", b: "#Выбор Оева", img: "klub", a1: "#FF4FAE", a2: "#FF9AD2", kind: "bubble", c: ["#FF7EC4", "#E0246E"], word: "КЛУБНИКА" }
+  ];
+  var N = F.length, $ = function (id) { return document.getElementById(id); }, root = document.documentElement;
+  var reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  $("chapters").innerHTML = F.map(function (f, i) {
+    return '<section class="ch" id="f' + (i + 1) + '" data-i="' + i + '" aria-labelledby="h' + i + '"><div class="t">' +
+      '<div class="eyebrow"><b>' + String(i + 1).padStart(2, "0") + ' / ' + String(N).padStart(2, "0") + '</b>' + (f.b ? '<span class="badge">' + f.b + '</span>' : '') + '</div>' +
+      '<h2 id="h' + i + '">' + f.n + '</h2><p class="d">' + f.d + '</p>' +
+      '<a class="buy" href="#f' + (i + 1) + '">Купить <span aria-hidden="true">↗</span></a></div></section>';
+  }).join("");
+  $("rail").innerHTML = F.map(function (f, i) { return '<a href="#f' + (i + 1) + '" aria-label="' + f.n + '"></a>'; }).join("");
+
+  var can = $("can"), imgs = can.querySelectorAll("img"), cur = -1, mob = false;
+  function show(i) {
+    if (i === cur) return; cur = i; var f = F[i];
+    imgs.forEach(function (im, k) { im.classList.toggle("on", k === i); });
+    can.style.setProperty("--m", "url(img/" + f.img + ".webp)");
+    root.style.setProperty("--a1", f.a1); root.style.setProperty("--a2", f.a2);
+    $("ghost").textContent = f.word;
+    document.querySelectorAll("#rail a").forEach(function (a, k) { a.setAttribute("aria-current", String(k === i)); });
+  }
+  show(0);
+
+  // ---- поворот банки от прокрутки: между главами банка разворачивается на ребро, и с обратной стороны выходит следующий вкус ----
+  var secs = [];
+  function measure() { mob = innerWidth < 760; secs = [].map.call(document.querySelectorAll(".ch"), function (s) { return s.offsetTop; }); size(); }
+  var tilt = 0, tx = 0, ty = 0, mx = 0, my = 0;
+  addEventListener("pointermove", function (e) { mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5; });
+  function pose(now) {
+    var y = scrollY + innerHeight * .5, vh = innerHeight;
+    // номер вкуса по прокрутке (0 — первый экран и «Пина колада»): секции 0 и 1 обе показывают первый вкус
+    var pos = 0;
+    for (var k = 1; k < secs.length; k++) if (y > secs[k]) pos = k;
+    var into = (y - secs[pos]) / vh;    // 0…1 внутри текущей секции
+    var flav = Math.max(0, pos - 1), next = Math.min(N - 1, flav + 1);
+    var turn = 0, idx = flav;
+    if (pos >= 1 && pos < secs.length - 1 && flav < N - 1) {
+      var t = Math.min(1, Math.max(0, (into - .6) / .4));     // поворот — в конце главы
+      t = t * t * (3 - 2 * t);
+      if (t < .5) { turn = t * 2 * 90; idx = flav; } else { turn = -90 + (t - .5) * 2 * 90; idx = next; }
+    }
+    if (reduce) turn = 0;
+    show(idx);
+    var idle = reduce ? 0 : Math.sin(now / 2600) * 6;
+    tx += ((mob ? 0 : mx * 10) - tx) * .08; ty += ((mob ? 0 : -my * 6) - ty) * .08;
+    var ry = turn + idle + tx, a = Math.abs(turn) / 90;
+    can.style.transform = "rotateY(" + ry.toFixed(2) + "deg) rotateX(" + ty.toFixed(2) + "deg) translateY(" + (reduce ? 0 : Math.sin(now / 1700) * 8).toFixed(1) + "px)";
+    // свет на цилиндре: блик скользит, край, уходящий от зрителя, темнеет
+    can.style.setProperty("--h", (30 + (ry / 90) * 55).toFixed(1) + "%");
+    can.style.setProperty("--dl", (ry < 0 ? a * .7 : .05).toFixed(2));
+    can.style.setProperty("--dr", (ry > 0 ? a * .7 : .12).toFixed(2));
+    root.style.setProperty("--sx", mob ? "50%" : "68%");
+  }
+
+  // ---- частицы вкуса: дольки ананаса, лёд, пузыри жвачки ----
+  var fx = $("fx"), g = fx.getContext("2d"), DPR = Math.min(2, devicePixelRatio || 1), W = 0, H = 0, parts = [];
+  function size() { W = innerWidth; H = innerHeight; fx.width = Math.round(W * DPR); fx.height = Math.round(H * DPR); }
+  for (var q = 0; q < (innerWidth < 760 ? 12 : 20); q++) parts.push({ x: Math.random(), y: Math.random(), z: .4 + Math.random() * .9, r: Math.random() * 6.28, vr: (Math.random() - .5) * .5, ph: Math.random() * 6.28 });
+  function part(p, f, al) {
+    var s = (mob ? 18 : 30) * p.z, x = p.x * W, y = p.y * H;
+    g.save(); g.translate(x * DPR, y * DPR); g.rotate(p.r); g.scale(DPR, DPR); g.globalAlpha = al * (.3 + .6 * Math.min(1, p.z));
+    if (f.kind === "slice") {   // долька ананаса: корка, мякоть, сердцевина
+      g.fillStyle = "#C98A1E"; g.beginPath(); g.moveTo(0, -s); g.lineTo(s * .9, s * .6); g.lineTo(-s * .9, s * .6); g.closePath(); g.fill();
+      g.fillStyle = f.c[0]; g.beginPath(); g.moveTo(0, -s * .78); g.lineTo(s * .7, s * .48); g.lineTo(-s * .7, s * .48); g.closePath(); g.fill();
+      g.strokeStyle = "rgba(255,255,255,.55)"; g.lineWidth = 1.2; for (var k = -2; k <= 2; k++) { g.beginPath(); g.moveTo(0, -s * .6); g.lineTo(k * s * .25, s * .45); g.stroke(); }
+    } else if (f.kind === "ice") {   // кубик льда
+      g.fillStyle = "rgba(225,242,255,.3)"; g.strokeStyle = "rgba(255,255,255,.75)"; g.lineWidth = 1.5;
+      g.beginPath(); if (g.roundRect) g.roundRect(-s * .7, -s * .7, s * 1.4, s * 1.4, s * .28); else g.rect(-s * .7, -s * .7, s * 1.4, s * 1.4); g.fill(); g.stroke();
+      g.fillStyle = "rgba(255,255,255,.6)"; g.fillRect(-s * .45, -s * .5, s * .5, s * .12);
+    } else {   // пузырь жвачки с бликом
+      var rg = g.createRadialGradient(-s * .25, -s * .3, 1, 0, 0, s * .8); rg.addColorStop(0, "#fff"); rg.addColorStop(.3, f.c[0]); rg.addColorStop(1, f.c[1]);
+      g.fillStyle = rg; g.beginPath(); g.arc(0, 0, s * .7, 0, 6.29); g.fill();
+    }
+    g.restore();
+  }
+  var last = 0, lastY = scrollY, vel = 0, prevIdx = 0, fadeAt = 0, on = true;
+  document.addEventListener("visibilitychange", function () { on = !document.hidden; if (on) requestAnimationFrame(frame); });
+  function frame(now) {
+    if (!on) return; requestAnimationFrame(frame);
+    var dt = Math.min(.05, (now - last) / 1000 || .016); last = now;
+    vel += ((scrollY - lastY) - vel) * .2; lastY = scrollY;
+    var before = cur; pose(now); if (cur !== before) { prevIdx = before; fadeAt = now; }
+    g.clearRect(0, 0, fx.width, fx.height);
+    var k = Math.min(1, (now - fadeAt) / 700);
+    parts.forEach(function (p) {
+      if (!reduce) { p.y -= (dt * .02 + vel * .0007) * p.z; p.r += p.vr * dt; p.x += Math.sin(now / 2200 + p.ph) * .0004; }
+      if (p.y < -.1) p.y = 1.1; if (p.y > 1.1) p.y = -.1;
+      var fade = mob && p.y > .55 ? .3 : 1;
+      if (k < 1 && prevIdx >= 0) part(p, F[prevIdx], (1 - k) * fade);
+      part(p, F[cur], k * fade);
+    });
+  }
+  addEventListener("resize", measure);
+  addEventListener("load", measure);
+  measure(); requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
