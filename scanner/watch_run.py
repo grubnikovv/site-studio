@@ -82,7 +82,7 @@ def main():
     urls += OTHER[j:]
     json.dump({"name": names[0], "pause": 8, "pubkey": pub, "urls": urls}, open(f"{ROOT}/jobs/{names[0]}.json", "w"), ensure_ascii=False, indent=1)
     push("Плановая проверка заказов", f"jobs/{names[0]}.json")
-    if now.weekday() == 0:
+    if now.weekday() == 0 and now.hour < 10:  # тёплые клиенты — один раз, утром в понедельник
         d = DISTRICTS[now.isocalendar()[1] % len(DISTRICTS)]
         names.append("warm-" + stamp)
         json.dump({"name": names[1], "pause": 4, "per_query": 12, "pubkey": pub, "queries": [q + " " + d for q in WARM]},
