@@ -16,7 +16,7 @@ BRANCH = "claude/low-code-business-ideas-0dr8l2"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORDS = ["лендинг", "сайт", "редизайн", "дизайн сайта", "telegram бот", "бот", "верстка", "автоматизация",
          "презентация", "инфографика", "python", "парсер"]
-# Kwork блокирует после ~17 запросов за запуск, поэтому дополнительные слова идут по очереди: 5 за запуск.
+# Kwork блокирует после ~15–17 запросов за запуск, поэтому дополнительные слова идут по очереди: 3 за запуск.
 EXTRA = ["чат-бот", "квиз", "калькулятор", "mini app", "баннер", "нейросеть", "тексты", "wordpress", "тильда",
          "excel", "настройка", "приложение", "1с", "перевод", "интернет-магазин"]
 # Другие биржи разбираются по ссылкам на заказы (parse_generic). Weblancer и Freelancehunt закрыты Cloudflare.
@@ -73,7 +73,7 @@ def main():
 
     names = ["watch-" + stamp]
     # Kwork вперемешку с другими площадками — подряд он блокирует после ~13 запросов.
-    k = (now.toordinal() * 6 + now.hour) % len(EXTRA); extra = (EXTRA * 2)[k:k + 5]
+    k = (now.toordinal() * 6 + now.hour) % len(EXTRA); extra = (EXTRA * 2)[k:k + 3]
     kw = ["https://kwork.ru/projects?keyword=" + quote(w) for w in WORDS + extra]; urls = []
     step = len(kw) / max(len(OTHER), 1); j = 0  # другие площадки равномерно между запросами Kwork
     for i, u in enumerate(kw):
