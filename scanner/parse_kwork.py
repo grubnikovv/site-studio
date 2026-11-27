@@ -52,6 +52,7 @@ def parse_tg(r, days=2):
     for p in posts[-25:]:
         p = p.strip()
         if len(p) < 80 or not KW.search(p) or BAD.search(p): continue
+        if "DOWNLOAD TELEGRAM" in p or "Subscribers" in p[:300]: continue  # шапка канала, не заказ
         if not re.search(r"(нужен|нужна|нужно|ищу|ищем|требуется|сделать|разработать)", p, re.I): continue
         if re.search(r"(вакансия|зарплат|в штат|оклад|резюме|в команду|постоянн\w* работ|тип работы: постоянная|full-time|фулл-тайм|парт-тайм|part-time|график \d|5/2|kpi|junior|middle|senior|джун|мидл)", p, re.I): continue
         key = "tg:" + ch + ":" + hashlib.md5(p[:120].encode()).hexdigest()[:12]
